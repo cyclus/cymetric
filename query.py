@@ -1,17 +1,6 @@
-package query
-
-import (
-    "bytes"
-    "database/sql"
-    "fmt"
-    "strconv"
-
-    "github.com/rwcarlsen/cyan/nuc"
-)
-
-// SimIds returns a list of all simulation ids in the cyclus database for
-// conn.
-func SimIds(db *sql.DB) (ids []string, err error) {
+# SimIds returns a list of all simulation ids in the cyclus database for
+# conn.
+function SimIds(db *sql.DB) (ids []string, err error) {
     sql := "SELECT SimID FROM SimulationTimeInfo"
     rows, err := db.Query(sql)
     if err != nil {
@@ -38,7 +27,7 @@ type SimInfo struct {
     DecayPeriod int
 }
 
-func (si SimInfo) String() string {
+function (si SimInfo) String() string {
     return fmt.Sprintf("%v: start=%v, end=%v, decay=%v", si.Id,
         si.StartTime, si.StartTime+si.Duration, si.DecayPeriod)
 }
@@ -53,12 +42,12 @@ type AgentInfo struct {
     Exit   int
 }
 
-func (ai AgentInfo) String() string {
+function (ai AgentInfo) String() string {
     return fmt.Sprintf("%v %v:%v:%v: parent=%v, enter=%v, exit=%v", ai.Id,
         ai.Type, ai.Model, ai.Proto, ai.Parent, ai.Enter, ai.Exit)
 }
 
-func AllAgents(db *sql.DB, simid string) (ags []AgentInfo, err error) {
+function AllAgents(db *sql.DB, simid string) (ags []AgentInfo, err error) {
     sql := `SELECT ID,AgentType,ModelType,Prototype,ParentID,EnterDate,DeathDate FROM
                 Agents INNER JOIN AgentDeaths ON Agents.ID = AgentDeaths.AgentID
             WHERE Agents.SimID = ? AND Agents.SimID = AgentDeaths.SimID;`
@@ -80,7 +69,7 @@ func AllAgents(db *sql.DB, simid string) (ags []AgentInfo, err error) {
     return ags, nil
 }
 
-func DeployCumulative(db *sql.DB, simid string, proto string) (xys []XY, err error) {
+function DeployCumulative(db *sql.DB, simid string, proto string) (xys []XY, err error) {
     sql := `SELECT ti.Time,COUNT(*)
               FROM Agents AS ag
               INNER JOIN AgentDeaths AS ad ON ag.ID = ad.AgentID
@@ -108,7 +97,7 @@ func DeployCumulative(db *sql.DB, simid string, proto string) (xys []XY, err err
     return xys, nil
 }
 
-func SimStat(db *sql.DB, simid string) (si SimInfo, err error) {
+function SimStat(db *sql.DB, simid string) (si SimInfo, err error) {
     sql := "SELECT SimulationStart,Duration FROM SimulationTimeInfo WHERE SimID = ?"
     rows, err := db.Query(sql, simid)
     if err != nil {
@@ -132,7 +121,7 @@ type XY struct {
     Y float64
 }
 
-func InvSeries(db *sql.DB, simid string, agent int, iso int) (xys []XY, err error) {
+function InvSeries(db *sql.DB, simid string, agent int, iso int) (xys []XY, err error) {
     sql := `SELECT ti.Time,SUM(cmp.Quantity * inv.Quantity) FROM (
                 Compositions AS cmp
                 INNER JOIN Inventories AS inv ON inv.StateID = cmp.ID
@@ -158,11 +147,11 @@ func InvSeries(db *sql.DB, simid string, agent int, iso int) (xys []XY, err erro
     return xys, nil
 }
 
-// MatCreated returns the total amount of material created by the listed
-// agent ids in the simulation for the given sim id between t0 and t1. Passing no
-// agents defaults to all agents. Use t0=-1 to specify beginning-of-simulation.
-// Use t1=-1 to specify end-of-simulation.
-func MatCreated(db *sql.DB, simid string, t0, t1 int, agents ...int) (m nuc.Material, err error) {
+# MatCreated returns the total amount of material created by the listed
+# agent ids in the simulation for the given sim id between t0 and t1. Passing no
+# agents defaults to all agents. Use t0=-1 to specify beginning-of-simulation.
+# Use t1=-1 to specify end-of-simulation.
+function MatCreated(db *sql.DB, simid string, t0, t1 int, agents ...int) (m nuc.Material, err error) {
     if t0 == -1 {
         si, err := SimStat(db, simid)
         if err != nil {
@@ -198,10 +187,10 @@ func MatCreated(db *sql.DB, simid string, t0, t1 int, agents ...int) (m nuc.Mate
     return makeMaterial(db, sql, simid, t0, t1)
 }
 
-// InvAt returns the material inventory of the listed agent ids for the
-// specified sim id at time t. Passing no agents defaults to all agents. Use
-// t=-1 to specify end-of-simulation.
-func InvAt(db *sql.DB, simid string, t int, agents ...int) (m nuc.Material, err error) {
+# InvAt returns the material inventory of the listed agent ids for the
+# specified sim id at time t. Passing no agents defaults to all agents. Use
+# t=-1 to specify end-of-simulation.
+function InvAt(db *sql.DB, simid string, t int, agents ...int) (m nuc.Material, err error) {
     if t == -1 {
         si, err := SimStat(db, simid)
         if err != nil {
@@ -235,7 +224,7 @@ type FlowArc struct {
     Quantity float64
 }
 
-func FlowGraph(db *sql.DB, simid string, t0, t1 int, groupByProto bool) (arcs []FlowArc, err error) {
+function FlowGraph(db *sql.DB, simid string, t0, t1 int, groupByProto bool) (arcs []FlowArc, err error) {
     if t0 == -1 {
         si, err := SimStat(db, simid)
         if err != nil {
@@ -293,7 +282,7 @@ func FlowGraph(db *sql.DB, simid string, t0, t1 int, groupByProto bool) (arcs []
     return arcs, nil
 }
 
-func Flow(db *sql.DB, simid string, t0, t1 int, fromAgents, toAgents []int) (m nuc.Material, err error) {
+function Flow(db *sql.DB, simid string, t0, t1 int, fromAgents, toAgents []int) (m nuc.Material, err error) {
     if t0 == -1 {
         si, err := SimStat(db, simid)
         if err != nil {
@@ -332,9 +321,9 @@ func Flow(db *sql.DB, simid string, t0, t1 int, fromAgents, toAgents []int) (m n
     return makeMaterial(db, sql, simid, t0, t1)
 }
 
-// Index builds an sql statement for creating a new index on the specified
-// table over cols.  The index is named according to the table and cols.
-func Index(table string, cols ...string) string {
+# Index builds an sql statement for creating a new index on the specified
+# table over cols.  The index is named according to the table and cols.
+function Index(table string, cols ...string) string {
     var buf bytes.Buffer
     buf.WriteString("CREATE INDEX IF NOT EXISTS ")
     buf.WriteString(table + "_" + cols[0])
@@ -349,7 +338,7 @@ func Index(table string, cols ...string) string {
     return buf.String()
 }
 
-func makeMaterial(db *sql.DB, sql string, args ...interface{}) (m nuc.Material, err error) {
+function makeMaterial(db *sql.DB, sql string, args ...interface{}) (m nuc.Material, err error) {
     rows, err := db.Query(sql, args...)
     if err != nil {
         return nil, err
