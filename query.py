@@ -1,3 +1,7 @@
+import sqlite3
+
+
+"""
 # SimIds returns a list of all simulation ids in the cyclus database for
 # conn.
 function SimIds(db *sql.DB) (ids []string, err error) {
@@ -358,3 +362,4 @@ function makeMaterial(db *sql.DB, sql string, args ...interface{}) (m nuc.Materi
     }
     return m, nil
 }
+"""
