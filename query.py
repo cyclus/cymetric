@@ -13,7 +13,7 @@ def all_agents(c, sim_id):
                 WHERE Agents.SimID = """ + sim_id + " AND Agents.SimID = AgentDeaths.SimID;"
     return c.execute(sql)
 
-def deploy_cumulative(c):
+def deploy_cumulative(c, sim_id, prototype_name):
     """Time-series of # active deployments of a specific prototype.
 
     Args:
@@ -25,8 +25,8 @@ def deploy_cumulative(c):
               INNER JOIN AgentDeaths AS ad ON ag.ID = ad.AgentID
               INNER JOIN TimeList AS ti ON ti.Time >= ag.EnterDate AND ad.DeathDate > ti.Time
             WHERE
-              ag.SimID = ? AND ag.SimID = ad.SimID
-              AND ag.Prototype = ?
+              ag.SimID = """ + sim_id + """ AND ag.SimID = ad.SimID
+              AND ag.Prototype = """ + prototype_name + """
             GROUP BY ti.Time
             ORDER BY ti.Time;"""
     return c.execute(sql)
