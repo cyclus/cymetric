@@ -1,6 +1,6 @@
 import sqlite3
 
-def all_agents(c, simID):
+def all_agents(c, sim_id):
     """List of all agents and their info.
 
     Args:
@@ -10,7 +10,7 @@ def all_agents(c, simID):
 
     sql = """SELECT ID,AgentType,ModelType,Prototype,ParentID,EnterDate,DeathDate FROM
                 Agents INNER JOIN AgentDeaths ON Agents.ID = AgentDeaths.AgentID
-                WHERE Agents.SimID = """ + simID + " AND Agents.SimID = AgentDeaths.SimID;"
+                WHERE Agents.SimID = """ + sim_id + " AND Agents.SimID = AgentDeaths.SimID;"
     return c.execute(sql)
 
 def deploy_cumulative(c):
@@ -31,7 +31,7 @@ def deploy_cumulative(c):
             ORDER BY ti.Time;"""
     return c.execute(sql)
 
-def inv_series(c):
+def inv_series(c, sim_id, agent_id, iso_id):
     """Timeseries of a specific agent's inventory of a specific isotope.
 
     Args:
@@ -43,8 +43,8 @@ def inv_series(c):
                 INNER JOIN Inventories AS inv ON inv.StateID = cmp.ID
                 INNER JOIN TimeList AS ti ON (ti.Time >= inv.StartTime AND ti.Time < inv.EndTime)
             ) WHERE (
-                inv.SimID = ? AND inv.SimID = cmp.SimID
-                AND inv.AgentID = ? AND cmp.IsoID = ?
+                 inv.SimID = """ + sim_id + """ AND inv.SimID = cmp.SimID
+                 AND inv.AgentID = """ + agent_id + "AND cmp.IsoID = " + iso_id +"""
             ) GROUP BY ti.Time,cmp.IsoID;"""
     return c.execute(sql)
 
