@@ -1,15 +1,16 @@
 import sqlite3
 
-def all_agents(c):
+def all_agents(c, simID):
     """List of all agents and their info.
 
     Args:
         c: connection cursor to sqlite database.
+        simID: simulation ID
     """
 
     sql = """SELECT ID,AgentType,ModelType,Prototype,ParentID,EnterDate,DeathDate FROM
                 Agents INNER JOIN AgentDeaths ON Agents.ID = AgentDeaths.AgentID
-                WHERE Agents.SimID = ? AND Agents.SimID = AgentDeaths.SimID;"""
+                WHERE Agents.SimID = """ + simID + " AND Agents.SimID = AgentDeaths.SimID;"
     return c.execute(sql)
 
 def deploy_cumulative(c):
