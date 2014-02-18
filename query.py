@@ -5,9 +5,8 @@ def all_agents(c, sim_id):
 
     Args:
         c: connection cursor to sqlite database.
-        simID: simulation ID
+        sim_id: simulation ID
     """
-
     sql = """SELECT ID,AgentType,ModelType,Prototype,ParentID,EnterDate,DeathDate FROM
                 Agents INNER JOIN AgentDeaths ON Agents.ID = AgentDeaths.AgentID
                 WHERE Agents.SimID = """ + sim_id + " AND Agents.SimID = AgentDeaths.SimID;"
@@ -18,8 +17,9 @@ def deploy_cumulative(c, sim_id, prototype_name):
 
     Args:
         c: connection cursor to sqlite database.
+        sim_id: simulation ID.
+        prototype_name: name of a prototype.
     """
-
     sql = """SELECT ti.Time,COUNT(*)
               FROM Agents AS ag
               INNER JOIN AgentDeaths AS ad ON ag.ID = ad.AgentID
@@ -35,9 +35,11 @@ def inv_series(c, sim_id, agent_id, iso_id):
     """Timeseries of a specific agent's inventory of a specific isotope.
 
     Args:
-        c: connection cursor to sqlite database
+        c: connection cursor to sqlite database.
+        sim_id: simulation ID.
+        agent_id: ID of an agent.
+        iso_id: ID of an isotope/nuclide.
     """
-
     sql = """SELECT ti.Time,SUM(cmp.Quantity * inv.Quantity) FROM (
                 Compositions AS cmp
                 INNER JOIN Inventories AS inv ON inv.StateID = cmp.ID
@@ -48,11 +50,15 @@ def inv_series(c, sim_id, agent_id, iso_id):
             ) GROUP BY ti.Time,cmp.IsoID;"""
     return c.execute(sql)
 
-def inv_at(c):
+def inv_at(c, sim_id, agent_id, t1, t2):
     """Total inventory(all isotopes) of a specific agent at specific timestep.
 
     Args:
         c: connection to sqlite database.
+        sim_id: simulation ID.
+        agent_id: ID of an agent.
+        t1: start time.
+        t2: end time.
     """
     sql = """SELECT cmp.IsoID,SUM(cmp.Quantity * inv.Quantity) FROM (
                 Inventories AS inv
