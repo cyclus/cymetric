@@ -86,9 +86,9 @@ def mat_created(c, sim_id, agent_id, t1, t2):
                 INNER JOIN Compositions AS cmp ON res.StateID = cmp.ID
                 INNER JOIN ResCreators AS cre ON res.ID = cre.ResID
             ) WHERE (
-                cre.SimID = ? AND cre.SimID = res.SimID AND cre.SimID = cmp.SimID
-                AND res.TimeCreated >= ? AND res.TimeCreated < ?
-                AND cre.ModelID = ?
+                cre.SimID = """ + sim_id + """ AND cre.SimID = res.SimID AND cre.SimID = cmp.SimID
+                AND res.TimeCreated >= """ + t1 + " AND res.TimeCreated < " + t2 + """
+                AND cre.ModelID = """ + agent_id + """
             ) GROUP BY cmp.IsoID;"""
     return c.execute(sql)
 
