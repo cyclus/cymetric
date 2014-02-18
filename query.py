@@ -64,18 +64,22 @@ def inv_at(c, sim_id, agent_id, t1, t2):
                 Inventories AS inv
                 INNER JOIN Compositions AS cmp ON inv.StateID = cmp.ID
             ) WHERE (
-                inv.SimID = ? AND inv.SimID = cmp.SimID
-                AND inv.StartTime <= ? AND inv.EndTime > ?
-                AND inv.AgentID = ?
+                inv.SimID = """ + sim_id + """ AND inv.SimID = cmp.SimID
+                AND inv.StartTime <= """ + t1 + " AND inv.EndTime > " + t2 + """
+                AND inv.AgentID = """ + agent_id + """
             ) GROUP BY cmp.IsoID;"""
     return c.execute(sql)
 
-def mat_created(c):
+def mat_created(c, sim_id, agent_id, t1, t2):
     """Total amount of material(all isotopes) created by a particular agent
     between two timesteps.
 
     Args:
         c: connection to a sqlite database.
+        sim_id: simulation ID.
+        agent_id: ID of an agent.
+        t1: start time.
+        t2: end time.
     """
     sql = """SELECT cmp.IsoID,SUM(cmp.Quantity * res.Quantity) FROM (
                 Resources As res
