@@ -92,21 +92,26 @@ def mat_created(c, sim_id, agent_id, t1, t2):
             ) GROUP BY cmp.IsoID;"""
     return c.execute(sql)
 
-def flow(c):
+def flow(c, sim_id, from_agent_id, to_agent_id, t1, t2):
     """Total material(all isotopes) transacted between two agents between two
     timesteps.
 
     Args:
         c: connection to sqlite database.
+        sim_id: simulation ID.
+        from_agent_id: ID of a sending agent.
+        to_agent_id: ID of a receiving agent.
+        t1: start time.
+        t2: end time.
     """
     sql = """SELECT cmp.IsoID,SUM(cmp.Quantity * res.Quantity) FROM (
                Resources AS res
                INNER JOIN Compositions AS cmp ON cmp.ID = res.StateID
                INNER JOIN Transactions AS tr ON tr.ResourceID = res.ID
              ) WHERE (
-               res.SimID = [simid] AND cmp.SimID = res.SimID AND tr.SimID = res.SimID
-               AND tr.Time >= [t1] AND tr.Time < [t2]
-               AND tr.SenderID = [from-agent] AND tr.ReceiverID = [to-agent]
+               res.SimID = """ + sim_id + """ AND cmp.SimID = res.SimID AND tr.SimID = res.SimID
+               AND tr.Time >= """ + t1 + " AND tr.Time < " + t2 + """
+               AND tr.SenderID = """ + from_agent_id + " AND tr.ReceiverID = " + to_agent_id + """
              ) GROUP BY cmp.IsoID;"""
     return c.execute(sql)
 
