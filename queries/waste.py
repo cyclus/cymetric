@@ -15,18 +15,17 @@ def waste_mass(c):
     return c.execute(sql)
 
 def waste_content(c):
-    """Lists mass of waste in facilty with respect to isotope.
+    """Lists total mass of waste in facilty with respect to isotope at end of simulation.
 
     Args:
         c: connection cursor to sqlite database.
     """
-    sql = """SELECT Transactions.ReceiverID, Transactions.ResourceID, 
-                    Resources.Quantity, Resources.units
-                    Compositions.IsoID, Compositions.Quantity
+    sql = """SELECT Compositions.IsoID, Compositions.Quantity*Resources.Quantity, Resources.units
              FROM Compositions
              INNER JOIN Transactions ON  Compositions.ID = Transactions.ResourceID
              INNER JOIN Resources ON Compositions.ID = Resources.StateID
              WHERE Transactions.ReceiverID=23
+             GROUP BY Compositions.IsoID
              ORDER BY Compositions.IsoID;"""
     return c.execute(sql)
 
