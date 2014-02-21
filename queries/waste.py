@@ -7,25 +7,42 @@ def waste_mass(c):
         c: connection cursor to sqlite database.
     """
     sql = """SELECT Transactions.ReceiverID, Transactions.ResourceID, 
-                    Resources.Quantity, Resources.units, Resources.TimeCreated 
+                    Resources.TimeCreated, Resources.Quantity, Resources.units 
              FROM Transactions 
-             INNER JOIN Resources ON Transactions.ResourceID = Resources.StateID 
+             INNER JOIN Resources ON Transactions.ResourceID = Resources.ResourceID 
              WHERE Transactions.ReceiverID=23 
              ORDER BY Resources.TimeCreated;"""
     return c.execute(sql)
 
-def waste_content(c):
+def total_waste_content(c):
     """Lists total mass of waste in facilty with respect to isotope at end of simulation.
 
     Args:
         c: connection cursor to sqlite database.
+        t: time.
     """
-    sql = """SELECT Compositions.IsoID, Compositions.Quantity*Resources.Quantity, Resources.units
+    sql = """SELECT Compositions.NucID, Compositions.MassFrac*Resources.Quantity, Resources.units
              FROM Compositions
-             INNER JOIN Transactions ON  Compositions.ID = Transactions.ResourceID
-             INNER JOIN Resources ON Compositions.ID = Resources.StateID
+             INNER JOIN Transactions ON  Resources.ResourceID = Transactions.ResourceID
+             INNER JOIN Resources ON Compositions.StateID = Resources.StateID
              WHERE Transactions.ReceiverID=23
-             GROUP BY Compositions.IsoID
-             ORDER BY Compositions.IsoID;"""
+             GROUP BY Compositions.NucID
+             ORDER BY Compositions.NucID;"""
+    return c.execute(sql)
+
+def waste_content(c, t):
+    """Lists total mass of waste in facilty with respect to isotope at a given time.
+
+    Args:
+        c: connection cursor to sqlite database.
+        t: time.
+    """
+    sql = """SELECT Compositions.NucID, Compositions.MassFrac*Resources.Quantity, Resources.units
+             FROM Compositions
+             INNER JOIN Transactions ON  Resources.ResourceID = Transactions.ResourceID
+             INNER JOIN Resources ON Compositions.StateID = Resources.StateID
+             WHERE Transactions.ReceiverID=23 AND Transactions.Time <= """ + t + """
+             GROUP BY Compositions.NucID
+             ORDER BY Compositions.NucID;"""
     return c.execute(sql)
 
