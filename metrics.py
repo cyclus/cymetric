@@ -4,10 +4,12 @@ import sqlite3
 
 from queries import activity
 from queries import waste
+from queries import decayheat
 
 metrics = {
     'activity': activity.activity,
     'waste-mass': waste.waste_mass,
+    'decay-heat': decayheat.decayheat
     }
 
 def main():
