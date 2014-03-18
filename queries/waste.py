@@ -30,19 +30,3 @@ def total_waste_content(c):
              ORDER BY Compositions.NucID;"""
     return c.execute(sql)
 
-def waste_content(c, t):
-    """Lists total mass of waste in facilty with respect to isotope at a given time.
-
-    Args:
-        c: connection cursor to sqlite database.
-        t: time.
-    """
-    sql = """SELECT Compositions.NucID, Compositions.MassFrac*Resources.Quantity, Resources.units
-             FROM Compositions
-             INNER JOIN Transactions ON  Resources.ResourceID = Transactions.ResourceID
-             INNER JOIN Resources ON Compositions.StateID = Resources.StateID
-             WHERE Transactions.ReceiverID=23 AND Transactions.Time <= """ + t + """
-             GROUP BY Compositions.NucID
-             ORDER BY Compositions.NucID;"""
-    return c.execute(sql)
-
