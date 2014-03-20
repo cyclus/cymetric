@@ -7,8 +7,9 @@ def decayheat(c):
     Args:
         c: connection cursor to sqlite database.
     """
-    
+    # gives avogadro's number with a kg to g conversion
     ACT_CONV = 1000*6.022e23
+    # converts from MeV/s to MW
     Q_CONV = 1.602e-19
     
     # SQL query returns a table with the nuclides (and their masses) transacted from reactor
@@ -23,20 +24,26 @@ def decayheat(c):
     cur = c.execute(sql)
     results = cur.fetchall()
 
-    decayheats = []
-    prev_line = []
-    
+    alldecayheats = []
+
     # Calculates decay heat (MW) at each timestep
     for time_step, nuc, mass in results:
         act = ACT_CONV * mass * data.decay_const(nuc) / data.atomic_mass(nuc)
         dh = Q_CONV * act * data.q_val(nuc)
-        curr_line = [time_step, nuc, mass]
-
-        # Sums decay heats for each time step
-        if curr_line[0] == prev_line[0]:
-            dh += prev_line[2]
-        row = (time_step, dh)
-        decayheats.append(row)
-        prev_line = curr_line
+        row = (time_step, nuc, dh)
+        alldecayheats.append(row)
         
+    # Sums decay heats for each time step
+    dict_decayheats = {}
+    decayheats = []
+
+    for time_step, nuc, dh in alldecayheats:
+        if time_step in dict_decayheats.keys():
+            dict_decayheats[time_step] += dh
+        else:
+            dict_decayheats[time_step] = dh
+    
+    decayheats = dict_decayheats.items()
+    decayheats.sort()
+
     return decayheats
