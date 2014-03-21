@@ -1,7 +1,7 @@
 import sqlite3
 from pyne import data
 
-def decayheat(c):
+def query(c):
     """Lists decay heats of all nuclides with respect to time for all facilities.
 
     Args:
@@ -32,17 +32,53 @@ def decayheat(c):
         dh = Q_CONV * act * data.q_val(nuc)
         row = (time_step, nuc, dh)
         alldecayheats.append(row)
-        
-    # Sums decay heats for each time step
+
+    return alldecayheats
+
+def enddecayheat(c):
+    """Lists decay heat at end of simulation.
+
+    Args:
+        c: connection cursor to sqlite database.
+    """
+    # Conversion of time from months to seconds
+    CONV = 3.16e7 / 12
+
+    # Retrieve list of decay heats of each nuclide
+    alldecayheats = query(c)
+
+    end_heat = 0
+    sim_time = alldecayheats[-1][0]
+
+    # Sum decayed heats for each time-step/nuclide
+    for time_step, nuc, dh in alldecayheats:
+        t = (sim_time - time_step) * CONV
+        exp = t / data.decay_const(nuc)
+        q_i = dh * 0.5**exp
+        end_heat += q_i
+
+    return end_heat    
+
+def decayheat(c):
+    """Lists decay heats at each time-step for all facilities.
+
+    Args:
+        c: connection cursor to sqlite database.
+    """
+    # Retrieve list of decay heats of each nuclide
+    alldecayheats = query(c)
+
     dict_decayheats = {}
     decayheats = []
 
+    # Get only one time-step per entry, add decay heats of same time-steps
     for time_step, nuc, dh in alldecayheats:
         if time_step in dict_decayheats.keys():
             dict_decayheats[time_step] += dh
         else:
             dict_decayheats[time_step] = dh
-    
+
+    # Put back into list of tuples & sort by time-step
     decayheats = dict_decayheats.items()
     decayheats.sort()
 

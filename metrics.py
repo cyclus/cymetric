@@ -5,11 +5,15 @@ import sqlite3
 from queries import activity
 from queries import waste
 from queries import decayheat
+from queries import radiotoxicity
 
 metrics = {
     'activity': activity.activity,
+    'radiotoxicity': radiotoxicity.radiotoxicity,
     'waste-mass': waste.waste_mass,
-    'decay-heat': decayheat.decayheat
+    'waste-composition': waste.end_waste_comp,
+    'decay-heat': decayheat.decayheat,
+    'end-decay-heat': decayheat.enddecayheat
     }
 
 def main():
