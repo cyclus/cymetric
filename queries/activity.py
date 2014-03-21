@@ -26,4 +26,5 @@ def activity(c):
         act = CONV * mass * data.decay_const(nuc) / data.atomic_mass(nuc)
         row = (time_step, nuc, act)
         activities.append(row)
+
     return activities
