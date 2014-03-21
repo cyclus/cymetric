@@ -6,15 +6,18 @@ def waste_mass(c):
     Args:
         c: connection cursor to sqlite database.
     """
-    sql = """SELECT Transactions.ReceiverID, Transactions.ResourceID, 
-                    Resources.TimeCreated, Resources.Quantity, Resources.units 
-             FROM Transactions 
-             INNER JOIN Resources ON Transactions.ResourceID = Resources.ResourceID 
-             WHERE Transactions.ReceiverID=23 
+    sql = """SELECT Resources.TimeCreated, Resources.Quantity, Resources.units 
+             FROM Resources 
+             INNER JOIN Transactions ON Transactions.ResourceID = Resources.ResourceID 
+             WHERE Transactions.ReceiverID=25 
              ORDER BY Resources.TimeCreated;"""
-    return c.execute(sql)
 
-def total_waste_content(c):
+    cur = c.execute(sql)
+    results = cur.fetchall()
+
+    return results
+
+def end_waste_comp(c):
     """Lists total mass of waste in facilty with respect to isotope at end of simulation.
 
     Args:
@@ -25,8 +28,11 @@ def total_waste_content(c):
              FROM Compositions
              INNER JOIN Transactions ON  Resources.ResourceID = Transactions.ResourceID
              INNER JOIN Resources ON Compositions.StateID = Resources.StateID
-             WHERE Transactions.ReceiverID=23
+             WHERE Transactions.ReceiverID=25
              GROUP BY Compositions.NucID
              ORDER BY Compositions.NucID;"""
-    return c.execute(sql)
 
+    cur = c.execute(sql)
+    results = cur.fetchall()
+
+    return results
