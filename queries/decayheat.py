@@ -69,7 +69,6 @@ def decayheat(c):
     alldecayheats = query(c)
 
     dict_decayheats = {}
-    decayheats = []
 
     # Get only one time-step per entry, add decay heats of same time-steps
     for time_step, nuc, dh in alldecayheats:
