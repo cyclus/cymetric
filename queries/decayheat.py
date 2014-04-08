@@ -1,3 +1,4 @@
+import csv
 import sqlite3
 from pyne import data
 
@@ -81,4 +82,12 @@ def decayheat(c):
     decayheats = dict_decayheats.items()
     decayheats.sort()
 
-    return decayheats
+    # Write to csv file 
+    fname = 'decayheat.csv'
+    with open(fname,'w') as out:
+        csv_out=csv.writer(out)
+        csv_out.writerow(['time-step','decay-heat [MW]'])
+        for row in decayheats:
+            csv_out.writerow(row)
+
+    print('file saved as ' + fname + '!')

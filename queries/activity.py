@@ -1,3 +1,4 @@
+import csv
 import sqlite3
 import math
 from pyne import data
@@ -67,4 +68,12 @@ def activity(c):
     acts = dict_acts.items()
     acts.sort()
 
-    return acts
+    # Write to csv file 
+    fname = 'activity.csv'
+    with open(fname,'w') as out:
+        csv_out=csv.writer(out)
+        csv_out.writerow(['nuclide','activity [Bq]'])
+        for row in acts:
+            csv_out.writerow(row)
+
+    print('file saved as ' + fname + '!')
