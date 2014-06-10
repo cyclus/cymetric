@@ -11,7 +11,7 @@ from queries import massflow
 metrics = {
     'activity': activity.activity,
     'radiotoxicity': radiotoxicity.radiotoxicity,
-    'tot-waste-mass': waste.wastemass,
+    'waste-mass': waste.wastemass,
     'tot-nuc-mass': waste.nucmass,
     'waste-composition': waste.wastecomp,
     'decay-heat': decayheat.decayheat,

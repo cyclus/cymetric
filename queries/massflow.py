@@ -6,13 +6,15 @@ def fuelmass(c):
     Args:
         c: connection cursor to sqlite database.
     """
-    sql = """SELECT Resources.TimeCreated, Compositions.MassFrac*Resources.Quantity, 
-                    Compositions.NucID
-             FROM Resources 
-             INNER JOIN Transactions ON Transactions.ResourceID = Resources.ResourceID 
-	     INNER JOIN Compositions ON Compositions.StateID = Resources.ResourceID
-             WHERE Transactions.ReceiverID=23 
-             ORDER BY Resources.TimeCreated;"""
+    sql = """SELECT resources.TimeCreated, compositions.MassFrac*resources.Quantity, 
+                    compositions.NucId
+             FROM resources 
+             INNER JOIN transactions ON transactions.ResourceId =
+resources.ResourceId 
+	     INNER JOIN compositions ON compositions.QualId =
+resources.ResourceId
+             WHERE transactions.ReceiverId=13 
+             ORDER BY resources.TimeCreated;"""
 
     cur = c.execute(sql)
     results = cur.fetchall()

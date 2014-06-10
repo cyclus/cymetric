@@ -6,11 +6,12 @@ def wastemass(c):
     Args:
         c: connection cursor to sqlite database.
     """
-    sql = """SELECT Resources.TimeCreated, Resources.Quantity 
-             FROM Resources 
-             INNER JOIN Transactions ON Transactions.ResourceID = Resources.ResourceID 
-             WHERE Transactions.ReceiverID=25 
-             ORDER BY Resources.TimeCreated;"""
+    sql = """SELECT resources.TimeCreated, resources.Quantity 
+             FROM resources 
+             INNER JOIN transactions ON transactions.ResourceId =
+resources.ResourceId 
+             WHERE transactions.ReceiverId=14 
+             ORDER BY resources.TimeCreated;"""
 
     cur = c.execute(sql)
     results = cur.fetchall()
@@ -23,13 +24,14 @@ def wastecomp(c):
     Args:
         c: connection cursor to sqlite database.
     """
-    sql = """SELECT Transactions.Time, Compositions.NucID, 
-                    Compositions.MassFrac*Resources.Quantity
-             FROM Compositions
-             INNER JOIN Transactions ON  Resources.ResourceID = Transactions.ResourceID
-             INNER JOIN Resources ON Compositions.StateID = Resources.StateID
-             WHERE Transactions.ReceiverID=25
-             ORDER BY Transactions.Time;"""
+    sql = """SELECT transactions.Time, compositions.NucId, 
+                    compositions.MassFrac*resources.Quantity
+             FROM compositions
+             INNER JOIN transactions ON resources.ResourceId =
+transactions.ResourceId
+             INNER JOIN resources ON compositions.QualId = resources.QualId
+             WHERE transactions.ReceiverId=14
+             ORDER BY transactions.Time;"""
 
     cur = c.execute(sql)
     results = cur.fetchall()

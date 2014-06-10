@@ -14,14 +14,14 @@ def query(c):
     Q_CONV = 1.602e-19
     
     # SQL query returns a table with the nuclides (and their masses) transacted from reactor
-    sql = ("SELECT Resources.TimeCreated, Compositions.NucID," 
-           "Compositions.MassFrac*Resources.Quantity ")
-    sql += ("FROM Resources "
-            "INNER JOIN Compositions ON Resources.StateID = Compositions.StateID "
-            "INNER JOIN Transactions ON Resources.TimeCreated = Transactions.Time "
-            "WHERE Transactions.SenderID=23 "
-            "GROUP BY Resources.TimeCreated, Compositions.NucID "
-            "ORDER BY Resources.TimeCreated;")
+    sql = ("SELECT resources.TimeCreated, compositions.NucId," 
+           "compositions.MassFrac*resources.Quantity ")
+    sql += ("FROM resources "
+            "INNER JOIN compositions ON resources.QualId = compositions.QualId "
+            "INNER JOIN transactions ON resources.TimeCreated = transactions.Time "
+            "WHERE transactions.SenderId=13 "
+            "GROUP BY resources.TimeCreated, compositions.NucId "
+            "ORDER BY resources.TimeCreated;")
     cur = c.execute(sql)
     results = cur.fetchall()
 

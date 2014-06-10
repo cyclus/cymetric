@@ -11,12 +11,12 @@ def query(c):
     """
 
     # SQL query returns a table with the nuclides and their masses at each timestep
-    sql = ("SELECT Resources.TimeCreated, Compositions.NucID," 
-           "Compositions.MassFrac*Resources.Quantity ")
-    sql += ("FROM Resources "
-            "INNER JOIN Compositions ON Resources.StateID = Compositions.StateID "
-            "GROUP BY Resources.TimeCreated, Compositions.NucID "
-            "ORDER BY Resources.TimeCreated;")
+    sql = ("SELECT resources.TimeCreated, compositions.NucID," 
+           "compositions.MassFrac*resources.Quantity ")
+    sql += ("FROM resources "
+            "INNER JOIN compositions ON resources.QualId = compositions.QualId "
+            "GROUP BY resources.TimeCreated, compositions.NucId "
+            "ORDER BY resources.TimeCreated;")
     cur = c.execute(sql)
     results = cur.fetchall()
 
@@ -34,7 +34,7 @@ def query(c):
     return activities
 
 def activity(c):
-    """Lists activities of all nuclides at a given time (in years) from the end of the sim.
+    """Lists activities of all nuclides at 10, 100, 1000, 10000 yrs from the end of the sim.
 
     Args:
         c: connection cursor to sqlite database.
@@ -49,30 +49,41 @@ def activity(c):
     YCONV = 3.16e7
 
     dict_acts = {}
-
-    t = input("Enter a time in years: ")
-
+    t = 10
     sim_time = activities[-1][0]
-    time = sim_time * MCONV + t * YCONV
-
     # Get only one nuclide per entry, add activities
     for time_step, nuc, act in activities:
+        time = sim_time * MCONV + t * YCONV
         sec = time - time_step * MCONV
-        act = act * math.exp(-sec * data.decay_const(nuc))
+        act10 = act * math.exp(-sec * data.decay_const(nuc))
         if nuc in dict_acts.keys():
-            dict_acts[nuc] += act
+            dict_acts[nuc] += act10
         else:
-            dict_acts[nuc] = act
+            dict_acts[nuc] = act10
 
     # Put back into list of tuples & sort by nuclide
-    acts = dict_acts.items()
-    acts.sort()
+    activity = dict_acts.items()
+    activity.sort()
+
+    acts = [] 
+    for nuc, act in activity:
+        sec100 = 100 * YCONV - 10 * YCONV
+        sec1000 = 1000 * YCONV - 10 * YCONV
+        sec10000 = 10000 * YCONV - 10 * YCONV
+        act100 = act * math.exp(-sec100 * data.decay_const(nuc))
+        act1000 = act * math.exp(-sec1000 * data.decay_const(nuc))
+        act10000 = act * math.exp(-sec10000 * data.decay_const(nuc))
+        row = (nuc, act, act100, act1000, act10000)
+        acts.append(row)
 
     # Write to csv file 
     fname = 'activity.csv'
     with open(fname,'w') as out:
         csv_out=csv.writer(out)
-        csv_out.writerow(['nuclide','activity [Bq]'])
+	csv_out.writerow(['nuclide', 'act at 10 yrs [Bq]', 
+                          'act at 100 yrs [Bq]', 
+                          'act at 1000 yrs [Bq]', 
+                          'act at 10000 yrs [Bq]'])
         for row in acts:
             csv_out.writerow(row)
 
