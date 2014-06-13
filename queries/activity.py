@@ -49,38 +49,41 @@ def activity(c):
     YCONV = 3.16e7
 
     dict_acts = {}
-    t = 10
-    sim_time = activities[-1][0]
-    # Get only one nuclide per entry, add activities
+    sim_time = activities[-1][0] * MCONV
+    # Get only one nuclide per entry, add activities @ end of sim
     for time_step, nuc, act in activities:
-        time = sim_time * MCONV + t * YCONV
-        sec = time - time_step * MCONV
-        act10 = act * math.exp(-sec * data.decay_const(nuc))
+        sec = sim_time - time_step * MCONV
+        acts = act * math.exp(-sec * data.decay_const(nuc))
         if nuc in dict_acts.keys():
-            dict_acts[nuc] += act10
+            dict_acts[nuc] += acts
         else:
-            dict_acts[nuc] = act10
+            dict_acts[nuc] = acts
 
     # Put back into list of tuples & sort by nuclide
-    activity = dict_acts.items()
-    activity.sort()
+    act_endsim = dict_acts.items()
+    act_endsim.sort()
 
+    # calculate activities 10, 100, 1000, 10000 yrs later
     acts = [] 
-    for nuc, act in activity:
-        sec100 = 100 * YCONV - 10 * YCONV
-        sec1000 = 1000 * YCONV - 10 * YCONV
-        sec10000 = 10000 * YCONV - 10 * YCONV
-        act100 = act * math.exp(-sec100 * data.decay_const(nuc))
-        act1000 = act * math.exp(-sec1000 * data.decay_const(nuc))
-        act10000 = act * math.exp(-sec10000 * data.decay_const(nuc))
-        row = (nuc, act, act100, act1000, act10000)
+    for nuc, act0 in act_endsim:
+        sec10 = 10 * YCONV
+        sec100 = 100 * YCONV
+        sec1000 = 1000 * YCONV
+        sec10000 = 10000 * YCONV
+        act10 = act0 * math.exp(-sec10 * data.decay_const(nuc))
+        act100 = act0 * math.exp(-sec100 * data.decay_const(nuc))
+        act1000 = act0 * math.exp(-sec1000 * data.decay_const(nuc))
+        act10000 = act0 * math.exp(-sec10000 * data.decay_const(nuc))
+        row = (nuc, act0, act10, act100, act1000, act10000)
         acts.append(row)
 
     # Write to csv file 
     fname = 'activity.csv'
     with open(fname,'w') as out:
         csv_out=csv.writer(out)
-	csv_out.writerow(['nuclide', 'act at 10 yrs [Bq]', 
+	csv_out.writerow(['nuclide', 
+                          'act at 0 yrs [Bq]', 
+                          'act at 10 yrs [Bq]', 
                           'act at 100 yrs [Bq]', 
                           'act at 1000 yrs [Bq]', 
                           'act at 10000 yrs [Bq]'])
