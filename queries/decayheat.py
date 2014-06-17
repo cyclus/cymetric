@@ -50,43 +50,70 @@ def enddecayheat(c):
 
     end_heat = 0
     sim_time = alldecayheats[-1][0]
-
     # Sum decayed heats for each time-step/nuclide
     for time_step, nuc, dh in alldecayheats:
         t = (sim_time - time_step) * CONV
-        exp = t / data.decay_const(nuc)
+        exp = t * data.decay_const(nuc)
         q_i = dh * 0.5**exp
         end_heat += q_i
 
     return end_heat    
 
 def decayheat(c):
-    """Lists decay heats at each time-step for all facilities.
+    """Lists decay heats at 0, 10, 100, 1000, 10000 years summed over all
+       nuclides and facilities.
 
     Args:
         c: connection cursor to sqlite database.
     """
+    # Conversion of time from months to seconds
+    MCONV = 3.16e7 / 12
+
+    # Conversion of years to seconds
+    YCONV = 3.16e7
+
     # Retrieve list of decay heats of each nuclide
     alldecayheats = query(c)
 
-    dict_decayheats = {}
-
-    # Get only one time-step per entry, add decay heats of same time-steps
+    dict_decayheat = {}
+    sim_time = alldecayheats[-1][0]
+    # Get only one nuclide per entry by adding decay heats
     for time_step, nuc, dh in alldecayheats:
-        if time_step in dict_decayheats.keys():
-            dict_decayheats[time_step] += dh
+        sec = (sim_time - time_step) * MCONV
+        q_i = dh * 0.5**(sec * data.decay_const(nuc))
+        if nuc in dict_decayheat.keys():
+            dict_decayheat[nuc] += q_i
         else:
-            dict_decayheats[time_step] = dh
+            dict_decayheat[nuc] = q_i
 
     # Put back into list of tuples & sort by time-step
-    decayheats = dict_decayheats.items()
-    decayheats.sort()
+    decayheat = dict_decayheat.items()
+    decayheat.sort()
+
+    # calculate decay heats of each nuc 0, 10, 100, 1000, 10000 yrs after sim
+    decayheats = []
+    for nuc, dh0 in decayheat:
+        sec10 = 10 * YCONV
+        sec100 = 100 * YCONV
+        sec1000 = 1000 * YCONV
+        sec10000 = 10000 * YCONV
+        dh10 = dh0 * 0.5**(sec10 * data.decay_const(nuc))
+        dh100 = dh0 * 0.5**(sec100 * data.decay_const(nuc))
+        dh1000 = dh0 * 0.5**(sec1000 * data.decay_const(nuc))
+        dh10000 = dh0 * 0.5**(sec10000 * data.decay_const(nuc))
+        row = (nuc, dh0, dh10, dh100, dh1000, dh10000)
+        decayheats.append(row)
 
     # Write to csv file 
     fname = 'decayheat.csv'
     with open(fname,'w') as out:
         csv_out=csv.writer(out)
-        csv_out.writerow(['time-step','decay-heat [MW]'])
+        csv_out.writerow(['nuclide',
+                          'decay heat at 0 yrs [MW]',
+                          'decay heat at 10 yrs [MW]',
+                          'decay heat at 100 yrs [MW]',
+                          'decay heat at 1000 yrs [MW]',
+                          'decay heat at 10000 yrs [MW]'])
         for row in decayheats:
             csv_out.writerow(row)
 

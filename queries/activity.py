@@ -49,10 +49,10 @@ def activity(c):
     YCONV = 3.16e7
 
     dict_acts = {}
-    sim_time = activities[-1][0] * MCONV
+    sim_time = activities[-1][0]
     # Get only one nuclide per entry, add activities @ end of sim
     for time_step, nuc, act in activities:
-        sec = sim_time - time_step * MCONV
+        sec = (sim_time - time_step) * MCONV
         acts = act * math.exp(-sec * data.decay_const(nuc))
         if nuc in dict_acts.keys():
             dict_acts[nuc] += acts
