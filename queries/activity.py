@@ -28,7 +28,7 @@ def query(c):
     # Calculates activities (/s) of each nuclide at each timestep
     for time_step, nuc, mass in results:
         act = CONV * mass * data.decay_const(nuc) / data.atomic_mass(nuc)
-        row = (time_step, nuc, act)
+        row = (time_step, nuc, mass, act)
         activities.append(row)
 
     return activities
@@ -51,7 +51,7 @@ def activity(c):
     dict_acts = {}
     sim_time = activities[-1][0]
     # Get only one nuclide per entry, add activities @ end of sim
-    for time_step, nuc, act in activities:
+    for time_step, nuc, mass, act in activities:
         sec = (sim_time - time_step) * MCONV
         acts = act * math.exp(-sec * data.decay_const(nuc))
         if nuc in dict_acts.keys():
