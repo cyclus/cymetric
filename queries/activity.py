@@ -66,15 +66,14 @@ def activity(c):
     # calculate activities 10, 100, 1000, 10000 yrs later
     acts = [] 
     for nuc, act0 in act_endsim:
-        sec10 = 10 * YCONV
-        sec100 = 100 * YCONV
-        sec1000 = 1000 * YCONV
-        sec10000 = 10000 * YCONV
-        act10 = act0 * math.exp(-sec10 * data.decay_const(nuc))
-        act100 = act0 * math.exp(-sec100 * data.decay_const(nuc))
-        act1000 = act0 * math.exp(-sec1000 * data.decay_const(nuc))
-        act10000 = act0 * math.exp(-sec10000 * data.decay_const(nuc))
-        row = (nuc, act0, act10, act100, act1000, act10000)
+        t = 10
+        nuc_acts = (act0,)
+        while t <= 10000:
+            sec = t * YCONV
+            nuc_act = act0 * math.exp(-sec * data.decay_const(nuc))
+            nuc_acts += (nuc_act,)
+            t = 10 * t
+        row = (nuc,) + tuple(nuc_acts)
         acts.append(row)
 
     # Write to csv file 

@@ -93,15 +93,14 @@ def decayheat(c):
     # calculate decay heats of each nuc 0, 10, 100, 1000, 10000 yrs after sim
     decayheats = []
     for nuc, dh0 in decayheat:
-        sec10 = 10 * YCONV
-        sec100 = 100 * YCONV
-        sec1000 = 1000 * YCONV
-        sec10000 = 10000 * YCONV
-        dh10 = dh0 * 0.5**(sec10 * data.decay_const(nuc))
-        dh100 = dh0 * 0.5**(sec100 * data.decay_const(nuc))
-        dh1000 = dh0 * 0.5**(sec1000 * data.decay_const(nuc))
-        dh10000 = dh0 * 0.5**(sec10000 * data.decay_const(nuc))
-        row = (nuc, dh0, dh10, dh100, dh1000, dh10000)
+        t = 10
+        dhs = (dh0,)
+        while t <= 10000:
+            sec = t * YCONV
+            dh = dh0 * 0.5**(sec * data.decay_const(nuc))
+            dhs += (dh,)
+            t = 10 * t
+        row = (nuc,) + tuple(dhs)
         decayheats.append(row)
 
     # Write to csv file 
