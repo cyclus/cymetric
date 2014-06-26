@@ -1,4 +1,6 @@
+import csv
 import sqlite3
+import math
 from pyne import data
 
 import activity
@@ -22,6 +24,7 @@ def rel_activity(c):
     YCONV = 3.16e7
 
     dict_acts = {}
+    tot_mass = 0.0
     sim_time = activities[-1][0]
     # Get list of one activity per nuclide wrt end of sim & sum total mass
     for time_step, nuc, mass, act in activities:
@@ -42,28 +45,23 @@ def rel_activity(c):
     CONV_238 = 0.993*1000*6.022e23
     actU235 = CONV_235 * tot_mass * data.decay_const('U235') / data.atomic_mass('U235')
     actU238 = CONV_238 * tot_mass * data.decay_const('U235') / data.atomic_mass('U235')
-    act_U0 = actU235 + actU238
+    act_U = actU235 + actU238
 
     # calculate relative activities to nat U after 0, 10, 100, 1000, 10000 yrs
     rel_acts = []
     for nuc, act0 in act_endsim:
-        nuc_decay = []
-        natU_decay = []
         t = 10
+        nuc_acts = (act0,)
         while t <= 10000:
             sec = t * YCONV
             nuc_act = act0 * math.exp(-sec * data.decay_const(nuc))
-            natU_act = act_U0 * math.exp(-sec * data.decay_const('U238'))
+            nuc_acts += (nuc_act,)
             t = 10 * t
-            nuc_decay.append(nuc_act)
-            natU_decay.appent(natU_act)
-        nuc_row = (act0,) + nuc_decay
-        natU_row = (act_U0,) + natU_decay
         rel = []
-        for act, nat in nuc_row, natU_row:
-           frac = act / nat
-           rel.append(frac)
-        row = (nuc,) + rel
+        for i in nuc_acts:
+            frac = i / act_U
+            rel.append(frac)
+        row = (nuc,) + tuple(rel)
         rel_acts.append(row)
 
     # Write to csv file 
@@ -76,7 +74,7 @@ def rel_activity(c):
                           'rel_act at 100 yrs', 
                           'rel_act at 1000 yrs', 
                           'rel_act at 10000 yrs'])
-        for row in acts:
+        for row in rel_acts:
             csv_out.writerow(row)
 
     print('file saved as ' + fname + '!')
