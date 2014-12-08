@@ -211,7 +211,7 @@ def main_body(cmake_args, make_args):
 def final_message(success=True):
     if success:
         return
-    msg = ("\n\nIf you are having issues building cyclus, please report your problem "
+    msg = ("\n\nIf you are having issues building cymetric, please report your problem "
            "to cyclus-dev@googlegroups.com or look for help at http://fuelcycle.org\n\n"
            )
     print('\n' + '-'*20 + msg + '-'*20)
@@ -234,7 +234,7 @@ def main():
         _, cympath, _ = imp.find_module('cymetric', cympath)
     except ImportError:
         pynepath = "${HOME}/.local/python2.7/site-packages"
-    libpath = abspath(joinpath(pynepath, '..', '..', '..'))
+    libpath = abspath(joinpath(cympath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
     msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
            "LD_LIBRARY_PATH (or DYLD_FALLBACK_LIBRARY_PATH on Mac OSX) has been "
