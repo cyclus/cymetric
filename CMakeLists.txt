@@ -34,6 +34,9 @@ execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V"
     ERROR_STRIP_TRAILING_WHITESPACE)
 message( STATUS "Cython Version: " ${CYTHON_VERSION} )
 
+# Find Cyclus, it is kind of a big deal
+find_package(Cyclus REQUIRED)
+
 # Also, there are some custom macros to make for less verbosity
 include( CymetricMacros )
 
