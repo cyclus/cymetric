@@ -11,6 +11,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Default to release build type
 set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
 
+# Also, there are some custom macros to make for less verbosity
+include( CymetricMacros )
+print_logo()
+
 # quiets fortify_source warnings when not compiling with optimizations
 # in linux distros where compilers were compiled with fortify_source enabled by
 # default (e.g. Arch linux).
@@ -36,11 +40,8 @@ message( STATUS "Cython Version: " ${CYTHON_VERSION} )
 
 # Find Cyclus, it is kind of a big deal
 find_package(Cyclus REQUIRED)
-
-# Also, there are some custom macros to make for less verbosity
-include( CymetricMacros )
-
-print_logo()
+SET(INCLUDE_DIRECTORIES ${INCLUDE_DIRECTORIES} ${CYCLUS_CORE_INCLUDE_DIR})
+SET(LIBS ${LIBS} ${CYCLUS_CORE_LIBRARIES})
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
