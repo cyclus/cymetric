@@ -57,5 +57,5 @@ cdef class _Hdf5Back(_FullBackend):
         return (<cpp_cyclus.Hdf5Back*> self.ptx).Name()
 
 
-class Hdf5Backend(_Hdf5Back, FullBackend):
+class Hdf5Back(_Hdf5Back, FullBackend):
     """Full backend cyclus database interface."""
