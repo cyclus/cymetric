@@ -10,6 +10,11 @@ cdef extern from "cyclus.h" namespace "boost::spirit":
     cdef cppclass hold_any:
         T cast[T]() except +
 
+cdef extern from "cyclus.h" namespace "boost::uuids":
+
+    cdef cppclass uuid:
+        T cast[T]() except +
+
 cdef extern from "cyclus.h" namespace "cyclus":
 
     ctypedef vector[hold_any] QueryRow
@@ -32,6 +37,10 @@ cdef extern from "cyclus.h" namespace "cyclus":
         GE
         EQ
         NE
+
+    cdef cppclass Blob:
+        Blob(std_string) except +
+        const std_string str() except +
 
     cdef cppclass Cond:
         Cond() except +

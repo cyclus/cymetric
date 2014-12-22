@@ -15,12 +15,30 @@ from libcpp cimport bool as cpp_bool
 # local imports
 from cymetric cimport cpp_cyclus
 
+cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
+    rtn = value.str()
+    return bytes(rtn)
 
 cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     """Converts database types to python objects."""
     cdef object rtn
+    cdef c
     if dbtype == cpp_cyclus.BOOL:
         rtn = value.cast[cpp_bool]()
+    elif dbtype == cpp_cyclus.INT:
+        rtn = value.cast[int]()
+    elif dbtype == cpp_cyclus.FLOAT:
+        rtn = value.cast[float]()
+    elif dbtype == cpp_cyclus.DOUBLE:
+        rtn = value.cast[double]()
+    elif dbtype == cpp_cyclus.STRING:
+        rtn = value.cast[std_string]()
+    elif dbtype == cpp_cyclus.VL_STRING:
+        rtn = value.cast[std_string]()
+    #elif dbtype == cpp_cyclus.BLOB:
+    #    rtn = blob_to_bytes(value.cast[cpp_cyclus.Blob]())
+    elif dbtype == cpp_cyclus.UUID:
+        rtn = value.cast[std_string]()
     else:
         raise TypeError("dbtype {0} could not be found".format(dbtype))
     return rtn
