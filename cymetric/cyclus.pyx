@@ -48,7 +48,12 @@ cdef class _Hdf5Back(_FullBackend):
         """Full backend C++ constructor"""
         self.ptx = new cpp_cyclus.Hdf5Back(path)
 
+    def flush(self):
+        """Flushes the database to disk."""
+        (<cpp_cyclus.Hdf5Back*> self.ptx).Flush()
+
     def name(self):
+        """Retuns the name of the database."""
         return (<cpp_cyclus.Hdf5Back*> self.ptx).Name()
 
 
