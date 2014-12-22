@@ -24,6 +24,9 @@ IF(NOT ${BUILD_TYPE} STREQUAL "release")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
 ENDIF()
 
+# no overflow warnings because of silly coin-ness
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overflow")
+
 #
 # Find and use dependencues
 #
@@ -69,7 +72,8 @@ MESSAGE("\tFound LAPACK Libraries: ${LAPACK_LIBRARIES}")
 # Find HDF5
 FIND_PACKAGE(HDF5 REQUIRED)
 ADD_DEFINITIONS(${HDF5_DEFINITIONS})
-set(LIBS ${LIBS} ${HDF5_LIBRARIES})
+#set(LIBS ${LIBS} ${HDF5_LIBRARIES})
+set(LIBS ${LIBS} "-lhdf5" "-lhdf5_hl")
 
 # find coin and link to it
 FIND_PACKAGE(COIN REQUIRED)
