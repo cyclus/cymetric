@@ -2,7 +2,7 @@
 cmake_minimum_required( VERSION 2.8.5 )
 
 # Set the project name
-project( cymetric CXX)
+project(cymetric)
 
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
@@ -24,6 +24,10 @@ IF(NOT ${BUILD_TYPE} STREQUAL "release")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
 ENDIF()
 
+#
+# Find and use dependencues
+#
+
 # Use new Python library finder
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibsNew REQUIRED)
@@ -40,8 +44,44 @@ message( STATUS "Cython Version: " ${CYTHON_VERSION} )
 
 # Find Cyclus, it is kind of a big deal
 find_package(Cyclus REQUIRED)
-SET(INCLUDE_DIRECTORIES ${INCLUDE_DIRECTORIES} ${CYCLUS_CORE_INCLUDE_DIR})
+SET(CYMETRIC_INCLUDE_DIR ${CYMETRIC_INCLUDE_DIR} ${CYCLUS_CORE_INCLUDE_DIR})
 SET(LIBS ${LIBS} ${CYCLUS_CORE_LIBRARIES})
+
+# Find LibXML++ and dependencies
+FIND_PACKAGE(LibXML++ REQUIRED)
+SET(CYMETRIC_INCLUDE_DIR ${CYMETRIC_INCLUDE_DIR} ${LibXML++_INCLUDE_DIR} 
+    ${Glibmm_INCLUDE_DIRS} ${LibXML++Config_INCLUDE_DIR})
+SET(LIBS ${LIBS} ${LibXML++_LIBRARIES})
+
+# Include the boost header files, system, and filesystem libraries
+SET(Boost_USE_STATIC_LIBS       OFF)
+SET(Boost_USE_STATIC_RUNTIME    OFF)
+FIND_PACKAGE(Boost COMPONENTS filesystem system REQUIRED)
+SET(CYMETRIC_INCLUDE_DIR ${CYMETRIC_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
+SET(LIBS ${LIBS} ${Boost_FILESYSTEM_LIBRARY})
+SET(LIBS ${LIBS} ${Boost_SYSTEM_LIBRARY})
+
+# find lapack and link to it
+FIND_PACKAGE(LAPACK REQUIRED)
+set(LIBS ${LIBS} ${LAPACK_LIBRARIES})
+MESSAGE("\tFound LAPACK Libraries: ${LAPACK_LIBRARIES}")
+
+# Find HDF5
+FIND_PACKAGE(HDF5 REQUIRED)
+ADD_DEFINITIONS(${HDF5_DEFINITIONS})
+set(LIBS ${LIBS} ${HDF5_LIBRARIES})
+
+# find coin and link to it
+FIND_PACKAGE(COIN REQUIRED)
+SET(CYMETRIC_INCLUDE_DIR ${CYMETRIC_INCLUDE_DIR} ${COIN_INCLUDE_DIRS})
+set(LIBS ${LIBS} ${COIN_LIBRARIES})
+
+# Include the accumlated directory
+INCLUDE_DIRECTORIES(${CYMETRIC_INCLUDE_DIR})
+
+#
+# Continue with build settings
+#
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
