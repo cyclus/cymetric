@@ -8,7 +8,7 @@ from libcpp.string cimport string as std_string
 cdef extern from "cyclus.h" namespace "boost::spirit":
 
     cdef cppclass hold_any:
-        pass
+        T cast[T]() except +
 
 cdef extern from "cyclus.h" namespace "cyclus":
 

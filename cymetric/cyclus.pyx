@@ -16,6 +16,16 @@ from libcpp cimport bool as cpp_bool
 from cymetric cimport cpp_cyclus
 
 
+cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
+    """Converts database types to python objects."""
+    cdef object rtn
+    if dbtype == cpp_cyclus.BOOL:
+        rtn = value.cast[cpp_bool]()
+    else:
+        raise TypeError("dbtype {0} could not be found".format(dbtype))
+    return rtn
+
+
 cdef class _FullBackend:
 
     def __cinit__(self):
@@ -26,7 +36,7 @@ cdef class _FullBackend:
         #del self.ptx  # don't know why this doesn't work
         free(self.ptx)
 
-    def query(table, conds=None):
+    def query(self, std_string table, conds=None):
         """Queries a database table.
 
         Parameters
@@ -35,7 +45,28 @@ cdef class _FullBackend:
             The table name.
         conds : iterable, optional
             A list of conditions.
+
+        Returns
+        -------
+        results : table 
+            Rows from the table 
         """
+        cdef int i, j
+        cdef int nrows, ncols
+        cdef cpp_cyclus.QueryResult qr
+        cdef std_vector[cpp_cyclus.Cond]* cpp_conds
+        if conds is None:
+            cpp_conds = NULL
+        qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(table, cpp_conds)
+        nrows = qr.rows.size()
+        ncols = qr.fields.size()
+        results = []
+        for i in range(nrows):
+            row = []
+            for j in range(ncols):
+                row.append(db_to_py(qr.rows[i][j], qr.types[j]))
+            results.append(tuple(row))
+        return results
 
 
 class FullBackend(_FullBackend, object):
