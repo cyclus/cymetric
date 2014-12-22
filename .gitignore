@@ -2,3 +2,5 @@
 *-journal
 *.pyc
 build
+tests/*.h5
+tests/*.sqlite
