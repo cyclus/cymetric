@@ -59,3 +59,11 @@ cdef extern from "cyclus.h" namespace "cyclus":
         FullBackend() except + 
 
         QueryResult Query(std_string, vector[Cond]*) except +
+
+cdef extern from "hdf5_back.h" namespace "cyclus":
+
+    cdef cppclass Hdf5Back(FullBackend):
+        Hdf5Back(std_string) except +
+
+        std_string Name() except +
+
