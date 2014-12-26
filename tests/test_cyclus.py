@@ -2,6 +2,7 @@
 import os
 import subprocess
 
+import nose
 from nose.tools import assert_equal
 
 from cymetric import cyclus
@@ -16,3 +17,14 @@ def test_hdf5_name():
     db = cyclus.Hdf5Back(exp)
     obs = db.name()
     assert_equal(exp, obs)
+
+
+def test_hdf5_name():
+    db = cyclus.Hdf5Back("test.h5")
+    obs = db.query("AgentEntry")
+    #assert_equal(exp, obs)
+    print(obs)
+    assert False
+
+if __name__ == "__main__":
+    nose.runmodule()

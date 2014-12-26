@@ -35,10 +35,10 @@ cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
         rtn = value.cast[std_string]()
     elif dbtype == cpp_cyclus.VL_STRING:
         rtn = value.cast[std_string]()
-    #elif dbtype == cpp_cyclus.BLOB:
-    #    rtn = blob_to_bytes(value.cast[cpp_cyclus.Blob]())
+    elif dbtype == cpp_cyclus.BLOB:
+        rtn = blob_to_bytes(value.cast[cpp_cyclus.Blob]())
     elif dbtype == cpp_cyclus.UUID:
-        rtn = value.cast[std_string]()
+        rtn = value.cast[cpp_cyclus.uuid]().data
     else:
         raise TypeError("dbtype {0} could not be found".format(dbtype))
     return rtn
