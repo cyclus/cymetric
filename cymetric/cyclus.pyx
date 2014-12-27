@@ -72,10 +72,16 @@ cdef class _FullBackend:
         cdef int i, j
         cdef int nrows, ncols
         cdef cpp_cyclus.QueryResult qr
-        cdef std_vector[cpp_cyclus.Cond]* cpp_conds
+        cdef std_vector[cpp_cyclus.Cond] cpp_conds
+        cdef std_vector[cpp_cyclus.Cond]* conds_ptx
         if conds is None:
-            cpp_conds = NULL
-        qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(table, cpp_conds)
+            conds_ptx = NULL
+        else:
+            for cond in conds:
+                cpp_conds.push_back(cpp_cyclus.Cond(cond[0], cond[1], 
+                    cpp_cyclus.hold_any(<const char*> cond[2])))
+            conds_ptx = &cpp_conds
+        qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(table, conds_ptx)
         nrows = qr.rows.size()
         ncols = qr.fields.size()
         results = []

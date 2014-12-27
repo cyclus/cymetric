@@ -19,12 +19,20 @@ def test_hdf5_name():
     assert_equal(exp, obs)
 
 
-def test_hdf5_name():
+def test_hdf5_simid():
     db = cyclus.Hdf5Back("test.h5")
     obs = db.query("AgentEntry")
-    #assert_equal(exp, obs)
-    print(obs)
-    assert False
+    simid = obs[0][0]
+    for row in obs[1:]:
+        assert_equal(simid, row[0])
+
+def test_hdf5_conds():
+    db = cyclus.Hdf5Back("test.h5")
+    obs = db.query("AgentEntry", [('Kind', '==', 'Region')])
+    assert_equal(1, len(obs))
+    assert_equal('Region', obs[0][2])
+    assert_equal(':agents:NullRegion', obs[0][3])
+
 
 if __name__ == "__main__":
     nose.runmodule()
