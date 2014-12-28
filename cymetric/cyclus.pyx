@@ -12,6 +12,9 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
 from libcpp cimport bool as cpp_bool
 
+from binascii import hexlify
+from uuid import UUID
+
 # local imports
 from cymetric cimport cpp_cyclus
 
@@ -21,8 +24,8 @@ cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
 
 cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     """Converts database types to python objects."""
+    cdef int i
     cdef object rtn
-    cdef c
     if dbtype == cpp_cyclus.BOOL:
         rtn = value.cast[cpp_bool]()
     elif dbtype == cpp_cyclus.INT:
@@ -38,7 +41,37 @@ cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     elif dbtype == cpp_cyclus.BLOB:
         rtn = blob_to_bytes(value.cast[cpp_cyclus.Blob]())
     elif dbtype == cpp_cyclus.UUID:
-        rtn = value.cast[cpp_cyclus.uuid]().data
+        d = []
+        for i in range(16):
+            d.append(<unsigned int> value.cast[cpp_cyclus.uuid]().data[i])
+        rtn = UUID(hex=hexlify(bytearray(d)))
+    else:
+        raise TypeError("dbtype {0} could not be found".format(dbtype))
+    return rtn
+
+cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
+    """Converts python object to database type in a hold_any instance."""
+    cdef int i
+    cdef cpp_cyclus.hold_any rtn
+    cdef cpp_cyclus.uuid u
+    if dbtype == cpp_cyclus.BOOL:
+        rtn = rtn.assign[cpp_bool](<bint> value)
+    elif dbtype == cpp_cyclus.INT:
+        rtn = rtn.assign[int](<int> value)
+    elif dbtype == cpp_cyclus.FLOAT:
+        rtn = rtn.assign[float](<float>  value)
+    elif dbtype == cpp_cyclus.DOUBLE:
+        rtn = rtn.assign[double](<double> value)
+    elif dbtype == cpp_cyclus.STRING:
+        rtn = rtn.assign[std_string](std_string(<const char*> value))
+    elif dbtype == cpp_cyclus.VL_STRING:
+        rtn = rtn.assign[std_string](std_string(<const char*> value))
+    elif dbtype == cpp_cyclus.BLOB:
+        rtn = rtn.assign[cpp_cyclus.Blob](cpp_cyclus.Blob(value))
+    elif dbtype == cpp_cyclus.UUID:
+        for i in range(16):
+            u.data[i] = value[i]
+        rtn = rtn.assign[cpp_cyclus.uuid](u)
     else:
         raise TypeError("dbtype {0} could not be found".format(dbtype))
     return rtn
@@ -71,16 +104,22 @@ cdef class _FullBackend:
         """
         cdef int i, j
         cdef int nrows, ncols
+        cdef std_string field
         cdef cpp_cyclus.QueryResult qr
         cdef std_vector[cpp_cyclus.Cond] cpp_conds
         cdef std_vector[cpp_cyclus.Cond]* conds_ptx
+        cdef std_map[std_string, cpp_cyclus.DbTypes] coltypes
+        # set up the conditions
         if conds is None:
             conds_ptx = NULL
         else:
+            coltypes = (<cpp_cyclus.FullBackend*> self.ptx).ColumnTypes(table)
             for cond in conds:
-                cpp_conds.push_back(cpp_cyclus.Cond(cond[0], cond[1], 
-                    cpp_cyclus.hold_any(<const char*> cond[2])))
+                field = std_string(<const char*> cond[0])
+                cpp_conds.push_back(cpp_cyclus.Cond(field, cond[1], 
+                    py_to_any(cond[2], coltypes[field])))
             conds_ptx = &cpp_conds
+        # query, convert, and return
         qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(table, conds_ptx)
         nrows = qr.rows.size()
         ncols = qr.fields.size()

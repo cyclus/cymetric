@@ -10,6 +10,7 @@ cdef extern from "cyclus.h" namespace "boost::spirit":
     cdef cppclass hold_any:
         hold_any() except +
         hold_any(const char*) except +
+        hold_any assign[T](T) except +
         T cast[T]() except +
 
 cdef extern from "cyclus.h" namespace "boost::uuids":
@@ -70,6 +71,7 @@ cdef extern from "cyclus.h" namespace "cyclus":
         FullBackend() except + 
 
         QueryResult Query(std_string, vector[Cond]*) except +
+        map[std_string, DbTypes] ColumnTypes(std_string) except +
 
 
 cdef extern from "hdf5_back.h" namespace "cyclus":
