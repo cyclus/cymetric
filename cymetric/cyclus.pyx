@@ -18,6 +18,15 @@ from uuid import UUID
 # local imports
 from cymetric cimport cpp_cyclus
 
+BOOL = cpp_cyclus.BOOL
+INT = cpp_cyclus.INT
+FLOAT = cpp_cyclus.FLOAT
+DOUBLE = cpp_cyclus.DOUBLE
+STRING = cpp_cyclus.STRING
+VL_STRING = cpp_cyclus.VL_STRING
+BLOB = cpp_cyclus.BLOB
+UUID = cpp_cyclus.UUID
+
 cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
     rtn = value.str()
     return bytes(rtn)
