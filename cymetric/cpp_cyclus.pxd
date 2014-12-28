@@ -74,6 +74,15 @@ cdef extern from "cyclus.h" namespace "cyclus":
         map[std_string, DbTypes] ColumnTypes(std_string) except +
 
 
+cdef extern from "sqlite_back.h" namespace "cyclus":
+    
+    cdef cppclass SqliteBack(FullBackend):
+        SqliteBack(std_string) except +
+
+        void Flush() except +
+        std_string Name() except +
+
+
 cdef extern from "hdf5_back.h" namespace "cyclus":
 
     cdef cppclass Hdf5Back(FullBackend):

@@ -136,6 +136,25 @@ class FullBackend(_FullBackend, object):
     """Full backend cyclus database interface."""
 
 
+cdef class _SqliteBack(_FullBackend):
+
+    def __cinit__(self, std_string path):
+        """Full backend C++ constructor"""
+        self.ptx = new cpp_cyclus.SqliteBack(path)
+
+    def flush(self):
+        """Flushes the database to disk."""
+        (<cpp_cyclus.SqliteBack*> self.ptx).Flush()
+
+    def name(self):
+        """Retuns the name of the database."""
+        return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+
+
+class SqliteBack(_SqliteBack, FullBackend):
+    """SQLite backend cyclus database interface."""
+
+
 cdef class _Hdf5Back(_FullBackend):
 
     def __cinit__(self, std_string path):
@@ -152,4 +171,4 @@ cdef class _Hdf5Back(_FullBackend):
 
 
 class Hdf5Back(_Hdf5Back, FullBackend):
-    """Full backend cyclus database interface."""
+    """HDF5 backend cyclus database interface."""
