@@ -67,8 +67,9 @@ class Evaluator(object):
             if m.schema is None or len(m.schema) == 0:
                 break
             d = rec.new_datum(m.name)
+            #assert False
             for field, dbtype in m.schema:
-                d = d.add_val(field, rawd[field][i], dbtype=dbtype)
+                d = d.add_val(field, rawd[str(field)][i], dbtype=dbtype)
         return raw
 
 

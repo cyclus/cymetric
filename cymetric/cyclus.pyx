@@ -10,6 +10,7 @@ from libcpp.string cimport string as std_string
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
+from libc.string cimport memcpy
 from libcpp cimport bool as cpp_bool
 
 from binascii import hexlify
@@ -21,6 +22,10 @@ import pandas as pd
 
 # local imports
 from cymetric cimport cpp_cyclus
+
+# startup numpy
+np.import_array()
+np.import_ufunc()
 
 BOOL = cpp_cyclus.BOOL
 INT = cpp_cyclus.INT
@@ -128,6 +133,7 @@ cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
     cdef int i
     cdef cpp_cyclus.hold_any rtn
     cdef cpp_cyclus.uuid u
+    cdef char * c
     if dbtype == cpp_cyclus.BOOL:
         rtn = rtn.assign[cpp_bool](<bint> value)
     elif dbtype == cpp_cyclus.INT:
@@ -143,8 +149,8 @@ cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
     elif dbtype == cpp_cyclus.BLOB:
         rtn = rtn.assign[cpp_cyclus.Blob](cpp_cyclus.Blob(value))
     elif dbtype == cpp_cyclus.UUID:
-        for i in range(16):
-            u.data[i] = value[i]
+        c = value
+        memcpy(u.data, c, 16)
         rtn = rtn.assign[cpp_cyclus.uuid](u)
     else:
         raise TypeError("dbtype {0} could not be found".format(dbtype))
@@ -301,6 +307,8 @@ cdef class _Recorder:
     def __dealloc__(self):
         """Recorder C++ destructor."""
         #del self.ptx  # don't know why this doesn't work
+        if self.ptx == NULL:
+            return
         self.close()
         free(self.ptx)
 

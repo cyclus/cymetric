@@ -49,7 +49,7 @@ _matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreate
                 'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
 
-_matschema = (('SimID', cyclus.UUID), ('QualId', cyclus.INT), 
+_matschema = (('SimId', cyclus.UUID), ('QualId', cyclus.INT), 
               ('TimeCreated', cyclus.INT), ('NucId', cyclus.INT), 
               ('Mass', cyclus.DOUBLE))
 
