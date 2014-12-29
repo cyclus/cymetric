@@ -14,6 +14,10 @@ from libcpp cimport bool as cpp_bool
 from cymetric cimport cpp_cyclus
 
 
+cdef class _Datum:
+    cdef void * ptx
+    cdef bint _free
+
 cdef class _FullBackend:
     cdef void * ptx
 
@@ -21,4 +25,10 @@ cdef class _SqliteBack(_FullBackend):
     pass
 
 cdef class _Hdf5Back(_FullBackend):
+    pass
+
+cdef class _Recorder:
+    cdef void * ptx
+
+cdef class _RawRecorder(_Recorder):
     pass

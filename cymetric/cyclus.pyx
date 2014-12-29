@@ -35,6 +35,16 @@ cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
     rtn = value.str()
     return bytes(rtn)
 
+
+cdef object uuid_to_py(cpp_cyclus.uuid x):
+    cdef int i
+    cdef list d = []
+    for i in range(16):
+        d.append(<unsigned int> x.data[i])
+    rtn = uuid.UUID(hex=hexlify(bytearray(d)))
+    return rtn
+
+
 cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     """Converts database types to python objects."""
     cdef int i
@@ -141,6 +151,46 @@ cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
     return rtn
 
 
+cdef class _Datum:
+
+    def __cinit__(self, bint _new=True, bint _free=False):
+        self._free = _free
+        self.ptx = NULL
+        #if _new:
+        #    self.ptx = new Datum()
+
+    def __dealloc__(self):
+        """Datum destructor."""
+        if self._free:
+            free(self.ptx)
+
+    def add_val(self, const char* field, value, shape=None, dbtype=BLOB):
+        cdef int i, n
+        cdef std_vector[int] cpp_shape
+        cdef cpp_cyclus.hold_any v = py_to_any(value, dbtype)
+        if shape is None:
+            (<cpp_cyclus.Datum*> self.ptx).AddVal(field, v)
+        else:
+            n = len(shape)
+            cpp_shape.resize(n)
+            for i in range(n):
+                cpp_shape[i] = <int> shape[i]
+            (<cpp_cyclus.Datum*> self.ptx).AddVal(field, v, &cpp_shape)
+        return self
+
+    def record(self):
+        (<cpp_cyclus.Datum*> self.ptx).Record()
+
+    property title:
+        """The datumn name."""
+        def __get__(self):
+            return (<cpp_cyclus.Datum*> self.ptx).title()
+
+
+class Datum(_Datum):
+    """Datum class."""
+
+
 cdef class _FullBackend:
 
     def __cinit__(self):
@@ -222,7 +272,7 @@ class SqliteBack(_SqliteBack, FullBackend):
 cdef class _Hdf5Back(_FullBackend):
 
     def __cinit__(self, std_string path):
-        """Full backend C++ constructor"""
+        """Hdf5 backend C++ constructor"""
         self.ptx = new cpp_cyclus.Hdf5Back(path)
 
     def flush(self):
@@ -236,3 +286,70 @@ cdef class _Hdf5Back(_FullBackend):
 
 class Hdf5Back(_Hdf5Back, FullBackend):
     """HDF5 backend cyclus database interface."""
+
+
+cdef class _Recorder:
+
+    def __cinit__(self):
+        """Recorder C++ constructor"""
+        self.ptx = NULL 
+
+    def __init__(self):
+        if self.ptx == NULL:
+            self.ptx = new cpp_cyclus.Recorder()
+
+    def __dealloc__(self):
+        """Recorder C++ destructor."""
+        #del self.ptx  # don't know why this doesn't work
+        self.close()
+        free(self.ptx)
+
+    property dump_count:
+        """The frequency of recording."""
+        def __get__(self):
+            return (<cpp_cyclus.Recorder*> self.ptx).dump_count()
+
+        def __set__(self, value):
+            (<cpp_cyclus.Recorder*> self.ptx).set_dump_count(<unsigned int> value)
+
+    property sim_id:
+        """The simulation id of the recorder."""
+        def __get__(self):
+            return uuid_to_py((<cpp_cyclus.Recorder*> self.ptx).sim_id())
+
+    def new_datum(self, std_string title):
+        """Registers a backend with the recorder."""
+        cdef _Datum d = Datum(_new=False)
+        d.ptx = (<cpp_cyclus.Recorder*> self.ptx).NewDatum(title)
+        return d
+
+    def register_backend(self, _FullBackend backend):
+        """Registers a backend with the recorder."""
+        (<cpp_cyclus.Recorder*> self.ptx).RegisterBackend(
+            <cpp_cyclus.RecBackend*> backend.ptx)
+
+    def flush(self):
+        """Flushes the recorder to disk."""
+        (<cpp_cyclus.Recorder*> self.ptx).Flush()
+
+    def close(self):
+        """Closes the recorder."""
+        (<cpp_cyclus.Recorder*> self.ptx).Close()
+
+
+class Recorder(_Recorder, object):
+    """Cyclus recorder interface."""
+
+
+cdef class _RawRecorder(_Recorder):
+
+    def __cinit__(self):
+        """Raw recorder C++ constructor"""
+        self.ptx = new cpp_cyclus.RawRecorder()
+
+
+class RawRecorder(_RawRecorder, Recorder):
+    """Cyclus raw recorder interface."""
+
+
+
