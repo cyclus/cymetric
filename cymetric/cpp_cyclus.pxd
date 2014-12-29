@@ -2,6 +2,7 @@
 from libcpp.map cimport map
 from libcpp.set cimport set
 from libcpp.vector cimport vector
+from libcpp.utility cimport pair
 from libcpp.string cimport string as std_string
 
 
@@ -17,6 +18,13 @@ cdef extern from "cyclus.h" namespace "boost::uuids":
 
     cdef cppclass uuid:
         unsigned char data[16]
+
+
+cdef extern from "rec_backend.h" namespace "cyclus":
+
+    cdef cppclass RecBackend:
+        pass
+
 
 cdef extern from "cyclus.h" namespace "cyclus":
 
@@ -54,6 +62,13 @@ cdef extern from "cyclus.h" namespace "cyclus":
         CmpOpCode opcode
         hold_any val
 
+    cdef cppclass Datum:
+        Datum* AddVal(const char*, hold_any) except +
+        Datum* AddVal(const char*, hold_any, vector[int]*) except +
+        void Record() except +
+        std_string title() except +
+        #vector[pair[char*, hold_any]] vals() except +
+        vector[vector[int]] shapes() except +
 
     cdef cppclass QueryResult:
         QueryResult() except +
@@ -64,14 +79,30 @@ cdef extern from "cyclus.h" namespace "cyclus":
 
         vector[std_string] fields
         vector[DbTypes] types
-        vector[QueryRow] rows        
-
+        vector[QueryRow] rows
 
     cdef cppclass FullBackend:
         FullBackend() except + 
 
         QueryResult Query(std_string, vector[Cond]*) except +
         map[std_string, DbTypes] ColumnTypes(std_string) except +
+
+    cdef cppclass Recorder:
+        Recorder() except +
+
+        unsigned int dump_count() except +
+        void set_dump_count(unsigned int) except +
+        uuid sim_id() except +
+        Datum* NewDatum(std_string) except +
+        void RegisterBackend(RecBackend* b) except +
+        void Flush() except +
+        void Close() except +
+
+    cdef cppclass RawRecorder(Recorder):
+        RawRecorder() except +
+
+        void set_dump_count(unsigned int) except +
+        Datum* NewDatum(std_string) except +
 
 
 cdef extern from "sqlite_back.h" namespace "cyclus":

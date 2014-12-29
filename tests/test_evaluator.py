@@ -14,7 +14,6 @@ from tools import setup, dbtest
 def test_eval(db, fname, backend):
     df = evaluator.eval('Materials', db)
     assert_less(0, len(df))
-    #assert False
 
 if __name__ == "__main__":
     nose.runmodule()
