@@ -57,8 +57,8 @@ cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
         d = []
         for i in range(16):
             d.append(<unsigned int> value.cast[cpp_cyclus.uuid]().data[i])
-        rtn = hexlify(bytearray(d))
-        #rtn = uuid.UUID(hex=hexlify(bytearray(d)))
+        #rtn = hexlify(bytearray(d))
+        rtn = uuid.UUID(hex=hexlify(bytearray(d)))
     else:
         raise TypeError("dbtype {0} could not be found".format(dbtype))
     return rtn

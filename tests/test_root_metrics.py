@@ -17,7 +17,7 @@ def test_resources(db, fname, backend):
     r = root_metrics.resources(db=db)
     obs = r()
     assert_less(0, len(obs))
-    assert_equal('Resources', r.__name__)
+    assert_equal('Resources', r.name)
 
 
 if __name__ == "__main__":

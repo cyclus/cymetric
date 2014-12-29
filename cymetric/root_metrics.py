@@ -7,23 +7,26 @@ from cymetric.evaluator import register_metric
 
 def _genrootclass(name):
     class Cls(object):
-        __name__ = name
-
-        depends = ()
+        dependencies = ()
 
         @property
         def schema(self):
             if self._schema is not None:
                 return
             # fill in schema code
+
+        @property
+        def name(self):
+            return self.__class__.__name__
             
         def __init__(self, db):
             self._schema = None
             self.db = db
 
         def __call__(self, *args, **kwargs):
-            return self.db.query(self.__name__)
+            return self.db.query(self.name)
 
+    Cls.__name__ = str(name)
     register_metric(Cls)
     return Cls
 

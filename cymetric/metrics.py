@@ -2,6 +2,8 @@
 """
 from __future__ import print_function, unicode_literals
 
+import pandas as pd
+
 from cymetric import cyclus
 from cymetric.evaluator import register_metric
 
@@ -14,33 +16,37 @@ class Metric(object):
     def __init__(self, db):
         self.db = db
 
-def _genmetricclass(f, name, depends, schema):
-    class Cls(Metric):
-        __name__ = name
+    @property
+    def name(self):
+        return self.__class__.__name__
 
-        depends = depends
-        schema = schema
+
+def _genmetricclass(f, name, depends, scheme):
+    class Cls(Metric):
+        dependencies = depends
+        schema = scheme
 
         def __init__(self, db):
             super(Cls, self).__init__(db)
 
-        def __call__(self, *args, **kwargs):
+        def __call__(self, series, *args, **kwargs):
             # FIXME test if I already exist in the db, read in if I do
-            return f()
+            return f(series)
 
+    Cls.__name__ = str(name)
     register_metric(Cls)
     return Cls
 
 
 def metric(name=None, depends=NotImplemented, schema=NotImplemented):
     def dec(f):
-        if name is None:
-            name = f.__name__
-        return _genrootclass(f=f, name=name, schema=schema, depends=depends)
+        clsname = name or f.__name__
+        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends)
     return dec
 
 
-_matdeps = (('Resources', ('SimId', 'QualId', 'TimeCreated'), 'Quantity'),
+_matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+                'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
 
 _matschema = (('SimID', cyclus.UUID), ('QualId', cyclus.INT), 
@@ -49,6 +55,12 @@ _matschema = (('SimID', cyclus.UUID), ('QualId', cyclus.INT),
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(series):
-    return []
+    x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
+            on=['SimId', 'QualId'], how='inner').set_index(['SimId', 'QualId', 
+                'ResourceId', 'ObjId','TimeCreated', 'NucId'])
+    y = x['Quantity'] * x['MassFrac']
+    y.name = 'Mass'
+    z = y.reset_index()
+    return z
 
 
