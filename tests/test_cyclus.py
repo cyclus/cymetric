@@ -18,27 +18,28 @@ def test_name(db, fname, backend):
 
 @dbtest
 def test_simid(db, fname, backend):
-    obs = db.query("AgentEntry")
-    simid = obs[0][0]
-    for row in obs[1:]:
-        assert_equal(simid, row[0])
+    df = db.query("AgentEntry")
+    simid = df['SimId']
+    exp = simid[0]
+    for obs in simid:
+        assert_equal(exp, obs)
 
 
 @dbtest
 def test_conds_ae(db, fname, backend):
     obs = db.query("AgentEntry", [('Kind', '==', 'Region')])
     assert_equal(1, len(obs))
-    assert_equal('Region', obs[0][2])
-    assert_equal(':agents:NullRegion', obs[0][3])
+    assert_equal('Region', obs['Kind'][0])
+    assert_equal(':agents:NullRegion', obs['Spec'][0])
 
 
 @dbtest
 def test_conds_comp(db, fname, backend):
     conds = [('NucId', '==', 922350000), ('MassFrac', '>', 0.0072)]
-    obs = db.query("Compositions", conds)
-    assert_less(0, len(obs))
-    for row in obs:
-        assert_less(0.0072, row[-1])
+    df = db.query("Compositions", conds)
+    assert_less(0, len(df))
+    for row in df['MassFrac']:
+        assert_less(0.0072, row)
 
 
 if __name__ == "__main__":

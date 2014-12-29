@@ -13,7 +13,11 @@ from libc.stdlib cimport malloc, free
 from libcpp cimport bool as cpp_bool
 
 from binascii import hexlify
-from uuid import UUID
+import uuid
+
+cimport numpy as np
+import numpy as np
+import pandas as pd
 
 # local imports
 from cymetric cimport cpp_cyclus
@@ -53,10 +57,60 @@ cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
         d = []
         for i in range(16):
             d.append(<unsigned int> value.cast[cpp_cyclus.uuid]().data[i])
-        rtn = UUID(hex=hexlify(bytearray(d)))
+        rtn = uuid.UUID(hex=hexlify(bytearray(d)))
     else:
         raise TypeError("dbtype {0} could not be found".format(dbtype))
     return rtn
+
+
+cdef object db_to_dt(cpp_cyclus.DbTypes dbtype):
+    """Converts database types to numpty dtypes."""
+    cdef object rtn
+    if dbtype == cpp_cyclus.BOOL:
+        rtn = b'b'
+    elif dbtype == cpp_cyclus.INT:
+        rtn = b'i4'
+    elif dbtype == cpp_cyclus.FLOAT:
+        rtn = b'f4'
+    elif dbtype == cpp_cyclus.DOUBLE:
+        rtn = b'f8'
+    elif dbtype == cpp_cyclus.STRING:
+        rtn = b'O'
+    elif dbtype == cpp_cyclus.VL_STRING:
+        rtn = b'O'
+    elif dbtype == cpp_cyclus.BLOB:
+        rtn = b'O'
+    elif dbtype == cpp_cyclus.UUID:
+        rtn = b'S16'
+    else:
+        rtn = b'O'
+    return rtn
+
+
+cdef np.ndarray db_to_array(object values, cpp_cyclus.DbTypes dbtype):
+    """Converts values to numpy array."""
+    cdef np.ndarray rtn
+    cdef str dt = db_to_dt(dbtype)
+    if dbtype == cpp_cyclus.BOOL:
+        rtn = np.array(values, dtype=dt)
+    elif dbtype == cpp_cyclus.INT:
+        rtn = np.array(values, dtype=dt)
+    elif dbtype == cpp_cyclus.FLOAT:
+        rtn = np.array(values, dtype=dt)
+    elif dbtype == cpp_cyclus.DOUBLE:
+        rtn = np.array(values, dtype=dt)
+    elif dbtype == cpp_cyclus.STRING:
+        rtn = np.array(values)
+    elif dbtype == cpp_cyclus.VL_STRING:
+        rtn = np.array(values, dtype=dt)
+    elif dbtype == cpp_cyclus.BLOB:
+        rtn = np.array(values, dtype=dt)
+    elif dbtype == cpp_cyclus.UUID:
+        rtn = np.array([v.bytes for v in values], dtype=dt)
+    else:
+        rtn = np.array(values, dtype=dt)
+    return rtn
+
 
 cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
     """Converts python object to database type in a hold_any instance."""
@@ -108,8 +162,8 @@ cdef class _FullBackend:
 
         Returns
         -------
-        results : table 
-            Rows from the table 
+        results : pd.DataFrame
+            Pandas DataFrame the represents the table
         """
         cdef int i, j
         cdef int nrows, ncols
@@ -132,12 +186,12 @@ cdef class _FullBackend:
         qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(table, conds_ptx)
         nrows = qr.rows.size()
         ncols = qr.fields.size()
-        results = []
+        cdef dict res = {j: [] for j in range(ncols)}
         for i in range(nrows):
-            row = []
             for j in range(ncols):
-                row.append(db_to_py(qr.rows[i][j], qr.types[j]))
-            results.append(tuple(row))
+                res[j].append(db_to_py(qr.rows[i][j], qr.types[j]))
+        res = {qr.fields[j]: db_to_array(v, qr.types[j]) for j, v in res.items()}
+        results = pd.DataFrame(res, columns=[qr.fields[j] for j in range(ncols)])
         return results
 
 
