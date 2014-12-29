@@ -2,6 +2,8 @@
 """
 from __future__ import unicode_literals, print_function
 
+from cymetric import cyclus
+
 import pandas as pd
 
 METRIC_REGISTRY = {}
@@ -34,9 +36,11 @@ class Evaluator(object):
         rawcache : dict
             Results of querying metrics with given conditions.
         """
-        self.db = db
         self.metrics = {}
         self.rawcache = {}
+        self.db = db
+        self.recorder = rec = cyclus.RawRecorder()
+        rec.register_backend(db)
 
     def get_metric(self, metric):
         if metric not in self.metrics:
@@ -56,7 +60,15 @@ class Evaluator(object):
             series.append(s)
         raw = m(series)
         self.rawcache[rawkey] = raw
-        # FIXME write back to db here
+        # write back to db
+        rec = self.recorder
+        rawd = raw.to_dict(outtype='series')
+        for i in range(len(raw)):
+            if m.schema is None or len(m.schema) == 0:
+                break
+            d = rec.new_datum(m.name)
+            for field, dbtype in m.schema:
+                d = d.add_val(field, rawd[field][i], dbtype=dbtype)
         return raw
 
 
