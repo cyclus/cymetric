@@ -91,6 +91,7 @@ cdef extern from "cyclus.h" namespace "cyclus":
     cdef cppclass QueryableBackend:
         QueryResult Query(std_string, vector[Cond]*) except +
         map[std_string, DbTypes] ColumnTypes(std_string) except +
+        set[std_string] Tables() except +
 
     cdef cppclass FullBackend(QueryableBackend, RecBackend):
         FullBackend() except + 

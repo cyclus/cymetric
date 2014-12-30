@@ -252,6 +252,11 @@ cdef class _FullBackend:
         results = pd.DataFrame(res, columns=[qr.fields[j] for j in range(ncols)])
         return results
 
+    def tables(self):
+        """Retrieves the set of tables present in the database."""
+        cdef std_set[std_string] ctabs = (<cpp_cyclus.FullBackend*> self.ptx).Tables()
+        return ctabs
+
 
 class FullBackend(_FullBackend, object):
     """Full backend cyclus database interface."""

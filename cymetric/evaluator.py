@@ -41,6 +41,7 @@ class Evaluator(object):
         self.db = db
         self.recorder = rec = cyclus.RawRecorder()
         rec.register_backend(db)
+        self.known_tables = db.tables()
 
     def get_metric(self, metric):
         if metric not in self.metrics:
@@ -61,15 +62,16 @@ class Evaluator(object):
         raw = m(series)
         self.rawcache[rawkey] = raw
         # write back to db
+        if m.name in self.known_tables:
+            return raw
         rec = self.recorder
         rawd = raw.to_dict(outtype='series')
         for i in range(len(raw)):
-            if m.schema is None or len(m.schema) == 0:
-                break
             d = rec.new_datum(m.name)
             for field, dbtype in m.schema:
                 d = d.add_val(field, rawd[str(field)][i], dbtype=dbtype)
             d.record()
+        self.known_tables.add(m.name)
         return raw
 
 
