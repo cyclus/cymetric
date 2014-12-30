@@ -95,12 +95,6 @@ cdef extern from "cyclus.h" namespace "cyclus":
     cdef cppclass FullBackend(QueryableBackend, RecBackend):
         FullBackend() except + 
 
-        #QueryResult Query(std_string, vector[Cond]*) except +
-        #map[std_string, DbTypes] ColumnTypes(std_string) except +
-        #void Notify(DatumList) except +
-        #std_string Name() except +
-        #void Flush()  except +
-
     cdef cppclass Recorder:
         Recorder() except +
 
@@ -128,15 +122,9 @@ cdef extern from "sqlite_back.h" namespace "cyclus":
     cdef cppclass SqliteBack(FullBackend):
         SqliteBack(std_string) except +
 
-        #void Flush() except +
-        #std_string Name() except +
-
 
 cdef extern from "hdf5_back.h" namespace "cyclus":
 
     cdef cppclass Hdf5Back(FullBackend):
         Hdf5Back(std_string) except +
-
-        #void Flush() except +
-        #std_string Name() except +
 
