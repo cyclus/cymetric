@@ -29,13 +29,15 @@ import jinja2
 class TypeSystem(object):
     """A type system for cyclus code generation."""
 
-    def __init__(self, table, cycver):
+    def __init__(self, table, cycver, cpp_typesystem='cpp_typesystem'):
         """Parameters
         ----------
         table : list
             A table of possible types. The first row must be the column names.
         cycver : tuple of ints
             Cyclus version number.
+        cpp_typesystem : str, optional
+            The namespace of the C++ wrapper header.
 
         Attributes
         ----------
@@ -58,7 +60,10 @@ class TypeSystem(object):
         norms : dict
             Maps types to programatic normal form, ie INT -> 'int' and
             VECTOR_STRING -> ['std::vector', 'std::string'].
+        dbtypes : list of str
+            The type names in the type system, sorted by id.
         """
+        self.cpp_typesystem = cpp_typesystem
         self.cycver = cycver
         self.verstr = verstr = 'v{0}.{1}'.format(*cycver)
         self.cols = cols = {x: i for i, x in enumerate(table[0])}
@@ -76,6 +81,11 @@ class TypeSystem(object):
             cpptypes[t] = row[cpptype]
             ranks[t] = row[rank]
         self.norms = {t: parse_template(c) for t, c in cpptypes.items()}
+        self.dbtypes = sorted(types, key=lambda t: ids[t])
+
+    def cython_cpp_name(self, t):
+        """Returns the C++ name of the type, eg INT -> cpp_typesystem.INT."""
+        return '{0}.{1}'.format(self.cpp_typesystem, t)
 
 
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
@@ -147,13 +157,40 @@ cdef extern from "cyclus.h" namespace "cyclus":
 def cpp_typesystem(ts, ns):
     """Creates the Cython header that wraps the Cyclus type system."""
     ctx = dict(
-        dbtypes=sorted(ts.types, key=lambda t: ts.ids[t]),
+        dbtypes=ts.dbtypes,
         cg_warning=CG_WARNING,
         stl_cimports=STL_CIMPORTS,
         )
     rtn = CPP_TYPESYSTEM.render(ctx)
     return rtn
     
+
+TYPESYSTEM_PYX = JENV.from_string("""
+{{ cg_warning }}
+
+{{ stl_cimports}}
+
+# local imports
+from cymetric cimport cpp_typesystem
+from cymetric cimport cpp_cyclus
+
+# raw type definitions
+{% for t in dbtypes %}
+{{ t }} = {{ ts.cython_cpp_name(t) }}{% endfor %}
+
+""".strip())
+
+def typesystem_pyx(ts, ns):
+    """Creates the Cython wrapper for the Cyclus type system."""
+    ctx = dict(
+        ts=ts,
+        dbtypes=ts.dbtypes,
+        cg_warning=CG_WARNING,
+        stl_cimports=STL_CIMPORTS,
+        )
+    rtn = TYPESYSTEM_PYX.render(ctx)
+    return rtn
+
 
 #
 # CLI
@@ -171,8 +208,12 @@ def parse_args(argv):
                         help="the local build directory, default 'build'")
     parser.add_argument('--cpp-typesystem', default='cpp_typesystem.pxd', 
                         dest='cpp_typesystem',
-                        help="the name of the C++ typesystem wrapper, "
+                        help="the name of the C++ typesystem wrapper header, "
                              "default 'cpp_typesystem.pxd'")
+    parser.add_argument('--typesystem-pyx', default='typesystem.pyx', 
+                        dest='typesystem_pyx',
+                        help="the name of the C++ typesystem wrapper, "
+                             "default 'typesystem.pyx'")
 
     ns = parser.parse_args(argv)
     return ns
@@ -196,12 +237,14 @@ def setup(ns):
     verstr = subprocess.check_output(['cyclus', '--version'])
     ver = tuple(map(int, verstr.split()[2].split('.')))
     # make and return a type system
-    ts = TypeSystem(table=tab, cycver=ver)
+    ts = TypeSystem(table=tab, cycver=ver, 
+            cpp_typesystem=os.path.splitext(ns.cpp_typesystem)[0])
     return ts
 
 def code_gen(ts, ns):
     """Generates code given a type system and a namespace."""
-    cases = [(cpp_typesystem, ns.cpp_typesystem)]
+    cases = [(cpp_typesystem, ns.cpp_typesystem), 
+             (typesystem_pyx, ns.typesystem_pyx),]
     for func, basename in cases:
         s = func(ts, ns)
         fname = os.path.join(ns.src_dir, basename)
