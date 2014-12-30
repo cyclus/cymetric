@@ -5,6 +5,8 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string as std_string
 
+from cpp_typesystem cimport DbTypes
+
 
 cdef extern from "cyclus.h" namespace "boost::spirit":
 
@@ -44,17 +46,6 @@ cdef extern from "rec_backend.h" namespace "cyclus":
 cdef extern from "cyclus.h" namespace "cyclus":
 
     ctypedef vector[hold_any] QueryRow
-
-    cdef enum DbTypes:
-        # primitive types
-        BOOL
-        INT
-        FLOAT
-        DOUBLE
-        STRING
-        VL_STRING
-        BLOB
-        UUID
 
     cdef enum CmpOpCode:
         LT
