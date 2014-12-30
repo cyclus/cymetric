@@ -27,7 +27,5 @@ def dbtest(f):
             shutil.copy(oname, fname)
             db = backend(fname)
             yield f, db, fname, backend
-            if os.path.exists(fname):
-                os.remove(fname)
     return wrapper
 
