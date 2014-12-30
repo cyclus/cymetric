@@ -1,5 +1,5 @@
 """Python wrapper for cyclus."""
-from __future__ import division, unicode_literals
+from __future__ import division, unicode_literals, print_function
 
 # Cython imports
 from libcpp.utility cimport pair as std_pair
@@ -165,10 +165,10 @@ cdef class _Datum:
         #if _new:
         #    self.ptx = new Datum()
 
-    def __dealloc__(self):
-        """Datum destructor."""
-        if self._free:
-            free(self.ptx)
+    #def __dealloc__(self):
+    #    """Datum destructor."""
+    #    if self._free:
+    #        free(self.ptx)
 
     def add_val(self, const char* field, value, shape=None, dbtype=BLOB):
         cdef int i, n
@@ -190,7 +190,10 @@ cdef class _Datum:
     property title:
         """The datumn name."""
         def __get__(self):
-            return (<cpp_cyclus.Datum*> self.ptx).title()
+            print("getting title")
+            s = (<cpp_cyclus.Datum*> self.ptx).title()
+            print("title is ", s)
+            return s
 
 
 class Datum(_Datum):
@@ -258,9 +261,10 @@ class FullBackend(_FullBackend, object):
 
 cdef class _SqliteBack(_FullBackend):
 
-    def __cinit__(self, std_string path):
+    def __cinit__(self, path):
         """Full backend C++ constructor"""
-        self.ptx = new cpp_cyclus.SqliteBack(path)
+        cdef std_string cpp_path = str(path)
+        self.ptx = new cpp_cyclus.SqliteBack(cpp_path)
 
     def flush(self):
         """Flushes the database to disk."""
@@ -277,9 +281,10 @@ class SqliteBack(_SqliteBack, FullBackend):
 
 cdef class _Hdf5Back(_FullBackend):
 
-    def __cinit__(self, std_string path):
+    def __cinit__(self, path):
         """Hdf5 backend C++ constructor"""
-        self.ptx = new cpp_cyclus.Hdf5Back(path)
+        cdef std_string cpp_path = str(path)
+        self.ptx = new cpp_cyclus.Hdf5Back(cpp_path)
 
     def flush(self):
         """Flushes the database to disk."""
@@ -303,6 +308,7 @@ cdef class _Recorder:
     def __init__(self):
         if self.ptx == NULL:
             self.ptx = new cpp_cyclus.Recorder()
+        self._data = []
 
     def __dealloc__(self):
         """Recorder C++ destructor."""
@@ -325,16 +331,33 @@ cdef class _Recorder:
         def __get__(self):
             return uuid_to_py((<cpp_cyclus.Recorder*> self.ptx).sim_id())
 
-    def new_datum(self, std_string title):
+    def new_datum(self, title):
         """Registers a backend with the recorder."""
+        print("py", title)
+        cdef std_string cpp_title = str(title).encode()
+        print("cpp", title)
         cdef _Datum d = Datum(_new=False)
-        d.ptx = (<cpp_cyclus.Recorder*> self.ptx).NewDatum(title)
-        return d
+        print("made new datum")
+        (<_Datum> d).ptx = (<cpp_cyclus.Recorder*> self.ptx).NewDatum(cpp_title)
+        print("dptx set")
+        pyd = d
+        print("converted d to pyd")
+        self._data.append(pyd)
+        print("added pyd to list")
+        dtitle = pyd.title
+        print("datum", dtitle)
+        return pyd
 
-    def register_backend(self, _FullBackend backend):
+    def register_backend(self, backend):
         """Registers a backend with the recorder."""
-        (<cpp_cyclus.Recorder*> self.ptx).RegisterBackend(
-            <cpp_cyclus.RecBackend*> backend.ptx)
+        cdef cpp_cyclus.RecBackend* b 
+        if isinstance(backend, Hdf5Back):
+            b = <cpp_cyclus.RecBackend*> (
+                <cpp_cyclus.Hdf5Back*> (<_Hdf5Back> backend).ptx)
+        elif isinstance(backend, SqliteBack):
+            b = <cpp_cyclus.RecBackend*> (
+                <cpp_cyclus.SqliteBack*> (<_SqliteBack> backend).ptx)
+        (<cpp_cyclus.Recorder*> self.ptx).RegisterBackend(b)
 
     def flush(self):
         """Flushes the recorder to disk."""
