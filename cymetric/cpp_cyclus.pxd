@@ -20,10 +20,25 @@ cdef extern from "cyclus.h" namespace "boost::uuids":
         unsigned char data[16]
 
 
+cdef extern from "cyclus.h" namespace "cyclus":
+
+    cdef cppclass Datum:
+        Datum* AddVal(const char*, hold_any) except +
+        Datum* AddVal(const char*, hold_any, vector[int]*) except +
+        void Record() except +
+        std_string title() except +
+        #vector[pair[char*, hold_any]] vals() except +
+        vector[vector[int]] shapes() except +
+
+
 cdef extern from "rec_backend.h" namespace "cyclus":
 
+    ctypedef vector[Datum*] DatumList
+
     cdef cppclass RecBackend:
-        pass
+        void Notify(DatumList) except +
+        std_string Name() except +
+        void Flush()  except +
 
 
 cdef extern from "cyclus.h" namespace "cyclus":
@@ -62,14 +77,6 @@ cdef extern from "cyclus.h" namespace "cyclus":
         CmpOpCode opcode
         hold_any val
 
-    cdef cppclass Datum:
-        Datum* AddVal(const char*, hold_any) except +
-        Datum* AddVal(const char*, hold_any, vector[int]*) except +
-        void Record() except +
-        std_string title() except +
-        #vector[pair[char*, hold_any]] vals() except +
-        vector[vector[int]] shapes() except +
-
     cdef cppclass QueryResult:
         QueryResult() except +
 
@@ -81,11 +88,18 @@ cdef extern from "cyclus.h" namespace "cyclus":
         vector[DbTypes] types
         vector[QueryRow] rows
 
-    cdef cppclass FullBackend:
-        FullBackend() except + 
-
+    cdef cppclass QueryableBackend:
         QueryResult Query(std_string, vector[Cond]*) except +
         map[std_string, DbTypes] ColumnTypes(std_string) except +
+
+    cdef cppclass FullBackend(QueryableBackend, RecBackend):
+        FullBackend() except + 
+
+        #QueryResult Query(std_string, vector[Cond]*) except +
+        #map[std_string, DbTypes] ColumnTypes(std_string) except +
+        #void Notify(DatumList) except +
+        #std_string Name() except +
+        #void Flush()  except +
 
     cdef cppclass Recorder:
         Recorder() except +
@@ -101,17 +115,21 @@ cdef extern from "cyclus.h" namespace "cyclus":
     cdef cppclass RawRecorder(Recorder):
         RawRecorder() except +
 
+        unsigned int dump_count() except +
         void set_dump_count(unsigned int) except +
+        uuid sim_id() except +
         Datum* NewDatum(std_string) except +
-
+        void RegisterBackend(RecBackend*) except +
+        void Flush() except +
+        void Close() except +
 
 cdef extern from "sqlite_back.h" namespace "cyclus":
     
     cdef cppclass SqliteBack(FullBackend):
         SqliteBack(std_string) except +
 
-        void Flush() except +
-        std_string Name() except +
+        #void Flush() except +
+        #std_string Name() except +
 
 
 cdef extern from "hdf5_back.h" namespace "cyclus":
@@ -119,6 +137,6 @@ cdef extern from "hdf5_back.h" namespace "cyclus":
     cdef cppclass Hdf5Back(FullBackend):
         Hdf5Back(std_string) except +
 
-        void Flush() except +
-        std_string Name() except +
+        #void Flush() except +
+        #std_string Name() except +
 

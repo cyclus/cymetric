@@ -39,8 +39,10 @@ class Evaluator(object):
         self.metrics = {}
         self.rawcache = {}
         self.db = db
+        #self.recorder = rec = cyclus.Recorder()
         self.recorder = rec = cyclus.RawRecorder()
         rec.register_backend(db)
+        #rec.dump_count = 1
 
     def get_metric(self, metric):
         if metric not in self.metrics:
@@ -70,6 +72,9 @@ class Evaluator(object):
             #assert False
             for field, dbtype in m.schema:
                 d = d.add_val(field, rawd[str(field)][i], dbtype=dbtype)
+            d.record()
+        if not (m.schema is None or len(m.schema) == 0):
+            rec.flush()
         return raw
 
 

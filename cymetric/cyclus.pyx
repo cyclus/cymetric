@@ -190,9 +190,7 @@ cdef class _Datum:
     property title:
         """The datumn name."""
         def __get__(self):
-            print("getting title")
             s = (<cpp_cyclus.Datum*> self.ptx).title()
-            print("title is ", s)
             return s
 
 
@@ -308,7 +306,6 @@ cdef class _Recorder:
     def __init__(self):
         if self.ptx == NULL:
             self.ptx = new cpp_cyclus.Recorder()
-        self._data = []
 
     def __dealloc__(self):
         """Recorder C++ destructor."""
@@ -333,20 +330,10 @@ cdef class _Recorder:
 
     def new_datum(self, title):
         """Registers a backend with the recorder."""
-        print("py", title)
         cdef std_string cpp_title = str(title).encode()
-        print("cpp", title)
         cdef _Datum d = Datum(_new=False)
-        print("made new datum")
         (<_Datum> d).ptx = (<cpp_cyclus.Recorder*> self.ptx).NewDatum(cpp_title)
-        print("dptx set")
-        pyd = d
-        print("converted d to pyd")
-        self._data.append(pyd)
-        print("added pyd to list")
-        dtitle = pyd.title
-        print("datum", dtitle)
-        return pyd
+        return d
 
     def register_backend(self, backend):
         """Registers a backend with the recorder."""
