@@ -265,7 +265,7 @@ TO_PY_CONVERTERS = {
     'boost::uuids::uuid': ('', '', 'uuid_to_py({var})'),
     # templates
     'std::set': (
-        '{valdecl}'
+        '{valdecl}\n'
         'cdef {valtype} {valname}\n'
         'cdef std_set[{valtype}].iterator it\n'
         'cdef set py{var}\n',
@@ -277,7 +277,24 @@ TO_PY_CONVERTERS = {
         '    pyvar.add(pyval)\n'
         '    inc(it)\n',
         'py{var}'),
-    'std::map': ('', '', '{var}'),
+    'std::map': (
+        '{keydecl}\n'
+        '{valdecl}\n'
+        'cdef {keytype} {keyname}\n'
+        'cdef {valtype} {valname}\n'
+        'cdef {type}.iterator it\n'
+        'cdef dict py{var}\n',
+        'it = {var}.begin()\n'
+        'while it != {var}.end():\n'
+        '    {keyname} = it.first\n'
+        '    {keybody.indent4}\n'
+        '    pykey = {keyexpr}\n'
+        '    {valname} = it.second\n'
+        '    {valbody.indent4}\n'
+        '    pyval = {valexpr}\n'
+        '    pyvar[pykey] = pyval\n'
+        '    inc(it)\n',
+        'py{var}'),
     'std::pair': (
         '{firstdecl}\n'
         '{seconddecl}\n'
@@ -291,7 +308,7 @@ TO_PY_CONVERTERS = {
         'pysecond = {secondexpr}\n',
         '(pyfirst, pysecond)'),
     'std::list': (
-        '{valdecl}'
+        '{valdecl}\n'
         'cdef {valtype} {valname}\n'
         'cdef std_set[{valtype}].iterator it\n'
         'cdef list py{var}\n',
