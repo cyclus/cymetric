@@ -320,7 +320,13 @@ TO_PY_CONVERTERS = {
         '    pyvar.append(pyval)\n'
         '    inc(it)\n',
         'py{var}'),
-    'std::vector': ('', '', '{var}'),
+    'std::vector': (
+        'cdef np.npy_intp {var}_shape[1]', 
+        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
+        'py{var} = np.PyArray_SimpleNewFromData(1, {var}_shape, {nptypes[0]}, '
+            '&{var}[0])\n'
+        'py{var} = np.PyArray_Copy(py{var})\n', 
+        'py{var}'),
     }
 
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
