@@ -278,8 +278,31 @@ TO_PY_CONVERTERS = {
         '    inc(it)\n',
         'py{var}'),
     'std::map': ('', '', '{var}'),
-    'std::pair': ('', '', '{var}'),
-    'std::list': ('', '', '{var}'),
+    'std::pair': (
+        '{firstdecl}\n'
+        '{seconddecl}\n'
+        'cdef {firsttype} {firstname}\n'
+        'cdef {secondtype} {secondname}\n',
+        '{firstname} = {var}.first'
+        '{firstbody}\n'
+        'pyfirst = {firstexpr}\n'
+        '{secondname} = {var}.second'
+        '{secondbody}\n'
+        'pysecond = {secondexpr}\n',
+        '(pyfirst, pysecond)'),
+    'std::list': (
+        '{valdecl}'
+        'cdef {valtype} {valname}\n'
+        'cdef std_set[{valtype}].iterator it\n'
+        'cdef list py{var}\n',
+        'it = {var}.begin()\n'
+        'while it != {var}.end():\n'
+        '    {valname} = deref(it)\n'
+        '    {valbody.indent4}\n'
+        '    pyval = {valexpr}\n'
+        '    pyvar.append(pyval)\n'
+        '    inc(it)\n',
+        'py{var}'),
     'std::vector': ('', '', '{var}'),
     }
 
@@ -421,7 +444,7 @@ cdef object uuid_to_py(cpp_cyclus.uuid x):
     return rtn
 
 
-{% for n in sorted(set(ts.norms.values())) %}
+{% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
 {% set decl, body, expr = ts.convert_to_py('x', n) %}
 cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x):
     {{ decl | indent(4) }}
