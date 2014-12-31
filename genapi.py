@@ -159,11 +159,25 @@ class TypeSystem(object):
             Return expression.
         """
         n = self.norms.get(t, t)
+        ctx = {'type': self.cython_type(t), 'var': x}
         if n in self._to_py_converters:
-            return self._to_py_converters[n]
-        # must be a template already
-        self._to_py_converters[n] = f
-        return f
+            # basic type or str
+            decl, body, expr = self._to_py_converters[n]
+        else:
+            # must be a template already
+            n0 = n[0]
+            decl, body, expr = self._to_py_converters[n0]
+            for targ, n_i in zip(TEMPLATE_ARGS[n0], n[1:]):
+                x_i = x + '_' +  targ
+                ctx[targ+'name'] = x_i
+                ctx[targ+'type'] = self.cython_type(n_i)
+                dbe_i = self.convert_to_py(x_i, n_i)
+                dbe_i = map(Indenter, dbe_i)
+                ctx[targ+'decl'], ctx[targ+'body'], ctx[targ+'expr'] = dbe_i
+        decl = decl.format(**ctx)
+        body = body.format(**ctx)
+        expr = expr.format(**ctx)
+        return decl, body, expr
 
 
 CYTHON_TYPES = {
@@ -241,6 +255,32 @@ TEMPLATE_ARGS = {
 
 # note that this maps normal forms to python
 TO_PY_CONVERTERS = {
+    # base types
+    'bool': ('', '', '{var}'),
+    'int': ('', '', '{var}'),
+    'float': ('', '', '{var}'),
+    'double': ('', '', '{var}'),
+    'std::string': ('', '', '{var}'),
+    'cyclus::Blob': ('', '', 'blob_to_bytes({var})'),
+    'boost::uuids::uuid': ('', '', 'uuid_to_py({var})'),
+    # templates
+    'std::set': (
+        '{valdecl}'
+        'cdef {valtype} {valname}\n'
+        'cdef std_set[{valtype}].iterator it\n'
+        'cdef set py{var}\n',
+        'it = {var}.begin()\n'
+        'while it != {var}.end():\n'
+        '    {valname} = deref(it)\n'
+        '    {valbody.indent4}\n'
+        '    pyval = {valexpr}\n'
+        '    pyvar.add(pyval)\n'
+        '    inc(it)\n',
+        'py{var}'),
+    'std::map': ('', '', '{var}'),
+    'std::pair': ('', '', '{var}'),
+    'std::list': ('', '', '{var}'),
+    'std::vector': ('', '', '{var}'),
     }
 
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
@@ -275,6 +315,21 @@ def parse_template(s, open_brace='<', close_brace='>', separator=','):
                                 close_brace=close_brace, separator=separator))
     t = tuple(t)
     return t
+
+
+class Indenter(object):
+
+    def __init__(self, s):
+        self._s = s
+
+    def __str__(self):
+        return self._s
+
+    def __getattr__(self, key):
+        if key.startswith('indent'):
+            n = int(key[6:])
+            return self._s.replace('\n', '\n' + ' '*n)
+        return self.__dict__[key]
 
 #
 # Code Generation
@@ -366,6 +421,14 @@ cdef object uuid_to_py(cpp_cyclus.uuid x):
     return rtn
 
 
+{% for t in dbtypes %}
+{% set decl, body, expr = ts.convert_to_py('x', t) %}
+cdef object {{ ts.funcname(t) }}_to_py({{ ts.cython_type(t) }} x):
+    {{ decl | indent(4) }}
+    {{ body | indent(4) }}
+    return {{ expr }}
+{%- endfor -%}
+
 # type system functions
 
 cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
@@ -448,6 +511,7 @@ def setup(ns):
     #print(ts.norms)
     return ts
 
+
 def code_gen(ts, ns):
     """Generates code given a type system and a namespace."""
     cases = [(cpp_typesystem, ns.cpp_typesystem), 
@@ -457,6 +521,7 @@ def code_gen(ts, ns):
         fname = os.path.join(ns.src_dir, basename)
         with io.open(fname, 'w') as f:
             f.write(s)
+
 
 def main(argv=sys.argv[1:]):
     ns = parse_args(argv)
