@@ -421,13 +421,13 @@ cdef object uuid_to_py(cpp_cyclus.uuid x):
     return rtn
 
 
-{% for t in dbtypes %}
-{% set decl, body, expr = ts.convert_to_py('x', t) %}
-cdef object {{ ts.funcname(t) }}_to_py({{ ts.cython_type(t) }} x):
+{% for n in sorted(set(ts.norms.values())) %}
+{% set decl, body, expr = ts.convert_to_py('x', n) %}
+cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x):
     {{ decl | indent(4) }}
     {{ body | indent(4) }}
     return {{ expr }}
-{%- endfor -%}
+{%- endfor %}
 
 # type system functions
 
@@ -456,6 +456,8 @@ def typesystem_pyx(ts, ns):
         cg_warning=CG_WARNING,
         npy_imports=NPY_IMPORTS,
         stl_cimports=STL_CIMPORTS,
+        set=set,
+        sorted=sorted,
         )
     rtn = TYPESYSTEM_PYX.render(ctx)
     return rtn
