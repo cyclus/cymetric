@@ -90,6 +90,7 @@ class TypeSystem(object):
         self._cython_types = dict(CYTHON_TYPES)
         self._funcnames = dict(FUNCNAMES)
         self._vars_to_py = dict(VARS_TO_PY)
+        self._to_py_converters = dict(TO_PY_CONVERTERS)
 
     def cython_cpp_name(self, t):
         """Returns the C++ name of the type, eg INT -> cpp_typesystem.INT."""
@@ -137,6 +138,32 @@ class TypeSystem(object):
         cyt = self.cython_type(t)
         cast = '{0}.cast[{1}]()'.format(x, cyt)
         return self.var_to_py(cast, t)
+
+    def convert_to_py(self, x, t):
+        """Converts a C++ variable to python.
+
+        Parameters
+        ----------
+        x : str
+            variable name
+        t : str
+            variable type
+
+        Returns
+        -------
+        decl : str
+            Declarations needed for conversion, may be many lines.
+        body : str
+            Actual conversion implementation, may be many lines.
+        rtn : str
+            Return expression.
+        """
+        n = self.norms.get(t, t)
+        if n in self._to_py_converters:
+            return self._to_py_converters[n]
+        # must be a template already
+        self._to_py_converters[n] = f
+        return f
 
 
 CYTHON_TYPES = {
@@ -204,6 +231,18 @@ VARS_TO_PY = {
     'boost::uuids::uuid': 'uuid_to_py({var})',
     }
 
+TEMPLATE_ARGS = {
+    'std::set': ('val',),
+    'std::map': ('key', 'val'),
+    'std::pair': ('first', 'second'),
+    'std::list': ('val',),
+    'std::vector': ('val',),
+    }
+
+# note that this maps normal forms to python
+TO_PY_CONVERTERS = {
+    }
+
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
     """Takes a string with template specialization and returns a list
     of the argument values as strings. Mostly cribbed from xdress.
@@ -267,6 +306,14 @@ from libc.string cimport memcpy
 from libcpp cimport bool as cpp_bool
 """.strip()
 
+NPY_IMPORTS = """
+# numpy imports & startup
+cimport numpy as np
+import numpy as np
+np.import_array()
+np.import_ufunc()
+""".strip()
+
 CPP_TYPESYSTEM = JENV.from_string("""
 {{ cg_warning }}
 
@@ -291,7 +338,9 @@ def cpp_typesystem(ts, ns):
 TYPESYSTEM_PYX = JENV.from_string('''
 {{ cg_warning }}
 
-{{ stl_cimports}}
+{{ stl_cimports }}
+
+{{ npy_imports }}
 
 # local imports
 from cymetric cimport cpp_typesystem
@@ -342,6 +391,7 @@ def typesystem_pyx(ts, ns):
         ts=ts,
         dbtypes=ts.dbtypes,
         cg_warning=CG_WARNING,
+        npy_imports=NPY_IMPORTS,
         stl_cimports=STL_CIMPORTS,
         )
     rtn = TYPESYSTEM_PYX.render(ctx)
