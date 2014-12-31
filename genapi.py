@@ -88,6 +88,8 @@ class TypeSystem(object):
         # caches
         self._cython_cpp_name = {}
         self._cython_types = dict(CYTHON_TYPES)
+        self._funcnames = dict(FUNCNAMES)
+        self._vars_to_py = dict(VARS_TO_PY)
 
     def cython_cpp_name(self, t):
         """Returns the C++ name of the type, eg INT -> cpp_typesystem.INT."""
@@ -108,10 +110,33 @@ class TypeSystem(object):
         self._cython_types[t] = cyt
         return cyt
 
+    def funcname(self, t):
+        """Returns a version of the type name suitable for use in a function name.
+        """
+        if t in self._funcnames:
+            return self._funcnames[t]
+        if isinstance(t, str_types):
+            n = self.norms[t]
+            return self.funcname(n)
+        f = '_'.join(map(self.funcname, t))
+        self._funcnames[t] = f
+        return f
+
+    def var_to_py(self, x, t):
+        """Returns an expression for converting an object to Python."""
+        n = self.norms[t]
+        expr = self._vars_to_py.get(n, None)
+        if expr is None:
+            f = self.funcname(t)
+            expr = f + '_to_py({var})'
+            self._vars_to_py[n] = expr
+        return expr.format(var=x)
+
     def hold_any_to_py(self, x, t):
         """Returns an expression for converting a hold_any object to Python."""
         cyt = self.cython_type(t)
-        return cyt
+        cast = '{0}.cast[{1}]()'.format(x, cyt)
+        return self.var_to_py(cast, t)
 
 
 CYTHON_TYPES = {
@@ -141,6 +166,43 @@ CYTHON_TYPES = {
     'std::vector': 'std_vector',
     }
 
+FUNCNAMES = {
+    # type system types
+    'BOOL': 'bool',
+    'INT': 'int',
+    'FLOAT': 'float',
+    'DOUBLE': 'double',
+    'STRING': 'std_string',
+    'VL_STRING': 'std_string',
+    'BLOB': 'blob',
+    'UUID': 'uuid',
+    # C++ normal types
+    'bool': 'bool',
+    'int': 'int',
+    'float': 'float',
+    'double': 'double',
+    'std::string': 'std_string',
+    'std::string': 'std_string',
+    'cyclus::Blob': 'blob',
+    'boost::uuids::uuid': 'uuid',
+    # Template Types
+    'std::set': 'std_set',
+    'std::map': 'std_map',
+    'std::pair': 'std_pair',
+    'std::list': 'std_list',
+    'std::vector': 'std_vector',
+    }
+
+# note that this maps normal forms to python
+VARS_TO_PY = {
+    'bool': '{var}',
+    'int': '{var}',
+    'float': '{var}',
+    'double': '{var}',
+    'std::string': '{var}',
+    'cyclus::Blob': 'blob_to_bytes({var})',
+    'boost::uuids::uuid': 'uuid_to_py({var})',
+    }
 
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
     """Takes a string with template specialization and returns a list
