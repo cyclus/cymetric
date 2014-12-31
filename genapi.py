@@ -17,8 +17,10 @@ from distutils import core, dir_util
 from pprint import pprint, pformat
 if sys.version_info[0] > 2:
     from urllib.request import urlopen
+    str_types = (str, bytes)
 else:
     from urllib2 import urlopen
+    str_types = (str, unicode)
 
 import jinja2
 
@@ -59,7 +61,7 @@ class TypeSystem(object):
             Maps types to shape rank.
         norms : dict
             Maps types to programatic normal form, ie INT -> 'int' and
-            VECTOR_STRING -> ['std::vector', 'std::string'].
+            VECTOR_STRING -> ('std::vector', 'std::string').
         dbtypes : list of str
             The type names in the type system, sorted by id.
         """
@@ -83,9 +85,61 @@ class TypeSystem(object):
         self.norms = {t: parse_template(c) for t, c in cpptypes.items()}
         self.dbtypes = sorted(types, key=lambda t: ids[t])
 
+        # caches
+        self._cython_cpp_name = {}
+        self._cython_types = dict(CYTHON_TYPES)
+
     def cython_cpp_name(self, t):
         """Returns the C++ name of the type, eg INT -> cpp_typesystem.INT."""
-        return '{0}.{1}'.format(self.cpp_typesystem, t)
+        if t not in self._cython_cpp_name:
+            self._cython_cpp_name[t] = '{0}.{1}'.format(self.cpp_typesystem, t)
+        return self._cython_cpp_name[t]
+
+    def cython_type(self, t):
+        """Returns the Cython spelling of the type."""
+        if t in self._cython_types:
+            return self._cython_types[t]
+        if isinstance(t, str_types):
+            n = self.norms[t]
+            return self.cython_type(n)
+        # must be teplate type
+        cyt = list(map(self.cython_type, t))
+        cyt = '{0}[{1}]'.format(cyt[0], ', '.join(cyt[1:]))
+        self._cython_types[t] = cyt
+        return cyt
+
+    def hold_any_to_py(self, x, t):
+        """Returns an expression for converting a hold_any object to Python."""
+        cyt = self.cython_type(t)
+        return cyt
+
+
+CYTHON_TYPES = {
+    # type system types
+    'BOOL': 'cpp_bool',
+    'INT': 'int',
+    'FLOAT': 'float',
+    'DOUBLE': 'double',
+    'STRING': 'std_string',
+    'VL_STRING': 'std_string',
+    'BLOB': 'cpp_cyclus.Blob',
+    'UUID': 'cpp_cyclus.uuid',
+    # C++ normal types
+    'bool': 'cpp_bool',
+    'int': 'int',
+    'float': 'float',
+    'double': 'double',
+    'std::string': 'std_string',
+    'std::string': 'std_string',
+    'cyclus::Blob': 'cpp_cyclus.Blob',
+    'boost::uuids::uuid': 'cpp_cyclus.uuid',
+    # Template Types
+    'std::set': 'std_set',
+    'std::map': 'std_map',
+    'std::pair': 'std_pair',
+    'std::list': 'std_list',
+    'std::vector': 'std_vector',
+    }
 
 
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
@@ -118,6 +172,7 @@ def parse_template(s, open_brace='<', close_brace='>', separator=','):
     for targ in targs:
         t.append(parse_template(targ, open_brace=open_brace,
                                 close_brace=close_brace, separator=separator))
+    t = tuple(t)
     return t
 
 #
@@ -136,12 +191,18 @@ CG_WARNING = """
 """.strip()
 
 STL_CIMPORTS = """
+# Cython standard library imports
 from libcpp.map cimport std_map
 from libcpp.set cimport std_set
 from libcpp.list cimport std_list
 from libcpp.vector cimport std_vector
 from libcpp.utility cimport std_pair
 from libcpp.string cimport string as std_string
+from cython.operator cimport dereference as deref
+from cython.operator cimport preincrement as inc
+from libc.stdlib cimport malloc, free
+from libc.string cimport memcpy
+from libcpp cimport bool as cpp_bool
 """.strip()
 
 CPP_TYPESYSTEM = JENV.from_string("""
@@ -165,7 +226,7 @@ def cpp_typesystem(ts, ns):
     return rtn
     
 
-TYPESYSTEM_PYX = JENV.from_string("""
+TYPESYSTEM_PYX = JENV.from_string('''
 {{ cg_warning }}
 
 {{ stl_cimports}}
@@ -176,9 +237,42 @@ from cymetric cimport cpp_cyclus
 
 # raw type definitions
 {% for t in dbtypes %}
-{{ t }} = {{ ts.cython_cpp_name(t) }}{% endfor %}
+{{ t }} = {{ ts.cython_cpp_name(t) }}
+{%- endfor -%}
 
-""".strip())
+# converters
+cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
+    rtn = value.str()
+    return bytes(rtn)
+
+
+cdef object uuid_to_py(cpp_cyclus.uuid x):
+    cdef int i
+    cdef list d = []
+    for i in range(16):
+        d.append(<unsigned int> x.data[i])
+    rtn = uuid.UUID(hex=hexlify(bytearray(d)))
+    return rtn
+
+
+# type system functions
+
+cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
+    """Converts database types to python objects."""
+    cdef object rtn
+    if dbtype == {{ ts.cython_cpp_name(dbtypes[0]) }}:
+        rtn = {{ ts.hold_any_to_py('value', dbtypes[0]) }}
+    {%- for t in dbtypes[1:] %}
+    elif dbtype == {{ ts.cython_cpp_name(t) }}:
+        rtn = {{ ts.hold_any_to_py('value', t) }}
+    {%- endfor -%}
+    else:
+        raise TypeError("dbtype {0} could not be found".format(dbtype))
+    return rtn
+
+
+
+'''.strip())
 
 def typesystem_pyx(ts, ns):
     """Creates the Cython wrapper for the Cyclus type system."""
@@ -239,6 +333,7 @@ def setup(ns):
     # make and return a type system
     ts = TypeSystem(table=tab, cycver=ver, 
             cpp_typesystem=os.path.splitext(ns.cpp_typesystem)[0])
+    #print(ts.norms)
     return ts
 
 def code_gen(ts, ns):
