@@ -4,6 +4,7 @@ from libcpp.set cimport set
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string as std_string
+from libcpp cimport bool as cpp_bool
 
 from cpp_typesystem cimport DbTypes
 
@@ -90,25 +91,18 @@ cdef extern from "cyclus.h" namespace "cyclus":
 
     cdef cppclass Recorder:
         Recorder() except +
+        Recorder(cpp_bool) except +
 
         unsigned int dump_count() except +
         void set_dump_count(unsigned int) except +
+        cpp_bool inject_sim_id() except +
+        void set_inject_sim_id(cpp_bool) except +
         uuid sim_id() except +
         Datum* NewDatum(std_string) except +
         void RegisterBackend(RecBackend*) except +
         void Flush() except +
         void Close() except +
 
-    cdef cppclass RawRecorder(Recorder):
-        RawRecorder() except +
-
-        unsigned int dump_count() except +
-        void set_dump_count(unsigned int) except +
-        uuid sim_id() except +
-        Datum* NewDatum(std_string) except +
-        void RegisterBackend(RecBackend*) except +
-        void Flush() except +
-        void Close() except +
 
 cdef extern from "sqlite_back.h" namespace "cyclus":
     

@@ -2,8 +2,7 @@
 from __future__ import unicode_literals, print_function
 
 from cymetric.typesystem import *  # only grabs code generated defintiions
-from cymetric.cyclus import Datum, FullBackend, SqliteBack, Hdf5Back, Recorder, \
-    RawRecorder
+from cymetric.cyclus import Datum, FullBackend, SqliteBack, Hdf5Back, Recorder
 from cymetric.root_metrics import root_metric
 from cymetric.metrics import Metric, metric
 from cymetric.evaluator import METRIC_REGISTRY, register_metric, raw_to_series, \

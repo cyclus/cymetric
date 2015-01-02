@@ -39,7 +39,7 @@ class Evaluator(object):
         self.metrics = {}
         self.rawcache = {}
         self.db = db
-        self.recorder = rec = cyclus.RawRecorder()
+        self.recorder = rec = cyclus.Recorder(inject_sim_id=False)
         rec.register_backend(db)
         self.known_tables = db.tables()
 

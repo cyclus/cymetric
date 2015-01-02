@@ -29,6 +29,3 @@ cdef class _Hdf5Back(_FullBackend):
 
 cdef class _Recorder:
     cdef void * ptx
-
-cdef class _RawRecorder(_Recorder):
-    pass

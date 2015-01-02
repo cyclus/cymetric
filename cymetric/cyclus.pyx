@@ -178,13 +178,9 @@ class Hdf5Back(_Hdf5Back, FullBackend):
 
 cdef class _Recorder:
 
-    def __cinit__(self):
+    def __cinit__(self, bint inject_sim_id=True):
         """Recorder C++ constructor"""
-        self.ptx = NULL 
-
-    def __init__(self):
-        if self.ptx == NULL:
-            self.ptx = new cpp_cyclus.Recorder()
+        self.ptx = new cpp_cyclus.Recorder(<cpp_bool> inject_sim_id)
 
     def __dealloc__(self):
         """Recorder C++ destructor."""
@@ -206,6 +202,14 @@ cdef class _Recorder:
         """The simulation id of the recorder."""
         def __get__(self):
             return uuid_cpp_to_py((<cpp_cyclus.Recorder*> self.ptx).sim_id())
+
+    property inject_sim_id:
+        """Whether or not in inject the simulation id into the tables."""
+        def __get__(self):
+            return (<cpp_cyclus.Recorder*> self.ptx).inject_sim_id()
+
+        def __set__(self, value):
+            (<cpp_cyclus.Recorder*> self.ptx).set_inject_sim_id(<bint> value)
 
     def new_datum(self, title):
         """Registers a backend with the recorder."""
@@ -236,17 +240,4 @@ cdef class _Recorder:
 
 class Recorder(_Recorder, object):
     """Cyclus recorder interface."""
-
-
-cdef class _RawRecorder(_Recorder):
-
-    def __cinit__(self):
-        """Raw recorder C++ constructor"""
-        self.ptx = new cpp_cyclus.RawRecorder()
-
-
-class RawRecorder(_RawRecorder, Recorder):
-    """Cyclus raw recorder interface."""
-
-
 
