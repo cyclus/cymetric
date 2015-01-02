@@ -326,7 +326,7 @@ VARS_TO_PY = {
     'double': '{var}',
     'std::string': '{var}',
     'cyclus::Blob': 'blob_to_bytes({var})',
-    'boost::uuids::uuid': 'uuid_to_py({var})',
+    'boost::uuids::uuid': 'uuid_cpp_to_py({var})',
     }
 
 # note that this maps normal forms to python
@@ -337,7 +337,7 @@ VARS_TO_CPP = {
     'double': '<double> {var}',
     'std::string': 'std_string(<const char*> {var})',
     'cyclus::Blob': 'cpp_cyclus.Blob(std_string(<const char*> {var}))',
-    'boost::uuids::uuid': 'uuid_to_cpp({var})',
+    'boost::uuids::uuid': 'uuid_py_to_cpp({var})',
     }
 
 TEMPLATE_ARGS = {
@@ -372,7 +372,7 @@ TO_PY_CONVERTERS = {
     'double': ('', '', '{var}'),
     'std::string': ('', '', '{var}'),
     'cyclus::Blob': ('', '', 'blob_to_bytes({var})'),
-    'boost::uuids::uuid': ('', '', 'uuid_to_py({var})'),
+    'boost::uuids::uuid': ('', '', 'uuid_cpp_to_py({var})'),
     # templates
     'std::set': (
         '{valdecl}\n'
@@ -467,7 +467,7 @@ TO_CPP_CONVERTERS = {
     'double': ('', '', '<double> {var}'),
     'std::string': ('', '', 'std_string(<const char*> {var})'),
     'cyclus::Blob': ('', '', 'cpp_cyclus.Blob(std_string(<const char*> {var}))'),
-    'boost::uuids::uuid': ('', '', 'uuid_to_cpp({var})'),
+    'boost::uuids::uuid': ('', '', 'uuid_py_to_cpp({var})'),
     # templates
     'std::set': (
         '{valdecl}\n'
@@ -515,7 +515,7 @@ TO_CPP_CONVERTERS = {
         '(<np.ndarray> {var}).descr.type_num == {nptypes[0]}:\n'
         '    {var}_data = <{valtype} *> np.PyArray_DATA(<np.ndarray> {var})\n'
         '    cpp{var}.resize(<size_t> {var}_size)\n'
-        '    memcpy(<void*> cpp{var}[0], {var}_data, sizeof({valtype}) * {var}_size)\n'
+        '    memcpy(<void*> &cpp{var}[0], {var}_data, sizeof({valtype}) * {var}_size)\n'
         'else:\n'
         '    for i, {valname} in enumerate({var}):\n'
         '        cpp{var}[i] = {val_to_cpp}\n',
@@ -669,7 +669,7 @@ cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
     return bytes(rtn)
 
 
-cdef object uuid_to_py(cpp_cyclus.uuid x):
+cdef object uuid_cpp_to_py(cpp_cyclus.uuid x):
     cdef int i
     cdef list d = []
     for i in range(16):
@@ -678,7 +678,7 @@ cdef object uuid_to_py(cpp_cyclus.uuid x):
     return rtn
 
 
-cdef cpp_cyclus.uuid uuid_to_cpp(object x):
+cdef cpp_cyclus.uuid uuid_py_to_cpp(object x):
     cdef char * c
     cdef cpp_cyclus.uuid u
     if isinstance(x, uuid.UUID):
