@@ -528,10 +528,8 @@ cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x):
 cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     """Converts database types to python objects."""
     cdef object rtn
-    if dbtype == {{ ts.cython_cpp_name(dbtypes[0]) }}:
-        rtn = {{ ts.hold_any_to_py('value', dbtypes[0]) }}
-    {%- for t in dbtypes[1:] %}
-    elif dbtype == {{ ts.cython_cpp_name(t) }}:
+    {%- for i, t in enumerate(dbtypes) %}
+    {% if i > 0 %}el{% endif %}if dbtype == {{ ts.cython_cpp_name(t) }}:
         rtn = {{ ts.hold_any_to_py('value', t) }}
     {%- endfor -%}
     else:
@@ -551,6 +549,7 @@ def typesystem_pyx(ts, ns):
         stl_cimports=STL_CIMPORTS,
         set=set,
         sorted=sorted,
+        enumerate=enumerate,
         )
     rtn = TYPESYSTEM_PYX.render(ctx)
     return rtn
