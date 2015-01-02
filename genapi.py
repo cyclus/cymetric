@@ -379,12 +379,13 @@ TO_PY_CONVERTERS = {
         'cdef {valtype} {valname}\n'
         'cdef std_set[{valtype}].iterator it\n'
         'cdef set py{var}\n',
+        'py{var} = set()\n'
         'it = {var}.begin()\n'
         'while it != {var}.end():\n'
         '    {valname} = deref(it)\n'
         '    {valbody.indent4}\n'
         '    pyval = {valexpr}\n'
-        '    pyvar.add(pyval)\n'
+        '    py{var}.add(pyval)\n'
         '    inc(it)\n',
         'py{var}'),
     'std::map': (
@@ -394,15 +395,16 @@ TO_PY_CONVERTERS = {
         'cdef {valtype} {valname}\n'
         'cdef {type}.iterator it\n'
         'cdef dict py{var}\n',
+        'py{var} = {{}}\n'
         'it = {var}.begin()\n'
         'while it != {var}.end():\n'
-        '    {keyname} = it.first\n'
+        '    {keyname} = deref(it).first\n'
         '    {keybody.indent4}\n'
         '    pykey = {keyexpr}\n'
-        '    {valname} = it.second\n'
+        '    {valname} = deref(it).second\n'
         '    {valbody.indent4}\n'
         '    pyval = {valexpr}\n'
-        '    pyvar[pykey] = pyval\n'
+        '    py{var}[pykey] = pyval\n'
         '    inc(it)\n',
         'py{var}'),
     'std::pair': (
@@ -422,12 +424,13 @@ TO_PY_CONVERTERS = {
         'cdef {valtype} {valname}\n'
         'cdef std_list[{valtype}].iterator it\n'
         'cdef list py{var}\n',
+        'py{var} = []\n'
         'it = {var}.begin()\n'
         'while it != {var}.end():\n'
         '    {valname} = deref(it)\n'
         '    {valbody.indent4}\n'
         '    pyval = {valexpr}\n'
-        '    pyvar.append(pyval)\n'
+        '    py{var}.append(pyval)\n'
         '    inc(it)\n',
         'py{var}'),
     'std::vector': (
@@ -482,20 +485,22 @@ TO_CPP_CONVERTERS = {
         'for {keyname}, {valname} in {var}.items():\n'
         '    {keybody.indent4}\n'
         '    {valbody.indent4}\n'
-        '    cppvar[{keyexpr}] = {valexpr}\n',
+        '    cpp{var}[{keyexpr}] = {valexpr}\n',
         'cpp{var}'),
     'std::pair': (
         '{firstdecl}\n'
         '{seconddecl}\n'
         'cdef {type} cpp{var}\n',
+        '{firstname} = {var}[0]\n'
         '{firstbody}\n'
         'cpp{var}.first = {firstexpr}\n'
+        '{secondname} = {var}[1]\n'
         '{secondbody}\n'
         'cpp{var}.second = {secondexpr}\n',
         'cpp{var}'),
     'std::list': (
         '{valdecl}\n'
-        'cdef std::list[{valtype}] cpp{var}\n',
+        'cdef std_list[{valtype}] cpp{var}\n',
         'for {valname} in {var}:\n'
         '    {valbody.indent4}\n'
         '    cpp{var}.push_back({valexpr})\n',
@@ -510,7 +515,7 @@ TO_CPP_CONVERTERS = {
         '(<np.ndarray> {var}).descr.type_num == {nptypes[0]}:\n'
         '    {var}_data = <{valtype} *> np.PyArray_DATA(<np.ndarray> {var})\n'
         '    cpp{var}.resize(<size_t> {var}_size)\n'
-        '    memcpy(cpp{var}[0], {var}_data, sizeof({valtype}) * {var}_size)\n'
+        '    memcpy(<void*> cpp{var}[0], {var}_data, sizeof({valtype}) * {var}_size)\n'
         'else:\n'
         '    for i, {valname} in enumerate({var}):\n'
         '        cpp{var}[i] = {val_to_cpp}\n',
@@ -591,11 +596,11 @@ CG_WARNING = """
 
 STL_CIMPORTS = """
 # Cython standard library imports
-from libcpp.map cimport std_map
-from libcpp.set cimport std_set
-from libcpp.list cimport std_list
-from libcpp.vector cimport std_vector
-from libcpp.utility cimport std_pair
+from libcpp.map cimport map as std_map
+from libcpp.set cimport set as std_set
+from libcpp.list cimport list as std_list
+from libcpp.vector cimport vector as std_vector
+from libcpp.utility cimport pair as std_pair
 from libcpp.string cimport string as std_string
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
@@ -709,7 +714,7 @@ cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     {%- for i, t in enumerate(dbtypes) %}
     {% if i > 0 %}el{% endif %}if dbtype == {{ ts.cython_cpp_name(t) }}:
         rtn = {{ ts.hold_any_to_py('value', t) }}
-    {%- endfor -%}
+    {%- endfor %}
     else:
         msg = "dbtype {0} could not be found while converting to Python"
         raise TypeError(msg.format(dbtype))
@@ -721,7 +726,7 @@ cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
     {%- for i, t in enumerate(dbtypes) %}
     {% if i > 0 %}el{% endif %}if dbtype == {{ ts.cython_cpp_name(t) }}:
         rtn = {{ ts.py_to_any('rtn', 'value', t) }}
-    {%- endfor -%}
+    {%- endfor %}
     else:
         msg = "dbtype {0} could not be found while converting from Python"
         raise TypeError(msg.format(dbtype))

@@ -56,6 +56,7 @@ cdef extern from "cyclus.h" namespace "cyclus":
         NE
 
     cdef cppclass Blob:
+        Blob() except +
         Blob(std_string) except +
         const std_string str() except +
 
