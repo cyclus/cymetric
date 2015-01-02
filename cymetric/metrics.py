@@ -46,6 +46,10 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
     return dec
 
 
+#
+# The actual metrics
+#
+
 _matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
                 'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
