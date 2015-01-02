@@ -809,8 +809,13 @@ def code_gen(ts, ns):
     for func, basename in cases:
         s = func(ts, ns)
         fname = os.path.join(ns.src_dir, basename)
-        with io.open(fname, 'w') as f:
-            f.write(s)
+        orig = None
+        if os.path.isfile(fname):
+            with io.open(fname, 'r') as f:
+                orig = f.read()
+        if orig is None or orig != s:
+            with io.open(fname, 'w') as f:
+                f.write(s)
 
 
 def main(argv=sys.argv[1:]):

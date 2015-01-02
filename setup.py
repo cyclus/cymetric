@@ -40,6 +40,8 @@ import subprocess
 from glob import glob
 from distutils import core, dir_util
 
+import genapi
+
 VERSION = '0.0-dev'
 IS_NT = os.name == 'nt'
 
@@ -197,6 +199,9 @@ def cmake_cli(cmake_args):
 def main_body(cmake_args, make_args):
     if not os.path.exists('build'):
         os.mkdir('build')
+    print('Generating API Bindings...')
+    genapi.main([])
+
     cmake_cmd = cmake_cli(cmake_args)
     rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
 
