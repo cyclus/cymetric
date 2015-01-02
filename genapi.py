@@ -90,6 +90,7 @@ class TypeSystem(object):
         self._cython_types = dict(CYTHON_TYPES)
         self._funcnames = dict(FUNCNAMES)
         self._vars_to_py = dict(VARS_TO_PY)
+        self._vars_to_cpp = dict(VARS_TO_CPP)
         self._nptypes = dict(NPTYPES)
         self._to_py_converters = dict(TO_PY_CONVERTERS)
 
@@ -139,6 +140,24 @@ class TypeSystem(object):
         cyt = self.cython_type(t)
         cast = '{0}.cast[{1}]()'.format(x, cyt)
         return self.var_to_py(cast, t)
+
+    def var_to_cpp(self, x, t):
+        """Returns an expression for converting a Python object to C++."""
+        n = self.norms.get(t, t)
+        expr = self._vars_to_cpp.get(n, None)
+        if expr is None:
+            f = self.funcname(t)
+            expr = f + '_to_cpp({var})'
+            self._vars_to_cpp[n] = expr
+        return expr.format(var=x)
+
+    def py_to_any(self, a, val, t):
+        """Returns an expression for assigning a Python object (val) to an any 
+        object (a)."""
+        cyt = self.cython_type(t)
+        cpp = self.var_to_cpp(val, t)
+        rtn = '{a}.assign[{cyt}]({cpp})'.format(a=a, cyt=cyt, cpp=cpp)
+        return rtn
 
     def nptype(self, n):
         """Returns the numpy type for a normal form element."""
@@ -259,6 +278,17 @@ VARS_TO_PY = {
     'std::string': '{var}',
     'cyclus::Blob': 'blob_to_bytes({var})',
     'boost::uuids::uuid': 'uuid_to_py({var})',
+    }
+
+# note that this maps normal forms to python
+VARS_TO_CPP = {
+    'bool': '<bint> {var}',
+    'int': '<int> {var}',
+    'float': '<float> {var}',
+    'double': '<double> {var}',
+    'std::string': 'std_string(<const char*> {var})',
+    'cyclus::Blob': 'cpp_cyclus.Blob(std_string(<const char*> {var}))',
+    'boost::uuids::uuid': 'uuid_to_cpp({var})',
     }
 
 TEMPLATE_ARGS = {
@@ -495,6 +525,10 @@ TYPESYSTEM_PYX = JENV.from_string('''
 from cymetric cimport cpp_typesystem
 from cymetric cimport cpp_cyclus
 
+# pure python imports
+from binascii import hexlify
+import uuid
+
 # raw type definitions
 {% for t in dbtypes %}
 {{ t }} = {{ ts.cython_cpp_name(t) }}
@@ -515,6 +549,17 @@ cdef object uuid_to_py(cpp_cyclus.uuid x):
     return rtn
 
 
+cdef cpp_cyclus.uuid uuid_to_cpp(object x):
+    cdef char * c
+    cdef cpp_cyclus.uuid u
+    if isinstance(x, uuid.UUID):
+        c = x.bytes
+    else:
+        c = x
+    memcpy(u.data, c, 16)
+    return u
+
+
 {% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
 {% set decl, body, expr = ts.convert_to_py('x', n) %}
 cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x):
@@ -533,7 +578,20 @@ cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
         rtn = {{ ts.hold_any_to_py('value', t) }}
     {%- endfor -%}
     else:
-        raise TypeError("dbtype {0} could not be found".format(dbtype))
+        msg = "dbtype {0} could not be found while converting to Python"
+        raise TypeError(msg.format(dbtype))
+    return rtn
+
+cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
+    """Converts python object to database type in a hold_any instance."""
+    cdef cpp_cyclus.hold_any rtn
+    {%- for i, t in enumerate(dbtypes) %}
+    {% if i > 0 %}el{% endif %}if dbtype == {{ ts.cython_cpp_name(t) }}:
+        rtn = {{ ts.py_to_any('rtn', 'value', t) }}
+    {%- endfor -%}
+    else:
+        msg = "dbtype {0} could not be found while converting from Python"
+        raise TypeError(msg.format(dbtype))
     return rtn
 
 
