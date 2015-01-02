@@ -22,139 +22,13 @@ import pandas as pd
 
 # local imports
 from cymetric cimport cpp_cyclus
+from cymetric cimport cpp_typesystem
+from cymetric.typesystem cimport py_to_any, db_to_py, uuid_cpp_to_py
+
 
 # startup numpy
 np.import_array()
 np.import_ufunc()
-
-BOOL = cpp_cyclus.BOOL
-INT = cpp_cyclus.INT
-FLOAT = cpp_cyclus.FLOAT
-DOUBLE = cpp_cyclus.DOUBLE
-STRING = cpp_cyclus.STRING
-VL_STRING = cpp_cyclus.VL_STRING
-BLOB = cpp_cyclus.BLOB
-UUID = cpp_cyclus.UUID
-
-cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
-    rtn = value.str()
-    return bytes(rtn)
-
-
-cdef object uuid_to_py(cpp_cyclus.uuid x):
-    cdef int i
-    cdef list d = []
-    for i in range(16):
-        d.append(<unsigned int> x.data[i])
-    rtn = uuid.UUID(hex=hexlify(bytearray(d)))
-    return rtn
-
-
-cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
-    """Converts database types to python objects."""
-    cdef int i
-    cdef object rtn
-    if dbtype == cpp_cyclus.BOOL:
-        rtn = value.cast[cpp_bool]()
-    elif dbtype == cpp_cyclus.INT:
-        rtn = value.cast[int]()
-    elif dbtype == cpp_cyclus.FLOAT:
-        rtn = value.cast[float]()
-    elif dbtype == cpp_cyclus.DOUBLE:
-        rtn = value.cast[double]()
-    elif dbtype == cpp_cyclus.STRING:
-        rtn = value.cast[std_string]()
-    elif dbtype == cpp_cyclus.VL_STRING:
-        rtn = value.cast[std_string]()
-    elif dbtype == cpp_cyclus.BLOB:
-        rtn = blob_to_bytes(value.cast[cpp_cyclus.Blob]())
-    elif dbtype == cpp_cyclus.UUID:
-        d = []
-        for i in range(16):
-            d.append(<unsigned int> value.cast[cpp_cyclus.uuid]().data[i])
-        #rtn = hexlify(bytearray(d))
-        rtn = uuid.UUID(hex=hexlify(bytearray(d)))
-    else:
-        raise TypeError("dbtype {0} could not be found".format(dbtype))
-    return rtn
-
-
-cdef object db_to_dt(cpp_cyclus.DbTypes dbtype):
-    """Converts database types to numpty dtypes."""
-    cdef object rtn
-    if dbtype == cpp_cyclus.BOOL:
-        rtn = b'b'
-    elif dbtype == cpp_cyclus.INT:
-        rtn = b'i4'
-    elif dbtype == cpp_cyclus.FLOAT:
-        rtn = b'f4'
-    elif dbtype == cpp_cyclus.DOUBLE:
-        rtn = b'f8'
-    elif dbtype == cpp_cyclus.STRING:
-        rtn = b'O'
-    elif dbtype == cpp_cyclus.VL_STRING:
-        rtn = b'O'
-    elif dbtype == cpp_cyclus.BLOB:
-        rtn = b'O'
-    elif dbtype == cpp_cyclus.UUID:
-        rtn = b'S16'
-    else:
-        rtn = b'O'
-    return rtn
-
-
-cdef np.ndarray db_to_array(object values, cpp_cyclus.DbTypes dbtype):
-    """Converts values to numpy array."""
-    cdef np.ndarray rtn
-    cdef str dt = db_to_dt(dbtype)
-    if dbtype == cpp_cyclus.BOOL:
-        rtn = np.array(values, dtype=dt)
-    elif dbtype == cpp_cyclus.INT:
-        rtn = np.array(values, dtype=dt)
-    elif dbtype == cpp_cyclus.FLOAT:
-        rtn = np.array(values, dtype=dt)
-    elif dbtype == cpp_cyclus.DOUBLE:
-        rtn = np.array(values, dtype=dt)
-    elif dbtype == cpp_cyclus.STRING:
-        rtn = np.array(values)
-    elif dbtype == cpp_cyclus.VL_STRING:
-        rtn = np.array(values, dtype=dt)
-    elif dbtype == cpp_cyclus.BLOB:
-        rtn = np.array(values, dtype=dt)
-    elif dbtype == cpp_cyclus.UUID:
-        rtn = np.array([v.bytes for v in values], dtype=dt)
-    else:
-        rtn = np.array(values, dtype=dt)
-    return rtn
-
-
-cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype):
-    """Converts python object to database type in a hold_any instance."""
-    cdef int i
-    cdef cpp_cyclus.hold_any rtn
-    cdef cpp_cyclus.uuid u
-    cdef char * c
-    if dbtype == cpp_cyclus.BOOL:
-        rtn = rtn.assign[cpp_bool](<bint> value)
-    elif dbtype == cpp_cyclus.INT:
-        rtn = rtn.assign[int](<int> value)
-    elif dbtype == cpp_cyclus.FLOAT:
-        rtn = rtn.assign[float](<float>  value)
-    elif dbtype == cpp_cyclus.DOUBLE:
-        rtn = rtn.assign[double](<double> value)
-    elif dbtype == cpp_cyclus.STRING:
-        rtn = rtn.assign[std_string](std_string(<const char*> value))
-    elif dbtype == cpp_cyclus.VL_STRING:
-        rtn = rtn.assign[std_string](std_string(<const char*> value))
-    elif dbtype == cpp_cyclus.BLOB:
-        rtn = rtn.assign[cpp_cyclus.Blob](cpp_cyclus.Blob(value))
-    elif dbtype == cpp_cyclus.UUID:
-        c = value
-        memcpy(u.data, c, 16)
-        rtn = rtn.assign[cpp_cyclus.uuid](u)
-    else:
-        raise TypeError("dbtype {0} could not be found".format(dbtype))
-    return rtn
 
 
 cdef class _Datum:
@@ -170,7 +44,7 @@ cdef class _Datum:
     #    if self._free:
     #        free(self.ptx)
 
-    def add_val(self, const char* field, value, shape=None, dbtype=BLOB):
+    def add_val(self, const char* field, value, shape=None, dbtype=cpp_typesystem.BLOB):
         cdef int i, n
         cdef std_vector[int] cpp_shape
         cdef cpp_cyclus.hold_any v = py_to_any(value, dbtype)
@@ -248,7 +122,7 @@ cdef class _FullBackend:
         for i in range(nrows):
             for j in range(ncols):
                 res[j].append(db_to_py(qr.rows[i][j], qr.types[j]))
-        res = {qr.fields[j]: db_to_array(v, qr.types[j]) for j, v in res.items()}
+        res = {qr.fields[j]: v for j, v in res.items()}
         results = pd.DataFrame(res, columns=[qr.fields[j] for j in range(ncols)])
         return results
 
@@ -331,7 +205,7 @@ cdef class _Recorder:
     property sim_id:
         """The simulation id of the recorder."""
         def __get__(self):
-            return uuid_to_py((<cpp_cyclus.Recorder*> self.ptx).sim_id())
+            return uuid_cpp_to_py((<cpp_cyclus.Recorder*> self.ptx).sim_id())
 
     def new_datum(self, title):
         """Registers a backend with the recorder."""

@@ -750,6 +750,57 @@ def typesystem_pyx(ts, ns):
     rtn = TYPESYSTEM_PYX.render(ctx)
     return rtn
 
+TYPESYSTEM_PXD = JENV.from_string('''
+{{ cg_warning }}
+
+{{ stl_cimports }}
+
+# local imports
+from cymetric cimport cpp_typesystem
+from cymetric cimport cpp_cyclus
+
+#
+# converters
+#
+cdef bytes blob_to_bytes(cpp_cyclus.Blob value)
+
+cdef object uuid_cpp_to_py(cpp_cyclus.uuid x)
+
+
+cdef cpp_cyclus.uuid uuid_py_to_cpp(object x)
+
+{% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
+cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x)
+{%- endfor %}
+
+{% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
+cdef {{ ts.cython_type(n) }} {{ ts.funcname(n) }}_to_cpp(object x)
+{%- endfor %}
+
+
+#
+# type system functions
+#
+cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype)
+
+cdef cpp_cyclus.hold_any py_to_any(object value, cpp_cyclus.DbTypes dbtype)
+'''.strip())
+
+def typesystem_pxd(ts, ns):
+    """Creates the Cython wrapper header for the Cyclus type system."""
+    ctx = dict(
+        ts=ts,
+        dbtypes=ts.dbtypes,
+        cg_warning=CG_WARNING,
+        npy_imports=NPY_IMPORTS,
+        stl_cimports=STL_CIMPORTS,
+        set=set,
+        sorted=sorted,
+        enumerate=enumerate,
+        )
+    rtn = TYPESYSTEM_PXD.render(ctx)
+    return rtn
+
 
 #
 # CLI
@@ -767,12 +818,16 @@ def parse_args(argv):
                         help="the local build directory, default 'build'")
     parser.add_argument('--cpp-typesystem', default='cpp_typesystem.pxd', 
                         dest='cpp_typesystem',
-                        help="the name of the C++ typesystem wrapper header, "
+                        help="the name of the C++ typesystem header, "
                              "default 'cpp_typesystem.pxd'")
     parser.add_argument('--typesystem-pyx', default='typesystem.pyx', 
                         dest='typesystem_pyx',
-                        help="the name of the C++ typesystem wrapper, "
+                        help="the name of the Cython typesystem wrapper, "
                              "default 'typesystem.pyx'")
+    parser.add_argument('--typesystem-pxd', default='typesystem.pxd', 
+                        dest='typesystem_pxd',
+                        help="the name of the Cython typesystem wrapper header, "
+                             "default 'typesystem.pxd'")
 
     ns = parser.parse_args(argv)
     return ns
@@ -798,14 +853,14 @@ def setup(ns):
     # make and return a type system
     ts = TypeSystem(table=tab, cycver=ver, 
             cpp_typesystem=os.path.splitext(ns.cpp_typesystem)[0])
-    #print(ts.norms)
     return ts
 
 
 def code_gen(ts, ns):
     """Generates code given a type system and a namespace."""
     cases = [(cpp_typesystem, ns.cpp_typesystem), 
-             (typesystem_pyx, ns.typesystem_pyx),]
+             (typesystem_pyx, ns.typesystem_pyx),
+             (typesystem_pxd, ns.typesystem_pxd),]
     for func, basename in cases:
         s = func(ts, ns)
         fname = os.path.join(ns.src_dir, basename)
