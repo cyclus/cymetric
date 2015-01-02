@@ -215,6 +215,54 @@ class TypeSystem(object):
         expr = expr.format(**ctx)
         return decl, body, expr
 
+    def convert_to_cpp(self, x, t):
+        """Converts a Python variable to C++.
+
+        Parameters
+        ----------
+        x : str
+            variable name
+        t : str
+            variable type
+
+        Returns
+        -------
+        decl : str
+            Declarations needed for conversion, may be many lines.
+        body : str
+            Actual conversion implementation, may be many lines.
+        rtn : str
+            Return expression.
+        """
+        n = self.norms.get(t, t)
+        ctx = {'type': self.cython_type(t), 'var': x, 'nptypes': []}
+        if n in self._to_cpp_converters:
+            # basic type or str
+            n0 = ()
+            decl, body, expr = self._to_cpp_converters[n]
+        elif n[0] == 'std::vector' and self.nptype(n[1]) in ('np.NPY_OBJECT', 
+                                                             'np.NPY_BOOL'):
+            # vector of type that should become an object
+            n0 = n[0]
+            decl, body, expr = self._to_cpp_converters['np.ndarray', 'np.NPY_OBJECT']
+        else:
+            # must be a template already
+            n0 = n[0]
+            decl, body, expr = self._to_cpp_converters[n0]
+        for targ, n_i in zip(TEMPLATE_ARGS.get(n0, ()), n[1:]):
+            x_i = x + '_' +  targ
+            ctx[targ+'name'] = x_i
+            ctx[targ+'type'] = self.cython_type(n_i)
+            dbe_i = self.convert_to_cpp(x_i, n_i)
+            dbe_i = map(Indenter, dbe_i)
+            ctx[targ+'decl'], ctx[targ+'body'], ctx[targ+'expr'] = dbe_i
+            ctx['nptypes'].append(self.nptype(n_i))
+            ctx[targ+'_to_cpp'] = self.var_to_cpp(x_i, n_i)
+        decl = decl.format(**ctx)
+        body = body.format(**ctx)
+        expr = expr.format(**ctx)
+        return decl, body, expr
+
 
 CYTHON_TYPES = {
     # type system types
@@ -372,7 +420,7 @@ TO_PY_CONVERTERS = {
     'std::list': (
         '{valdecl}\n'
         'cdef {valtype} {valname}\n'
-        'cdef std_set[{valtype}].iterator it\n'
+        'cdef std_list[{valtype}].iterator it\n'
         'cdef list py{var}\n',
         'it = {var}.begin()\n'
         'while it != {var}.end():\n'
@@ -420,80 +468,62 @@ TO_CPP_CONVERTERS = {
     # templates
     'std::set': (
         '{valdecl}\n'
-        'cdef {valtype} cpp{valname}\n'
         'cdef std_set[{valtype}] cpp{var}\n',
         'for {valname} in {var}:\n'
         '    {valbody.indent4}\n'
-        '    cpp{valname} = {valexpr}\n'
-        '    cpp{var}.insert(cpp{valname})\n',
+        '    cpp{var}.insert({valexpr})\n',
         'cpp{var}'),
     'std::map': (
         '{keydecl}\n'
         '{valdecl}\n'
-        'cdef {keytype} {keyname}\n'
-        'cdef {valtype} {valname}\n'
-        'cdef {type}.iterator it\n'
-        'cdef dict py{var}\n',
-        'it = {var}.begin()\n'
-        'while it != {var}.end():\n'
-        '    {keyname} = it.first\n'
+        'cdef {type} cpp{var}\n',
+        'if not isinstance({var}, collections.Mapping):\n'
+        '    {var} = dict({var})\n'
+        'for {keyname}, {valname} in {var}.items():\n'
         '    {keybody.indent4}\n'
-        '    pykey = {keyexpr}\n'
-        '    {valname} = it.second\n'
         '    {valbody.indent4}\n'
-        '    pyval = {valexpr}\n'
-        '    pyvar[pykey] = pyval\n'
-        '    inc(it)\n',
-        'py{var}'),
+        '    cppvar[{keyexpr}] = {valexpr}\n',
+        'cpp{var}'),
     'std::pair': (
         '{firstdecl}\n'
         '{seconddecl}\n'
-        'cdef {firsttype} {firstname}\n'
-        'cdef {secondtype} {secondname}\n',
-        '{firstname} = {var}.first'
+        'cdef {type} cpp{var}\n',
         '{firstbody}\n'
-        'pyfirst = {firstexpr}\n'
-        '{secondname} = {var}.second'
+        'cpp{var}.first = {firstexpr}\n'
         '{secondbody}\n'
-        'pysecond = {secondexpr}\n',
-        '(pyfirst, pysecond)'),
+        'cpp{var}.second = {secondexpr}\n',
+        'cpp{var}'),
     'std::list': (
         '{valdecl}\n'
-        'cdef {valtype} {valname}\n'
-        'cdef std_set[{valtype}].iterator it\n'
-        'cdef list py{var}\n',
-        'it = {var}.begin()\n'
-        'while it != {var}.end():\n'
-        '    {valname} = deref(it)\n'
+        'cdef std::list[{valtype}] cpp{var}\n',
+        'for {valname} in {var}:\n'
         '    {valbody.indent4}\n'
-        '    pyval = {valexpr}\n'
-        '    pyvar.append(pyval)\n'
-        '    inc(it)\n',
-        'py{var}'),
+        '    cpp{var}.push_back({valexpr})\n',
+        'cpp{var}'),
     'std::vector': (
-        'cdef np.npy_intp {var}_shape[1]\n', 
-        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
-        'py{var} = np.PyArray_SimpleNewFromData(1, {var}_shape, {nptypes[0]}, '
-            '&{var}[0])\n'
-        'py{var} = np.PyArray_Copy(py{var})\n', 
-        'py{var}'),
-    ('std::vector', 'bool'): (
         'cdef int i\n'
-        'cdef np.npy_intp {var}_shape[1]\n', 
-        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
-        'py{var} = np.PyArray_SimpleNew(1, {var}_shape, np.NPY_BOOL)\n'
-        'for i in range({var}_shape[0]):\n'
-        '    py{var}[i] = {var}[i]\n',
-        'py{var}'),
+        'cdef int {var}_size\n'
+        'cdef {type} cpp{var}\n'
+        'cdef {valtype} * {var}_data\n',
+        '{var}_size = len({var})\n'
+        'if isinstance({var}, np.ndarray) and '
+        '(<np.ndarray> {var}).descr.type_num == {nptypes[0]}:\n'
+        '    {var}_data = <{valtype} *> np.PyArray_DATA(<np.ndarray> {var})\n'
+        '    cpp{var}.resize(<size_t> {var}_size)\n'
+        '    memcpy(cpp{var}[0], {var}_data, sizeof({valtype}) * {var}_size)\n'
+        'else:\n'
+        '    for i, {valname} in enumerate({var}):\n'
+        '        cpp{var}[i] = {val_to_cpp}\n',
+        'cpp{var}'),
     ('np.ndarray', 'np.NPY_OBJECT'): (
         'cdef int i\n'
-        'cdef np.npy_intp {var}_shape[1]\n', 
-        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
-        'py{var} = np.PyArray_SimpleNew(1, {var}_shape, np.NPY_OBJECT)\n'
-        'for i in range({var}_shape[0]):\n'
-        '    {var}_i = {elem_to_py}\n'
-        '    py{var}[i] = {var}_i\n',
-        'py{var}'),
+        'cdef int {var}_size\n'
+        'cdef {type} cpp{var}\n',
+        '{var}_size = len({var})\n'
+        'cpp{var}.resize(<size_t> {var}_size)\n'
+        'for i, {valname} in enumerate({var}):\n'
+        '    cpp{var}[i] = {val_to_cpp}\n',
+        'cpp{var}'),
     }
 
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
