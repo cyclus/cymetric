@@ -90,6 +90,7 @@ class TypeSystem(object):
         self._cython_types = dict(CYTHON_TYPES)
         self._funcnames = dict(FUNCNAMES)
         self._vars_to_py = dict(VARS_TO_PY)
+        self._nptypes = dict(NPTYPES)
         self._to_py_converters = dict(TO_PY_CONVERTERS)
 
     def cython_cpp_name(self, t):
@@ -125,7 +126,7 @@ class TypeSystem(object):
 
     def var_to_py(self, x, t):
         """Returns an expression for converting an object to Python."""
-        n = self.norms[t]
+        n = self.norms.get(t, t)
         expr = self._vars_to_py.get(n, None)
         if expr is None:
             f = self.funcname(t)
@@ -138,6 +139,14 @@ class TypeSystem(object):
         cyt = self.cython_type(t)
         cast = '{0}.cast[{1}]()'.format(x, cyt)
         return self.var_to_py(cast, t)
+
+    def nptype(self, n):
+        """Returns the numpy type for a normal form element."""
+        npt = self._nptypes.get(n, None)
+        if npt is None:
+            npt = 'np.NPY_OBJECT'
+            self._nptypes[n] = npt
+        return npt
 
     def convert_to_py(self, x, t):
         """Converts a C++ variable to python.
@@ -159,21 +168,28 @@ class TypeSystem(object):
             Return expression.
         """
         n = self.norms.get(t, t)
-        ctx = {'type': self.cython_type(t), 'var': x}
+        ctx = {'type': self.cython_type(t), 'var': x, 'nptypes': []}
         if n in self._to_py_converters:
             # basic type or str
+            n0 = ()
             decl, body, expr = self._to_py_converters[n]
+        elif n[0] == 'std::vector' and self.nptype(n[1]) == 'np.NPY_OBJECT':
+            # vector of type that should become an object
+            n0 = n[0]
+            decl, body, expr = self._to_py_converters['np.ndarray', 'np.NPY_OBJECT']
+            ctx['elem_to_py'] = self.var_to_py(x + '[i]', n[1])
         else:
             # must be a template already
             n0 = n[0]
             decl, body, expr = self._to_py_converters[n0]
-            for targ, n_i in zip(TEMPLATE_ARGS[n0], n[1:]):
-                x_i = x + '_' +  targ
-                ctx[targ+'name'] = x_i
-                ctx[targ+'type'] = self.cython_type(n_i)
-                dbe_i = self.convert_to_py(x_i, n_i)
-                dbe_i = map(Indenter, dbe_i)
-                ctx[targ+'decl'], ctx[targ+'body'], ctx[targ+'expr'] = dbe_i
+        for targ, n_i in zip(TEMPLATE_ARGS.get(n0, ()), n[1:]):
+            x_i = x + '_' +  targ
+            ctx[targ+'name'] = x_i
+            ctx[targ+'type'] = self.cython_type(n_i)
+            dbe_i = self.convert_to_py(x_i, n_i)
+            dbe_i = map(Indenter, dbe_i)
+            ctx[targ+'decl'], ctx[targ+'body'], ctx[targ+'expr'] = dbe_i
+            ctx['nptypes'].append(self.nptype(n_i))
         decl = decl.format(**ctx)
         body = body.format(**ctx)
         expr = expr.format(**ctx)
@@ -253,6 +269,21 @@ TEMPLATE_ARGS = {
     'std::vector': ('val',),
     }
 
+NPTYPES = {
+    'bool': 'np.NPY_BOOL',
+    'int': 'np.NPY_INT32',
+    'float': 'np.NPY_FLOAT32',
+    'double': 'np.NPY_FLOAT64',
+    'std::string': 'np.NPY_OBJECT',
+    'cyclus::Blob': 'np.NPY_OBJECT',
+    'boost::uuids::uuid': 'np.NPY_OBJECT',
+    'std::set': 'np.NPY_OBJECT',
+    'std::map': 'np.NPY_OBJECT',
+    'std::pair': 'np.NPY_OBJECT',
+    'std::list': 'np.NPY_OBJECT',
+    'std::vector': 'np.NPY_OBJECT',
+    }
+
 # note that this maps normal forms to python
 TO_PY_CONVERTERS = {
     # base types
@@ -321,11 +352,28 @@ TO_PY_CONVERTERS = {
         '    inc(it)\n',
         'py{var}'),
     'std::vector': (
-        'cdef np.npy_intp {var}_shape[1]', 
+        'cdef np.npy_intp {var}_shape[1]\n', 
         '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
         'py{var} = np.PyArray_SimpleNewFromData(1, {var}_shape, {nptypes[0]}, '
             '&{var}[0])\n'
         'py{var} = np.PyArray_Copy(py{var})\n', 
+        'py{var}'),
+    ('std::vector', 'bool'): (
+        'cdef int i\n'
+        'cdef np.npy_intp {var}_shape[1]\n', 
+        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
+        'py{var} = np.PyArray_SimpleNew(1, {var}_shape, np.NPY_BOOL)\n'
+        'for i in range({var}_shape[0]):\n'
+        '    py{var}[i] = {var}[i]\n',
+        'py{var}'),
+    ('np.ndarray', 'np.NPY_OBJECT'): (
+        'cdef int i\n'
+        'cdef np.npy_intp {var}_shape[1]\n', 
+        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
+        'py{var} = np.PyArray_SimpleNew(1, {var}_shape, np.NPY_OBJECT)\n'
+        'for i in range({var}_shape[0]):\n'
+        '    {var}_i = {elem_to_py}\n'
+        '    py{var}[i] = {var}_i\n',
         'py{var}'),
     }
 
@@ -489,7 +537,6 @@ cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     else:
         raise TypeError("dbtype {0} could not be found".format(dbtype))
     return rtn
-
 
 
 '''.strip())
