@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 import pandas as pd
 
 from cymetric import cyclus
+from cymetric import typesystem as ts
 from cymetric.evaluator import register_metric
 
 
@@ -49,10 +50,10 @@ _matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreate
                 'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
 
-_matschema = (('SimId', cyclus.UUID), ('QualId', cyclus.INT), 
-              ('ResourceId', cyclus.INT), ('ObjId', cyclus.INT), 
-              ('TimeCreated', cyclus.INT), ('NucId', cyclus.INT), 
-              ('Mass', cyclus.DOUBLE))
+_matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
+              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+              ('Mass', ts.DOUBLE))
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(series):
