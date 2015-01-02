@@ -93,6 +93,7 @@ class TypeSystem(object):
         self._vars_to_cpp = dict(VARS_TO_CPP)
         self._nptypes = dict(NPTYPES)
         self._to_py_converters = dict(TO_PY_CONVERTERS)
+        self._to_cpp_converters = dict(TO_CPP_CONVERTERS)
 
     def cython_cpp_name(self, t):
         """Returns the C++ name of the type, eg INT -> cpp_typesystem.INT."""
@@ -407,6 +408,94 @@ TO_PY_CONVERTERS = {
         'py{var}'),
     }
 
+TO_CPP_CONVERTERS = {
+    # base types
+    'bool': ('', '', '<bint> {var}'),
+    'int': ('', '', '<int> {var}'),
+    'float': ('', '', '<float> {var}'),
+    'double': ('', '', '<double> {var}'),
+    'std::string': ('', '', 'std_string(<const char*> {var})'),
+    'cyclus::Blob': ('', '', 'cpp_cyclus.Blob(std_string(<const char*> {var}))'),
+    'boost::uuids::uuid': ('', '', 'uuid_to_cpp({var})'),
+    # templates
+    'std::set': (
+        '{valdecl}\n'
+        'cdef {valtype} cpp{valname}\n'
+        'cdef std_set[{valtype}] cpp{var}\n',
+        'for {valname} in {var}:\n'
+        '    {valbody.indent4}\n'
+        '    cpp{valname} = {valexpr}\n'
+        '    cpp{var}.insert(cpp{valname})\n',
+        'cpp{var}'),
+    'std::map': (
+        '{keydecl}\n'
+        '{valdecl}\n'
+        'cdef {keytype} {keyname}\n'
+        'cdef {valtype} {valname}\n'
+        'cdef {type}.iterator it\n'
+        'cdef dict py{var}\n',
+        'it = {var}.begin()\n'
+        'while it != {var}.end():\n'
+        '    {keyname} = it.first\n'
+        '    {keybody.indent4}\n'
+        '    pykey = {keyexpr}\n'
+        '    {valname} = it.second\n'
+        '    {valbody.indent4}\n'
+        '    pyval = {valexpr}\n'
+        '    pyvar[pykey] = pyval\n'
+        '    inc(it)\n',
+        'py{var}'),
+    'std::pair': (
+        '{firstdecl}\n'
+        '{seconddecl}\n'
+        'cdef {firsttype} {firstname}\n'
+        'cdef {secondtype} {secondname}\n',
+        '{firstname} = {var}.first'
+        '{firstbody}\n'
+        'pyfirst = {firstexpr}\n'
+        '{secondname} = {var}.second'
+        '{secondbody}\n'
+        'pysecond = {secondexpr}\n',
+        '(pyfirst, pysecond)'),
+    'std::list': (
+        '{valdecl}\n'
+        'cdef {valtype} {valname}\n'
+        'cdef std_set[{valtype}].iterator it\n'
+        'cdef list py{var}\n',
+        'it = {var}.begin()\n'
+        'while it != {var}.end():\n'
+        '    {valname} = deref(it)\n'
+        '    {valbody.indent4}\n'
+        '    pyval = {valexpr}\n'
+        '    pyvar.append(pyval)\n'
+        '    inc(it)\n',
+        'py{var}'),
+    'std::vector': (
+        'cdef np.npy_intp {var}_shape[1]\n', 
+        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
+        'py{var} = np.PyArray_SimpleNewFromData(1, {var}_shape, {nptypes[0]}, '
+            '&{var}[0])\n'
+        'py{var} = np.PyArray_Copy(py{var})\n', 
+        'py{var}'),
+    ('std::vector', 'bool'): (
+        'cdef int i\n'
+        'cdef np.npy_intp {var}_shape[1]\n', 
+        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
+        'py{var} = np.PyArray_SimpleNew(1, {var}_shape, np.NPY_BOOL)\n'
+        'for i in range({var}_shape[0]):\n'
+        '    py{var}[i] = {var}[i]\n',
+        'py{var}'),
+    ('np.ndarray', 'np.NPY_OBJECT'): (
+        'cdef int i\n'
+        'cdef np.npy_intp {var}_shape[1]\n', 
+        '{var}_shape[0] = <np.npy_intp> {var}.size()\n'
+        'py{var} = np.PyArray_SimpleNew(1, {var}_shape, np.NPY_OBJECT)\n'
+        'for i in range({var}_shape[0]):\n'
+        '    {var}_i = {elem_to_py}\n'
+        '    py{var}[i] = {var}_i\n',
+        'py{var}'),
+    }
+
 def split_template_args(s, open_brace='<', close_brace='>', separator=','):
     """Takes a string with template specialization and returns a list
     of the argument values as strings. Mostly cribbed from xdress.
@@ -526,15 +615,20 @@ from cymetric cimport cpp_typesystem
 from cymetric cimport cpp_cyclus
 
 # pure python imports
-from binascii import hexlify
 import uuid
+import collections
+from binascii import hexlify
 
+#
 # raw type definitions
+#
 {% for t in dbtypes %}
 {{ t }} = {{ ts.cython_cpp_name(t) }}
 {%- endfor -%}
 
+#
 # converters
+#
 cdef bytes blob_to_bytes(cpp_cyclus.Blob value):
     rtn = value.str()
     return bytes(rtn)
@@ -559,7 +653,6 @@ cdef cpp_cyclus.uuid uuid_to_cpp(object x):
     memcpy(u.data, c, 16)
     return u
 
-
 {% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
 {% set decl, body, expr = ts.convert_to_py('x', n) %}
 cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x):
@@ -568,8 +661,18 @@ cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x):
     return {{ expr }}
 {%- endfor %}
 
-# type system functions
+{% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
+{% set decl, body, expr = ts.convert_to_cpp('x', n) %}
+cdef {{ ts.cython_type(n) }} {{ ts.funcname(n) }}_to_cpp(object x):
+    {{ decl | indent(4) }}
+    {{ body | indent(4) }}
+    return {{ expr }}
+{%- endfor %}
 
+
+#
+# type system functions
+#
 cdef object db_to_py(cpp_cyclus.hold_any value, cpp_cyclus.DbTypes dbtype):
     """Converts database types to python objects."""
     cdef object rtn
