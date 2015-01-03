@@ -135,6 +135,12 @@ cdef class _FullBackend:
 class FullBackend(_FullBackend, object):
     """Full backend cyclus database interface."""
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.flush()
+
 
 cdef class _SqliteBack(_FullBackend):
 

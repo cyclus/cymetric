@@ -109,15 +109,16 @@ class ExecutionContext(MutableMapping):
         args, kwargs : tuple, dict
             Other arguments to the mutable mapping.
         """
-        self._ctx = dict(*args, **kwargs)
+        self._ctx = ctx = {}
         self.evaler = evaler or evaluator.Evaluator(db)
         for metric in METRIC_REGISTRY:
-            self._ctx[metric] = MetricProxy(metric, evaler)
+            ctx[metric] = MetricProxy(metric, evaler)
         import cymetric as cym
-        self._ctx['cym'] = cym
-        self._ctx['np'] = np
-        self._ctx['pd'] = pd
-        self._ctx['uuid'] = uuid
+        ctx['cym'] = cym
+        ctx['np'] = np
+        ctx['pd'] = pd
+        ctx['uuid'] = uuid
+        ctx.update(*args, **kwargs)
 
     def __getitem__(self, key):
         if key not in self._ctx:
@@ -136,4 +137,13 @@ class ExecutionContext(MutableMapping):
 
     def __len__(self):
         return len(self._ctx)
+
+    def keys(self):
+        return self._ctx.keys()
+
+    def values(self):
+        return self._ctx.values()
+
+    def items(self):
+        return self._ctx.items()
 
