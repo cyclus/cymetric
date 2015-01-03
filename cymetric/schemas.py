@@ -51,6 +51,13 @@ def canon_shape(shape, dbtype):
     return rtn
 
 
+def canon_name(name):
+    """Returns canonical form of a column name."""
+    if not isinstance(name, str_types):
+        raise ValueError('column name {0!r} must be a string'.format(name))
+    return name
+
+
 def canon_column(col):
     """Returns canonical form of a column."""
     if len(col) == 2:
@@ -61,11 +68,69 @@ def canon_column(col):
     else:
         msg = '{0!r} does not have length 2 or 3, cannot convert to schema.'
         raise ValueError(msg.format(col))
-    if not isinstance(name, str_types):
-        raise ValueError('column name {0!r} must be a string'.format(name))
+    name = canon_name(name)
     dbtype = canon_dbtype(dbtype)
     shape = canon_shape(shape, dbtype)
     return (name, dbtype, shape)
+
+
+class SchemaProperty(MutableSequence):
+    """Represents specific properties of a schema."""
+
+    def __init__(self, obj, prop):
+        self.obj = obj
+        if prop == 'names':
+            i = 0
+            c = canon_name
+        elif prop == 'dbtypes':
+            i = 1
+            c = canon_dbtype
+        elif prop == 'shapes':
+            i = 2
+            c = canon_shape
+        self.idx = i
+        self.canonizer = c
+
+    def _newcol(self, col, val):
+        val = self.canonizer(val)
+        col = list(col)
+        col[self.idx] = val
+        return tuple(col)
+
+    def __get__(self, obj, objtype):
+        return self
+
+    def __set__(self, obj, val):
+        if len(obj) != len(val):
+            msg = 'The length of the schema ({0}) does not match the given length {1}.'
+            raise ValueError(msg.format(len(obj), len(val)))
+        newdescr = []
+        for col, v in zip(obj, val):
+            newdescr.append(self._newcol(col, v))
+        obj.descr[:] = newdescr
+
+    def __getitem__(self, i):
+        return self.obj.descr[i][self.idx]
+
+    def __setitem__(self, i, val):
+        self.obj.descr[i] = self._newcol(self.obj.descr[i], val)
+
+    def __delitem__(self, i):
+        raise AttributeError("May not delete from schema property.")
+
+    def __len__(self):
+        return len(self.obj)
+
+    def insert(self, i, val):
+        raise AttributeError("May not insert from schema property.")
+
+    def __iter__(self):
+        for col in self.obj.descr:
+            yield col[self.idx]
+
+    def __str__(self):
+        s = '[' + ', '.join([repr(x) for x in self]) + ']'
+        return s
 
 
 class schema(MutableSequence):
@@ -80,6 +145,9 @@ class schema(MutableSequence):
             Sequence of 2- or 3-tuples that represent the schema.
         """
         self.descr = [canon_column(val) for val in x]
+        self.names = SchemaProperty(self, 'names')
+        self.dbtypes = SchemaProperty(self, 'dbtypes')
+        self.shapes = SchemaProperty(self, 'shapes')
 
     def __getitem__(self, i):
         return self.descr[i]
@@ -90,7 +158,7 @@ class schema(MutableSequence):
     def __delitem__(self, i):
         del self.descr[i]
 
-    def __len__(self, i):
+    def __len__(self):
         return len(self.descr)
 
     def insert(self, i, val):
@@ -99,3 +167,7 @@ class schema(MutableSequence):
     def __iter__(self):
         for col in self.descr:
             yield col
+
+    def __str__(self):
+        s = '[' + ', '.join([repr(x) for x in self]) + ']'
+        return s
