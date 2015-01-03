@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 import pandas as pd
 
 from cymetric import cyclus
+from cymetric import schemas
 from cymetric import typesystem as ts
 from cymetric.evaluator import register_metric
 
@@ -25,7 +26,7 @@ class Metric(object):
 def _genmetricclass(f, name, depends, scheme):
     class Cls(Metric):
         dependencies = depends
-        schema = scheme
+        schema = schemas.schema(scheme)
 
         def __init__(self, db):
             super(Cls, self).__init__(db)
