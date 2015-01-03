@@ -12,9 +12,14 @@ else:
 
 import numpy as np
 import pandas as pd
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
+except ImportError:
+    matplotlib = None
+    plt = None
 
 from cymetric import evaluator, METRIC_REGISTRY
-
 
 class ColumnProxy(object):
     """A proxy object for column that returns condition 3-tuples from 
@@ -31,6 +36,9 @@ class ColumnProxy(object):
 
     def __call__(self, *args, **kwargs):
         raise TypeError('ColumnProxy object {0!r} is not callable'.format(self.name))
+
+    def __getitem__(self, *args, **kwargs):
+        raise TypeError('ColumnProxy object {0!r} cannot be indexed'.format(self.name))
 
     def __lt__(self, other):
         return self.name, '<', other
@@ -93,8 +101,14 @@ class MetricProxy(object):
         self.evaler = evaler
 
     def __getitem__(self, key):
-        conds = None if has_no_conds(key) else [parse_cond(k) for k in key]
+        if has_no_conds(key):
+            conds = None 
+        elif isinstance(key, str_types):
+            conds = [parse_cond(key)]
+        else:
+            conds = [parse_cond(k) for k in key]
         return self.evaler.eval(self.name, conds=conds)
+
 
 class ExecutionContext(MutableMapping):
     """An execution context for the command line or any other situation 
@@ -116,11 +130,14 @@ class ExecutionContext(MutableMapping):
         self.evaler = evaler or evaluator.Evaluator(db)
         for metric in METRIC_REGISTRY:
             ctx[metric] = MetricProxy(metric, evaler)
-        import cymetric as cym
+        import cymetric as cym  # lazy import needed
         ctx['cym'] = cym
         ctx['np'] = np
         ctx['pd'] = pd
         ctx['uuid'] = uuid
+        if matplotlib is not None:
+            ctx['matplotlib'] = matplotlib
+            ctx['plt'] = plt
         ctx.update(*args, **kwargs)
 
     def __getitem__(self, key):
