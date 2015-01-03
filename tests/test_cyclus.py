@@ -12,7 +12,7 @@ from tools import setup, dbtest
 
 @dbtest
 def test_name(db, fname, backend):
-    obs = db.name()
+    obs = db.name
     assert_equal(fname, obs)
 
 

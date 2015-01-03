@@ -29,6 +29,9 @@ class ColumnProxy(object):
         """
         self.name = name
 
+    def __call__(self, *args, **kwargs):
+        raise TypeError('ColumnProxy object {0!r} is not callable'.format(self.name))
+
     def __lt__(self, other):
         return self.name, '<', other
 
@@ -121,7 +124,9 @@ class ExecutionContext(MutableMapping):
         ctx.update(*args, **kwargs)
 
     def __getitem__(self, key):
-        if key not in self._ctx:
+        if key in __builtins__:
+            raise KeyError 
+        elif key not in self._ctx:
             self._ctx[key] = ColumnProxy(key)
         return self._ctx[key]
 

@@ -153,9 +153,10 @@ cdef class _SqliteBack(_FullBackend):
         """Flushes the database to disk."""
         (<cpp_cyclus.SqliteBack*> self.ptx).Flush()
 
-    def name(self):
-        """Retuns the name of the database."""
-        return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+    property name:
+        """The name of the database."""
+        def __get__(self):
+            return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
 
 
 class SqliteBack(_SqliteBack, FullBackend):
@@ -173,9 +174,10 @@ cdef class _Hdf5Back(_FullBackend):
         """Flushes the database to disk."""
         (<cpp_cyclus.Hdf5Back*> self.ptx).Flush()
 
-    def name(self):
-        """Retuns the name of the database."""
-        return (<cpp_cyclus.Hdf5Back*> self.ptx).Name()
+    property name:
+        """The name of the database."""
+        def __get__(self):
+            return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
 
 
 class Hdf5Back(_Hdf5Back, FullBackend):
