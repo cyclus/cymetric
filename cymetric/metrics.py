@@ -30,7 +30,7 @@ def _genmetricclass(f, name, depends, scheme):
         def __init__(self, db):
             super(Cls, self).__init__(db)
 
-        def __call__(self, series, *args, **kwargs):
+        def __call__(self, series, conds=None, *args, **kwargs):
             # FIXME test if I already exist in the db, read in if I do
             return f(series)
 

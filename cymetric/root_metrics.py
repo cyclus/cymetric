@@ -23,8 +23,8 @@ def _genrootclass(name):
             self._schema = None
             self.db = db
 
-        def __call__(self, *args, **kwargs):
-            return self.db.query(self.name)
+        def __call__(self, conds=None, *args, **kwargs):
+            return self.db.query(self.name, conds=conds)
 
     Cls.__name__ = str(name)
     register_metric(Cls)

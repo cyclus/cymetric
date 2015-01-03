@@ -89,6 +89,8 @@ EMPTY_SLICE = slice(None)
 
 def has_no_conds(key):
     """Determines if a key means that there are no conditions given."""
+    if isinstance(key, ColumnProxy):
+        return False
     return ((key is Ellipsis) or (key is None) or (key == EMPTY_SLICE) or
         (isinstance(key, Sized) and len(key) == 0))
 

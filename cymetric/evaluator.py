@@ -59,7 +59,7 @@ class Evaluator(object):
             d = self.eval(dep[0], conds=conds)
             s = raw_to_series(d, dep[1], dep[2])
             series.append(s)
-        raw = m(series)
+        raw = m(series=series, conds=conds)
         self.rawcache[rawkey] = raw
         # write back to db
         if m.name in self.known_tables:
