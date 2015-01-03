@@ -659,7 +659,42 @@ from binascii import hexlify
 #
 {% for t in dbtypes %}
 {{ t }} = {{ ts.cython_cpp_name(t) }}
-{%- endfor -%}
+{%- endfor %}
+
+cdef dict C_RANKS = {
+{%- for t in dbtypes %}
+    {{ ts.cython_cpp_name(t) }}: {{ ts.ranks[t] }}, 
+{%- endfor %}
+    }
+RANKS = C_RANKS
+
+cdef dict C_NAMES = {
+{%- for t in dbtypes %}
+    {{ ts.cython_cpp_name(t) }}: '{{ t }}', 
+{%- endfor %}
+    }
+NAMES = C_NAMES
+
+cdef dict C_IDS = {
+{%- for t in dbtypes %}
+    '{{ t }}': {{ ts.cython_cpp_name(t) }}, 
+{%- endfor %}
+    }
+IDS = C_IDS
+
+cdef dict C_CPPTYPES = {
+{%- for t in dbtypes %}
+    {{ ts.cython_cpp_name(t) }}: '{{ ts.cpptypes[t] }}', 
+{%- endfor %}
+    }
+CPPTYPES = C_CPPTYPES
+
+cdef dict C_NORMS = {
+{%- for t in dbtypes %}
+    {{ ts.cython_cpp_name(t) }}: {{ repr(ts.norms[t]) }}, 
+{%- endfor %}
+    }
+NORMS = C_NORMS
 
 #
 # converters
@@ -744,6 +779,7 @@ def typesystem_pyx(ts, ns):
         npy_imports=NPY_IMPORTS,
         stl_cimports=STL_CIMPORTS,
         set=set,
+        repr=repr,
         sorted=sorted,
         enumerate=enumerate,
         )
@@ -758,6 +794,15 @@ TYPESYSTEM_PXD = JENV.from_string('''
 # local imports
 from cymetric cimport cpp_typesystem
 from cymetric cimport cpp_cyclus
+
+#
+# raw
+#
+cpdef dict C_RANKS
+cpdef dict C_NAMES
+cpdef dict C_IDS
+cpdef dict C_CPPTYPES
+cpdef dict C_NORMS
 
 #
 # converters

@@ -12,12 +12,6 @@ else:
 
 import numpy as np
 import pandas as pd
-try:
-    import matplotlib
-    import matplotlib.pyplot as plt
-except ImportError:
-    matplotlib = None
-    plt = None
 
 from cymetric.evaluator import Evaluator, METRIC_REGISTRY
 
@@ -154,9 +148,13 @@ class ExecutionContext(MutableMapping):
         ctx['np'] = np
         ctx['pd'] = pd
         ctx['uuid'] = uuid
-        if matplotlib is not None:
+        try:
+            import matplotlib
+            import matplotlib.pyplot as plt
             ctx['matplotlib'] = matplotlib
             ctx['plt'] = plt
+        except ImportError:
+            pass
         ctx.update(*args, **kwargs)
 
     def __getitem__(self, key):
