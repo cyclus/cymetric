@@ -33,6 +33,7 @@ class ColumnProxy(object):
             The column name.
         """
         self.name = name
+        self.conds = []
 
     def __call__(self, *args, **kwargs):
         raise TypeError('ColumnProxy object {0!r} is not callable'.format(self.name))
@@ -41,22 +42,29 @@ class ColumnProxy(object):
         raise TypeError('ColumnProxy object {0!r} cannot be indexed'.format(self.name))
 
     def __lt__(self, other):
-        return self.name, '<', other
+        self.conds.append((self.name, '<', other))
+        return self
 
     def __gt__(self, other):
-        return self.name, '>', other
+        self.conds.append((self.name, '>', other))
+        return self
 
     def __le__(self, other):
-        return self.name, '<=', other
+        self.conds.append((self.name, '<=', other))
+        return self
 
     def __ge__(self, other):
+        self.conds.append((self.name, '>=', other))
+        return self
         return self.name, '>=', other
 
     def __eq__(self, other):
-        return self.name, '==', other
+        self.conds.append((self.name, '==', other))
+        return self
 
     def __ne__(self, other):
-        return self.name, '!=', other
+        self.conds.append((self.name, '!=', other))
+        return self
 
 
 stripper = lambda s: s.strip()
@@ -65,6 +73,8 @@ COND_RE = re.compile('\s*(\w+)\s*(<|>|<=|>=|==|!=)\s*(.*)')
 
 def parse_cond(cond):
     """Parses a condition and returns the canonical 3-tuple."""
+    if isinstance(cond, ColumnProxy):
+        return cond.conds
     if not isinstance(cond, str_types):
         return cond
     m = COND_RE.match(cond)
@@ -103,10 +113,17 @@ class MetricProxy(object):
     def __getitem__(self, key):
         if has_no_conds(key):
             conds = None 
+        elif isinstance(key, ColumnProxy):
+            conds = key.conds
         elif isinstance(key, str_types):
             conds = [parse_cond(key)]
         else:
-            conds = [parse_cond(k) for k in key]
+            conds = []
+            for k in key:
+                if isinstance(k, ColumnProxy):
+                    conds += k.conds
+                elif isinstance(k, str_types):
+                    conds.append(parse_cond(k))
         return self.evaler.eval(self.name, conds=conds)
 
 
