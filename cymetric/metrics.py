@@ -30,8 +30,12 @@ def _genmetricclass(f, name, depends, scheme):
         def __init__(self, db):
             super(Cls, self).__init__(db)
 
-        def __call__(self, series, conds=None, *args, **kwargs):
+        def __call__(self, series, conds=None, known_tables=None, *args, **kwargs):
             # FIXME test if I already exist in the db, read in if I do
+            if known_tables is None:
+                known_tables = self.db.tables()
+            if self.name in known_tables:
+                return self.db.query(self.name, conds=conds)
             return f(series)
 
     Cls.__name__ = str(name)
