@@ -80,7 +80,7 @@ EMPTY_SLICE = slice(None)
 def has_no_conds(key):
     """Determines if a key means that there are no conditions given."""
     return ((key is Ellipsis) or (key is None) or (key == EMPTY_SLICE) or
-        (isinsatnce(key, Sized) and len(key) == 0))
+        (isinstance(key, Sized) and len(key) == 0))
 
 
 class MetricProxy(object):
