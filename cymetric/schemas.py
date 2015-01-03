@@ -1,4 +1,4 @@
-"""Schemas for cymetric
+"""Schemas for cymetric.
 """
 from __future__ import print_function, unicode_literals
 import sys
