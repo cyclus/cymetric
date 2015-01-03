@@ -6,7 +6,7 @@ from argparse import ArgumentParser, Namespace
 
 from cymetric.tools import dbopen
 from cymetric.evaluator import Evaluator
-from cymetric.execution import ExecutionContext
+from cymetric.execution import exec_code
 
 def parse_args():
     """Parses the command line arguments."""
@@ -28,11 +28,7 @@ def main():
         for tab in sorted(db.tables()):
             print(tab)
     if ns.exec_code is not None:
-        evaler = Evaluator(db)
-        glb = {}
-        loc = ExecutionContext(evaler=evaler)
-        exec(ns.exec_code, glb, loc)
-
+        exec_code(ns.exec_code, db)
 
 if __name__ == '__main__': 
     main()

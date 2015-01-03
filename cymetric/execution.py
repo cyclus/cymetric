@@ -1,4 +1,4 @@
-"""Execution for cymetric
+"""Execution for cymetric.
 """
 from __future__ import unicode_literals, print_function
 import re
@@ -19,7 +19,7 @@ except ImportError:
     matplotlib = None
     plt = None
 
-from cymetric import evaluator, METRIC_REGISTRY
+from cymetric.evaluator import Evaluator, METRIC_REGISTRY
 
 class ColumnProxy(object):
     """A proxy object for column that returns condition 3-tuples from 
@@ -188,3 +188,12 @@ class ExecutionContext(MutableMapping):
     def items(self):
         return self._ctx.items()
 
+    def __del__(self):
+        self.evaler.db.flush()
+
+def exec_code(code, db):
+    """Runs a code snipper in the context of a database."""
+    evaler = Evaluator(db)
+    glb = {}
+    loc = ExecutionContext(evaler=evaler)
+    exec(code, glb, loc)

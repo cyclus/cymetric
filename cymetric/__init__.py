@@ -8,4 +8,4 @@ from cymetric.root_metrics import root_metric
 from cymetric.metrics import Metric, metric
 from cymetric.evaluator import METRIC_REGISTRY, register_metric, raw_to_series, \
     Evaluator, eval
-from cymetric.execution import ExecutionContext
+from cymetric.execution import ExecutionContext, exec_code
