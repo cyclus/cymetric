@@ -879,6 +879,7 @@ def parse_args(argv):
 
 
 def setup(ns):
+    """Ensure that we are ready to perform code generation. Returns typesystem."""
     # load raw table
     dbtypes_json = os.path.join(ns.build_dir, 'dbtypes.json')
     if not os.path.exists(ns.build_dir):
@@ -918,7 +919,10 @@ def code_gen(ts, ns):
                 f.write(s)
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=None):
+    """Entry point into the code genearion. Accepts list of command line arguments."""
+    if argv is None:
+        argv = sys.argv[1:]
     ns = parse_args(argv)
     ts = setup(ns)
     code_gen(ts, ns)

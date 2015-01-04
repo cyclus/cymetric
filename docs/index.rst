@@ -13,7 +13,7 @@ Learn More
 .. toctree::
     :maxdepth: 1
 
-    cymetric/index
+    genapi
 
 Contact Us
 ----------
