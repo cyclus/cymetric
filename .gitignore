@@ -2,6 +2,7 @@
 *-journal
 *.pyc
 build
+docs/_build
 tests/*.h5
 tests/*.sqlite
 
