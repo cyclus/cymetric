@@ -16,7 +16,7 @@ Command Line Usage
 ------------------
 Cymetric ships with a command line utility, just called ``cymetric``. Since 
 cymetric is wholly dependent on acting |cyclus| database, you must supply a
-databse as an argument on the command line. We'll be using ``test.h5`` and 
+database as an argument on the command line. We'll be using ``test.h5`` and 
 ``test.sqlite`` as our example database here.  
 
 Table Listing: ``-l``
@@ -151,7 +151,7 @@ save the result to a variable, and then print this variable all via the followin
     476     0.002827
     Name: Mass, Length: 477, dtype: float64
 
-As a convience, the following Python modules are avalilable in the execution context 
+As a convenience, the following Python modules are available in the execution context 
 under standard aliases. This prevents you from having to import them manually yourself.
 
 ===================== ==============
@@ -224,7 +224,7 @@ Executing Code
 ~~~~~~~~~~~~~~~~~~~~~~~
 Sometimes, you just have a code snippet as a string like you might run from the 
 command line, even though you are in Python. The ``exec_code()`` function gives
-you easy access to the exact same capablitied that you have on the command line.
+you easy access to the exact same capabilities that you have on the command line.
 This function accepts the code string and the database:
 
 .. code-block:: python
@@ -266,14 +266,14 @@ assumed. Cymetric handles all of these details for you!
 In the above, the ``@metric()`` decorator takes three arguments. The first is 
 the ``name`` of the metric. Note that this can be distinct from the function name.
 
-The second is ``deps``, which represents the metric dependcies.  This is a list 
-oif 3-tuples that represents which ``series`` to pull out of the database and 
+The second is ``deps``, which represents the metric dependencies.  This is a list 
+of 3-tuples that represents which ``series`` to pull out of the database and 
 pass into the metric function (here ``mats_sqrd()``).  The first element is 
 the table name as a string (eg ``'Materials'``). The second element is a tuple of 
 column names that become the index of the series 
 (eg ``('SimId', 'ResourceId', 'NucId')``). Finally, the last element is the 
 column of the table that becomes the values of the series.  A metric may have 
-as many dependecies as required. Circular dependencies are not allowed.
+as many dependencies as required. Circular dependencies are not allowed.
 
 Lastly, the ``@metric()`` decorator takes a ``schema`` argument. This represents 
 the structure of the metric table on disk and in |cyclus|. Thus, it is highly
@@ -283,7 +283,7 @@ names that match the schema provided. It is generally a good idea to include a
 ``SimId`` column.  
 
 The above shows how easy it is to incorporate metrics that are computed via 
-cymetric. However, cycmetric also helps you bring in data that might come from 
+cymetric. However, cymetric also helps you bring in data that might come from 
 custom |cyclus| tables (see http://fuelcycle.org/arche/custom_tables.html).
 All you need to do is use the ``root_metric()`` function somewhere. This simply 
 accepts the name of the table.  For example, 
