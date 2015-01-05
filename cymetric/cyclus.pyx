@@ -217,7 +217,7 @@ cdef class _Recorder:
             return (<cpp_cyclus.Recorder*> self.ptx).inject_sim_id()
 
         def __set__(self, value):
-            (<cpp_cyclus.Recorder*> self.ptx).set_inject_sim_id(<bint> value)
+            (<cpp_cyclus.Recorder*> self.ptx).inject_sim_id(<bint> value)
 
     def new_datum(self, title):
         """Registers a backend with the recorder."""

@@ -13,6 +13,7 @@ Learn More
 .. toctree::
     :maxdepth: 1
 
+    tutorial
     cymetric/index
     genapi
 

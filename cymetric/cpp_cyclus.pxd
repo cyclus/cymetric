@@ -96,7 +96,7 @@ cdef extern from "cyclus.h" namespace "cyclus":
         unsigned int dump_count() except +
         void set_dump_count(unsigned int) except +
         cpp_bool inject_sim_id() except +
-        void set_inject_sim_id(cpp_bool) except +
+        void inject_sim_id(cpp_bool) except +
         uuid sim_id() except +
         Datum* NewDatum(std_string) except +
         void RegisterBackend(RecBackend*) except +
