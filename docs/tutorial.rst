@@ -176,3 +176,67 @@ Will pop up with the following figure:
 
 .. image:: _static/tut_nucid_mass.png
 
+Python Interface
+------------------
+Using cymetric from Python is also easy.  Typically, it is recommended that you 
+alias ``cymetric`` as ``cym``, because all of the important functionality lives here.
+To start, use the ``dbopen()`` function to open up a database:
+
+.. code-block:: python
+
+    import cymetric as cym
+
+    db = cym.dbopen('test.sqlite')
+
+Evaluating Metrics
+~~~~~~~~~~~~~~~~~~~~~~~
+The main purpose of cymetric is to evaluate metrics. The easiest way to do this 
+is via the ``eval()`` function. This accepts a metric name and a database and 
+returns a pandas DataFrame:
+
+.. code-block:: python
+
+    frame = cym.eval('Materials', db) 
+
+You may also optionally supply a list of 3-tuples representing the conditions to 
+filter the metric on.
+
+.. code-block:: python
+
+    filtered_frame = cym.eval('Materials', db, conds=[('NucId', '==', 922350000)]) 
+
+Calling ``eval()`` sets up a new ``Evaluator`` object each time a metric is 
+evaluated.  This can be inefficient if you computing many metrics because it will 
+have to read in from the database each time.  Thus, if you are planning on computing
+many metrics, then its is better to create your own ``Evaluator`` and call its
+``eval()`` method directly. For example, 
+
+.. code-block:: python
+
+    evaler = cym.Evaluator(db)
+    frame1 = evaler('Materials') 
+    frame2 = evaler('AgentEntry', conds=[('Kind', '==', 'Facility')]) 
+    
+And you can run with the data from there! We recommend learning pandas to get the 
+most out of your analysis from this point.
+
+Executing Code
+~~~~~~~~~~~~~~~~~~~~~~~
+Sometimes, you just have a code snippet as a string like you might run from the 
+command line, even though you are in Python. The ``exec_code()`` function gives
+you easy access to the exact same capablitied that you have on the command line.
+This function accepts the code string and the database:
+
+.. code-block:: python
+
+    cym.exec_code("print(AgentEntry[:])", db)
+
+For more exciting capabilities, please explore the online documentation or ask 
+us questions on the mailing list.
+
+Writing Metrics
+------------------
+Naturally
+
+
+
