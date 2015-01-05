@@ -54,5 +54,113 @@ be alarmed. Listing the current tables is easy:
     Transactions
     XMLPPInfo
 
+Metrics that are generated will show up in this listing after they have been computed.
+
 Code Execution: ``-e``
 ~~~~~~~~~~~~~~~~~~~~~~~
+Cymetric allows you to execute arbitrary code on metrics from the command line with 
+the ``-e`` flag. The code that you pass in is pure Python. Every metric and root
+|cyclus| table (see http://fuelcycle.org/user/dbdoc.html) are assigned automatically
+to variable names that you can use. Indexing the table variables will return the 
+metric as a pandas data frame (see http://pandas.pydata.org/). For example, to 
+print the ``AgentEntry`` table, we would write ``AgentEntry[:]`` to get the 
+table and ``print(AgentEntry[:])`` to display it after the ``-e`` flag:
+
+.. code-block:: bash
+
+    $ cymetric test.h5 -e "print(AgentEntry[:])"
+                                      SimId  AgentId      Kind                    Spec          Prototype  ParentId  Lifetime  EnterTime
+    0  db805939-c565-404a-9483-adfb3da8b6d2       11    Region      :agents:NullRegion       SingleRegion        -1        -1          0
+    1  db805939-c565-404a-9483-adfb3da8b6d2       12      Inst    :cycamore:DeployInst  SingleInstitution        11        -1          0
+    2  db805939-c565-404a-9483-adfb3da8b6d2       13  Facility        :cycamore:Source         UOX_Source        12        -1          1
+    3  db805939-c565-404a-9483-adfb3da8b6d2       14  Facility        :cycamore:Source         MOX_Source        12        -1          1
+    4  db805939-c565-404a-9483-adfb3da8b6d2       15  Facility  :cycamore:BatchReactor           Reactor1        12        -1          1
+    5  db805939-c565-404a-9483-adfb3da8b6d2       16  Facility  :cycamore:BatchReactor           Reactor2        12        -1          2
+    6  db805939-c565-404a-9483-adfb3da8b6d2       17  Facility  :cycamore:BatchReactor           Reactor3        12        -1          3
+
+    [7 rows x 8 columns]
+
+Indexing a metric with an empty slice (``[:]``), none (``[None]``), or an ellipsis
+(``[...]``) will return the full metric. However, you can also index by condition 
+filters on the column names. The column names of the metric are thus also available for
+use.  For example, let's just grab all of the facilities out of the entry table:
+
+.. code-block:: bash
+
+    $ cymetric test.h5 -e "print(AgentEntry[Kind == 'Facility'])"
+                                      SimId  AgentId      Kind                    Spec   Prototype  ParentId  Lifetime  EnterTime
+    0  db805939-c565-404a-9483-adfb3da8b6d2       13  Facility        :cycamore:Source  UOX_Source        12        -1          1
+    1  db805939-c565-404a-9483-adfb3da8b6d2       14  Facility        :cycamore:Source  MOX_Source        12        -1          1
+    2  db805939-c565-404a-9483-adfb3da8b6d2       15  Facility  :cycamore:BatchReactor    Reactor1        12        -1          1
+    3  db805939-c565-404a-9483-adfb3da8b6d2       16  Facility  :cycamore:BatchReactor    Reactor2        12        -1          2
+    4  db805939-c565-404a-9483-adfb3da8b6d2       17  Facility  :cycamore:BatchReactor    Reactor3        12        -1          3
+
+    [5 rows x 8 columns]
+
+Separate the conditions by commas (``,``) to apply multiple filters at the same 
+time:
+
+.. code-block:: bash
+
+    $ cymetric test.h5 -e "print(AgentEntry[Kind == 'Facility', AgentId > 14])"
+                                      SimId  AgentId      Kind                    Spec Prototype  ParentId  Lifetime  EnterTime
+    0  db805939-c565-404a-9483-adfb3da8b6d2       15  Facility  :cycamore:BatchReactor  Reactor1        12        -1          1
+    1  db805939-c565-404a-9483-adfb3da8b6d2       16  Facility  :cycamore:BatchReactor  Reactor2        12        -1          2
+    2  db805939-c565-404a-9483-adfb3da8b6d2       17  Facility  :cycamore:BatchReactor  Reactor3        12        -1          3
+
+    [3 rows x 8 columns]
+
+Because code execution is just pure Python, we can do *anything* that we would be 
+able to do in Python. Suppose that we have a ``Materials`` metric with a ``Mass``
+column. We can compute this metric, pull the column out, multiply it by 42,
+save the result to a variable, and then print this variable all via the following.
+
+.. code-block:: bash
+
+    $ cymetric test.h5 -e "mass = Materials[:]['Mass'] * 42; print(mass)"
+    0      0.000000
+    1      0.000000
+    2      0.000000
+    3      0.000000
+    4      0.000000
+    5      0.000000
+    6      0.000000
+    7      0.000000
+    8      0.000000
+    9      0.000000
+    10     4.790314
+    11     0.007370
+    12     0.066327
+    13     0.368486
+    14    33.064222
+    ...
+    462     0.493771
+    463     0.313213
+    464     0.350812
+    465     0.228541
+    466    40.917474
+    467     0.030567
+    468     0.011288
+    469     0.238031
+    470     0.092571
+    471     0.081648
+    472     0.034441
+    473     0.002762
+    474     0.008074
+    475     0.000965
+    476     0.002827
+    Name: Mass, Length: 477, dtype: float64
+
+As a convience, the following Python modules are avalilable in the execution context 
+under standard aliases. This prevents you from having to import them manually yourself.
+
+===================== ==============
+Module                Alias
+===================== ==============
+``cymetric``          ``cym``
+``numpy``             ``np``
+``pandas``            ``pd``
+``uuid``              ``uuid``
+``matplotlib``        ``matplotlib``
+``matplotlib.pyplot`` ``plt``
+===================== ==============
