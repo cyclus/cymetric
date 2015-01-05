@@ -164,3 +164,15 @@ Module                Alias
 ``matplotlib``        ``matplotlib``
 ``matplotlib.pyplot`` ``plt``
 ===================== ==============
+
+This let's you do neat things such as plot the metrics right from the command line.
+For example,
+
+.. code-block:: bash
+
+    $ cymetric test.h5 -e "Materials[ResourceId == 15].plot(x='NucId', y='Mass', kind='bar'); plt.show()"
+
+Will pop up with the following figure:
+
+.. image:: _static/tut_nucid_mass.png
+
