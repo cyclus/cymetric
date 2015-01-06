@@ -13,8 +13,9 @@ PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-DOCREPONAME = pyne.github.com
-DOCREPOURL  = git@github.com:opowtowsky/cymetric.github.com.git
+DOCREPONAME = cymetric-docs
+DOCREPOURL  = git@github.com:scopatz/cymetric-docs.git
+DOCREPOBRANCH = gh-pages
 
 .PHONY: help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest
 
@@ -98,7 +99,7 @@ push-latest:
 	cd $(BUILDDIR) && \
 	test -d $(DOCREPONAME) || git clone $(DOCREPOURL) $(DOCREPONAME) && \
 	cd $(DOCREPONAME) && \
-	git pull origin master && \
+	git pull origin $(DOCREPOBRANCH) && \
 	test -d latest || mkdir latest && touch latest/_ && \
 	rm -r latest/* && \
 	cp -r ../html/* latest/ && \
@@ -110,7 +111,7 @@ push-release:
 	cd $(BUILDDIR) && \
 	test -d $(DOCREPONAME) || git clone $(DOCREPOURL) $(DOCREPONAME) && \
 	cd $(DOCREPONAME) && \
-	git pull origin master && \
+	git pull origin $(DOCREPOBRANCH) && \
 	test -d $(RELEASE) || mkdir $(RELEASE) && touch $(RELEASE)/_ && \
 	rm -r $(RELEASE)/* && \
 	cp -r ../html/* $(RELEASE)/ && \
@@ -122,7 +123,7 @@ push-root:
 	cd $(BUILDDIR) && \
 	test -d $(DOCREPONAME) || git clone $(DOCREPOURL) $(DOCREPONAME) && \
 	cd $(DOCREPONAME) && \
-	git pull origin master && \
+	git pull origin $(DOCREPOBRANCH) && \
 	rm -rf libref previous _sources _static *.html *.js *.inv  && \
 	cp -r ../html/* . && \
 	git add . && \
