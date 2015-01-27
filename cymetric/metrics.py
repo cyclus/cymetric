@@ -9,6 +9,8 @@ from cymetric import schemas
 from cymetric import typesystem as ts
 from cymetric.evaluator import register_metric
 
+from pyne import data
+
 
 class Metric(object):
 
@@ -55,9 +57,10 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 # The actual metrics
 #
 
-_matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+# Material Mass (quantity * massfrac)
+_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
                 'Quantity'),
-            ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
+            ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')]
 
 _matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
               ('ResourceId', ts.INT), ('ObjId', ts.INT), 
@@ -74,4 +77,20 @@ def materials(series):
     z = y.reset_index()
     return z
 
+# Activity (mass * decay_const / atomic_mass)
+_actdeps = ('Materials', ('Sim,Id', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 
+               'NucId'), 'Mass')
+
+_actschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
+              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+              ('Mass', ts.DOUBLE), ('Activity', ts.DOUBLE))
+
+@metric(name='Activity', depends=_actdeps, schema=_actschema)
+def activity(series):
+    x = series[0]
+    y = 1000 * data.N_A * x['Mass'] * data.decay_const(x['NucId']) / data.atomic_mass(x['NucId'])
+    y.name = 'Activity'
+    z = y.reset_index()
+    return z
 
