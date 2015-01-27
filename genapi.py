@@ -890,6 +890,8 @@ def setup(ns):
         print('Downloading ' + DBTYPES_JS_URL + ' ...')
         f = urlopen(DBTYPES_JS_URL)
         raw = f.read()
+        if isinstance(raw, bytes):
+            raw = raw.decode()
         parts = [p for p in raw.split("'") if p.startswith('[')]
         with io.open(dbtypes_json, 'w') as f:
             f.write('\n'.join(parts))
@@ -897,6 +899,8 @@ def setup(ns):
         tab = json.load(f)
     # get cyclus version
     verstr = subprocess.check_output(['cyclus', '--version'])
+    if isinstance(verstr, bytes):
+        verstr = verstr.decode()
     ver = tuple(map(int, verstr.split()[2].split('.')))
     # make and return a type system
     ts = TypeSystem(table=tab, cycver=ver, 
