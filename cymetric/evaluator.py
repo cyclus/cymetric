@@ -69,7 +69,8 @@ class Evaluator(object):
         for i in range(len(raw)):
             d = rec.new_datum(m.name)
             for field, dbtype, shape in m.schema:
-                d = d.add_val(field, rawd[str(field)][i], dbtype=dbtype, shape=shape)
+                d = d.add_val(m.schema.byte_names[field], rawd[str(field)][i], 
+                              dbtype=dbtype, shape=shape)
             d.record()
         self.known_tables.add(m.name)
         return raw

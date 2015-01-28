@@ -108,12 +108,18 @@ class SchemaProperty(MutableSequence):
         for col, v in zip(obj, val):
             newdescr.append(self._newcol(col, v))
         obj.descr[:] = newdescr
+        if self.idx == 0:
+            obj.byte_names.clear()
+            obj.byte_names.update({name: name.encode() for name, _, _ in newdescr})
 
     def __getitem__(self, i):
         return self.obj.descr[i][self.idx]
 
     def __setitem__(self, i, val):
-        self.obj.descr[i] = self._newcol(self.obj.descr[i], val)
+        if self.idx == 0:
+            del obj.byte_names[self.obj.descr[i][0]]
+            obj.byte_names[val] = val.encode()
+        self.obj.descr[i] = col = self._newcol(self.obj.descr[i], val)
 
     def __delitem__(self, i):
         raise AttributeError("May not delete from schema property.")
@@ -148,6 +154,7 @@ class schema(MutableSequence):
         self.names = SchemaProperty(self, 'names')
         self.dbtypes = SchemaProperty(self, 'dbtypes')
         self.shapes = SchemaProperty(self, 'shapes')
+        self.byte_names = {name: name.encode() for name in self.names}
 
     def __getitem__(self, i):
         return self.descr[i]

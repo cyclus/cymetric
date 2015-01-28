@@ -23,7 +23,8 @@ import pandas as pd
 # local imports
 from cymetric cimport cpp_cyclus
 from cymetric cimport cpp_typesystem
-from cymetric.typesystem cimport py_to_any, db_to_py, uuid_cpp_to_py
+from cymetric.typesystem cimport py_to_any, db_to_py, uuid_cpp_to_py, \
+    str_py_to_cpp
 
 
 # startup numpy
@@ -48,6 +49,7 @@ cdef class _Datum:
         cdef int i, n
         cdef std_vector[int] cpp_shape
         cdef cpp_cyclus.hold_any v = py_to_any(value, dbtype)
+        cdef std_string cfield 
         if shape is None:
             (<cpp_cyclus.Datum*> self.ptx).AddVal(field, v)
         else:
@@ -239,7 +241,7 @@ cdef class _Recorder:
 
     def new_datum(self, title):
         """Registers a backend with the recorder."""
-        cdef std_string cpp_title = str(title).encode()
+        cdef std_string cpp_title = str_py_to_cpp(title)
         cdef _Datum d = Datum(_new=False)
         (<_Datum> d).ptx = (<cpp_cyclus.Recorder*> self.ptx).NewDatum(cpp_title)
         return d
