@@ -335,7 +335,7 @@ VARS_TO_CPP = {
     'int': '<int> {var}',
     'float': '<float> {var}',
     'double': '<double> {var}',
-    'std::string': 'std_string(<const char*> {var})',
+    'std::string': 'str_py_to_cpp({var})',
     'cyclus::Blob': 'cpp_cyclus.Blob(std_string(<const char*> {var}))',
     'boost::uuids::uuid': 'uuid_py_to_cpp({var})',
     }
@@ -726,6 +726,13 @@ cdef cpp_cyclus.uuid uuid_py_to_cpp(object x):
     memcpy(u.data, c, 16)
     return u
 
+cdef std_string str_py_to_cpp(object x):
+    cdef std_string s
+    x = x.encode()
+    s = std_string(<const char*> x)
+    return s
+
+
 {% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
 {% set decl, body, expr = ts.convert_to_py('x', n) %}
 cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x):
@@ -816,6 +823,8 @@ cdef object uuid_cpp_to_py(cpp_cyclus.uuid x)
 
 
 cdef cpp_cyclus.uuid uuid_py_to_cpp(object x)
+
+cdef std_string str_py_to_cpp(object x)
 
 {% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
 cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x)

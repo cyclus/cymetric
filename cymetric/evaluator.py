@@ -15,7 +15,7 @@ def register_metric(cls):
 
 def raw_to_series(df, idx, val):
     """Convert data frame to series with multi-index."""
-    d = df.set_index(map(str, idx))
+    d = df.set_index(list(map(str, idx)))
     s = df[val]
     s.index = d.index
     return s

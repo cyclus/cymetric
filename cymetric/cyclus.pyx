@@ -111,8 +111,10 @@ cdef class _FullBackend:
         else:
             coltypes = (<cpp_cyclus.FullBackend*> self.ptx).ColumnTypes(tab)
             for cond in conds:
-                field = std_string(<const char*> cond[0])
-                cpp_conds.push_back(cpp_cyclus.Cond(field, cond[1], 
+                cond0 = cond[0].encode()
+                cond1 = cond[1].encode()
+                field = std_string(<const char*> cond0)
+                cpp_conds.push_back(cpp_cyclus.Cond(field, cond1, 
                     py_to_any(cond[2], coltypes[field])))
             conds_ptx = &cpp_conds
         # query, convert, and return
@@ -168,7 +170,9 @@ cdef class _SqliteBack(_FullBackend):
     property name:
         """The name of the database."""
         def __get__(self):
-            return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = name.decode()
+            return name
 
 
 class SqliteBack(_SqliteBack, FullBackend):
@@ -189,7 +193,9 @@ cdef class _Hdf5Back(_FullBackend):
     property name:
         """The name of the database."""
         def __get__(self):
-            return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = name.decode()
+            return name
 
 
 class Hdf5Back(_Hdf5Back, FullBackend):
