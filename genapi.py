@@ -324,7 +324,7 @@ VARS_TO_PY = {
     'int': '{var}',
     'float': '{var}',
     'double': '{var}',
-    'std::string': '{var}',
+    'std::string': 'bytes({var}).decode()',
     'cyclus::Blob': 'blob_to_bytes({var})',
     'boost::uuids::uuid': 'uuid_cpp_to_py({var})',
     }
@@ -370,7 +370,8 @@ TO_PY_CONVERTERS = {
     'int': ('', '', '{var}'),
     'float': ('', '', '{var}'),
     'double': ('', '', '{var}'),
-    'std::string': ('', '', '{var}'),
+    'std::string': ('\n', '\npy{var} = {var}\npy{var} = py{var}.decode()\n', 
+                    'py{var}'),
     'cyclus::Blob': ('', '', 'blob_to_bytes({var})'),
     'boost::uuids::uuid': ('', '', 'uuid_cpp_to_py({var})'),
     # templates
@@ -711,7 +712,7 @@ cdef object uuid_cpp_to_py(cpp_cyclus.uuid x):
     cdef list d = []
     for i in range(16):
         d.append(<unsigned int> x.data[i])
-    rtn = uuid.UUID(hex=hexlify(bytearray(d)))
+    rtn = uuid.UUID(hex=hexlify(bytearray(d)).decode())
     return rtn
 
 

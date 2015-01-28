@@ -82,7 +82,7 @@ cdef class _FullBackend:
         #del self.ptx  # don't know why this doesn't work
         free(self.ptx)
 
-    def query(self, std_string table, conds=None):
+    def query(self, table, conds=None):
         """Queries a database table.
 
         Parameters
@@ -99,6 +99,7 @@ cdef class _FullBackend:
         """
         cdef int i, j
         cdef int nrows, ncols
+        cdef std_string tab = str(table).encode()
         cdef std_string field
         cdef cpp_cyclus.QueryResult qr
         cdef std_vector[cpp_cyclus.Cond] cpp_conds
@@ -108,28 +109,39 @@ cdef class _FullBackend:
         if conds is None:
             conds_ptx = NULL
         else:
-            coltypes = (<cpp_cyclus.FullBackend*> self.ptx).ColumnTypes(table)
+            coltypes = (<cpp_cyclus.FullBackend*> self.ptx).ColumnTypes(tab)
             for cond in conds:
                 field = std_string(<const char*> cond[0])
                 cpp_conds.push_back(cpp_cyclus.Cond(field, cond[1], 
                     py_to_any(cond[2], coltypes[field])))
             conds_ptx = &cpp_conds
         # query, convert, and return
-        qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(table, conds_ptx)
+        qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(tab, conds_ptx)
         nrows = qr.rows.size()
         ncols = qr.fields.size()
-        cdef dict res = {j: [] for j in range(ncols)}
+        cdef dict res = {}
+        cdef list fields = []
+        for j in range(ncols):
+            res[j] = []
+            f = qr.fields[j]
+            fields.append(f.decode())
         for i in range(nrows):
             for j in range(ncols):
                 res[j].append(db_to_py(qr.rows[i][j], qr.types[j]))
-        res = {qr.fields[j]: v for j, v in res.items()}
-        results = pd.DataFrame(res, columns=[qr.fields[j] for j in range(ncols)])
+        res = {fields[j]: v for j, v in res.items()}
+        results = pd.DataFrame(res, columns=fields)
         return results
 
     def tables(self):
         """Retrieves the set of tables present in the database."""
         cdef std_set[std_string] ctabs = (<cpp_cyclus.FullBackend*> self.ptx).Tables()
-        return ctabs
+        cdef std_set[std_string].iterator it = ctabs.begin()
+        cdef set tabs = set()
+        while it != ctabs.end():
+            tab = deref(it)
+            tabs.add(tab.decode())
+            inc(it)
+        return tabs
 
 
 class FullBackend(_FullBackend, object):
@@ -146,7 +158,7 @@ cdef class _SqliteBack(_FullBackend):
 
     def __cinit__(self, path):
         """Full backend C++ constructor"""
-        cdef std_string cpp_path = str(path)
+        cdef std_string cpp_path = str(path).encode()
         self.ptx = new cpp_cyclus.SqliteBack(cpp_path)
 
     def flush(self):
@@ -167,7 +179,7 @@ cdef class _Hdf5Back(_FullBackend):
 
     def __cinit__(self, path):
         """Hdf5 backend C++ constructor"""
-        cdef std_string cpp_path = str(path)
+        cdef std_string cpp_path = str(path).encode()
         self.ptx = new cpp_cyclus.Hdf5Back(cpp_path)
 
     def flush(self):
