@@ -324,7 +324,7 @@ VARS_TO_PY = {
     'int': '{var}',
     'float': '{var}',
     'double': '{var}',
-    'std::string': '{var}',
+    'std::string': 'bytes({var}).decode()',
     'cyclus::Blob': 'blob_to_bytes({var})',
     'boost::uuids::uuid': 'uuid_cpp_to_py({var})',
     }
@@ -335,7 +335,7 @@ VARS_TO_CPP = {
     'int': '<int> {var}',
     'float': '<float> {var}',
     'double': '<double> {var}',
-    'std::string': 'std_string(<const char*> {var})',
+    'std::string': 'str_py_to_cpp({var})',
     'cyclus::Blob': 'cpp_cyclus.Blob(std_string(<const char*> {var}))',
     'boost::uuids::uuid': 'uuid_py_to_cpp({var})',
     }
@@ -370,7 +370,8 @@ TO_PY_CONVERTERS = {
     'int': ('', '', '{var}'),
     'float': ('', '', '{var}'),
     'double': ('', '', '{var}'),
-    'std::string': ('', '', '{var}'),
+    'std::string': ('\n', '\npy{var} = {var}\npy{var} = py{var}.decode()\n', 
+                    'py{var}'),
     'cyclus::Blob': ('', '', 'blob_to_bytes({var})'),
     'boost::uuids::uuid': ('', '', 'uuid_cpp_to_py({var})'),
     # templates
@@ -711,7 +712,7 @@ cdef object uuid_cpp_to_py(cpp_cyclus.uuid x):
     cdef list d = []
     for i in range(16):
         d.append(<unsigned int> x.data[i])
-    rtn = uuid.UUID(hex=hexlify(bytearray(d)))
+    rtn = uuid.UUID(hex=hexlify(bytearray(d)).decode())
     return rtn
 
 
@@ -724,6 +725,13 @@ cdef cpp_cyclus.uuid uuid_py_to_cpp(object x):
         c = x
     memcpy(u.data, c, 16)
     return u
+
+cdef std_string str_py_to_cpp(object x):
+    cdef std_string s
+    x = x.encode()
+    s = std_string(<const char*> x)
+    return s
+
 
 {% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
 {% set decl, body, expr = ts.convert_to_py('x', n) %}
@@ -816,6 +824,8 @@ cdef object uuid_cpp_to_py(cpp_cyclus.uuid x)
 
 cdef cpp_cyclus.uuid uuid_py_to_cpp(object x)
 
+cdef std_string str_py_to_cpp(object x)
+
 {% for n in sorted(set(ts.norms.values()), key=ts.funcname) %}
 cdef object {{ ts.funcname(n) }}_to_py({{ ts.cython_type(n) }} x)
 {%- endfor %}
@@ -890,6 +900,8 @@ def setup(ns):
         print('Downloading ' + DBTYPES_JS_URL + ' ...')
         f = urlopen(DBTYPES_JS_URL)
         raw = f.read()
+        if isinstance(raw, bytes):
+            raw = raw.decode()
         parts = [p for p in raw.split("'") if p.startswith('[')]
         with io.open(dbtypes_json, 'w') as f:
             f.write('\n'.join(parts))
@@ -897,6 +909,8 @@ def setup(ns):
         tab = json.load(f)
     # get cyclus version
     verstr = subprocess.check_output(['cyclus', '--version'])
+    if isinstance(verstr, bytes):
+        verstr = verstr.decode()
     ver = tuple(map(int, verstr.split()[2].split('.')))
     # make and return a type system
     ts = TypeSystem(table=tab, cycver=ver, 

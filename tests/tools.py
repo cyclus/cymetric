@@ -8,8 +8,8 @@ from cymetric import cyclus
 
 DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back), 
        ('test.sqlite', 'orig.sqlite', cyclus.SqliteBack)]
-#DBS = [('test.h5', cyclus.Hdf5Back)]
-#DBS = [('test.sqlite', cyclus.SqliteBack)]
+#DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back)]
+#DBS = [('test.sqlite', 'orig.sqlite', cyclus.SqliteBack)]
 
 def setup():
     for fname, oname, _ in DBS:
