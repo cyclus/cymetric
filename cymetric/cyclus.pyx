@@ -23,7 +23,8 @@ import pandas as pd
 # local imports
 from cymetric cimport cpp_cyclus
 from cymetric cimport cpp_typesystem
-from cymetric.typesystem cimport py_to_any, db_to_py, uuid_cpp_to_py
+from cymetric.typesystem cimport py_to_any, db_to_py, uuid_cpp_to_py, \
+    str_py_to_cpp
 
 
 # startup numpy
@@ -48,6 +49,7 @@ cdef class _Datum:
         cdef int i, n
         cdef std_vector[int] cpp_shape
         cdef cpp_cyclus.hold_any v = py_to_any(value, dbtype)
+        cdef std_string cfield 
         if shape is None:
             (<cpp_cyclus.Datum*> self.ptx).AddVal(field, v)
         else:
@@ -82,7 +84,7 @@ cdef class _FullBackend:
         #del self.ptx  # don't know why this doesn't work
         free(self.ptx)
 
-    def query(self, std_string table, conds=None):
+    def query(self, table, conds=None):
         """Queries a database table.
 
         Parameters
@@ -99,6 +101,7 @@ cdef class _FullBackend:
         """
         cdef int i, j
         cdef int nrows, ncols
+        cdef std_string tab = str(table).encode()
         cdef std_string field
         cdef cpp_cyclus.QueryResult qr
         cdef std_vector[cpp_cyclus.Cond] cpp_conds
@@ -108,28 +111,41 @@ cdef class _FullBackend:
         if conds is None:
             conds_ptx = NULL
         else:
-            coltypes = (<cpp_cyclus.FullBackend*> self.ptx).ColumnTypes(table)
+            coltypes = (<cpp_cyclus.FullBackend*> self.ptx).ColumnTypes(tab)
             for cond in conds:
-                field = std_string(<const char*> cond[0])
-                cpp_conds.push_back(cpp_cyclus.Cond(field, cond[1], 
+                cond0 = cond[0].encode()
+                cond1 = cond[1].encode()
+                field = std_string(<const char*> cond0)
+                cpp_conds.push_back(cpp_cyclus.Cond(field, cond1, 
                     py_to_any(cond[2], coltypes[field])))
             conds_ptx = &cpp_conds
         # query, convert, and return
-        qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(table, conds_ptx)
+        qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(tab, conds_ptx)
         nrows = qr.rows.size()
         ncols = qr.fields.size()
-        cdef dict res = {j: [] for j in range(ncols)}
+        cdef dict res = {}
+        cdef list fields = []
+        for j in range(ncols):
+            res[j] = []
+            f = qr.fields[j]
+            fields.append(f.decode())
         for i in range(nrows):
             for j in range(ncols):
                 res[j].append(db_to_py(qr.rows[i][j], qr.types[j]))
-        res = {qr.fields[j]: v for j, v in res.items()}
-        results = pd.DataFrame(res, columns=[qr.fields[j] for j in range(ncols)])
+        res = {fields[j]: v for j, v in res.items()}
+        results = pd.DataFrame(res, columns=fields)
         return results
 
     def tables(self):
         """Retrieves the set of tables present in the database."""
         cdef std_set[std_string] ctabs = (<cpp_cyclus.FullBackend*> self.ptx).Tables()
-        return ctabs
+        cdef std_set[std_string].iterator it = ctabs.begin()
+        cdef set tabs = set()
+        while it != ctabs.end():
+            tab = deref(it)
+            tabs.add(tab.decode())
+            inc(it)
+        return tabs
 
 
 class FullBackend(_FullBackend, object):
@@ -146,7 +162,7 @@ cdef class _SqliteBack(_FullBackend):
 
     def __cinit__(self, path):
         """Full backend C++ constructor"""
-        cdef std_string cpp_path = str(path)
+        cdef std_string cpp_path = str(path).encode()
         self.ptx = new cpp_cyclus.SqliteBack(cpp_path)
 
     def flush(self):
@@ -156,7 +172,9 @@ cdef class _SqliteBack(_FullBackend):
     property name:
         """The name of the database."""
         def __get__(self):
-            return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = name.decode()
+            return name
 
 
 class SqliteBack(_SqliteBack, FullBackend):
@@ -167,7 +185,7 @@ cdef class _Hdf5Back(_FullBackend):
 
     def __cinit__(self, path):
         """Hdf5 backend C++ constructor"""
-        cdef std_string cpp_path = str(path)
+        cdef std_string cpp_path = str(path).encode()
         self.ptx = new cpp_cyclus.Hdf5Back(cpp_path)
 
     def flush(self):
@@ -177,7 +195,9 @@ cdef class _Hdf5Back(_FullBackend):
     property name:
         """The name of the database."""
         def __get__(self):
-            return (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = name.decode()
+            return name
 
 
 class Hdf5Back(_Hdf5Back, FullBackend):
@@ -221,7 +241,7 @@ cdef class _Recorder:
 
     def new_datum(self, title):
         """Registers a backend with the recorder."""
-        cdef std_string cpp_title = str(title).encode()
+        cdef std_string cpp_title = str_py_to_cpp(title)
         cdef _Datum d = Datum(_new=False)
         (<_Datum> d).ptx = (<cpp_cyclus.Recorder*> self.ptx).NewDatum(cpp_title)
         return d
