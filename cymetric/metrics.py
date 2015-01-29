@@ -77,32 +77,20 @@ def materials(series):
     z = y.reset_index()
     return z
 
-# TEST: MaterialsSquared
-deps = [('Materials', ('SimId', 'ResourceId', 'NucId'), 'Mass')]
-
-schema = [('SimId', ts.UUID), ('ResourceId', ts.INT),
-          ('NucId', ts.INT),  ('MassSquared', ts.DOUBLE)]
-
-@metric(name='MaterialsSquared', depends=deps, schema=schema)
-def mats_sqrd(series):
-    mats = series[0]
-    rtn = mats**2
-    rtn = rtn.reset_index()
-    return rtn
-
 # Activity (mass * decay_const / atomic_mass)
 _actdeps = [('Materials', ('ResourceId'), 'Mass'), 
             ('Materials', ('ResourceId'), 'NucId')]
 
-_actschema = [('ResourceId', ts.INT), ('NucId', ts.INT), 
-              ('Mass', ts.DOUBLE), ('Activity', ts.DOUBLE)]
+_actschema = [('ResourceId', ts.INT), ('Activity', ts.DOUBLE)]
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
-    x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
-            on=['ResourceId'], how='inner').set_index(['ResourceId'])
-    y = 1000 * data.N_A * x['Mass'] * data.decay_const(x['NucId']) / data.atomic_mass(x['NucId'])
-    y.name = 'Activity'
-    z = y.reset_index()
-    return z
+    mass = series[0]
+    nucid = series[1]
+    act = (1000 * data.N_A * mass['Mass'] * 
+         data.decay_const(nucid['NucId']) /
+         data.atomic_mass(nucid['NucId']))
+    act.name = 'Activity'
+    rtn = act.reset_index()
+    return rtn
 
