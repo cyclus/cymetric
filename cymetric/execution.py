@@ -141,8 +141,6 @@ class ExecutionContext(MutableMapping):
         """
         self._ctx = ctx = {}
         self.evaler = evaler or evaluator.Evaluator(db)
-        for metric in METRIC_REGISTRY:
-            ctx[metric] = MetricProxy(metric, evaler)
         import cymetric as cym  # lazy import needed
         ctx['cym'] = cym
         ctx['np'] = np
@@ -160,6 +158,8 @@ class ExecutionContext(MutableMapping):
     def __getitem__(self, key):
         if key in __builtins__:
             raise KeyError 
+        elif key in METRIC_REGISTRY:
+            self._ctx[key] = MetricProxy(key, self.evaler)
         elif key not in self._ctx:
             self._ctx[key] = ColumnProxy(key)
         return self._ctx[key]
