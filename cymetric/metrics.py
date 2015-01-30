@@ -78,19 +78,19 @@ def materials(series):
     return z
 
 # Activity (mass * decay_const / atomic_mass)
-_actdeps = ('Materials', ('Sim,Id', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 
-               'NucId'), 'Mass')
+_actdeps = [('Materials', ('ResourceId'), 'Mass'), 
+            ('Materials', ('ResourceId'), 'NucId')]
 
-_actschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
-              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-              ('Mass', ts.DOUBLE), ('Activity', ts.DOUBLE))
+_actschema = [('ResourceId', ts.INT), ('Activity', ts.DOUBLE)]
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
-    x = series[0]
-    y = 1000 * data.N_A * x['Mass'] * data.decay_const(x['NucId']) / data.atomic_mass(x['NucId'])
-    y.name = 'Activity'
-    z = y.reset_index()
-    return z
+    mass = series[0]
+    nucid = series[1]
+    act = (1000 * data.N_A * mass['Mass'] * 
+         data.decay_const(nucid['NucId']) /
+         data.atomic_mass(nucid['NucId']))
+    act.name = 'Activity'
+    rtn = act.reset_index()
+    return rtn
 
