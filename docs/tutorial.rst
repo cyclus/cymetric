@@ -257,7 +257,7 @@ metric, you could write the following.  Call the new metric ``MaterialsSquared``
     def mats_sqrd(series):
         mats = series[0]
         rtn = mats**2
-		rtn.name = 'MaterialsSquared'
+        rtn.name = 'MaterialsSquared'
         rtn = rtn.reset_index()
         return rtn
 
