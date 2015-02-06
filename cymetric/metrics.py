@@ -2,6 +2,7 @@
 """
 from __future__ import print_function, unicode_literals
 
+import numpy as np
 import pandas as pd
 
 from cymetric import cyclus
@@ -24,9 +25,12 @@ class Metric(object):
 
 
 def _genmetricclass(f, name, depends, scheme):
+    if not isinstance(scheme, schemas.schema):
+        scheme = schemas.schema(scheme)
+
     class Cls(Metric):
         dependencies = depends
-        schema = schemas.schema(scheme)
+        schema = scheme 
 
         def __init__(self, db):
             super(Cls, self).__init__(db)
@@ -55,6 +59,8 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 # The actual metrics
 #
 
+# Materials
+
 _matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
                 'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
@@ -73,5 +79,53 @@ def materials(series):
     y.name = 'Mass'
     z = y.reset_index()
     return z
+
+del _matdeps, _matschema
+
+
+
+# Agents
+
+_agentsdeps = [
+    ('AgentEntry', ('SimId', 'AgentId'), 'Kind'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'Spec'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'Prototype'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'ParentId'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'Lifetime'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'EnterTime'),
+    ('AgentExit', ('SimId', 'AgentId'), 'ExitTime'),
+    ('DecomSchedule', ('SimId', 'AgentId'), 'DecomTime'),
+    ('Info', ('SimId',), 'Duration'),
+    ]
+
+_agentsschema = schemas.schema([
+    ('SimId', ts.UUID), ('AgentId', ts.INT), ('Kind', ts.STRING), 
+    ('Spec', ts.STRING), ('Prototype', ts.STRING), ('ParentId', ts.INT), 
+    ('Lifetime', ts.INT), ('EnterTime', ts.INT), ('ExitTime', ts.INT),
+    ])
+
+@metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
+def agents(series):
+    mergeon  = ['SimId', 'AgentId']
+    idx = series[0].index
+    df = series[0].reset_index()
+    for s in series[1:6]:
+        df = pd.merge(df, s.reset_index(), on=mergeon, how='inner')
+    agent_exit = series[6]
+    if agent_exit is None:
+        agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx), dtype='int')
+    else:
+        agent_exit = agent_exit.reindex(index=idx)
+    decom_time = series[7]
+    if decom_time is not None:
+        agent_exit.fillna(decom_time, inplace=True)
+    duration = series[8]
+    agent_exit.fillna(duration, inplace=True)
+    agent_exit.name = 'ExitTime'
+    df = pd.merge(df, agent_exit.reset_index(), on=mergeon, how='inner')
+    return df
+
+del _agentsdeps, _agentsschema
+
 
 
