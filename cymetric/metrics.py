@@ -113,7 +113,7 @@ def agents(series):
         df = pd.merge(df, s.reset_index(), on=mergeon, how='inner')
     agent_exit = series[6]
     if agent_exit is None:
-        agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx), dtype='int')
+        agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx))
     else:
         agent_exit = agent_exit.reindex(index=idx)
     decom_time = series[7]
@@ -121,6 +121,8 @@ def agents(series):
         agent_exit.fillna(decom_time, inplace=True)
     duration = series[8]
     agent_exit.fillna(duration, inplace=True)
+    import pdb; pdb.set_trace()
+    agent_exit = agent_exit.astype('int')
     agent_exit.name = 'ExitTime'
     df = pd.merge(df, agent_exit.reset_index(), on=mergeon, how='inner')
     return df

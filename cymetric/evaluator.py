@@ -24,10 +24,12 @@ def raw_to_series(df, idx, val):
 class Evaluator(object):
     """An evaluation context for metrics."""
 
-    def __init__(self, db):
+    def __init__(self, db, write=True):
         """Parameters
         ----------
         db : database
+        write : bool, optional
+            Flag for whether metrics should be written to the database.
 
         Attributes
         ----------
@@ -36,6 +38,7 @@ class Evaluator(object):
         rawcache : dict
             Results of querying metrics with given conditions.
         """
+        self.write = write
         self.metrics = {}
         self.rawcache = {}
         self.db = db
@@ -64,7 +67,7 @@ class Evaluator(object):
             return raw
         self.rawcache[rawkey] = raw
         # write back to db
-        if m.name in self.known_tables:
+        if (m.name in self.known_tables) or (not self.write):
             return raw
         rec = self.recorder
         rawd = raw.to_dict(outtype='series')
@@ -78,7 +81,7 @@ class Evaluator(object):
         return raw
 
 
-def eval(metric, db, conds=None):
+def eval(metric, db, conds=None, write=True):
     """Evalutes a metric with the given conditions in a database."""
-    e = Evaluator(db)
+    e = Evaluator(db, write=write)
     return e.eval(str(metric), conds=conds)
