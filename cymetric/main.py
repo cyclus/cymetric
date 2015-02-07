@@ -25,7 +25,7 @@ def main():
     ns = parse_args()
     db = dbopen(ns.db)
     if ns.listing:
-        for tab in sorted(db.tables()):
+        for tab in sorted(db.tables):
             print(tab)
     if ns.exec_code is not None:
         exec_code(ns.exec_code, db)

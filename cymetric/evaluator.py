@@ -41,7 +41,7 @@ class Evaluator(object):
         self.db = db
         self.recorder = rec = cyclus.Recorder(inject_sim_id=False)
         rec.register_backend(db)
-        self.known_tables = db.tables()
+        self.known_tables = db.tables
 
     def get_metric(self, metric):
         if metric not in self.metrics:
@@ -57,9 +57,11 @@ class Evaluator(object):
         series = []
         for dep in m.dependencies:
             d = self.eval(dep[0], conds=conds)
-            s = raw_to_series(d, dep[1], dep[2])
+            s = None if d is None else raw_to_series(d, dep[1], dep[2])
             series.append(s)
         raw = m(series=series, conds=conds, known_tables=self.known_tables)
+        if raw is None:
+            return raw
         self.rawcache[rawkey] = raw
         # write back to db
         if m.name in self.known_tables:
