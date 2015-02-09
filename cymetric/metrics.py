@@ -1,6 +1,7 @@
 """A collection of metrics that come stock with cymetric.
 """
 from __future__ import print_function, unicode_literals
+import inspect
 
 import numpy as np
 import pandas as pd
@@ -31,7 +32,8 @@ def _genmetricclass(f, name, depends, scheme):
 
     class Cls(Metric):
         dependencies = depends
-        schema = scheme 
+        schema = scheme
+        func = f
 
         def __init__(self, db):
             super(Cls, self).__init__(db)
@@ -45,6 +47,7 @@ def _genmetricclass(f, name, depends, scheme):
             return f(series)
 
     Cls.__name__ = str(name)
+    Cls.__doc__ = inspect.getdoc(f)
     register_metric(Cls)
     return Cls
 

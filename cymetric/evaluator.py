@@ -2,23 +2,16 @@
 """
 from __future__ import unicode_literals, print_function
 
-from cymetric import cyclus
-
 import pandas as pd
+
+from cymetric import cyclus
+from cymetric.tools import raw_to_series
 
 METRIC_REGISTRY = {}
 
 def register_metric(cls):
     """Adds a metric to the registry."""
     METRIC_REGISTRY[cls.__name__] = cls
-
-
-def raw_to_series(df, idx, val):
-    """Convert data frame to series with multi-index."""
-    d = df.set_index(list(map(str, idx)))
-    s = df[val]
-    s.index = d.index
-    return s
 
 
 class Evaluator(object):
