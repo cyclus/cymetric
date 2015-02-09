@@ -8,6 +8,7 @@ import pandas as pd
 from cymetric import cyclus
 from cymetric import schemas
 from cymetric import typesystem as ts
+from cymetric import tools
 from cymetric.evaluator import register_metric
 
 
@@ -106,25 +107,31 @@ _agentsschema = schemas.schema([
 
 @metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
 def agents(series):
+    """Computes the Agents table. This is tricky because both the AgentExit
+    table and the DecomSchedule table may not be present in the database.
+    Furthermore, the Info table does not contain the AgentId column. This
+    computation handles the calculation of the ExitTime in the face a 
+    significant amounts of missing data.
+    """
     mergeon  = ['SimId', 'AgentId']
     idx = series[0].index
     df = series[0].reset_index()
     for s in series[1:6]:
-        df = pd.merge(df, s.reset_index(), on=mergeon, how='inner')
+        df = pd.merge(df, s.reset_index(), on=mergeon)
     agent_exit = series[6]
     if agent_exit is None:
         agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx))
+        agent_exit.name = 'ExitTime'
     else:
         agent_exit = agent_exit.reindex(index=idx)
+    df = pd.merge(df, agent_exit.reset_index(), on=mergeon)
     decom_time = series[7]
     if decom_time is not None:
-        agent_exit.fillna(decom_time, inplace=True)
+        df = tools.merge_and_fillna_col(df, decom_time.reset_index(), 
+                                        'ExitTime', 'DecomTime', on=mergeon)
     duration = series[8]
-    agent_exit.fillna(duration, inplace=True)
-    import pdb; pdb.set_trace()
-    agent_exit = agent_exit.astype('int')
-    agent_exit.name = 'ExitTime'
-    df = pd.merge(df, agent_exit.reset_index(), on=mergeon, how='inner')
+    df = tools.merge_and_fillna_col(df, duration.reset_index(), 
+                                    'ExitTime', 'Duration', on=['SimId'])
     return df
 
 del _agentsdeps, _agentsschema
