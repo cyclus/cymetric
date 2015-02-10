@@ -35,6 +35,8 @@ def _genmetricclass(f, name, depends, scheme):
         schema = scheme
         func = f
 
+        __doc__ = inspect.getdoc(f)
+
         def __init__(self, db):
             super(Cls, self).__init__(db)
 
@@ -47,7 +49,6 @@ def _genmetricclass(f, name, depends, scheme):
             return f(series)
 
     Cls.__name__ = str(name)
-    Cls.__doc__ = inspect.getdoc(f)
     register_metric(Cls)
     return Cls
 
