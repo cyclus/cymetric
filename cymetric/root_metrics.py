@@ -12,7 +12,7 @@ def _genrootclass(name):
         @property
         def schema(self):
             if self._schema is not None:
-                return
+                return self._schema
             # fill in schema code
 
         @property
@@ -24,6 +24,8 @@ def _genrootclass(name):
             self.db = db
 
         def __call__(self, conds=None, *args, **kwargs):
+            if self.name not in self.db.tables:
+                return None
             return self.db.query(self.name, conds=conds)
 
     Cls.__name__ = str(name)
@@ -55,3 +57,7 @@ build_schedule = root_metric(name='BuildSchedule')
 snapshots = root_metric(name='Snapshots')
 debug_requests = root_metric(name='DebugRequests')
 debug_bids = root_metric(name='DebugBids')
+
+# Archetype-dependent custom tables that we know about
+brightlite_reactor_data = root_metric(name='BrightLite_Reactor_Data')
+

@@ -214,8 +214,8 @@ many metrics, then its is better to create your own ``Evaluator`` and call its
 .. code-block:: python
 
     evaler = cym.Evaluator(db)
-    frame1 = evaler('Materials') 
-    frame2 = evaler('AgentEntry', conds=[('Kind', '==', 'Facility')]) 
+    frame1 = evaler.eval('Materials') 
+    frame2 = evaler.eval('AgentEntry', conds=[('Kind', '==', 'Facility')]) 
     
 And you can run with the data from there! We recommend learning pandas to get the 
 most out of your analysis from this point.
@@ -250,13 +250,14 @@ metric, you could write the following.  Call the new metric ``MaterialsSquared``
 
     deps = [('Materials', ('SimId', 'ResourceId', 'NucId'), 'Mass')]
 
-    schema = [('SimId', cym.UUID), ('ResourceId', ts.INT),
-              ('NucId', cym.INT),  ('MassSquared', ts.DOUBLE)]
+    schema = [('SimId', cym.UUID), ('ResourceId', cym.INT),
+              ('NucId', cym.INT),  ('MassSquared', cym.DOUBLE)]
 
     @cym.metric(name='MaterialsSquared', depends=deps, schema=schema)
     def mats_sqrd(series):
         mats = series[0]
         rtn = mats**2
+        rtn.name = 'MaterialsSquared'
         rtn = rtn.reset_index()
         return rtn
 

@@ -78,6 +78,7 @@ cdef class _FullBackend:
 
     def __cinit__(self):
         """Full backend C++ constructor"""
+        self._tables = None
 
     def __dealloc__(self):
         """Full backend C++ destructor."""
@@ -136,16 +137,24 @@ cdef class _FullBackend:
         results = pd.DataFrame(res, columns=fields)
         return results
 
-    def tables(self):
+    property tables:
         """Retrieves the set of tables present in the database."""
-        cdef std_set[std_string] ctabs = (<cpp_cyclus.FullBackend*> self.ptx).Tables()
-        cdef std_set[std_string].iterator it = ctabs.begin()
-        cdef set tabs = set()
-        while it != ctabs.end():
-            tab = deref(it)
-            tabs.add(tab.decode())
-            inc(it)
-        return tabs
+        def __get__(self):
+            if self._tables is not None:
+                return self._tables
+            cdef std_set[std_string] ctabs = \
+                (<cpp_cyclus.FullBackend*> self.ptx).Tables()
+            cdef std_set[std_string].iterator it = ctabs.begin()
+            cdef set tabs = set()
+            while it != ctabs.end():
+                tab = deref(it)
+                tabs.add(tab.decode())
+                inc(it)
+            self._tables = tabs
+            return self._tables
+
+        def __set__(self, value):
+            self._tables = value
 
 
 class FullBackend(_FullBackend, object):
