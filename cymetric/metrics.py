@@ -106,6 +106,8 @@ def activity(series):
     rtn = act.reset_index()
     return rtn
 
+del _actdeps, _actschema
+
 
 # Agents
 
