@@ -2,6 +2,7 @@
 """
 from __future__ import unicode_literals, print_function
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -53,3 +54,22 @@ def merge_and_fillna_col(left, right, lcol, rcol, how='inner', on=None):
     f = m[lcol].fillna(m[rcol])
     left[lcol] = f
     return left
+
+
+def ensure_dt_bytes(dt):
+    """Ensures that a structured numpy dtype is given in a Python 2 & 3
+    compatible way.
+    """
+    if sys.version_info[0] > 2:
+        return dt
+    dety = []
+    for t in dt:
+        t0 = t[0].encode() if isinstance(t[0], unicode) else t[0]
+        t1 = t[1].encode() if isinstance(t[1], unicode) else t[1]
+        ty = (t0, t1)
+        if len(t) == 3:
+            ty = ty + t[2:]
+        dety.append(ty)
+    return dety
+
+

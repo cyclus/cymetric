@@ -14,7 +14,7 @@ from pandas.util.testing import assert_frame_equal
 
 from cymetric import cyclus
 from cymetric import metrics
-from cymetric.tools import raw_to_series
+from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 
 def test_agents():
@@ -34,10 +34,11 @@ def test_agents():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 34, 'Facility', ':Brightlite:ReactorFacility', 'LWR', 33, -1, 5, 120.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 35, 'Facility', ':Brightlite:ReactorFacility', 'LWR', 33, -1, 5, 120.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 36, 'Facility', ':Brightlite:ReactorFacility', 'FRx', 33, -1, 10, 120.0),
-        ], dtype=[('SimId', b'O'), ('AgentId', b'<i8'), 
-                  ('Kind', b'O'), ('Spec', b'O'), ('Prototype', b'O'), 
-                  ('ParentId', b'<i8'), ('Lifetime', b'<i8'), 
-                  ('EnterTime', b'<i8'), ('ExitTime', b'<f8')])
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), 
+                ('Kind', 'O'), ('Spec', 'O'), ('Prototype', 'O'), 
+                ('ParentId', '<i8'), ('Lifetime', '<i8'), 
+                ('EnterTime', '<i8'), ('ExitTime', '<f8')]))
         )
     agent_entry = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 22, 'Region', ':agents:NullRegion', 'USA', -1, -1, 0),
@@ -55,10 +56,11 @@ def test_agents():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 34, 'Facility', ':Brightlite:ReactorFacility', 'LWR', 33, -1, 5),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 35, 'Facility', ':Brightlite:ReactorFacility', 'LWR', 33, -1, 5),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 36, 'Facility', ':Brightlite:ReactorFacility', 'FRx', 33, -1, 10),
-        ], dtype=[('SimId', b'O'), ('AgentId', b'<i8'), 
-                  ('Kind', b'O'), ('Spec', b'O'), ('Prototype', b'O'), 
-                  ('ParentId', b'<i8'), ('Lifetime', b'<i8'), 
-                  ('EnterTime', b'<i8')])
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), 
+                ('Kind', 'O'), ('Spec', 'O'), ('Prototype', 'O'), 
+                ('ParentId', '<i8'), ('Lifetime', '<i8'), 
+                ('EnterTime', '<i8')]))
         )
     info = pd.DataFrame({'Duration': {0: 120}, 
         'SimId': {0: UUID('f22f2281-2464-420a-8325-37320fd418f8')}, 

@@ -33,7 +33,7 @@ def _genmetricclass(f, name, depends, scheme):
     class Cls(Metric):
         dependencies = depends
         schema = scheme
-        func = f
+        func = staticmethod(f)
 
         __doc__ = inspect.getdoc(f)
 
@@ -67,7 +67,7 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 # Materials
 
 _matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
-                'Quantity'),
+             'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
 
 _matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
