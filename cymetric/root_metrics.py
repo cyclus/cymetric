@@ -12,7 +12,7 @@ def _genrootclass(name):
         @property
         def schema(self):
             if self._schema is not None:
-                return
+                return self._schema
             # fill in schema code
 
         @property
@@ -24,6 +24,8 @@ def _genrootclass(name):
             self.db = db
 
         def __call__(self, conds=None, *args, **kwargs):
+            if self.name not in self.db.tables:
+                return None
             return self.db.query(self.name, conds=conds)
 
     Cls.__name__ = str(name)

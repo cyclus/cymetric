@@ -1,12 +1,15 @@
 """A collection of metrics that come stock with cymetric.
 """
 from __future__ import print_function, unicode_literals
+import inspect
 
+import numpy as np
 import pandas as pd
 
 from cymetric import cyclus
 from cymetric import schemas
 from cymetric import typesystem as ts
+from cymetric import tools
 from cymetric.evaluator import register_metric
 
 
@@ -24,9 +27,15 @@ class Metric(object):
 
 
 def _genmetricclass(f, name, depends, scheme):
+    if not isinstance(scheme, schemas.schema):
+        scheme = schemas.schema(scheme)
+
     class Cls(Metric):
         dependencies = depends
-        schema = schemas.schema(scheme)
+        schema = scheme
+        func = staticmethod(f)
+
+        __doc__ = inspect.getdoc(f)
 
         def __init__(self, db):
             super(Cls, self).__init__(db)
@@ -55,8 +64,10 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 # The actual metrics
 #
 
+# Materials
+
 _matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
-                'Quantity'),
+             'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
 
 _matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
@@ -73,5 +84,61 @@ def materials(series):
     y.name = 'Mass'
     z = y.reset_index()
     return z
+
+del _matdeps, _matschema
+
+
+
+# Agents
+
+_agentsdeps = [
+    ('AgentEntry', ('SimId', 'AgentId'), 'Kind'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'Spec'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'Prototype'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'ParentId'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'Lifetime'),
+    ('AgentEntry', ('SimId', 'AgentId'), 'EnterTime'),
+    ('AgentExit', ('SimId', 'AgentId'), 'ExitTime'),
+    ('DecomSchedule', ('SimId', 'AgentId'), 'DecomTime'),
+    ('Info', ('SimId',), 'Duration'),
+    ]
+
+_agentsschema = schemas.schema([
+    ('SimId', ts.UUID), ('AgentId', ts.INT), ('Kind', ts.STRING), 
+    ('Spec', ts.STRING), ('Prototype', ts.STRING), ('ParentId', ts.INT), 
+    ('Lifetime', ts.INT), ('EnterTime', ts.INT), ('ExitTime', ts.INT),
+    ])
+
+@metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
+def agents(series):
+    """Computes the Agents table. This is tricky because both the AgentExit
+    table and the DecomSchedule table may not be present in the database.
+    Furthermore, the Info table does not contain the AgentId column. This
+    computation handles the calculation of the ExitTime in the face a 
+    significant amounts of missing data.
+    """
+    mergeon  = ['SimId', 'AgentId']
+    idx = series[0].index
+    df = series[0].reset_index()
+    for s in series[1:6]:
+        df = pd.merge(df, s.reset_index(), on=mergeon)
+    agent_exit = series[6]
+    if agent_exit is None:
+        agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx))
+        agent_exit.name = 'ExitTime'
+    else:
+        agent_exit = agent_exit.reindex(index=idx)
+    df = pd.merge(df, agent_exit.reset_index(), on=mergeon)
+    decom_time = series[7]
+    if decom_time is not None:
+        df = tools.merge_and_fillna_col(df, decom_time.reset_index(), 
+                                        'ExitTime', 'DecomTime', on=mergeon)
+    duration = series[8]
+    df = tools.merge_and_fillna_col(df, duration.reset_index(), 
+                                    'ExitTime', 'Duration', on=['SimId'])
+    return df
+
+del _agentsdeps, _agentsschema
+
 
 

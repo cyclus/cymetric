@@ -189,9 +189,9 @@ class ExecutionContext(MutableMapping):
     def __del__(self):
         self.evaler.db.flush()
 
-def exec_code(code, db):
+def exec_code(code, db, write=True):
     """Runs a code snipper in the context of a database."""
-    evaler = Evaluator(db)
+    evaler = Evaluator(db, write=write)
     glb = {}
     loc = ExecutionContext(evaler=evaler)
     exec(code, glb, loc)

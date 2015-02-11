@@ -2,9 +2,10 @@
 """
 from __future__ import unicode_literals, print_function
 
-from cymetric import cyclus
-
 import pandas as pd
+
+from cymetric import cyclus
+from cymetric.tools import raw_to_series
 
 METRIC_REGISTRY = {}
 
@@ -13,21 +14,15 @@ def register_metric(cls):
     METRIC_REGISTRY[cls.__name__] = cls
 
 
-def raw_to_series(df, idx, val):
-    """Convert data frame to series with multi-index."""
-    d = df.set_index(list(map(str, idx)))
-    s = df[val]
-    s.index = d.index
-    return s
-
-
 class Evaluator(object):
     """An evaluation context for metrics."""
 
-    def __init__(self, db):
+    def __init__(self, db, write=True):
         """Parameters
         ----------
         db : database
+        write : bool, optional
+            Flag for whether metrics should be written to the database.
 
         Attributes
         ----------
@@ -36,12 +31,13 @@ class Evaluator(object):
         rawcache : dict
             Results of querying metrics with given conditions.
         """
+        self.write = write
         self.metrics = {}
         self.rawcache = {}
         self.db = db
         self.recorder = rec = cyclus.Recorder(inject_sim_id=False)
         rec.register_backend(db)
-        self.known_tables = db.tables()
+        self.known_tables = db.tables
 
     def get_metric(self, metric):
         if metric not in self.metrics:
@@ -57,12 +53,14 @@ class Evaluator(object):
         series = []
         for dep in m.dependencies:
             d = self.eval(dep[0], conds=conds)
-            s = raw_to_series(d, dep[1], dep[2])
+            s = None if d is None else raw_to_series(d, dep[1], dep[2])
             series.append(s)
         raw = m(series=series, conds=conds, known_tables=self.known_tables)
+        if raw is None:
+            return raw
         self.rawcache[rawkey] = raw
         # write back to db
-        if m.name in self.known_tables:
+        if (m.name in self.known_tables) or (not self.write):
             return raw
         rec = self.recorder
         rawd = raw.to_dict(outtype='series')
@@ -76,7 +74,7 @@ class Evaluator(object):
         return raw
 
 
-def eval(metric, db, conds=None):
+def eval(metric, db, conds=None, write=True):
     """Evalutes a metric with the given conditions in a database."""
-    e = Evaluator(db)
+    e = Evaluator(db, write=write)
     return e.eval(str(metric), conds=conds)
