@@ -117,9 +117,14 @@ cdef class _FullBackend:
                 cond0 = cond[0].encode()
                 cond1 = cond[1].encode()
                 field = std_string(<const char*> cond0)
+                if coltypes.count(field) == 0:
+                    continue  # skips non-existent columns
                 cpp_conds.push_back(cpp_cyclus.Cond(field, cond1, 
                     py_to_any(cond[2], coltypes[field])))
-            conds_ptx = &cpp_conds
+            if cpp_conds.size() == 0:
+                conds_ptx = NULL 
+            else:
+                conds_ptx = &cpp_conds
         # query, convert, and return
         qr = (<cpp_cyclus.FullBackend*> self.ptx).Query(tab, conds_ptx)
         nrows = qr.rows.size()
