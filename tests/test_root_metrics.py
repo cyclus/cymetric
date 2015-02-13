@@ -37,6 +37,8 @@ def test_recipes(db, fname, backend):
 def test_products(db, fname, backend):
     r = root_metrics.products(db=db)
     obs = r()
+    if obs is None:
+        return
     assert_less(0, len(obs))
     assert_equal('Products', r.name)
 
@@ -58,6 +60,8 @@ def test_agent_entry(db, fname, backend):
 def test_agent_exit(db, fname, backend):
     r = root_metrics.agent_exit(db=db)
     obs = r()
+    if obs is None:
+        return
     assert_less(0, len(obs))
     assert_equal('AgentExit', r.name)
 
@@ -93,6 +97,8 @@ def test_input_files(db, fname, backend):
 def test_decom_schedule(db, fname, backend):
     r = root_metrics.decom_schedule(db=db)
     obs = r()
+    if obs is None:
+        return
     assert_less(0, len(obs))
     assert_equal('DecomSchedule', r.name)
 
