@@ -83,7 +83,7 @@ def test_materials():
                 ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
                 ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
         )
-    resources = pd.DataFrame(np.array([
+    res = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 9, 7, 'Material', 1, 1, 'kg', 5, 0, 0),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
@@ -91,7 +91,7 @@ def test_materials():
                 ('Units', 'O'), ('QualId', '<i8'), ('Parent1', '<i8'), 
                 ('Parent2', '<i8')]))
         )
-    compositions = pd.DataFrame(np.array([
+    comps = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 922350000, 0.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 922380000, 0.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 942390000, 0.0),
@@ -99,12 +99,15 @@ def test_materials():
                 ('SimId', 'O'), ('QualId', '<i8'), ('NucId', '<i8'), 
                 ('MassFrac', '<f8')]))
         )
-#    info = pd.DataFrame({'Mass': {0: 120}, 
+#    info = pd.DataFrame({'Mass': {0: ??}, 
 #        'SimId': {0: UUID('f22f2281-2464-420a-8325-37320fd418f8')}, 
 #        })
 #    mass = info.set_index(['SimId'])
-    series = [raw_to_series(materials, ['SimId', 'QualId'], col) \
-              for col in ('ResourceId', 'ObjId', 'TimeCreated', 'NucId', 'Mass')]
+    s1 = [raw_to_series(res, ['SimId', 'QualId'], col_r) \
+          for col_r in ('ResourceId', 'ObjId', 'TimeCreated', 'Quantity')]
+    s2 = [raw_to_series(comps, ['SimId', 'QualId'], col_c) \
+          for col_c in ('NucId', 'MassFrac')]
+    series = [s1, s2]
 #    series += [None, None, mass]
     obs = metrics.materials.func(series)
     assert_frame_equal(exp, obs)
