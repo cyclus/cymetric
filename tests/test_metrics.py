@@ -74,5 +74,41 @@ def test_agents():
     assert_frame_equal(exp, obs)
 
 
+def test_materials():
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 942390000, 0),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
+                ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
+        )
+    resources = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 9, 7, 'Material', 1, 1, 'kg', 5, 0, 0),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
+                ('Type', 'O'), ('TimeCreated', '<i8'), ('Quantity', '<i8'), 
+                ('Units', 'O'), ('QualId', '<i8'), ('Parent1', '<i8'), 
+                ('Parent2', '<i8')]))
+        )
+    compositions = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 922350000, 0.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 922380000, 0.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 942390000, 0.0),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('QualId', '<i8'), ('NucId', '<i8'), 
+                ('MassFrac', '<f8')]))
+        )
+#    info = pd.DataFrame({'Mass': {0: 120}, 
+#        'SimId': {0: UUID('f22f2281-2464-420a-8325-37320fd418f8')}, 
+#        })
+#    mass = info.set_index(['SimId'])
+    series = [raw_to_series(materials, ['SimId', 'QualId'], col) \
+              for col in ('ResourceId', 'ObjId', 'TimeCreated', 'NucId', 'Mass')]
+#    series += [None, None, mass]
+    obs = metrics.materials.func(series)
+    assert_frame_equal(exp, obs)
+
+
 if __name__ == "__main__":
     nose.runmodule()
