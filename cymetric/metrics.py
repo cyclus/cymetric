@@ -90,8 +90,8 @@ del _matdeps, _matschema
 
 
 # Activity (mass * decay_const / atomic_mass)
-_actdeps = [('Materials', ('ResourceId'), 'Mass'), 
-            ('Materials', ('ResourceId'), 'NucId')]
+_actdeps = [('Materials', ('ResourceId',), 'Mass'), 
+            ('Materials', ('ResourceId',), 'NucId')]
 
 _actschema = [('ResourceId', ts.INT), ('Activity', ts.DOUBLE)]
 
