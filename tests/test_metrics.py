@@ -103,10 +103,11 @@ def test_materials():
 #        'SimId': {0: UUID('f22f2281-2464-420a-8325-37320fd418f8')}, 
 #        })
 #    mass = info.set_index(['SimId'])
-    s1 = [raw_to_series(res, ['SimId', 'QualId'], col_r) \
-          for col_r in ('ResourceId', 'ObjId', 'TimeCreated', 'Quantity')]
-    s2 = [raw_to_series(comps, ['SimId', 'QualId'], col_c) \
-          for col_c in ('NucId', 'MassFrac')]
+    
+    s1 = raw_to_series(res, ['SimId', 'QualId'], col_r) \
+         for col_r in ('ResourceId', 'ObjId', 'TimeCreated', 'Quantity')
+    s2 = raw_to_series(comps, ['SimId', 'QualId'], col_c) \
+         for col_c in ('NucId', 'MassFrac')
     series = [s1, s2]
 #    series += [None, None, mass]
     obs = metrics.materials.func(series)
