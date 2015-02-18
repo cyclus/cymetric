@@ -104,11 +104,11 @@ def test_materials():
 #        })
 #    mass = info.set_index(['SimId'])
     
-    s1 = raw_to_series(res, ['SimId', 'QualId'], col_r) \
-         for col_r in ('ResourceId', 'ObjId', 'TimeCreated', 'Quantity')
-    s2 = raw_to_series(comps, ['SimId', 'QualId'], col_c) \
-         for col_c in ('NucId', 'MassFrac')
-    series = [s1, s2]
+    s1 = [raw_to_series(res, ['SimId', 'QualId'], col_r) \
+         for col_r in ('ResourceId', 'ObjId', 'TimeCreated', 'Quantity')]
+    s2 = [raw_to_series(comps, ['SimId', 'QualId'], col_c) \
+         for col_c in ('NucId', 'MassFrac')]
+    series = s1 + s2
 #    series += [None, None, mass]
     obs = metrics.materials.func(series)
     assert_frame_equal(exp, obs)
