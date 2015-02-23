@@ -99,10 +99,11 @@ _actschema = [('ResourceId', ts.INT), ('Activity', ts.DOUBLE)]
 def activity(series):
     mass = series[0]
     nucid = series[1]
-    act = (1000 * data.N_A * mass['Mass'] * 
-         data.decay_const(nucid['NucId']) /
-         data.atomic_mass(nucid['NucId']))
+    for nuc, m in zip(nucid, mass):
+        act.append = (1000 * data.N_A * mass * data.decay_const(nucid) \
+                     / data.atomic_mass(nucid))
     act.name = 'Activity'
+# how to store in actschema use group by to group by resourceid then make act per nuc
     rtn = act.reset_index()
     return rtn
 
