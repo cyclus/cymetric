@@ -908,7 +908,11 @@ def setup(ns):
     with io.open(dbtypes_json, 'r') as f:
         tab = json.load(f)
     # get cyclus version
-    verstr = subprocess.check_output(['cyclus', '--version'])
+    try:
+        verstr = subprocess.check_output(['cyclus', '--version'])
+    except subprocess.CalledProcessError:
+        # fallback for conda version of cyclus
+        verstr = subprocess.check_output(['cyclus_base', '--version']) 
     if isinstance(verstr, bytes):
         verstr = verstr.decode()
     ver = tuple(map(int, verstr.split()[2].split('.')))
