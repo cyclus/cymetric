@@ -910,7 +910,7 @@ def setup(ns):
     # get cyclus version
     try:
         verstr = subprocess.check_output(['cyclus', '--version'])
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, OSError):
         # fallback for conda version of cyclus
         verstr = subprocess.check_output(['cyclus_base', '--version']) 
     if isinstance(verstr, bytes):
