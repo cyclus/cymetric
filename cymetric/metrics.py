@@ -90,18 +90,19 @@ del _matdeps, _matschema
 
 
 # Activity (mass * decay_const / atomic_mass)
-_actdeps = [('Materials', ('ResourceId',), 'Mass'), 
-            ('Materials', ('ResourceId',), 'NucId')]
+_actdeps = [('Materials', ('SimId', 'ResourceId', 'NucId'), 'Mass')]
 
-_actschema = [('ResourceId', ts.INT), ('Activity', ts.DOUBLE)]
+_actschema = [('SimId', ts.UUID), ('ResourceId', ts.INT), 
+              ('NucId', ts.INT), ('Activity', ts.DOUBLE)]
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
     mass = series[0]
-    nucid = series[1]
-    for nuc, m in zip(nucid, mass):
-        act.append = (1000 * data.N_A * mass * data.decay_const(nucid) \
-                     / data.atomic_mass(nucid))
+    act = []
+    for (simid, resid, nuc), m in mass.iteritems():
+        val = (1000 * data.N_A * m * data.decay_const(nuc) \
+              / data.atomic_mass(nuc))
+        act.append(val)
     act.name = 'Activity'
 # how to store in actschema use group by to group by resourceid then make act per nuc
     rtn = act.reset_index()
