@@ -103,8 +103,8 @@ def activity(series):
         val = (1000 * data.N_A * m * data.decay_const(nuc) \
               / data.atomic_mass(nuc))
         act.append(val)
+    act = pd.Series(act, index=mass.index)
     act.name = 'Activity'
-# how to store in actschema use group by to group by resourceid then make act per nuc
     rtn = act.reset_index()
     return rtn
 
