@@ -917,7 +917,7 @@ def setup(ns):
             verstr = subprocess.check_output(['cyclus_base', '--version']) 
         except (subprocess.CalledProcessError, OSError):
             # fallback using the most recent value in JSON
-            ver = set([row[5] for row in tab])
+            ver = set([row[5] for row in tab[1:]])
             ver = max([tuple(map(int, s[1:].split('.'))) for s in ver])
     if verstr is not None:
         if isinstance(verstr, bytes):
