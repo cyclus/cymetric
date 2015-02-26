@@ -25,11 +25,13 @@ Building from Source
 Cymetric can be built from source by first downloading the code by cloning the GitHub repository:
 
 .. code-block:: bash
+
     $ git clone https://github.com/cyclus/cymetric
 
 Then build and install:
 
 .. code-block:: bash
+
     $ cd cymetric
     $ python setup.py install --user
 
