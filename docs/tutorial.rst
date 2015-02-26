@@ -12,6 +12,34 @@ automatically computed and evaluated.
 
 Without further ado, let's dive in!
 
+Getting Cymetric
+----------------
+Cymetric is an extension of |cyclus|, so it is assumed that |cyclus| is
+already installed on your system. (If not, please visit here
+for building it from source http://fuelcycle.org/kernel/build_from_source.html.)
+
+Cymetric is available on the same platforms as |cyclus|: Ubuntu and Max OS.
+
+Building from Source
+~~~~~~~~~~~~~~~~~~~~
+Cymetric can be built from source by first downloading the code by cloning the GitHub repository:
+
+.. code-block:: bash
+
+    $ git clone https://github.com/cyclus/cymetric
+
+Then build and install:
+
+.. code-block:: bash
+
+    $ cd cymetric
+    $ python setup.py install --user
+
+Installation via Binary
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Cymetric will soon be available to install via Conda.
+
 Command Line Usage
 ------------------
 Cymetric ships with a command line utility, just called ``cymetric``. Since 
