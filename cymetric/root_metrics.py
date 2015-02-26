@@ -57,7 +57,9 @@ build_schedule = root_metric(name='BuildSchedule')
 snapshots = root_metric(name='Snapshots')
 debug_requests = root_metric(name='DebugRequests')
 debug_bids = root_metric(name='DebugBids')
+time_series_power = root_metric(name='TimeSeriesPower')
 
 # Archetype-dependent custom tables that we know about
 brightlite_reactor_data = root_metric(name='BrightLite_Reactor_Data')
-
+agentstate_brightlite_reactorfacilityinfo = root_metric(
+    name='AgentState_Brightlite_ReactorFacilityInfo')
