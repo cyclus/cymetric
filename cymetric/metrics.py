@@ -113,6 +113,30 @@ def activity(series):
 del _actdeps, _actschema
 
 
+# DecayHeat (activity * q_value)
+_dhdeps = [('Activity', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+               'Activity')]
+
+_dhschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
+             ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+             ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+             ('DecayHeat', ts.DOUBLE)]
+
+@metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
+def decay_heat(series):
+    act = series[0]
+    dh = []
+    for (simid, qual, res, obj, time, nuc), a in act.iteritems():
+        val = (data.MeV_per_MJ * a * data.q_val(nuc))
+        dh.append(val)
+    dh = pd.Series(dh, index=act.index)
+    dh.name = 'DecayHeat'
+    rtn = dh.reset_index()
+    return rtn
+
+del _dhdeps, _dhschema
+
+
 # Agents
 
 _agentsdeps = [
