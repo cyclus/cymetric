@@ -15,8 +15,7 @@ def setup():
     for fname, oname, _ in DBS:
         if os.path.isfile(oname):
             continue
-        subprocess.check_call(['cyclus', '-o' + oname, 'test-input.xml'])
-
+        subprocess.check_call(' '.join(['cyclus', '-o' + oname, 'test-input.xml']), shell=True)
 
 def dbtest(f):
     @wraps(f)
