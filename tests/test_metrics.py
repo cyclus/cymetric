@@ -99,8 +99,8 @@ def test_materials():
                 ('SimId', 'O'), ('QualId', '<i8'), ('NucId', '<i8'), 
                 ('MassFrac', '<f8')]))
         )
-    s1 = res.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'])
-    s2 = comps.set_index(['SimId', 'QualId', 'NucId'])
+    s1 = res.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'])['Quantity']
+    s2 = comps.set_index(['SimId', 'QualId', 'NucId'])['MassFrac']
     series = [s1,s2]
     obs = metrics.materials.func(series)
     assert_frame_equal(exp, obs)
@@ -108,12 +108,12 @@ def test_materials():
 
 def test_activity():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 0.04),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 1.94),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 942390000, 0.01),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 3197501.3876324706),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 24126337.066086654),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 942390000, 22949993169.28023),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
-                ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
+                ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Activity', '<f8')]))
         )
 
     mass = pd.DataFrame(np.array([
@@ -124,9 +124,9 @@ def test_activity():
                 ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
                 ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
         )
-    series = mass.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])
-    obs = metrics.materials.func(series)
-    assert_frame_almost_equal(exp, obs)
+    series = [mass.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']]
+    obs = metrics.activity.func(series)
+    assert_frame_equal(exp, obs)
 
 if __name__ == "__main__":
     nose.runmodule()
