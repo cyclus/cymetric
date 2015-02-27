@@ -106,5 +106,27 @@ def test_materials():
     assert_frame_equal(exp, obs)
 
 
+def test_activity():
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 0.04),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 1.94),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 942390000, 0.01),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
+                ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
+        )
+
+    mass = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 0.04),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 1.94),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 942390000, 0.01),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
+                ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
+        )
+    series = mass.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])
+    obs = metrics.materials.func(series)
+    assert_frame_almost_equal(exp, obs)
+
 if __name__ == "__main__":
     nose.runmodule()

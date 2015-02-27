@@ -90,16 +90,18 @@ del _matdeps, _matschema
 
 
 # Activity (mass * decay_const / atomic_mass)
-_actdeps = [('Materials', ('SimId', 'ResourceId', 'NucId'), 'Mass')]
+_actdeps = [('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass')]
 
-_actschema = [('SimId', ts.UUID), ('ResourceId', ts.INT), 
-              ('NucId', ts.INT), ('Activity', ts.DOUBLE)]
+_actschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
+              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+              ('Activity', ts.DOUBLE)]
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
     mass = series[0]
     act = []
-    for (simid, resid, nuc), m in mass.iteritems():
+    for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
         val = (1000 * data.N_A * m * data.decay_const(nuc) \
               / data.atomic_mass(nuc))
         act.append(val)
