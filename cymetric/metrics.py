@@ -12,6 +12,8 @@ from cymetric import typesystem as ts
 from cymetric import tools
 from cymetric.evaluator import register_metric
 
+from pyne import data
+
 
 class Metric(object):
 
@@ -64,11 +66,10 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 # The actual metrics
 #
 
-# Materials
-
-_matdeps = (('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
-             'Quantity'),
-            ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'))
+# Material Mass (quantity * massfrac)
+_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+                'Quantity'),
+            ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')]
 
 _matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
               ('ResourceId', ts.INT), ('ObjId', ts.INT), 
@@ -87,6 +88,53 @@ def materials(series):
 
 del _matdeps, _matschema
 
+
+# Activity (mass * decay_const / atomic_mass)
+_actdeps = [('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass')]
+
+_actschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
+              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+              ('Activity', ts.DOUBLE)]
+
+@metric(name='Activity', depends=_actdeps, schema=_actschema)
+def activity(series):
+    mass = series[0]
+    act = []
+    for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
+        val = (1000 * data.N_A * m * data.decay_const(nuc) \
+              / data.atomic_mass(nuc))
+        act.append(val)
+    act = pd.Series(act, index=mass.index)
+    act.name = 'Activity'
+    rtn = act.reset_index()
+    return rtn
+
+del _actdeps, _actschema
+
+
+# DecayHeat (activity * q_value)
+_dhdeps = [('Activity', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+               'Activity')]
+
+_dhschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
+             ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+             ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+             ('DecayHeat', ts.DOUBLE)]
+
+@metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
+def decay_heat(series):
+    act = series[0]
+    dh = []
+    for (simid, qual, res, obj, time, nuc), a in act.iteritems():
+        val = (data.MeV_per_MJ * a * data.q_val(nuc))
+        dh.append(val)
+    dh = pd.Series(dh, index=act.index)
+    dh.name = 'DecayHeat'
+    rtn = dh.reset_index()
+    return rtn
+
+del _dhdeps, _dhschema
 
 
 # Agents
