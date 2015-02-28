@@ -582,6 +582,17 @@ class Indenter(object):
             return self._s.replace('\n', '\n' + ' '*n)
         return self.__dict__[key]
 
+def safe_output(cmd, shell=False, *args, **kwargs):
+    """Checks that a command successfully runs with/without shell=True. 
+    Returns the output.
+    """
+    try:
+        out = subprocess.check_output(cmd, shell=False, *args, **kwargs)
+    except (subprocess.CalledProcessError, OSError):
+        cmd = ' '.join(cmd)
+        out = subprocess.check_output(cmd, shell=True, *args, **kwargs)
+    return out     
+
 #
 # Code Generation
 #
@@ -910,11 +921,11 @@ def setup(ns):
     # get cyclus version
     verstr = None
     try:
-        verstr = subprocess.check_output(['cyclus', '--version'])
+        verstr = safe_output(['cyclus', '--version'])
     except (subprocess.CalledProcessError, OSError):
         # fallback for conda version of cyclus
         try: 
-            verstr = subprocess.check_output(['cyclus_base', '--version']) 
+            verstr = safe_output(['cyclus_base', '--version']) 
         except (subprocess.CalledProcessError, OSError):
             # fallback using the most recent value in JSON
             ver = set([row[5] for row in tab[1:]])
