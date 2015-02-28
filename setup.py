@@ -53,6 +53,17 @@ CMAKE_BUILD_TYPES = {
     'minsizerel': 'MinSizeRel',
     }
 
+def safe_call(cmd, shell=False, *args, **kwargs):
+    """Checks that a command successfully runs with/without shell=True. 
+    Returns the process return code
+    """
+    try:
+        rtn = subprocess.call(cmd, shell=False, *args, **kwargs)
+    except (subprocess.CalledProcessError, OSError):
+        cmd = ' '.join(cmd)
+        rtn = subprocess.call(cmd, shell=True, *args, **kwargs)
+    return rtn     
+
 
 def parse_setup(ns):
     a = [sys.argv[0], ns.cmd]
@@ -174,9 +185,9 @@ def setup():
 
 def cmake_cli(cmake_args):
     if not IS_NT:
-        rtn = subprocess.call(['which', 'cmake'])
+        rtn = safe_call(['which', 'cmake'])
         if rtn != 0:
-            sys.exit('CMake is not installed, aborting PyNE build.')
+            sys.exit('CMake is not installed, aborting build.')
     cmake_cmd = ['cmake', '..'] + cmake_args
     cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable]
     if IS_NT:
@@ -203,9 +214,9 @@ def main_body(cmake_args, make_args):
     genapi.main([])
 
     cmake_cmd = cmake_cli(cmake_args)
-    rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
+    rtn = safe_call(cmake_cmd, cwd='build')
 
-    rtn = subprocess.check_call(['make'] + make_args, cwd='build')
+    rtn = safe_call(['make'] + make_args, cwd='build')
 
     cwd = os.getcwd()
     os.chdir('build')
