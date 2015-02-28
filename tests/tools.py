@@ -11,22 +11,22 @@ DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back),
 #DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back)]
 #DBS = [('test.sqlite', 'orig.sqlite', cyclus.SqliteBack)]
 
-def safe_output(cmd, shell=False, *args, **kwargs):
+def safe_call(cmd, shell=False, *args, **kwargs):
     """Checks that a command successfully runs with/without shell=True. 
-    Returns the output.
+    Returns the process return code.
     """
     try:
-        out = subprocess.check_output(cmd, shell=False, *args, **kwargs)
+        rtn = subprocess.call(cmd, shell=False, *args, **kwargs)
     except (subprocess.CalledProcessError, OSError):
         cmd = ' '.join(cmd)
-        out = subprocess.check_output(cmd, shell=True, *args, **kwargs)
-    return out     
+        rtn = subprocess.call(cmd, shell=True, *args, **kwargs)
+    return rtn     
 
 def setup():
     for fname, oname, _ in DBS:
         if os.path.isfile(oname):
             continue
-        safe_output(['cyclus', '-o' + oname, 'test-input.xml'])
+        safe_call(['cyclus', '-o' + oname, 'test-input.xml'])
 
 def dbtest(f):
     @wraps(f)
