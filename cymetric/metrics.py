@@ -111,7 +111,7 @@ _actschema = [('SimId', ts.UUID), ('QualId', ts.INT),
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
-    raise_no_pyne('Activity could not be computed', HAVE_PYNE)
+    tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
     mass = series[0]
     act = []
     for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
@@ -137,7 +137,7 @@ _dhschema = [('SimId', ts.UUID), ('QualId', ts.INT),
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
 def decay_heat(series):
-    raise_no_pyne('DecayHeat could not be computed', HAVE_PYNE)
+    tools.raise_no_pyne('DecayHeat could not be computed', HAVE_PYNE)
     act = series[0]
     dh = []
     for (simid, qual, res, obj, time, nuc), a in act.iteritems():

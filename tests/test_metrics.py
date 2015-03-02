@@ -7,10 +7,17 @@ from uuid import UUID
 
 import nose
 from nose.tools import assert_equal, assert_less
+from nose.plugins.skip import SkipTest
 
 import numpy as np
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
+
+try:
+    from pyne import data
+    HAVE_PYNE = True
+except ImportError:
+    HAVE_PYNE = False
 
 from cymetric import cyclus
 from cymetric import metrics
@@ -107,6 +114,8 @@ def test_materials():
 
 
 def test_activity():
+    if not HAVE_PYNE:
+        raise SkipTest
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 3197501.3876324706),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 24126337.066086654),
@@ -130,6 +139,8 @@ def test_activity():
 
 
 def test_decayheat():
+    if not HAVE_PYNE:
+        raise SkipTest
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 2.3944723480343003e-12),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 1.6505536389997207e-11),
