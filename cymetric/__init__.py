@@ -15,6 +15,9 @@ try:
     from cymetric.execution import ExecutionContext, exec_code
 except ImportError:
     # again with the wacky CI issues
+    from . import cyclus
+    from pprint import pprint
+    pprint(dir(cyclus)) 
     from .cyclus import Datum, FullBackend, SqliteBack, Hdf5Back, \
         Recorder
     from .typesystem import *  # only grabs code generated defintiions
