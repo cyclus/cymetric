@@ -72,4 +72,7 @@ def ensure_dt_bytes(dt):
         dety.append(ty)
     return dety
 
-
+def raise_no_pyne(msg, have_pyne=False):
+    """Raise an error when PyNE cannot be found."""
+    if not have_pyne:
+        raise ImportError('pyne could not be imported: ' + msg)
