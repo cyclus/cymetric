@@ -61,7 +61,7 @@ def safe_call(cmd, shell=False, *args, **kwargs):
         rtn = subprocess.call(cmd, shell=False, *args, **kwargs)
     except (subprocess.CalledProcessError, OSError):
         cmd = ' '.join(cmd)
-        rtn = subprocess.call(cmd, shell=True, *args, **kwargs)
+        rtn = subprocess.check_call(cmd, shell=True, *args, **kwargs)
     return rtn     
 
 

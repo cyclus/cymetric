@@ -6,13 +6,25 @@ import inspect
 import numpy as np
 import pandas as pd
 
-from cymetric import cyclus
-from cymetric import schemas
-from cymetric import typesystem as ts
-from cymetric import tools
-from cymetric.evaluator import register_metric
+try:
+    from pyne import data
+    HAVE_PYNE = True
+except ImportError:
+    HAVE_PYNE = False
 
-from pyne import data
+try:
+    from cymetric import cyclus
+    from cymetric import schemas
+    from cymetric import typesystem as ts
+    from cymetric import tools
+    from cymetric.evaluator import register_metric
+except ImportError:
+    # some wacky CI paths prevent absolute importing, try relative
+    from . import cyclus
+    from . import schemas
+    from . import typesystem as ts
+    from . import tools
+    from .evaluator import register_metric
 
 
 class Metric(object):
@@ -99,6 +111,7 @@ _actschema = [('SimId', ts.UUID), ('QualId', ts.INT),
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
+    tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
     mass = series[0]
     act = []
     for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
@@ -124,6 +137,7 @@ _dhschema = [('SimId', ts.UUID), ('QualId', ts.INT),
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
 def decay_heat(series):
+    tools.raise_no_pyne('DecayHeat could not be computed', HAVE_PYNE)
     act = series[0]
     dh = []
     for (simid, qual, res, obj, time, nuc), a in act.iteritems():
