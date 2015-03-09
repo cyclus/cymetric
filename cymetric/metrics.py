@@ -203,4 +203,25 @@ def agents(series):
 del _agentsdeps, _agentsschema
 
 
+#########################
+## FCO-related metrics ##
+#########################
+
+# U Resources Mined [t]
+_udeps = [('Materials', ( 'TimeCreated', 'NucId'), 'Mass')]
+
+_uschema = (('TimeCreated', ts.INT), ('U_Mined', ts.DOUBLE))
+
+@metric(name='U_Mined', depends=_udeps, schema=_uschema)
+def u_mined(series):
+    mass = series[0]
+    u0 = mass[(mass.QualId == 2)]
+    u0 = pd.DataFrame.groupby(by=)
+    u = pd.Series(u0, index=mass.index)
+    u.name = 'U_Mined'
+    rtn = u.reset_index()
+    return rtn
+
+del _udeps, _schema
+
 
