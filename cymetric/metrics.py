@@ -207,21 +207,25 @@ del _agentsdeps, _agentsschema
 ## FCO-related metrics ##
 #########################
 
-# U Resources Mined [t]
-_udeps = [('Materials', ( 'TimeCreated', 'NucId'), 'Mass')]
+# U Resources Mined [t] (currently implemented with a metric tonnes conversion)
+_udeps = [('Materials', ( 'SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+             'Mass'),
+          ('Transactions', ('SimId', 'ResourceId'), 'Commodity')]
 
-_uschema = (('TimeCreated', ts.INT), ('U_Mined', ts.DOUBLE))
+_uschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
+            ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+            ('TimeCreated', ts.INT), ('U_Mined', ts.DOUBLE)]
 
 @metric(name='U_Mined', depends=_udeps, schema=_uschema)
 def u_mined(series):
-    mass = series[0]
-    u0 = mass[(mass.QualId == 2)]
-    u0 = pd.DataFrame.groupby(by=)
-    u = pd.Series(u0, index=mass.index)
+    x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
+            on=['SimId', 'ResourceId'], how='inner').set_index(['SimId', 'QualId', 
+                'ResourceId', 'ObjId','TimeCreated'])
+#    u_filt = x['Commodity'=='natl_u']
+    u = x['Mass']
     u.name = 'U_Mined'
     rtn = u.reset_index()
     return rtn
 
-del _udeps, _schema
-
+del _udeps, _uschema
 
