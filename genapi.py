@@ -569,21 +569,17 @@ def parse_template(s, open_brace='<', close_brace='>', separator=','):
 
 
 class Indenter(object):
-    """Handles indentations.
-    """
+    """Handles indentations."""
     def __init__(self, s):
-        """Constructor for string object.
-        """
+        """Constructor for string object."""
         self._s = s
 
     def __str__(self):
-        """Returns a string.
-        """
+        """Returns a string."""
         return self._s
 
     def __getattr__(self, key):
-        """Replaces an indentation with a newline and spaces.
-        """
+        """Replaces an indentation with a newline and spaces."""
         if key.startswith('indent'):
             n = int(key[6:])
             return self._s.replace('\n', '\n' + ' '*n)
@@ -884,8 +880,7 @@ def typesystem_pxd(ts, ns):
 DBTYPES_JS_URL = 'http://fuelcycle.org/arche/dbtypes.js'
 
 def parse_args(argv):
-    """Parses typesystem arguments for code generation.
-    """
+    """Parses typesystem arguments for code generation."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--src-dir', default='cymetric', dest='src_dir',
                         help="the local source directory, default 'cymetric'")

@@ -35,6 +35,7 @@ np.import_ufunc()
 cdef class _Datum:
 
     def __cinit__(self, bint _new=True, bint _free=False):
+        """Constructor for Datum type conversion."""
         self._free = _free
         self.ptx = NULL
         #if _new:
@@ -46,6 +47,24 @@ cdef class _Datum:
     #        free(self.ptx)
 
     def add_val(self, const char* field, value, shape=None, dbtype=cpp_typesystem.BLOB):
+        """Adds Datum values for type conversion.
+
+        Parameters
+        ----------
+        field : pointer to char/str
+            The column name.
+        value : any data type
+            Value in table column.
+        shape : int
+            Length of value.
+        dbtype : cpp data type 
+            Data type as defined by cyclus typesystem
+
+        Returns
+        -------
+        self : any data type
+            Converted value to cyclus data type
+        """
         cdef int i, n
         cdef std_vector[int] cpp_shape
         cdef cpp_cyclus.hold_any v = py_to_any(value, dbtype)
@@ -61,10 +80,11 @@ cdef class _Datum:
         return self
 
     def record(self):
+        """Records the Datum."""
         (<cpp_cyclus.Datum*> self.ptx).Record()
 
     property title:
-        """The datumn name."""
+        """The datum name."""
         def __get__(self):
             s = (<cpp_cyclus.Datum*> self.ptx).title()
             return s
@@ -246,7 +266,7 @@ cdef class _Recorder:
             return uuid_cpp_to_py((<cpp_cyclus.Recorder*> self.ptx).sim_id())
 
     property inject_sim_id:
-        """Whether or not in inject the simulation id into the tables."""
+        """Whether or not to inject the simulation id into the tables."""
         def __get__(self):
             return (<cpp_cyclus.Recorder*> self.ptx).inject_sim_id()
 
