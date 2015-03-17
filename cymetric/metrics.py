@@ -28,7 +28,7 @@ except ImportError:
 
 
 class Metric(object):
-
+    """Metric class"""
     dependencies = NotImplemented
     schema = NotImplemented
     
@@ -41,6 +41,17 @@ class Metric(object):
 
 
 def _genmetricclass(f, name, depends, scheme):
+    """Metric class requirements.
+    
+    Parameters
+    ----------
+    name : str
+        Metric name
+    depends : list of lists (table name, tuple of indices, column name)
+        Dependencies on other database tables (metrics or root metrics)
+    scheme : list of tuples (column name, data type)
+        Schema for metric
+    """
     if not isinstance(scheme, schemas.schema):
         scheme = schemas.schema(scheme)
 
@@ -52,9 +63,11 @@ def _genmetricclass(f, name, depends, scheme):
         __doc__ = inspect.getdoc(f)
 
         def __init__(self, db):
+            """Constructor for metric object in database."""
             super(Cls, self).__init__(db)
 
         def __call__(self, series, conds=None, known_tables=None, *args, **kwargs):
+            """Customize metric instance with parameters."""
             # FIXME test if I already exist in the db, read in if I do
             if known_tables is None:
                 known_tables = self.db.tables()
@@ -68,6 +81,7 @@ def _genmetricclass(f, name, depends, scheme):
 
 
 def metric(name=None, depends=NotImplemented, schema=NotImplemented):
+    """Checks for existence of metric."""
     def dec(f):
         clsname = name or f.__name__
         return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends)
@@ -90,6 +104,10 @@ _matschema = (('SimId', ts.UUID), ('QualId', ts.INT),
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(series):
+    """Materials metric returns the material mass (quantity of material in 
+    Resources times the massfrac in Compositions) indexed by the SimId, QualId, 
+    ResourceId, ObjId, TimeCreated, and NucId.
+    """
     x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['SimId', 'QualId'], how='inner').set_index(['SimId', 'QualId', 
                 'ResourceId', 'ObjId','TimeCreated', 'NucId'])
@@ -111,6 +129,10 @@ _actschema = [('SimId', ts.UUID), ('QualId', ts.INT),
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
+    """Activity metric returns the instantaneous activity of a nuclide 
+    in a material (material mass * decay constant / atomic mass) 
+    indexed by the SimId, QualId, ResourceId, ObjId, TimeCreated, and NucId.
+    """
     tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
     mass = series[0]
     act = []
@@ -137,6 +159,10 @@ _dhschema = [('SimId', ts.UUID), ('QualId', ts.INT),
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
 def decay_heat(series):
+    """Decay heat metric returns the instantaneous decay heat of a nuclide 
+    in a material (Q value * activity) indexed by the SimId, QualId, 
+    ResourceId, ObjId, TimeCreated, and NucId.
+    """
     tools.raise_no_pyne('DecayHeat could not be computed', HAVE_PYNE)
     act = series[0]
     dh = []
