@@ -41,7 +41,7 @@ class Metric(object):
 
 
 def _genmetricclass(f, name, depends, scheme):
-    """Metric class requirements.
+    """Creates a new metric class with a given name, dependencies, and schema.
     
     Parameters
     ----------
@@ -67,7 +67,7 @@ def _genmetricclass(f, name, depends, scheme):
             super(Cls, self).__init__(db)
 
         def __call__(self, series, conds=None, known_tables=None, *args, **kwargs):
-            """Customize metric instance with parameters."""
+            """Computes metric for given input data and conditions."""
             # FIXME test if I already exist in the db, read in if I do
             if known_tables is None:
                 known_tables = self.db.tables()
@@ -81,7 +81,7 @@ def _genmetricclass(f, name, depends, scheme):
 
 
 def metric(name=None, depends=NotImplemented, schema=NotImplemented):
-    """Checks for existence of metric."""
+    """Decorator that creates metric class from a function or class."""
     def dec(f):
         clsname = name or f.__name__
         return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends)

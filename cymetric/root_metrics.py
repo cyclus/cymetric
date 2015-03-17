@@ -6,7 +6,7 @@ from __future__ import print_function, unicode_literals
 from cymetric.evaluator import register_metric
 
 def _genrootclass(name):
-    """Root metric class."""
+    """Creates a new root metric class."""
     class Cls(object):
         dependencies = ()
 
@@ -28,7 +28,7 @@ def _genrootclass(name):
             self.db = db
 
         def __call__(self, conds=None, *args, **kwargs):
-            """Customize root metric instance with parameters."""
+            """Retrieves a root metric with given input conditions."""
             if self.name not in self.db.tables:
                 return None
             return self.db.query(self.name, conds=conds)
@@ -39,7 +39,7 @@ def _genrootclass(name):
 
 
 def root_metric(obj=None, name=None, schema=None, *args, **kwargs):
-    """Checks for existence of root metric."""
+    """Decorator that creates a root metric from a function or class."""
     if obj is not None:
         raise RuntimeError
     if name is None:

@@ -30,11 +30,11 @@ class ColumnProxy(object):
         self.conds = []
 
     def __call__(self, *args, **kwargs):
-        """Checks that column name is callable."""
+        """Stub function that prevents ColumnProxies from being called."""
         raise TypeError('ColumnProxy object {0!r} is not callable'.format(self.name))
 
     def __getitem__(self, *args, **kwargs):
-        """Checks that column name can be indexed."""
+        """Stub function that prevents ColumnProxies from being indexed."""
         raise TypeError('ColumnProxy object {0!r} cannot be indexed'.format(self.name))
 
     def __lt__(self, other):
@@ -206,7 +206,7 @@ class ExecutionContext(MutableMapping):
         return self._ctx.items()
 
     def __del__(self):
-        """Writes out data to db"""
+        """Closes db, flushing remaining buffers."""
         self.evaler.db.flush()
 
 def exec_code(code, db, write=True):

@@ -47,23 +47,22 @@ cdef class _Datum:
     #        free(self.ptx)
 
     def add_val(self, const char* field, value, shape=None, dbtype=cpp_typesystem.BLOB):
-        """Adds Datum values for type conversion.
+        """Adds Datum value to current record as the corresponding cyclus data type.
 
         Parameters
         ----------
         field : pointer to char/str
             The column name.
-        value : any data type
+        value : object
             Value in table column.
-        shape : int
+        shape : list or tuple of ints
             Length of value.
         dbtype : cpp data type 
             Data type as defined by cyclus typesystem
 
         Returns
         -------
-        self : any data type
-            Converted value to cyclus data type
+        self : datum
         """
         cdef int i, n
         cdef std_vector[int] cpp_shape
