@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Cymertic entry point."""
+"""Cymetric entry point."""
 from cymetric.main import main
 main()
 
