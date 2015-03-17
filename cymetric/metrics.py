@@ -221,7 +221,7 @@ def u_mined(series):
     x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['SimId', 'ResourceId'], how='inner').set_index(['SimId', 'QualId', 
                 'ResourceId', 'ObjId','TimeCreated'])
-    u0 = x.filter(items='Commodity', like='natl_u')
+    u0 = x[x['Commodity']=='natl_u']
     u = u0.groupby(level=['SimId', 'QualId', 'ResourceId', 'ObjId','TimeCreated'])['Mass'].sum()
     u.name = 'U_Mined'
     rtn = u.reset_index()
