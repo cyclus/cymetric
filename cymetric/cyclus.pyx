@@ -62,7 +62,7 @@ cdef class _Datum:
 
         Returns
         -------
-        self : datum
+        self : Datum
         """
         cdef int i, n
         cdef std_vector[int] cpp_shape
