@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Welcome to cymetric's setup.py script. This is a little non-standard because pyne
-is a multilanguage projects.  Still this script follows a predicatable ordering:
+is a multilanguage project.  Still, this script follows a predicatable ordering:
 
-1. Parse command line arguments,
+1. Parse command line arguments
 2. Call cmake from the 'build' directory
 3. Call make from the 'build' directory
 4. Use distuitls/setuptools from the 'build' directory
@@ -11,7 +11,7 @@ This gives us the best of both worlds. Compiled code is installed with cmake/mak
 and Cython/Python code is installed with normal Python tools. The only trick here is
 how the various command line arguments are handed off to the three sub-processes.
 
-To acomplish this we use argparser groups to group command line arguments based on
+To accomplish this we use argparser groups to group command line arguments based on
 whether they go to:
 
 1. the setup() function,
@@ -24,7 +24,7 @@ To add a new command line argument, first add it to the appropriate group in the
 ``parse_args()`` function.  Then, modify the logic in the cooresponding
 ``parse_setup()``, ``parse_cmake()``, ``parse_make()``, or ``parse_others()``
 functions to consume your new command line argument.  It is OK for more than
-one of the parser functions to comsume the argument. Where appropriate,
+one of the parser functions to consume the argument. Where appropriate,
 ensure the that argument is appended to the argument list that is returned by these
 functions.
 """

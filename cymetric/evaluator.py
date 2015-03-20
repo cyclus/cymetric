@@ -27,7 +27,7 @@ class Evaluator(object):
         Attributes
         ----------
         metrics : dict
-            Metric instances bound the evalator's database.
+            Metric instances bound the evaluator's database.
         rawcache : dict
             Results of querying metrics with given conditions.
         """
@@ -40,6 +40,7 @@ class Evaluator(object):
         self.known_tables = db.tables
 
     def get_metric(self, metric):
+        """Checks if metric is already in the registry; adds it if not."""
         if metric not in self.metrics:
             self.metrics[metric] = METRIC_REGISTRY[metric](self.db)
         return self.metrics[metric]
