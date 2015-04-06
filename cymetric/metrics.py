@@ -1,4 +1,4 @@
-"""A collection of metrics that come stock with cymetric.
+"""A collection of metrics that come stock witih cymetric.
 """
 from __future__ import print_function, unicode_literals
 import inspect
@@ -8,6 +8,7 @@ import pandas as pd
 
 try:
     from pyne import data
+    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
@@ -236,22 +237,29 @@ del _agentsdeps, _agentsschema
 # U Resources Mined [t] (currently implemented with a metric tonnes conversion)
 _udeps = [('Materials', ( 'SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
              'Mass'),
-          ('Transactions', ('SimId', 'ResourceId'), 'Commodity')]
+          ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'),
+          ('Transactions', ('SimId', 'TransactionId', 'ResourceId'), 'Commodity')]
 
 _uschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
             ('ResourceId', ts.INT), ('ObjId', ts.INT), 
             ('TimeCreated', ts.INT), ('U_Mined', ts.DOUBLE)]
 
-@metric(name='U_Mined', depends=_udeps, schema=_uschema)
-def u_mined(series):
-    x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
-            on=['SimId', 'ResourceId'], how='inner').set_index(['SimId', 'QualId', 
-                'ResourceId', 'ObjId','TimeCreated'])
-    u0 = x[x['Commodity']=='natl_u']
-    u = u0.groupby(level=['SimId', 'QualId', 'ResourceId', 'ObjId','TimeCreated'])['Mass'].sum()
-    u.name = 'U_Mined'
+@metric(name='FCO_U_Mined', depends=_udeps, schema=_uschema)
+def fco_u_mined(series):
+    """FCO_U_mined metric returns the uranium mined at each timestep in a 
+    simulation. This is written for FCO-only databases (i.e., the U235 and 
+    U238 are given separately in the FCO simulations)."""
+    mass = pd.merge(series[0].reset_index(), series[2].reset_index(), 
+            on=['SimId', 'ResourceId'], how='inner').set_index(['SimId',
+                'QualId', 'TransactionIdi', 'ResourceId', 'ObjId','TimeCreated'])
+    frac = series[1]
+#    if mass['Commodity']=='LWR Fuel':
+#
+    u = mass.groupby(level=['SimId', 'QualId', 'TransactionId', 'ResourceId', 'ObjId','TimeCreated'])['Mass'].sum()
+    u.name = 'FCO_U_Mined'
     rtn = u.reset_index()
     return rtn
 
 del _udeps, _uschema
+
 
