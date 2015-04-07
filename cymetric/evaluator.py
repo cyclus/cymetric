@@ -44,7 +44,7 @@ class Evaluator(object):
         if metric not in self.metrics:
             self.metrics[metric] = METRIC_REGISTRY[metric](self.db)
         return self.metrics[metric]
-    @profile
+
     def eval(self, metric, conds=None):
         """Evalutes a metric with the given conditions."""
         rawkey = (metric, conds if conds is None else frozenset(conds))
