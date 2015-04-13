@@ -235,14 +235,15 @@ del _agentsdeps, _agentsschema
 #########################
 
 # U Resources Mined [t] (currently implemented with a metric tonnes conversion)
-_udeps = [('Materials', ( 'SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+_udeps= [('Materials', ( 'SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 
              'Mass'),
           ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'),
           ('Transactions', ('SimId', 'TransactionId', 'ResourceId'), 'Commodity')]
 
 _uschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
-            ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-            ('TimeCreated', ts.INT), ('U_Mined', ts.DOUBLE)]
+            ('TransactionId', ts.INT), ('ResourceId', ts.INT), 
+            ('ObjId', ts.INT), ('TimeCreated', ts.INT), 
+            ('FCO_U_Mined', ts.DOUBLE)]
 
 @metric(name='FCO_U_Mined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
@@ -251,11 +252,24 @@ def fco_u_mined(series):
     U238 are given separately in the FCO simulations)."""
     mass = pd.merge(series[0].reset_index(), series[2].reset_index(), 
             on=['SimId', 'ResourceId'], how='inner').set_index(['SimId',
-                'QualId', 'TransactionIdi', 'ResourceId', 'ObjId','TimeCreated'])
+                'QualId', 'TransactionId', 'ResourceId', 'ObjId', 
+                'TimeCreated', 'NucId'])
     frac = series[1]
-#    if mass['Commodity']=='LWR Fuel':
-#
-    u = mass.groupby(level=['SimId', 'QualId', 'TransactionId', 'ResourceId', 'ObjId','TimeCreated'])['Mass'].sum()
+    u = []
+    prods = {}
+    mass235 = {}
+    m = mass[mass['Commodity']=='LWR Fuel']
+    for (_, _, _, _, obj, _, nuc), value in m.iterrows():
+        prods[obj] = prods.get(obj, 0.0) + value['Mass']
+        if nuc==922350000:
+            mass235[obj] = value['Mass']
+    for obj, m235 in mass235.items():
+        x_prod = m235 / prods[obj]
+        feed = enr.feed(0.0072, x_prod, 0.0025, product=prods[obj])
+        u.append(feed)
+    m = m.groupby(level=['SimId', 'QualId', 'TransactionId', 'ResourceId', 
+        'ObjId', 'TimeCreated'])['Mass'].sum()
+    u = pd.Series(u, index=m.index)
     u.name = 'FCO_U_Mined'
     rtn = u.reset_index()
     return rtn
