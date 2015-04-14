@@ -171,8 +171,8 @@ def test_decayheat():
 
 def test_fco_u_mined():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 1, 7, 3, 1, 1594.685),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 2, 8, 4, 1, 2185.349),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 1, 7, 3, 1, 1.594685),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 2, 8, 4, 1, 2.185349),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('QualId', '<i8'), ('TransactionId', '<i8'), 
                 ('ResourceId', '<i8'), ('ObjId', '<i8'), ('TimeCreated', '<i8'), 

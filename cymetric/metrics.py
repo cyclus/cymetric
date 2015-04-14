@@ -263,7 +263,7 @@ def fco_u_mined(series):
             mass235[obj] = value['Mass']
     for obj, m235 in mass235.items():
         x_prod = m235 / prods[obj]
-        feed = enr.feed(0.0072, x_prod, 0.0025, product=prods[obj])
+        feed = enr.feed(0.0072, x_prod, 0.0025, product=prods[obj]) / 1000
         u.append(feed)
     m = m.groupby(level=['SimId', 'QualId', 'TransactionId', 'ResourceId', 
                          'ObjId', 'TimeCreated'])['Mass'].sum()
