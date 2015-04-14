@@ -176,7 +176,7 @@ def test_fco_u_mined():
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('QualId', '<i8'), ('TransactionId', '<i8'), 
                 ('ResourceId', '<i8'), ('ObjId', '<i8'), ('TimeCreated', '<i8'), 
-                ('FCO_U_Mined', '<f8')]))
+                ('FcoUMined', '<f8')]))
         )
     mats = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 1, 922350000, 8.328354),

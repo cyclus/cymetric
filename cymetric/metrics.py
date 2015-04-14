@@ -237,16 +237,16 @@ del _agentsdeps, _agentsschema
 # U Resources Mined [t] (currently implemented with a metric tonnes conversion)
 _udeps= [('Materials', ( 'SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 
              'Mass'),
-          ('Transactions', ('SimId', 'TransactionId', 'ResourceId'), 'Commodity')]
+         ('Transactions', ('SimId', 'TransactionId', 'ResourceId'), 'Commodity')]
 
 _uschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
             ('TransactionId', ts.INT), ('ResourceId', ts.INT), 
             ('ObjId', ts.INT), ('TimeCreated', ts.INT), 
-            ('FCO_U_Mined', ts.DOUBLE)]
+            ('FcoUMined', ts.DOUBLE)]
 
-@metric(name='FCO_U_Mined', depends=_udeps, schema=_uschema)
+@metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
-    """FCO_U_mined metric returns the uranium mined at each timestep in a 
+    """FcoUMined metric returns the uranium mined at each timestep in a 
     simulation. This is written for FCO-only databases (i.e., the U235 and 
     U238 are given separately in the FCO simulations)."""
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
@@ -256,7 +256,7 @@ def fco_u_mined(series):
     u = []
     prods = {}
     mass235 = {}
-    m = mass[mass['Commodity']=='LWR Fuel']
+    m = mass[mass['Commodity'] == 'LWR Fuel']
     for (_, _, _, _, obj, _, nuc), value in m.iterrows():
         prods[obj] = prods.get(obj, 0.0) + value['Mass']
         if nuc==922350000:
@@ -266,9 +266,9 @@ def fco_u_mined(series):
         feed = enr.feed(0.0072, x_prod, 0.0025, product=prods[obj])
         u.append(feed)
     m = m.groupby(level=['SimId', 'QualId', 'TransactionId', 'ResourceId', 
-        'ObjId', 'TimeCreated'])['Mass'].sum()
+                         'ObjId', 'TimeCreated'])['Mass'].sum()
     u = pd.Series(u, index=m.index)
-    u.name = 'FCO_U_Mined'
+    u.name = 'FcoUMined'
     rtn = u.reset_index()
     return rtn
 
