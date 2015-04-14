@@ -237,7 +237,6 @@ del _agentsdeps, _agentsschema
 # U Resources Mined [t] (currently implemented with a metric tonnes conversion)
 _udeps= [('Materials', ( 'SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 
              'Mass'),
-          ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac'),
           ('Transactions', ('SimId', 'TransactionId', 'ResourceId'), 'Commodity')]
 
 _uschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
@@ -250,11 +249,10 @@ def fco_u_mined(series):
     """FCO_U_mined metric returns the uranium mined at each timestep in a 
     simulation. This is written for FCO-only databases (i.e., the U235 and 
     U238 are given separately in the FCO simulations)."""
-    mass = pd.merge(series[0].reset_index(), series[2].reset_index(), 
+    mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['SimId', 'ResourceId'], how='inner').set_index(['SimId',
                 'QualId', 'TransactionId', 'ResourceId', 'ObjId', 
                 'TimeCreated', 'NucId'])
-    frac = series[1]
     u = []
     prods = {}
     mass235 = {}

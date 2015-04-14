@@ -165,5 +165,42 @@ def test_decayheat():
     assert_frame_equal(exp, obs)
 
 
+#################################
+####### FCO METRICS TESTS #######
+#################################
+
+def test_fco_u_mined():
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 1, 7, 3, 1, 1594.685),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 2, 8, 4, 1, 2185.349),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('QualId', '<i8'), ('TransactionId', '<i8'), 
+                ('ResourceId', '<i8'), ('ObjId', '<i8'), ('TimeCreated', '<i8'), 
+                ('FCO_U_Mined', '<f8')]))
+        )
+    mats = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 1, 922350000, 8.328354),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 1, 922380000, 325.004979),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 1, 922350000, 11.104472),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 1, 922380000, 322.228861),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'),
+                ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('NucId', '<i8'), 
+                ('Mass', '<f8')]))
+        )
+    trans = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 'LWR Fuel'),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 'LWR Fuel'),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'), 
+                ('Commodity', 'O')]))
+        )
+    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
+    s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
+    series = [s1,s2]
+    obs = metrics.fco_u_mined.func(series)
+    assert_frame_equal(exp, obs)
+
+
 if __name__ == "__main__":
     nose.runmodule()
