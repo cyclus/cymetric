@@ -235,14 +235,10 @@ del _agentsdeps, _agentsschema
 #########################
 
 # U Resources Mined [t] (currently implemented with a metric tonnes conversion)
-_udeps= [('Materials', ( 'SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 
-             'Mass'),
-         ('Transactions', ('SimId', 'TransactionId', 'ResourceId'), 'Commodity')]
+_udeps= [('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
+         ('Transactions', ('ResourceId', ), 'Commodity')]
 
-_uschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
-            ('TransactionId', ts.INT), ('ResourceId', ts.INT), 
-            ('ObjId', ts.INT), ('TimeCreated', ts.INT), 
-            ('FcoUMined', ts.DOUBLE)]
+_uschema = [('TimeCreated', ts.INT), ('FcoUMined', ts.DOUBLE)]
 
 @metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
@@ -250,14 +246,13 @@ def fco_u_mined(series):
     simulation. This is written for FCO-only databases (i.e., the U235 and 
     U238 are given separately in the FCO simulations)."""
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
-            on=['SimId', 'ResourceId'], how='inner').set_index(['SimId',
-                'QualId', 'TransactionId', 'ResourceId', 'ObjId', 
+            on=['ResourceId'], how='inner').set_index(['ObjId', 
                 'TimeCreated', 'NucId'])
     u = []
     prods = {}
     mass235 = {}
     m = mass[mass['Commodity'] == 'LWR Fuel']
-    for (_, _, _, _, obj, _, nuc), value in m.iterrows():
+    for (obj, _, nuc), value in m.iterrows():
         prods[obj] = prods.get(obj, 0.0) + value['Mass']
         if nuc==922350000:
             mass235[obj] = value['Mass']
@@ -265,11 +260,13 @@ def fco_u_mined(series):
         x_prod = m235 / prods[obj]
         feed = enr.feed(0.0072, x_prod, 0.0025, product=prods[obj]) / 1000
         u.append(feed)
-    m = m.groupby(level=['SimId', 'QualId', 'TransactionId', 'ResourceId', 
-                         'ObjId', 'TimeCreated'])['Mass'].sum()
+    m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
     u = pd.Series(u, index=m.index)
+    u = u.groupby(level=['TimeCreated']).sum()
     u.name = 'FcoUMined'
-    rtn = u.reset_index()
+    # sum by years (12 time steps)
+    u_year = u.groupby(pd.cut(u.index, np.arange(0, 12, 12)))['FcoUMined'].sum()
+    rtn = u_year.reset_index()
     return rtn
 
 del _udeps, _uschema
