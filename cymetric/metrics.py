@@ -1,4 +1,4 @@
-"""A collection of metrics that come stock witih cymetric.
+"""A collection of metrics that come stock with cymetric.
 """
 from __future__ import print_function, unicode_literals
 import inspect
