@@ -242,9 +242,10 @@ _uschema = [('TimeCreated', ts.INT), ('FcoUMined', ts.DOUBLE)]
 
 @metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
-    """FcoUMined metric returns the uranium mined at each timestep in a 
-    simulation. This is written for FCO-only databases (i.e., the U235 and 
-    U238 are given separately in the FCO simulations)."""
+    """FcoUMined metric returns the uranium mined for each year in a 200-yr
+    simulation. This is written for FCO databases that use the Bright-lite 
+    Fuel Fab(i.e., the U235 and U238 are given separately in the FCO 
+    simulations)."""
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['ResourceId'], how='inner').set_index(['ObjId', 
                 'TimeCreated', 'NucId'])
