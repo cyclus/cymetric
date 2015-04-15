@@ -234,18 +234,18 @@ del _agentsdeps, _agentsschema
 ## FCO-related metrics ##
 #########################
 
-# U Resources Mined [t] (currently implemented with a metric tonnes conversion)
+# U Resources Mined [t] 
 _udeps= [('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
          ('Transactions', ('ResourceId', ), 'Commodity')]
 
-_uschema = [('TimeCreated', ts.INT), ('FcoUMined', ts.DOUBLE)]
+_uschema = [('Year', ts.INT), ('FcoUMined', ts.DOUBLE)]
 
 @metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
-    """FcoUMined metric returns the uranium mined for each year in a 200-yr
-    simulation. This is written for FCO databases that use the Bright-lite 
-    Fuel Fab(i.e., the U235 and U238 are given separately in the FCO 
-    simulations)."""
+    """FcoUMined metric returns the uranium mined in tonnes for each year 
+    in a 200-yr simulation. This is written for FCO databases that use the 
+    Bright-lite Fuel Fab(i.e., the U235 and U238 are given separately in the 
+    FCO simulations)."""
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['ResourceId'], how='inner').set_index(['ObjId', 
                 'TimeCreated', 'NucId'])
@@ -262,12 +262,12 @@ def fco_u_mined(series):
         feed = enr.feed(0.0072, x_prod, 0.0025, product=prods[obj]) / 1000
         u.append(feed)
     m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
-    u = pd.Series(u, index=m.index)
-    u = u.groupby(level=['TimeCreated']).sum()
-    u.name = 'FcoUMined'
+    m = m.reset_index()
     # sum by years (12 time steps)
-    u_year = u.groupby(pd.cut(u.index, np.arange(0, 12, 12)))['FcoUMined'].sum()
-    rtn = u_year.reset_index()
+    u = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x//12), 
+                           'FcoUMined': u}, columns=['Year', 'FcoUMined'])
+    u = u.groupby('Year').sum()
+    rtn = u.reset_index()
     return rtn
 
 del _udeps, _uschema
