@@ -273,3 +273,38 @@ def fco_u_mined(series):
 del _udeps, _uschema
 
 
+_swudeps = [('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
+          ('Transactions', ('ResourceId',), 'Commodity')]
+
+_swuschema = [('Year', ts.INT), ('SWU', ts.DOUBLE)]
+
+@metric(name='FcoSWU', depends=_swudeps, schema=_swuschema)
+def fco_swu(series):
+    """FcoSWU metric returns the separative work units required for each 
+    year in a 200-yr simulation. This is written for FCO databases that 
+    use the Bright-lite (i.e., the U235 and U238 are given separately 
+    in the FCO simulations)."""
+    mass = pd.merge(series[0].reset_index(), series[1].reset_index(),
+            on=['ResourceId'], how='inner').set_index(['ObjId', 'TimeCreated', 'NucId'])
+    swu = []
+    prods = {}
+    mass235 = {}
+    m = mass[mass['Commodity'] == 'LWR Fuel']
+    for (obj, _, nuc), value in m.iterrows():
+        prods[obj] = prods.get(obj, 0.0) + value['Mass']
+        if nuc == 922350000:
+            mass235[obj] = value['Mass']
+    for obj, m235 in mass235.items():
+        x_prod = m235 / prods[obj]
+        swu0 = enr.swu(0.0072, x_prod, 0.0025, product=prods[obj])
+        swu.append(swu0)
+    m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
+    m = m.reset_index()
+    # sum by years (12 time steps)
+    swu = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x//12),
+                             'SWU': swu}, columns=['Year', 'SWU'])
+    swu = swu.groupby('Year').sum()
+    rtn = swu.reset_index()
+    return rtn
+
+del _swudeps, _swuschema
