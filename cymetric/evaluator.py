@@ -27,7 +27,7 @@ class Evaluator(object):
         Attributes
         ----------
         metrics : dict
-            Metric instances bound the evalator's database.
+            Metric instances bound the evaluator's database.
         rawcache : dict
             Results of querying metrics with given conditions.
         """
@@ -40,6 +40,7 @@ class Evaluator(object):
         self.known_tables = db.tables
 
     def get_metric(self, metric):
+        """Checks if metric is already in the registry; adds it if not."""
         if metric not in self.metrics:
             self.metrics[metric] = METRIC_REGISTRY[metric](self.db)
         return self.metrics[metric]
@@ -63,12 +64,13 @@ class Evaluator(object):
         if (m.name in self.known_tables) or (not self.write):
             return raw
         rec = self.recorder
-        rawd = raw.to_dict(outtype='series')
+        rawd = raw.to_dict(outtype='list')
         for i in range(len(raw)):
             d = rec.new_datum(m.name)
             for field, dbtype, shape in m.schema:
-                d = d.add_val(m.schema.byte_names[field], rawd[str(field)][i], 
-                              dbtype=dbtype, shape=shape)
+                fname = m.schema.byte_names[field]
+                val = rawd[str(field)][i]
+                d = d.add_val(fname, val, dbtype=dbtype, shape=shape)
             d.record()
         self.known_tables.add(m.name)
         return raw
