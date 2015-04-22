@@ -15,6 +15,7 @@ from pandas.util.testing import assert_frame_equal
 
 try:
     from pyne import data
+    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
