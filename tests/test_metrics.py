@@ -170,6 +170,8 @@ def test_decayheat():
 #################################
 
 def test_fco_u_mined():
+    if not HAVE_PYNE:
+        raise SkipTest
     exp = pd.DataFrame(np.array([(0, 3.780034), (1, 2.185349)], 
         dtype=ensure_dt_bytes([('Year', '<i8'), ('FcoUMined', '<f8')]))
         )
@@ -201,6 +203,8 @@ def test_fco_u_mined():
 
 
 def test_fco_swu():
+    if not HAVE_PYNE:
+        raise SkipTest
     exp = pd.DataFrame(np.array([(0, 2406.823355), (1, 1473.053824)], 
         dtype=ensure_dt_bytes([('Year', '<i8'), ('SWU', '<f8')]))
         )
