@@ -273,3 +273,26 @@ def fco_u_mined(series):
 del _udeps, _uschema
 
 
+# Electricity Generated [GWe-y]
+_egdeps = [('TimeSeriesPower', ('Time',), 'Value'),]
+
+_egschema = [('Year', ts.INT), ('Power', ts.DOUBLE)]
+
+@metric(name='FcoElectricityGen', depends=_egdeps, schema=_egschema)
+def fco_electricity_gen(series):
+    """FcoElectricityGen metric returns the electricity generated in GWe-y 
+    in a 200-yr simulation. This is written for the purpose of FCO databases.
+    """
+    elec = series[0]
+    # sum by years (12 time steps)
+    elec.index = map(lambda x: x//12, elec.index)
+    elec = elec.groupby(elec.index).sum()
+    elec.index.name = 'Year'
+    elec.name = 'Power'
+    elec = elec.reset_index()
+    # calculate to GWe-y
+    elec.Power = elec.Power / 1000
+    return elec
+
+
+del _egdeps, _egschema
