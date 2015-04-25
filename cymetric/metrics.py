@@ -245,7 +245,8 @@ def fco_u_mined(series):
     """FcoUMined metric returns the uranium mined in tonnes for each year 
     in a 200-yr simulation. This is written for FCO databases that use the 
     Bright-lite Fuel Fab(i.e., the U235 and U238 are given separately in the 
-    FCO simulations)."""
+    FCO simulations).
+    """
     tools.raise_no_pyne('U_Mined could not be computed', HAVE_PYNE)
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['ResourceId'], how='inner').set_index(['ObjId', 
@@ -284,7 +285,8 @@ def fco_swu(series):
     """FcoSWU metric returns the separative work units required for each 
     year in a 200-yr simulation. This is written for FCO databases that 
     use the Bright-lite (i.e., the U235 and U238 are given separately 
-    in the FCO simulations)."""
+    in the FCO simulations).
+    """
     tools.raise_no_pyne('SWU Required could not be computed', HAVE_PYNE)
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(),
             on=['ResourceId'], how='inner').set_index(['ObjId', 'TimeCreated', 'NucId'])
@@ -298,7 +300,7 @@ def fco_swu(series):
             mass235[obj] = value['Mass']
     for obj, m235 in mass235.items():
         x_prod = m235 / prods[obj]
-        swu0 = enr.swu(0.0072, x_prod, 0.0025, product=prods[obj])
+        swu0 = enr.swu(0.0072, x_prod, 0.0025, product=prods[obj]) / 1e6
         swu.append(swu0)
     m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
     m = m.reset_index()
