@@ -277,8 +277,8 @@ del _udeps, _uschema
 
 deps = [('Materials', ('SimId', 'ResourceId', 'NucId'), 'Mass')]
 
-schema = [('SimId', cym.UUID), ('ResourceId', cym.INT),
-          ('NucId', cym.INT),  ('MassSquared', cym.DOUBLE)]
+schema = [('SimId', ts.UUID), ('ResourceId', ts.INT),
+          ('NucId', ts.INT),  ('MassSquared', ts.DOUBLE)]
 
 @metric(name='MaterialsSquared', depends=deps, schema=schema)
 def mats_sqrd(series):
