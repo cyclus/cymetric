@@ -284,7 +284,7 @@ schema = [('SimId', ts.UUID), ('ResourceId', ts.INT),
 def mats_sqrd(series):
     mats = series[0]
     rtn = mats**2
-    rtn.name = 'MaterialsSquared'
+    rtn.name = 'MassSquared'
     rtn = rtn.reset_index()
     return rtn
 
