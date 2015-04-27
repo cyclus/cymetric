@@ -275,17 +275,6 @@ del _udeps, _uschema
 
 ######Economic metrics######
 
-"""Naturally, you do not want to be limited to your the metrics that come
-predefined by cymetric. You have your own data and your own analysis that
-you want to perform. Cymetric makes it easy to write your own metrics and
-fully hook into the cymetric tools.
-
-All you need to do is write a function that accepts pandas series, return
-a pandas data frame, and decorate it by the @metric() decorator found in
-cymetric. For example, if you wanted to square the mass of materials as
-your metric, you could write the following. Call the new metric
-MaterialsSquared."""
-
 deps = [('Materials', ('SimId', 'ResourceId', 'NucId'), 'Mass')]
 
 schema = [('SimId', cym.UUID), ('ResourceId', cym.INT),
@@ -298,33 +287,4 @@ def mats_sqrd(series):
     rtn.name = 'MaterialsSquared'
     rtn = rtn.reset_index()
     return rtn
-"""Note that to write this metric, no knowledge of the database or any filters
-is assumed. Cymetric handles all of these details for you!
 
-In the above, the @metric() decorator takes three arguments. The first is the
-name of the metric. Note that this can be distinct from the function name.
-
-The second is deps, which represents the metric dependencies. This is a list
-of 3-tuples that represents which series to pull out of the database and pass
-into the metric function (here mats_sqrd()). The first element is the table
-name as a string (eg 'Materials'). The second element is a tuple of column
-names that become the index of the series (eg ('SimId', 'ResourceId', 'NucId')).
-Finally, the last element is the column of the table that becomes the values of
-the series. A metric may have as many dependencies as required. Circular
-dependencies are not allowed.
-
-Lastly, the @metric() decorator takes a schema argument. This represents the
-structure of the metric table on disk and in |cyclus|. Thus, it is highly tied
-to the |cyclus| type system (see http://fuelcycle.org/arche/dbtypes.html), as
-represented in cymetric. The data frame that is returned should have column
-names that match the schema provided. It is generally a good idea to include a
-SimId column.
-
-The above shows how easy it is to incorporate metrics that are computed via
-cymetric. However, cymetric also helps you bring in data that might come from
-custom |cyclus| tables (see http://fuelcycle.org/arche/custom_tables.html).
-All you need to do is use the root_metric() function somewhere. This simply
-accepts the name of the table. For example,
-
-my_table = cym.root_metric(name='MyTable')
-And that is all!"""
