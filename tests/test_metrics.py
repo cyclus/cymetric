@@ -206,7 +206,7 @@ def test_fco_u_mined():
 def test_fco_swu():
     if not HAVE_PYNE:
         raise SkipTest
-    exp = pd.DataFrame(np.array([(0, 0.002407), (1, 0.001473)], 
+    exp = pd.DataFrame(np.array([(0, 0.00241), (1, 0.00147)], 
         dtype=ensure_dt_bytes([('Year', '<i8'), ('SWU', '<f8')]))
         )
     mats = pd.DataFrame(np.array([
