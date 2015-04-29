@@ -283,17 +283,14 @@ def fco_electricity_gen(series):
     """FcoElectricityGen metric returns the electricity generated in GWe-y 
     in a 200-yr simulation. This is written for the purpose of FCO databases.
     """
-    elec = series[0]
+    elec = series[0].reset_index()
     # sum by years (12 time steps)
-    elec.index = map(lambda x: x//12, elec.index)
-    elec = elec.groupby(elec.index).sum()
-    elec.index.name = 'Year'
-    elec.name = 'Power'
-    elec = elec.reset_index()
-    # calculate to GWe-y
-    elec.Power = elec.Power / 1000
-    return elec
-
+    elec = pd.DataFrame(data={'Year': elec.Time.apply(lambda x: x//12), 
+                              'Power': elec.Value.apply(lambda x: x/1000)}, 
+                        columns=['Year', 'Power'])
+    elec = elec.groupby('Year').sum()
+    rtn = elec.reset_index()
+    return rtn
 
 del _egdeps, _egschema
 
