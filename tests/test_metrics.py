@@ -201,7 +201,7 @@ def test_fco_u_mined():
 
 
 def test_fco_fuel_loading():
-    exp = pd.DataFrame(np.array([(0, 666.666666), (1, 333.333333)], 
+    exp = pd.DataFrame(np.array([(0, 0.666666), (1, 0.333333)], 
         dtype=ensure_dt_bytes([('Year', '<i8'), ('FuelLoading', '<f8')]))
         )
     mats = pd.DataFrame(np.array([

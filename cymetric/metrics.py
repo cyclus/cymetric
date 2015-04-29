@@ -292,7 +292,9 @@ def fco_fuel_loading(series):
     mass.index = map(lambda x: x//12, mass.index)
     mass.index.name = 'Year'
     mass.name = 'FuelLoading'
-    rtn = mass.reset_index()
-    return rtn
+    mass = mass.reset_index()
+    # kg to t
+    mass.FuelLoading = mass.FuelLoading / 1000
+    return mass
 
 del _fldeps, _flschema
