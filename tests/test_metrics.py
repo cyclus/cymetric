@@ -233,7 +233,7 @@ def test_fco_swu():
     s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
     series = [s1,s2]
     obs = metrics.fco_swu.func(series)
-    assert_frame_equal(exp, obs)
+    assert_frame_equal(exp, obs, check_less_precise=True)
 
 
 def test_fco_fuel_loading():
