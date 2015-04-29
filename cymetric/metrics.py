@@ -305,6 +305,28 @@ def fco_u_mined(series):
 del _udeps, _uschema
 
 
+# Electricity Generated [GWe-y]
+_egdeps = [('TimeSeriesPower', ('Time',), 'Value'),]
+
+_egschema = [('Year', ts.INT), ('Power', ts.DOUBLE)]
+
+@metric(name='FcoElectricityGen', depends=_egdeps, schema=_egschema)
+def fco_electricity_gen(series):
+    """FcoElectricityGen metric returns the electricity generated in GWe-y 
+    in a 200-yr simulation. This is written for the purpose of FCO databases.
+    """
+    elec = series[0].reset_index()
+    # sum by years (12 time steps)
+    elec = pd.DataFrame(data={'Year': elec.Time.apply(lambda x: x//12), 
+                              'Power': elec.Value.apply(lambda x: x/1000)}, 
+                        columns=['Year', 'Power'])
+    elec = elec.groupby('Year').sum()
+    rtn = elec.reset_index()
+    return rtn
+
+del _egdeps, _egschema
+
+
 # Annual Fuel Loading Rate [tHM/y]
 _fldeps = [('Materials', ('ResourceId', 'TimeCreated'), 'Mass'),
           ('Transactions', ('ResourceId',), 'Commodity')]
@@ -330,3 +352,4 @@ def fco_fuel_loading(series):
     return mass
 
 del _fldeps, _flschema
+
