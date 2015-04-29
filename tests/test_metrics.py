@@ -206,7 +206,7 @@ def test_fco_u_mined():
 def test_fco_swu():
     if not HAVE_PYNE:
         raise SkipTest
-    exp = pd.DataFrame(np.array([(0, 0.00241), (1, 0.00147)], 
+    exp = pd.DataFrame(np.array([(0, 0.0024068), (1, 0.0014731)], 
         dtype=ensure_dt_bytes([('Year', '<i8'), ('SWU', '<f8')]))
         )
     mats = pd.DataFrame(np.array([
@@ -233,7 +233,7 @@ def test_fco_swu():
     s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
     series = [s1,s2]
     obs = metrics.fco_swu.func(series)
-    assert_frame_equal(exp, obs, check_less_precise=True)
+    assert_frame_equal(exp, obs)
 
 
 def test_fco_fuel_loading():
