@@ -273,3 +273,26 @@ def fco_u_mined(series):
 del _udeps, _uschema
 
 
+# Annual Fuel Loading Rate [tHM/y]
+_fldeps = [('Materials', ('ResourceId', 'TimeCreated'), 'Mass'),
+          ('Transactions', ('ResourceId',), 'Commodity')]
+
+_flschema = [('Year', ts.INT), ('FuelLoading', ts.DOUBLE)]
+
+@metric(name='FcoFuelLoading', depends=_fldeps, schema=_flschema)
+def fco_fuel_loading(series):
+    """FcoFuelLoading metric returns the fuel loaded in tHM/y in a 200-yr 
+    simulation. This is written for FCO databases.
+    """
+    mass = pd.merge(series[0].reset_index(), series[1].reset_index(),
+            on=['ResourceId'], how='inner').set_index(['TimeCreated'])
+    mass = mass.query('Commodity == ["LWR Fuel", "FR Fuel"]')
+    mass = mass.groupby(mass.index)['Mass'].sum()
+    # sum by years (12 time steps)
+    mass.index = map(lambda x: x//12, mass.index)
+    mass.index.name = 'Year'
+    mass.name = 'FuelLoading'
+    rtn = mass.reset_index()
+    return rtn
+
+del _fldeps, _flschema
