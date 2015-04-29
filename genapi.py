@@ -378,35 +378,35 @@ TO_PY_CONVERTERS = {
     'std::set': (
         '{valdecl}\n'
         'cdef {valtype} {valname}\n'
-        'cdef std_set[{valtype}].iterator it\n'
+        'cdef std_set[{valtype}].iterator it{var}\n'
         'cdef set py{var}\n',
         'py{var} = set()\n'
-        'it = {var}.begin()\n'
-        'while it != {var}.end():\n'
-        '    {valname} = deref(it)\n'
+        'it{var} = {var}.begin()\n'
+        'while it{var} != {var}.end():\n'
+        '    {valname} = deref(it{var})\n'
         '    {valbody.indent4}\n'
         '    pyval = {valexpr}\n'
         '    py{var}.add(pyval)\n'
-        '    inc(it)\n',
+        '    inc(it{var})\n',
         'py{var}'),
     'std::map': (
         '{keydecl}\n'
         '{valdecl}\n'
         'cdef {keytype} {keyname}\n'
         'cdef {valtype} {valname}\n'
-        'cdef {type}.iterator it\n'
+        'cdef {type}.iterator it{var}\n'
         'cdef dict py{var}\n',
         'py{var} = {{}}\n'
-        'it = {var}.begin()\n'
-        'while it != {var}.end():\n'
-        '    {keyname} = deref(it).first\n'
+        'it{var} = {var}.begin()\n'
+        'while it{var} != {var}.end():\n'
+        '    {keyname} = deref(it{var}).first\n'
         '    {keybody.indent4}\n'
         '    pykey = {keyexpr}\n'
-        '    {valname} = deref(it).second\n'
+        '    {valname} = deref(it{var}).second\n'
         '    {valbody.indent4}\n'
         '    pyval = {valexpr}\n'
         '    py{var}[pykey] = pyval\n'
-        '    inc(it)\n',
+        '    inc(it{var})\n',
         'py{var}'),
     'std::pair': (
         '{firstdecl}\n'
@@ -423,16 +423,16 @@ TO_PY_CONVERTERS = {
     'std::list': (
         '{valdecl}\n'
         'cdef {valtype} {valname}\n'
-        'cdef std_list[{valtype}].iterator it\n'
+        'cdef std_list[{valtype}].iterator it{var}\n'
         'cdef list py{var}\n',
         'py{var} = []\n'
-        'it = {var}.begin()\n'
-        'while it != {var}.end():\n'
-        '    {valname} = deref(it)\n'
+        'it{var} = {var}.begin()\n'
+        'while it{var} != {var}.end():\n'
+        '    {valname} = deref(it{var})\n'
         '    {valbody.indent4}\n'
         '    pyval = {valexpr}\n'
         '    py{var}.append(pyval)\n'
-        '    inc(it)\n',
+        '    inc(it{var})\n',
         'py{var}'),
     'std::vector': (
         'cdef np.npy_intp {var}_shape[1]\n', 
