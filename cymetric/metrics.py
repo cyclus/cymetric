@@ -271,20 +271,3 @@ def fco_u_mined(series):
     return rtn
 
 del _udeps, _uschema
-
-
-######Economic metrics######
-
-deps = [('Materials', ('SimId', 'ResourceId', 'NucId'), 'Mass')]
-
-schema = [('SimId', ts.UUID), ('ResourceId', ts.INT),
-          ('NucId', ts.INT),  ('MassSquared', ts.DOUBLE)]
-
-@metric(name='MaterialsSquared', depends=deps, schema=schema)
-def mats_sqrd(series):
-    mats = series[0]
-    rtn = mats**2
-    rtn.name = 'MassSquared'
-    rtn = rtn.reset_index()
-    return rtn
-
