@@ -231,5 +231,22 @@ def test_fco_fuel_loading():
     assert_frame_equal(exp, obs)
 
 
+def test_fco_electricity_gen():
+    exp = pd.DataFrame(np.array([(0, 3), (1, 10)], 
+        dtype=ensure_dt_bytes([('Year', '<i8'), ('Power', '<f8')]))
+        )
+    tsp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 3, 1000),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 2000),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 12, 10000),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'), 
+                ('Value', '<f8')]))
+        )
+    series = [tsp.set_index(['SimId', 'AgentId', 'Time'])['Value']]
+    obs = metrics.fco_electricity_gen.func(series)
+    assert_frame_equal(exp, obs)
+
+
 if __name__ == "__main__":
     nose.runmodule()
