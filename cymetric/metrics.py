@@ -246,7 +246,7 @@ _transschema = [
     ]
 
 @metric(name='TransactionQuant', depends=_transdeps, schema=_transschema)
-def fco_transactions(series):
+def transaction_quant(series):
     """TransQuant metric returns the quantity of each transaction throughout 
     the simulation.
     """
