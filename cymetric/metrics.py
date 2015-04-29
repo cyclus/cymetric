@@ -273,7 +273,6 @@ def fco_u_mined(series):
 del _udeps, _uschema
 
 
-<<<<<<< HEAD
 # Electricity Generated [GWe-y]
 _egdeps = [('TimeSeriesPower', ('Time',), 'Value'),]
 
@@ -297,7 +296,8 @@ def fco_electricity_gen(series):
 
 
 del _egdeps, _egschema
-=======
+
+
 # Annual Fuel Loading Rate [tHM/y]
 _fldeps = [('Materials', ('ResourceId', 'TimeCreated'), 'Mass'),
           ('Transactions', ('ResourceId',), 'Commodity')]
@@ -323,4 +323,4 @@ def fco_fuel_loading(series):
     return mass
 
 del _fldeps, _flschema
->>>>>>> 34d62f649ce67d3821e04c51b1daaa3469f14f3b
+
