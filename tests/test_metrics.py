@@ -171,7 +171,7 @@ def test_decayheat():
 
 def test_fco_u_mined():
     exp = pd.DataFrame(np.array([(0, 3.780034), (1, 2.185349)], 
-        dtype=ensure_dt_bytes([('Year', '<i8'), ('FcoUMined', '<f8')]))
+        dtype=ensure_dt_bytes([('Year', '<i8'), ('UMined', '<f8')]))
         )
     mats = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922350000, 8.328354),
@@ -231,7 +231,7 @@ def test_fco_fuel_loading():
     assert_frame_equal(exp, obs)
 
 
-def test_fco_electricity_gen():
+def test_fco_electricity_generated():
     exp = pd.DataFrame(np.array([(0, 3), (1, 10)], 
         dtype=ensure_dt_bytes([('Year', '<i8'), ('Power', '<f8')]))
         )
@@ -244,7 +244,7 @@ def test_fco_electricity_gen():
                 ('Value', '<f8')]))
         )
     series = [tsp.set_index(['SimId', 'AgentId', 'Time'])['Value']]
-    obs = metrics.fco_electricity_gen.func(series)
+    obs = metrics.fco_electricity_generated.func(series)
     assert_frame_equal(exp, obs)
 
 
