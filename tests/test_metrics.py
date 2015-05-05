@@ -165,27 +165,28 @@ def test_decayheat():
     assert_frame_equal(exp, obs)
 
 
-def test_transaction_quant():
+def test_transaction_quantity():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 3, 3,  10, 20, 'LWR Fuel', 410),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 3,  20, 30, 'FR Fuel', 305),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 12, 30, 40, 'Spent Fuel', 9),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 3, 3,  10, 20, 'LWR Fuel', 'kg', 410),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 3,  20, 30, 'FR Fuel', 'kg', 305),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 12, 30, 40, 'Spent Fuel', 'kg', 9),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'), 
                 ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('SenderId', '<i8'), 
-                ('ReceiverId', '<i8'), ('Commodity', 'O'), ('Mass', '<f8')]))
+                ('ReceiverId', '<i8'), ('Commodity', 'O'), ('Units', 'O'), 
+                ('Mass', '<f8')]))
         )
     mats = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922350000, 10),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922380000, 400),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 942390000, 5),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922380000, 300),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 942390000, 5),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922360000, 4),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922350000, 'kg', 10),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922380000, 'kg', 400),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 942390000, 'kg', 5),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922380000, 'kg', 300),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 942390000, 'kg', 5),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922360000, 'kg', 4),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'),
                 ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('NucId', '<i8'), 
-                ('Mass', '<f8')]))
+                ('Units', 'O'), ('Mass', '<f8')]))
         )
     trans = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 10, 20, 7, 'LWR Fuel'),
@@ -195,10 +196,10 @@ def test_transaction_quant():
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('SenderId', '<i8'), 
                 ('ReceiverId', '<i8'), ('ResourceId', '<i8'), ('Commodity', 'O')]))
         )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
+    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId', 'Units'])['Mass']
     s2 = trans.set_index(['SimId', 'TransactionId', 'SenderId', 'ReceiverId', 'ResourceId'])['Commodity']
     series = [s1,s2]
-    obs = metrics.transaction_quant.func(series)
+    obs = metrics.transaction_quantity.func(series)
     assert_frame_equal(exp, obs)
 
 

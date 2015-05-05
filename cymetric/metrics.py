@@ -230,9 +230,10 @@ def agents(series):
 del _agentsdeps, _agentsschema
 
 
-# Transaction Masses [kg]
+# Transaction Quantity
 _transdeps = [
-    ('Materials', ('SimId', 'ResourceId', 'ObjId', 'TimeCreated'), 'Mass'), 
+    ('Materials', ('SimId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'), 
+        'Mass'),
     ('Transactions', ('SimId', 'TransactionId', 'SenderId', 'ReceiverId', 
         'ResourceId'), 'Commodity')
     ]
@@ -242,16 +243,16 @@ _transschema = [
     ('ResourceId', ts.INT), ('ObjId', ts.INT), 
     ('TimeCreated', ts.INT), ('SenderId', ts.INT), 
     ('ReceiverId', ts.INT), ('Commodity', ts.STRING), 
-    ('Mass', ts.DOUBLE)
+    ('Units', ts.STRING), ('Mass', ts.DOUBLE)
     ]
 
-@metric(name='TransactionQuant', depends=_transdeps, schema=_transschema)
-def transaction_quant(series):
+@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
+def transaction_quantity(series):
     """TransQuant metric returns the quantity of each transaction throughout 
     the simulation.
     """
     trans_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId', 
-            'TimeCreated', 'SenderId', 'ReceiverId', series[1].name]
+            'TimeCreated', 'SenderId', 'ReceiverId', series[1].name, 'Units']
     trans = pd.merge(series[0].reset_index(), series[1].reset_index(),
             on=['SimId', 'ResourceId'], how='inner').set_index(trans_index)
     trans = trans.groupby(level=trans_index)['Mass'].sum()
