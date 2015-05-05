@@ -238,7 +238,7 @@ del _agentsdeps, _agentsschema
 _udeps= [('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
          ('Transactions', ('ResourceId', ), 'Commodity')]
 
-_uschema = [('Year', ts.INT), ('FcoUMined', ts.DOUBLE)]
+_uschema = [('Year', ts.INT), ('UMined', ts.DOUBLE)]
 
 @metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
@@ -265,7 +265,7 @@ def fco_u_mined(series):
     m = m.reset_index()
     # sum by years (12 time steps)
     u = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x//12), 
-                           'FcoUMined': u}, columns=['Year', 'FcoUMined'])
+                           'UMined': u}, columns=['Year', 'UMined'])
     u = u.groupby('Year').sum()
     rtn = u.reset_index()
     return rtn
@@ -278,9 +278,9 @@ _egdeps = [('TimeSeriesPower', ('Time',), 'Value'),]
 
 _egschema = [('Year', ts.INT), ('Power', ts.DOUBLE)]
 
-@metric(name='FcoElectricityGen', depends=_egdeps, schema=_egschema)
-def fco_electricity_gen(series):
-    """FcoElectricityGen metric returns the electricity generated in GWe-y 
+@metric(name='FcoElectricityGenerated', depends=_egdeps, schema=_egschema)
+def fco_electricity_generated(series):
+    """FcoElectricityGenerated metric returns the electricity generated in GWe-y 
     in a 200-yr simulation. This is written for the purpose of FCO databases.
     """
     elec = series[0].reset_index()
