@@ -83,12 +83,12 @@ def test_agents():
 
 def test_materials():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 0.04),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 1.94),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 942390000, 0.01),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000, 'kg', 0.04),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922380000, 'kg', 1.94),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 942390000, 'kg', 0.01),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'), 
-                ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
+                ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Units', 'O'), ('Mass', '<f8')]))
         )
     res = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 9, 7, 'Material', 1, 2, 'kg', 5, 0, 0),
@@ -106,7 +106,7 @@ def test_materials():
                 ('SimId', 'O'), ('QualId', '<i8'), ('NucId', '<i8'), 
                 ('MassFrac', '<f8')]))
         )
-    s1 = res.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'])['Quantity']
+    s1 = res.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'])['Quantity']
     s2 = comps.set_index(['SimId', 'QualId', 'NucId'])['MassFrac']
     series = [s1,s2]
     obs = metrics.materials.func(series)
