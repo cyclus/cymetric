@@ -94,14 +94,18 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 #
 
 # Material Mass (quantity * massfrac)
-_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
-                'Quantity'),
-            ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')]
+_matdeps = [
+    ('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+        'Quantity'),
+    ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')
+    ]
 
-_matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
-              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-              ('Mass', ts.DOUBLE))
+_matschema = [
+    ('SimId', ts.UUID), ('QualId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+    ('Mass', ts.DOUBLE)
+    ]
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(series):
@@ -121,12 +125,17 @@ del _matdeps, _matschema
 
 
 # Activity (mass * decay_const / atomic_mass)
-_actdeps = [('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass')]
+_actdeps = [
+    ('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+        'Mass')
+    ]
 
-_actschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
-              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-              ('Activity', ts.DOUBLE)]
+_actschema = [
+    ('SimId', ts.UUID), ('QualId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+    ('Activity', ts.DOUBLE)
+    ]
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
@@ -150,13 +159,17 @@ del _actdeps, _actschema
 
 
 # DecayHeat (activity * q_value)
-_dhdeps = [('Activity', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
-               'Activity')]
+_dhdeps = [
+    ('Activity', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 
+        'Activity')
+    ]
 
-_dhschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
-             ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-             ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-             ('DecayHeat', ts.DOUBLE)]
+_dhschema = [
+    ('SimId', ts.UUID), ('QualId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+    ('DecayHeat', ts.DOUBLE)
+    ]
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
 def decay_heat(series):
@@ -235,8 +248,10 @@ del _agentsdeps, _agentsschema
 #########################
 
 # U Resources Mined [t] 
-_udeps= [('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
-         ('Transactions', ('ResourceId', ), 'Commodity')]
+_udeps= [
+    ('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
+    ('Transactions', ('ResourceId', ), 'Commodity')
+    ]
 
 _uschema = [('Year', ts.INT), ('UMined', ts.DOUBLE)]
 
@@ -245,7 +260,8 @@ def fco_u_mined(series):
     """FcoUMined metric returns the uranium mined in tonnes for each year 
     in a 200-yr simulation. This is written for FCO databases that use the 
     Bright-lite Fuel Fab(i.e., the U235 and U238 are given separately in the 
-    FCO simulations)."""
+    FCO simulations).
+    """
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['ResourceId'], how='inner').set_index(['ObjId', 
                 'TimeCreated', 'NucId'])
@@ -296,8 +312,10 @@ del _egdeps, _egschema
 
 
 # Annual Fuel Loading Rate [tHM/y]
-_fldeps = [('Materials', ('ResourceId', 'TimeCreated'), 'Mass'),
-          ('Transactions', ('ResourceId',), 'Commodity')]
+_fldeps = [
+    ('Materials', ('ResourceId', 'TimeCreated'), 'Mass'),
+    ('Transactions', ('ResourceId',), 'Commodity')
+    ]
 
 _flschema = [('Year', ts.INT), ('FuelLoading', ts.DOUBLE)]
 
