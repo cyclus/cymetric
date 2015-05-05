@@ -276,8 +276,10 @@ del _udeps, _uschema
 
 
 # SWU Required [million SWU]
-_swudeps = [('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
-          ('Transactions', ('ResourceId',), 'Commodity')]
+_swudeps = [
+    ('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
+    ('Transactions', ('ResourceId',), 'Commodity')
+    ]
 
 _swuschema = [('Year', ts.INT), ('SWU', ts.DOUBLE)]
 
