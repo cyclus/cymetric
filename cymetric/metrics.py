@@ -94,14 +94,14 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 #
 
 # Material Mass (quantity * massfrac)
-_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'), 
                 'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')]
 
 _matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
               ('ResourceId', ts.INT), ('ObjId', ts.INT), 
               ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-              ('Mass', ts.DOUBLE))
+              ('Units', ts.STRING), ('Mass', ts.DOUBLE))
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(series):
@@ -111,7 +111,7 @@ def materials(series):
     """
     x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['SimId', 'QualId'], how='inner').set_index(['SimId', 'QualId', 
-                'ResourceId', 'ObjId','TimeCreated', 'NucId'])
+                'ResourceId', 'ObjId','TimeCreated', 'NucId', 'Units'])
     y = x['Quantity'] * x['MassFrac']
     y.name = 'Mass'
     z = y.reset_index()
