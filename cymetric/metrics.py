@@ -94,14 +94,14 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 #
 
 # Material Mass (quantity * massfrac)
-_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated'), 
+_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'), 
                 'Quantity'),
             ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')]
 
 _matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
               ('ResourceId', ts.INT), ('ObjId', ts.INT), 
               ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-              ('Mass', ts.DOUBLE))
+              ('Units', ts.STRING), ('Mass', ts.DOUBLE))
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(series):
@@ -111,7 +111,7 @@ def materials(series):
     """
     x = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['SimId', 'QualId'], how='inner').set_index(['SimId', 'QualId', 
-                'ResourceId', 'ObjId','TimeCreated', 'NucId'])
+                'ResourceId', 'ObjId','TimeCreated', 'NucId', 'Units'])
     y = x['Quantity'] * x['MassFrac']
     y.name = 'Mass'
     z = y.reset_index()
@@ -228,6 +228,39 @@ def agents(series):
     return df
 
 del _agentsdeps, _agentsschema
+
+
+# Transaction Quantity
+_transdeps = [
+    ('Materials', ('SimId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'), 
+        'Mass'),
+    ('Transactions', ('SimId', 'TransactionId', 'SenderId', 'ReceiverId', 
+        'ResourceId'), 'Commodity')
+    ]
+
+_transschema = [
+    ('SimId', ts.UUID), ('TransactionId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('SenderId', ts.INT), 
+    ('ReceiverId', ts.INT), ('Commodity', ts.STRING), 
+    ('Units', ts.STRING), ('Quantity', ts.DOUBLE)
+    ]
+
+@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
+def transaction_quantity(series):
+    """TransQuant metric returns the quantity of each transaction throughout 
+    the simulation.
+    """
+    trans_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId', 
+            'TimeCreated', 'SenderId', 'ReceiverId', series[1].name, 'Units']
+    trans = pd.merge(series[0].reset_index(), series[1].reset_index(),
+            on=['SimId', 'ResourceId'], how='inner').set_index(trans_index)
+    trans = trans.groupby(level=trans_index)['Mass'].sum()
+    trans.name = 'Quantity'
+    rtn = trans.reset_index()
+    return rtn
+
+del _transdeps, _transschema
 
 
 #########################
