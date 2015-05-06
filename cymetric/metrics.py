@@ -343,14 +343,14 @@ def fco_fuel_loading(series):
             on=['ResourceId'], how='inner').set_index(['TimeCreated'])
     mass = mass.query('Commodity == ["LWR Fuel", "FR Fuel"]')
     mass = mass.groupby(mass.index)['Mass'].sum()
-    # sum by years (12 time steps)
-    mass.index = map(lambda x: x//12, mass.index)
-    mass.index.name = 'Year'
-    mass.name = 'FuelLoading'
     mass = mass.reset_index()
-    # kg to t
-    mass.FuelLoading = mass.FuelLoading / 1000
-    return mass
+    # sum by years (12 time steps)
+    mass = pd.DataFrame(data={'Year': mass.TimeCreated.apply(lambda x: x//12),
+                              'FuelLoading': mass.Mass.apply(lambda x: x/1000)}, 
+                        columns=['Year', 'FuelLoading'])
+    mass = mass.groupby('Year').sum()
+    rtn = mass.reset_index()
+    return rtn
 
 del _fldeps, _flschema
 
