@@ -174,7 +174,7 @@ def test_transaction_quantity():
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'), 
                 ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('SenderId', '<i8'), 
                 ('ReceiverId', '<i8'), ('Commodity', 'O'), ('Units', 'O'), 
-                ('Mass', '<f8')]))
+                ('Quantity', '<f8')]))
         )
     mats = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922350000, 'kg', 10),
