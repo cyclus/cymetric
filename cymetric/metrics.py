@@ -316,9 +316,9 @@ _swudeps = [
 
 _swuschema = [('Year', ts.INT), ('SWU', ts.DOUBLE)]
 
-@metric(name='FcoSWU', depends=_swudeps, schema=_swuschema)
+@metric(name='FcoSwu', depends=_swudeps, schema=_swuschema)
 def fco_swu(series):
-    """FcoSWU metric returns the separative work units required for each 
+    """FcoSwu metric returns the separative work units required for each 
     year in a 200-yr simulation. This is written for FCO databases that 
     use the Bright-lite (i.e., the U235 and U238 are given separately 
     in the FCO simulations).
