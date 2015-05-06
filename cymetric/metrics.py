@@ -243,6 +243,39 @@ def agents(series):
 del _agentsdeps, _agentsschema
 
 
+# Transaction Quantity
+_transdeps = [
+    ('Materials', ('SimId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'), 
+        'Mass'),
+    ('Transactions', ('SimId', 'TransactionId', 'SenderId', 'ReceiverId', 
+        'ResourceId'), 'Commodity')
+    ]
+
+_transschema = [
+    ('SimId', ts.UUID), ('TransactionId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('SenderId', ts.INT), 
+    ('ReceiverId', ts.INT), ('Commodity', ts.STRING), 
+    ('Units', ts.STRING), ('Quantity', ts.DOUBLE)
+    ]
+
+@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
+def transaction_quantity(series):
+    """TransQuant metric returns the quantity of each transaction throughout 
+    the simulation.
+    """
+    trans_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId', 
+            'TimeCreated', 'SenderId', 'ReceiverId', series[1].name, 'Units']
+    trans = pd.merge(series[0].reset_index(), series[1].reset_index(),
+            on=['SimId', 'ResourceId'], how='inner').set_index(trans_index)
+    trans = trans.groupby(level=trans_index)['Mass'].sum()
+    trans.name = 'Quantity'
+    rtn = trans.reset_index()
+    return rtn
+
+del _transdeps, _transschema
+
+
 #########################
 ## FCO-related metrics ##
 #########################
