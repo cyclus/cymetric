@@ -76,4 +76,6 @@ agentstate_brightlite_reprocessfacilityinfo = root_metric(
     name='AgentState_Brightlite_ReprocessFacilityInfo')
 agentstate_agent_sinkinfo = root_metric(name='AgentState_agents_SinkInfo')
 agentstate_agent_sourceinfo = root_metric(name='AgentState_agents_SourceInfo')
+agentstate_cycamore_reactorinfo = root_metric(
+    name='AgentState_cycamore_ReactorInfo')
 brightlite_reactor_data = root_metric(name='BrightLite_Reactor_Data')
