@@ -94,14 +94,18 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
 #
 
 # Material Mass (quantity * massfrac)
-_matdeps = [('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'), 
-                'Quantity'),
-            ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')]
+_matdeps = [
+    ('Resources', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'), 
+        'Quantity'),
+    ('Compositions', ('SimId', 'QualId', 'NucId'), 'MassFrac')
+    ]
 
-_matschema = (('SimId', ts.UUID), ('QualId', ts.INT), 
-              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-              ('Units', ts.STRING), ('Mass', ts.DOUBLE))
+_matschema = [
+    ('SimId', ts.UUID), ('QualId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+    ('Units', ts.STRING), ('Mass', ts.DOUBLE)
+    ]
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(series):
@@ -121,12 +125,17 @@ del _matdeps, _matschema
 
 
 # Activity (mass * decay_const / atomic_mass)
-_actdeps = [('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass')]
+_actdeps = [
+    ('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+        'Mass')
+    ]
 
-_actschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
-              ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-              ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-              ('Activity', ts.DOUBLE)]
+_actschema = [
+    ('SimId', ts.UUID), ('QualId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+    ('Activity', ts.DOUBLE)
+    ]
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(series):
@@ -150,13 +159,17 @@ del _actdeps, _actschema
 
 
 # DecayHeat (activity * q_value)
-_dhdeps = [('Activity', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
-               'Activity')]
+_dhdeps = [
+    ('Activity', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 
+        'Activity')
+    ]
 
-_dhschema = [('SimId', ts.UUID), ('QualId', ts.INT), 
-             ('ResourceId', ts.INT), ('ObjId', ts.INT), 
-             ('TimeCreated', ts.INT), ('NucId', ts.INT), 
-             ('DecayHeat', ts.DOUBLE)]
+_dhschema = [
+    ('SimId', ts.UUID), ('QualId', ts.INT), 
+    ('ResourceId', ts.INT), ('ObjId', ts.INT), 
+    ('TimeCreated', ts.INT), ('NucId', ts.INT), 
+    ('DecayHeat', ts.DOUBLE)
+    ]
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
 def decay_heat(series):
@@ -268,17 +281,20 @@ del _transdeps, _transschema
 #########################
 
 # U Resources Mined [t] 
-_udeps= [('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
-         ('Transactions', ('ResourceId', ), 'Commodity')]
+_udeps= [
+    ('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
+    ('Transactions', ('ResourceId', ), 'Commodity')
+    ]
 
-_uschema = [('Year', ts.INT), ('FcoUMined', ts.DOUBLE)]
+_uschema = [('Year', ts.INT), ('UMined', ts.DOUBLE)]
 
 @metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
     """FcoUMined metric returns the uranium mined in tonnes for each year 
     in a 200-yr simulation. This is written for FCO databases that use the 
     Bright-lite Fuel Fab(i.e., the U235 and U238 are given separately in the 
-    FCO simulations)."""
+    FCO simulations).
+    """
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['ResourceId'], how='inner').set_index(['ObjId', 
                 'TimeCreated', 'NucId'])
@@ -298,7 +314,7 @@ def fco_u_mined(series):
     m = m.reset_index()
     # sum by years (12 time steps)
     u = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x//12), 
-                           'FcoUMined': u}, columns=['Year', 'FcoUMined'])
+                           'UMined': u}, columns=['Year', 'UMined'])
     u = u.groupby('Year').sum()
     rtn = u.reset_index()
     return rtn
@@ -311,9 +327,9 @@ _egdeps = [('TimeSeriesPower', ('Time',), 'Value'),]
 
 _egschema = [('Year', ts.INT), ('Power', ts.DOUBLE)]
 
-@metric(name='FcoElectricityGen', depends=_egdeps, schema=_egschema)
-def fco_electricity_gen(series):
-    """FcoElectricityGen metric returns the electricity generated in GWe-y 
+@metric(name='FcoElectricityGenerated', depends=_egdeps, schema=_egschema)
+def fco_electricity_generated(series):
+    """FcoElectricityGenerated metric returns the electricity generated in GWe-y 
     in a 200-yr simulation. This is written for the purpose of FCO databases.
     """
     elec = series[0].reset_index()
@@ -329,8 +345,10 @@ del _egdeps, _egschema
 
 
 # Annual Fuel Loading Rate [tHM/y]
-_fldeps = [('Materials', ('ResourceId', 'TimeCreated'), 'Mass'),
-          ('Transactions', ('ResourceId',), 'Commodity')]
+_fldeps = [
+    ('Materials', ('ResourceId', 'TimeCreated'), 'Mass'),
+    ('Transactions', ('ResourceId',), 'Commodity')
+    ]
 
 _flschema = [('Year', ts.INT), ('FuelLoading', ts.DOUBLE)]
 
