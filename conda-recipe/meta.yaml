@@ -1,0 +1,40 @@
+package:
+  name: cymetric
+  version: 0.0
+
+# Only use fn and url for polyphemus compatability
+source:
+  fn: cymetric-src.tar.gz # ["Travis" not in environ]
+  url: https://github.com/cyclus/cymetric/archive/master.tar.gz # ["Travis" not in environ]
+  path: .. # ["Travis" in environ]
+
+requirements:
+   build:
+    - cyclus ==0.0
+    - cmake
+    - python
+    - jinja2
+    - cython
+    - sigcpp
+    - glibmm
+    - libxmlpp 
+    - coincbc
+    - boost
+    - hdf5
+    - mylibxml2 # [osx]
+    - libxml2  #  [linux]
+    - myglib   # [osx]  
+    - glib  # [linux]
+    - libffi 
+    - gettext  # [osx]
+    - pkg-config-lite # [osx]
+    - numpy
+    - bzip2 
+   run:
+    - cyclus ==0.0
+    - python
+    - pandas
+
+about:
+  home: Cymetric
+  license: BSD 3 Clause
