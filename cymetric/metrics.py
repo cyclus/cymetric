@@ -295,10 +295,7 @@ def fco_u_mined(series):
     Bright-lite Fuel Fab(i.e., the U235 and U238 are given separately in the 
     FCO simulations).
     """
-<<<<<<< HEAD
     tools.raise_no_pyne('U_Mined could not be computed', HAVE_PYNE)
-=======
->>>>>>> cf81a4680267590ce4470ce50860d8e84e7fe5de
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
             on=['ResourceId'], how='inner').set_index(['ObjId', 
                 'TimeCreated', 'NucId'])
