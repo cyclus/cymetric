@@ -308,7 +308,8 @@ def fco_u_mined(series):
     mass235 = {}
     m = mass[mass['Commodity'] == 'LWR Fuel']
     for (obj, _, nuc), value in m.iterrows():
-        prods[obj] = prods.get(obj, 0.0) + value['Mass']
+        if 922320000 <= nuc <= 922390000:
+            prods[obj] = prods.get(obj, 0.0) + value['Mass']
         if nuc==922350000:
             mass235[obj] = value['Mass']
     for obj, m235 in mass235.items():
@@ -350,7 +351,8 @@ def fco_swu(series):
     mass235 = {}
     m = mass[mass['Commodity'] == 'LWR Fuel']
     for (obj, _, nuc), value in m.iterrows():
-        prods[obj] = prods.get(obj, 0.0) + value['Mass']
+        if 922320000 <= nuc <= 922390000:
+            prods[obj] = prods.get(obj, 0.0) + value['Mass']
         if nuc == 922350000:
             mass235[obj] = value['Mass']
     for obj, m235 in mass235.items():
