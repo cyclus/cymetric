@@ -280,6 +280,10 @@ del _transdeps, _transschema
 ## FCO-related metrics ##
 #########################
 
+# Some useful variables
+x_feed = 0.0072
+x_tails = 0.0025
+
 # U Resources Mined [t] 
 _udeps= [
     ('Materials', ('ResourceId', 'ObjId', 'TimeCreated', 'NucId'), 'Mass'),
@@ -309,7 +313,7 @@ def fco_u_mined(series):
             mass235[obj] = value['Mass']
     for obj, m235 in mass235.items():
         x_prod = m235 / prods[obj]
-        feed = enr.feed(0.0072, x_prod, 0.0025, product=prods[obj]) / 1000
+        feed = enr.feed(x_feed, x_prod, x_tails, product=prods[obj]) / 1000
         u.append(feed)
     m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
     m = m.reset_index()
@@ -351,7 +355,7 @@ def fco_swu(series):
             mass235[obj] = value['Mass']
     for obj, m235 in mass235.items():
         x_prod = m235 / prods[obj]
-        swu0 = enr.swu(0.0072, x_prod, 0.0025, product=prods[obj]) / 1e6
+        swu0 = enr.swu(x_feed, x_prod, x_tails, product=prods[obj]) / 1e6
         swu.append(swu0)
     m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
     m = m.reset_index()
