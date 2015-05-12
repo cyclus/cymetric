@@ -11,8 +11,6 @@ source:
 requirements:
    build:
     - cyclus ==0.0
-    - cmake
-    - python
     - jinja2
     - cython
     - numpy
@@ -24,6 +22,7 @@ requirements:
 
 test:
   requires:
+    - cycamore ==0.0
     - nose
 
 about:

@@ -36,6 +36,12 @@ install:
   - ./.travis-install.sh
   - cd ../cymetric
 
+  # install cycamore
+  - git clone https://github.com/cyclus/cycamore ../cycamore
+  - cd ../cycamore
+  - ./.travis-install.sh
+  - cd ../cymetric
+
   # install cymetric
   - ./.travis-install.sh
 
