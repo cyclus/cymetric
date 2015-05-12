@@ -11,6 +11,8 @@ source:
 requirements:
    build:
     - cyclus ==0.0
+    - cmake
+    - python
     - jinja2
     - cython
     - numpy
@@ -19,6 +21,10 @@ requirements:
     - cyclus ==0.0
     - python
     - pandas
+
+test:
+  requires:
+    - nose
 
 about:
   home: Cymetric
