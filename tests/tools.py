@@ -6,6 +6,8 @@ from functools import wraps
 
 from cymetric import cyclus
 
+HAS_BEEN_RUN = False
+
 DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back), 
        ('test.sqlite', 'orig.sqlite', cyclus.SqliteBack)]
 #DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back)]
@@ -23,6 +25,11 @@ def safe_call(cmd, shell=False, *args, **kwargs):
     return rtn     
 
 def setup():
+    global HAS_BEEN_RUN
+    if not HAS_BEEN_RUN:
+        HAS_BEEN_RUN = True
+        for fname, _, _ in DBS:
+            os.remove(fname)
     for fname, oname, _ in DBS:
         if os.path.isfile(oname):
             continue
