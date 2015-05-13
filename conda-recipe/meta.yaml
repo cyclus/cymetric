@@ -4,30 +4,15 @@ package:
 
 # Only use fn and url for polyphemus compatability
 source:
-  fn: cymetric-src.tar.gz # ["Travis" not in environ]
-  url: https://github.com/cyclus/cymetric/archive/master.tar.gz # ["Travis" not in environ]
-  path: .. # ["Travis" in environ]
+  fn: cymetric-src.tar.gz # ["TRAVIS" not in environ]
+  url: https://github.com/cyclus/cymetric/archive/master.tar.gz # ["TRAVIS" not in environ]
+  path: .. # ["TRAVIS" in environ]
 
 requirements:
    build:
     - cyclus ==0.0
-    - cmake
-    - python
     - jinja2
     - cython
-    - sigcpp
-    - glibmm
-    - libxmlpp 
-    - coincbc
-    - boost
-    - hdf5
-    - mylibxml2 # [osx]
-    - libxml2  #  [linux]
-    - myglib   # [osx]  
-    - glib  # [linux]
-    - libffi 
-    - gettext  # [osx]
-    - pkg-config-lite # [osx]
     - numpy
     - bzip2 
    run:
@@ -35,6 +20,12 @@ requirements:
     - python
     - pandas
 
+test:
+  requires:
+    - cycamore ==0.0
+    - pyne
+    - nose
+
 about:
-  home: Cymetric
+  home: Cyclus
   license: BSD 3 Clause
