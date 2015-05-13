@@ -4,9 +4,9 @@ package:
 
 # Only use fn and url for polyphemus compatability
 source:
-  fn: cymetric-src.tar.gz # ["Travis" not in environ]
-  url: https://github.com/cyclus/cymetric/archive/master.tar.gz # ["Travis" not in environ]
-  path: .. # ["Travis" in environ]
+  fn: cymetric-src.tar.gz # ["TRAVIS" not in environ]
+  url: https://github.com/cyclus/cymetric/archive/master.tar.gz # ["TRAVIS" not in environ]
+  path: .. # ["TRAVIS" in environ]
 
 requirements:
    build:
