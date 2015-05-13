@@ -48,5 +48,6 @@ install:
 script:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - export LD_LIBRARY_PATH="$HOME/miniconda/lib:$LD_LIBRARY_PATH"
-  - nosetests -w tests
+  - cat cymetric/metrics.py
+  - nosetests -svw tests
 
