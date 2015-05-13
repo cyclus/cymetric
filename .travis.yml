@@ -27,7 +27,6 @@ install:
   - conda config --add channels cyclus
   - conda update -q conda
   - conda install conda-build jinja2 setuptools binstar patchelf nose
-  - conda install pyne
   # Useful for debugging any issues with conda
   - conda info -a
 
@@ -49,6 +48,5 @@ install:
 script:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - export LD_LIBRARY_PATH="$HOME/miniconda/lib:$LD_LIBRARY_PATH"
-  - cat cymetric/metrics.py
-  - nosetests -svw tests
+  - nosetests -w tests
 
