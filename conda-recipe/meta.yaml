@@ -27,5 +27,5 @@ test:
     - nose
 
 about:
-  home: Cyclus
+  home: Cymetric
   license: BSD 3 Clause
