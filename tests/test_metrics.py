@@ -15,6 +15,7 @@ from pandas.util.testing import assert_frame_equal
 
 try:
     from pyne import data
+    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
@@ -208,6 +209,8 @@ def test_transaction_quantity():
 #################################
 
 def test_fco_u_mined():
+    if not HAVE_PYNE:
+        raise SkipTest
     exp = pd.DataFrame(np.array([(0, 3.780034), (1, 2.185349)], 
         dtype=ensure_dt_bytes([('Year', '<i8'), ('UMined', '<f8')]))
         )
