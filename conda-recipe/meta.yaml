@@ -23,6 +23,7 @@ requirements:
 test:
   requires:
     - cycamore ==0.0
+    - pyne
     - nose
 
 about:
