@@ -28,8 +28,11 @@ def setup():
     global HAS_BEEN_RUN
     if not HAS_BEEN_RUN:
         HAS_BEEN_RUN = True
-        for fname, _, _ in DBS:
-            os.remove(fname)
+        for fname, oname, _ in DBS:
+            if os.path.isfile(fname):
+                os.remove(fname)
+            if os.path.isfile(oname):
+                os.remove(oname)
     for fname, oname, _ in DBS:
         if os.path.isfile(oname):
             continue
