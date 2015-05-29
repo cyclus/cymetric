@@ -877,7 +877,7 @@ def typesystem_pxd(ts, ns):
 # CLI
 #
 
-DBTYPES_JS_URL = 'http://fuelcycle.org/arche/dbtypes.js'
+DBTYPES_JS_URL = 'https://raw.githubusercontent.com/cyclus/cyclus.github.com/355dfbec0b408e7aa4b00bd673affc65b7c9090d/source/arche/dbtypes.js'
 
 def parse_args(argv):
     """Parses typesystem arguments for code generation."""
