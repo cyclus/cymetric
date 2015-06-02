@@ -877,7 +877,7 @@ def typesystem_pxd(ts, ns):
 # CLI
 #
 
-DBTYPES_JS_URL = 'https://raw.githubusercontent.com/cyclus/cyclus.github.com/355dfbec0b408e7aa4b00bd673affc65b7c9090d/source/arche/dbtypes.js'
+DBTYPES_JS_URL = 'http://fuelcycle.org/arche/dbtypes.js'
 
 def parse_args(argv):
     """Parses typesystem arguments for code generation."""
@@ -908,12 +908,13 @@ def parse_args(argv):
 def setup(ns):
     """Ensure that we are ready to perform code generation. Returns typesystem."""
     # load raw table
-    dbtypes_json = os.path.join(ns.build_dir, 'dbtypes.json')
+    dbtypes_json = os.path.join(ns.src_dir, 'dbtypes.json')
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
     if not os.path.isfile(dbtypes_json):
-        print('Downloading ' + DBTYPES_JS_URL + ' ...')
-        f = urlopen(DBTYPES_JS_URL)
+        #print('Downloading ' + DBTYPES_JS_URL + ' ...')
+        #f = urlopen(DBTYPES_JS_URL)
+        f = open(os.path.join(ns.src_dir, 'dbtypes.js'))
         raw = f.read()
         if isinstance(raw, bytes):
             raw = raw.decode()
