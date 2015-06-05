@@ -912,8 +912,6 @@ def setup(ns):
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
     if not os.path.isfile(dbtypes_json):
-        #print('Downloading ' + DBTYPES_JS_URL + ' ...')
-        #f = urlopen(DBTYPES_JS_URL)
         f = open(os.path.join(ns.src_dir, 'dbtypes.js'))
         raw = f.read()
         if isinstance(raw, bytes):
