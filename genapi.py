@@ -7,6 +7,7 @@ import io
 import os
 import sys
 import imp
+import itertools
 import json
 import argparse
 import platform
@@ -69,20 +70,22 @@ class TypeSystem(object):
         self.cycver = cycver
         self.verstr = verstr = 'v{0}.{1}'.format(*cycver)
         self.cols = cols = {x: i for i, x in enumerate(table[0])}
-        id, name, version = cols['id'], cols['name'], cols['version']
+        version = cols['version']
         cpptype, rank = cols['C++ type'], cols['shape rank']
         self.table = table = [row for row in table if row[version] == verstr]
         self.types = types = set()
         self.ids = ids = {}
         self.cpptypes = cpptypes = {}
         self.ranks = ranks = {}
-        for row in table:
-            t = row[name]
+        for i, row in enumerate(table):
+            t = row[cpptype]
             types.add(t)
-            ids[t] = row[id]
+            ids[t] = i
             cpptypes[t] = row[cpptype]
             ranks[t] = row[rank]
         self.norms = {t: parse_template(c) for t, c in cpptypes.items()}
+        print(self.cpptypes)
+        print(self.norms)
         self.dbtypes = sorted(types, key=lambda t: ids[t])
 
         # caches
@@ -644,10 +647,41 @@ cdef extern from "cyclus.h" namespace "cyclus":
 
 """.strip())
 
+
+replaces = [
+    ('std::', ''),
+    ('cyclus::', ''),
+    ('boost::', ''),
+    ('uuids::', ''),
+    ('<', ' '),
+    ('>', ' '),
+    (',', ' '),
+    ]
+
+VLS = [
+    'MAP',
+    'VECTOR',
+    'SET',
+    'LIST',
+    'QUEUE'
+    ]
+
+def enumtypes(t):
+    for x, y in replaces:
+        t = t.replace(x, y)
+    t = [_.strip().upper() for _ in t.split()]
+    t = [[x] if x not in VLS else [x, 'VL_{}'.format(x)] for x in t]
+    ret = ['_'.join(x) for x in list(itertools.product(*t))]
+    return ret
+
 def cpp_typesystem(ts, ns):
     """Creates the Cython header that wraps the Cyclus type system."""
+    y = [enumtypes(t) for t in ts.dbtypes]
+    x = list(itertools.chain(*y))
+    print(y)
+    print(x)
     ctx = dict(
-        dbtypes=ts.dbtypes,
+        dbtypes=x,
         cg_warning=CG_WARNING,
         stl_cimports=STL_CIMPORTS,
         )
