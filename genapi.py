@@ -904,16 +904,19 @@ def parse_args(argv):
     ns = parser.parse_args(argv)
     return ns
 
-
 def setup(ns):
     """Ensure that we are ready to perform code generation. Returns typesystem."""
     # load raw table
     dbtypes_json = os.path.join(ns.build_dir, 'dbtypes.json')
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
-    if not os.path.isfile(dbtypes_json):
-        print('Downloading ' + DBTYPES_JS_URL + ' ...')
-        f = urlopen(DBTYPES_JS_URL)
+    try:
+        instdir = safe_output(['cyclus', '--install-path'])
+    except (subprocess.CalledProcessError, OSError):
+        # fallback for conda version of cyclus
+        instdir = safe_output(['cyclus_base', '--install-path']) 
+    fname = os.path.join(instdir.strip(), 'share', 'cyclus', 'dbtypes.js')
+    with io.open(fname) as f:
         raw = f.read()
         if isinstance(raw, bytes):
             raw = raw.decode()
