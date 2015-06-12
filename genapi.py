@@ -215,9 +215,19 @@ class TypeSystem(object):
             dbe_i = map(Indenter, dbe_i)
             ctx[targ+'decl'], ctx[targ+'body'], ctx[targ+'expr'] = dbe_i
             ctx['nptypes'].append(self.nptype(n_i))
-        decl = decl.format(**ctx)
-        body = body.format(**ctx)
-        expr = expr.format(**ctx)
+        errormsg = "KeyError with variable {} of type {} (in {}): {}"
+        try:
+            decl = decl.format(**ctx)
+        except KeyError as e:
+            raise Exception(errormsg.format(x, t, "declaration", e))
+        try:
+            body = body.format(**ctx)
+        except KeyError as e:
+            raise Exception(errormsg.format(x, t, "body", e))
+        try:
+            expr = expr.format(**ctx)
+        except KeyError as e:
+            raise Exception(errormsg.format(x, t, "expression", e))
         return decl, body, expr
 
     def convert_to_cpp(self, x, t):
