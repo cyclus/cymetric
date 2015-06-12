@@ -71,7 +71,7 @@ class TypeSystem(object):
         self.verstr = verstr = 'v{0}.{1}'.format(*cycver)
         self.cols = cols = {x: i for i, x in enumerate(table[0])}
         version = cols['version']
-        cpptype, rank = cols['C++ type'], cols['shape rank']
+        cppt_col = cols['C++ type']
         self.table = table = [row for row in table if row[version] == verstr]
         self.types = types = set()
         self.ids = ids = {}
@@ -79,7 +79,7 @@ class TypeSystem(object):
         self.ranks = ranks = {}
         i = 0
         for row in table:
-            cppt = row[cpptype]
+            cppt = row[cppt_col]
             rankt = rank(cppt)
             for t in enumtypes(cppt):
                 types.add(t)
@@ -88,8 +88,6 @@ class TypeSystem(object):
                 ranks[t] = rankt
                 i += 1
         self.norms = {t: parse_template(c) for t, c in cpptypes.items()}
-        print(self.cpptypes)
-        print(self.norms)
         self.dbtypes = sorted(types, key=lambda t: ids[t])
 
         # caches
