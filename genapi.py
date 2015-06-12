@@ -77,12 +77,16 @@ class TypeSystem(object):
         self.ids = ids = {}
         self.cpptypes = cpptypes = {}
         self.ranks = ranks = {}
-        for i, row in enumerate(table):
-            t = row[cpptype]
-            types.add(t)
-            ids[t] = i
-            cpptypes[t] = row[cpptype]
-            ranks[t] = row[rank]
+        i = 0
+        for row in table:
+            cppt = row[cpptype]
+            rankt = row[rank]
+            for t in enumtypes(cppt):
+                types.add(t)
+                ids[t] = i
+                cpptypes[t] = cppt
+                ranks[t] = rankt
+                i += 1
         self.norms = {t: parse_template(c) for t, c in cpptypes.items()}
         print(self.cpptypes)
         print(self.norms)
@@ -659,6 +663,7 @@ replaces = [
     ]
 
 VLS = [
+    'STRING',
     'MAP',
     'VECTOR',
     'SET',
@@ -676,12 +681,8 @@ def enumtypes(t):
 
 def cpp_typesystem(ts, ns):
     """Creates the Cython header that wraps the Cyclus type system."""
-    y = [enumtypes(t) for t in ts.dbtypes]
-    x = list(itertools.chain(*y))
-    print(y)
-    print(x)
     ctx = dict(
-        dbtypes=x,
+        dbtypes=ts.dbtypes,
         cg_warning=CG_WARNING,
         stl_cimports=STL_CIMPORTS,
         )
