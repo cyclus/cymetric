@@ -80,7 +80,7 @@ class TypeSystem(object):
         i = 0
         for row in table:
             cppt = row[cpptype]
-            rankt = row[rank]
+            rankt = rank(cppt)
             for t in enumtypes(cppt):
                 types.add(t)
                 ids[t] = i
@@ -670,6 +670,10 @@ VLS = [
     'LIST',
     'QUEUE'
     ]
+
+def rank(t):
+    rs = [t.count(x.lower()) for x in VLS]
+    return sum(rs)
 
 def enumtypes(t):
     for x, y in replaces:
