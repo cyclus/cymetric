@@ -960,7 +960,7 @@ def setup(ns):
     except (subprocess.CalledProcessError, OSError):
         # fallback for conda version of cyclus
         instdir = safe_output(['cyclus_base', '--install-path']) 
-    fname = os.path.join(instdir.strip(), 'share', 'cyclus', 'dbtypes.js')
+    fname = os.path.join(instdir.strip(), 'share', 'cyclus', 'dbtypes.js.old')
     with io.open(fname) as f:
         raw = f.read()
         if isinstance(raw, bytes):
