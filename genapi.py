@@ -7,6 +7,7 @@ import io
 import os
 import sys
 import imp
+import itertools
 import json
 import argparse
 import platform
@@ -69,19 +70,23 @@ class TypeSystem(object):
         self.cycver = cycver
         self.verstr = verstr = 'v{0}.{1}'.format(*cycver)
         self.cols = cols = {x: i for i, x in enumerate(table[0])}
-        id, name, version = cols['id'], cols['name'], cols['version']
-        cpptype, rank = cols['C++ type'], cols['shape rank']
+        version = cols['version']
+        cppt_col = cols['C++ type']
         self.table = table = [row for row in table if row[version] == verstr]
         self.types = types = set()
         self.ids = ids = {}
         self.cpptypes = cpptypes = {}
         self.ranks = ranks = {}
+        i = 0
         for row in table:
-            t = row[name]
-            types.add(t)
-            ids[t] = row[id]
-            cpptypes[t] = row[cpptype]
-            ranks[t] = row[rank]
+            cppt = row[cppt_col]
+            rankt = rank(cppt)
+            for t in enumtypes(cppt):
+                types.add(t)
+                ids[t] = i
+                cpptypes[t] = cppt
+                ranks[t] = rankt
+                i += 1
         self.norms = {t: parse_template(c) for t, c in cpptypes.items()}
         self.dbtypes = sorted(types, key=lambda t: ids[t])
 
@@ -210,9 +215,19 @@ class TypeSystem(object):
             dbe_i = map(Indenter, dbe_i)
             ctx[targ+'decl'], ctx[targ+'body'], ctx[targ+'expr'] = dbe_i
             ctx['nptypes'].append(self.nptype(n_i))
-        decl = decl.format(**ctx)
-        body = body.format(**ctx)
-        expr = expr.format(**ctx)
+        errormsg = "KeyError with variable {} of type {} (in {}): {}"
+        try:
+            decl = decl.format(**ctx)
+        except KeyError as e:
+            raise Exception(errormsg.format(x, t, "declaration", e))
+        try:
+            body = body.format(**ctx)
+        except KeyError as e:
+            raise Exception(errormsg.format(x, t, "body", e))
+        try:
+            expr = expr.format(**ctx)
+        except KeyError as e:
+            raise Exception(errormsg.format(x, t, "expression", e))
         return decl, body, expr
 
     def convert_to_cpp(self, x, t):
@@ -644,6 +659,38 @@ cdef extern from "cyclus.h" namespace "cyclus":
 
 """.strip())
 
+
+replaces = [
+    ('std::', ''),
+    ('cyclus::', ''),
+    ('boost::', ''),
+    ('uuids::', ''),
+    ('<', ' '),
+    ('>', ' '),
+    (',', ' '),
+    ]
+
+VLS = [
+    'STRING',
+    'MAP',
+    'VECTOR',
+    'SET',
+    'LIST',
+    'QUEUE'
+    ]
+
+def rank(t):
+    rs = [t.count(x.lower()) for x in VLS]
+    return sum(rs)
+
+def enumtypes(t):
+    for x, y in replaces:
+        t = t.replace(x, y)
+    t = [_.strip().upper() for _ in t.split()]
+    t = [[x] if x not in VLS else [x, 'VL_{}'.format(x)] for x in t]
+    ret = ['_'.join(x) for x in list(itertools.product(*t))]
+    return ret
+
 def cpp_typesystem(ts, ns):
     """Creates the Cython header that wraps the Cyclus type system."""
     ctx = dict(
@@ -877,8 +924,6 @@ def typesystem_pxd(ts, ns):
 # CLI
 #
 
-DBTYPES_JS_URL = 'http://fuelcycle.org/arche/dbtypes.js'
-
 def parse_args(argv):
     """Parses typesystem arguments for code generation."""
     parser = argparse.ArgumentParser()
@@ -904,16 +949,19 @@ def parse_args(argv):
     ns = parser.parse_args(argv)
     return ns
 
-
 def setup(ns):
     """Ensure that we are ready to perform code generation. Returns typesystem."""
     # load raw table
     dbtypes_json = os.path.join(ns.build_dir, 'dbtypes.json')
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
-    if not os.path.isfile(dbtypes_json):
-        print('Downloading ' + DBTYPES_JS_URL + ' ...')
-        f = urlopen(DBTYPES_JS_URL)
+    try:
+        instdir = safe_output(['cyclus', '--install-path'])
+    except (subprocess.CalledProcessError, OSError):
+        # fallback for conda version of cyclus
+        instdir = safe_output(['cyclus_base', '--install-path']) 
+    fname = os.path.join(instdir.strip(), 'share', 'cyclus', 'dbtypes.js.old')
+    with io.open(fname) as f:
         raw = f.read()
         if isinstance(raw, bytes):
             raw = raw.decode()
