@@ -27,7 +27,7 @@ def raw_to_series(df, idx, val):
     """Convert data frame to series with multi-index."""
     d = df.set_index(list(map(str, idx)))
     s = df[val]
-    s.index = d.index
+    s.index = d.index.copy()
     return s
 
 
