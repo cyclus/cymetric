@@ -1,0 +1,12 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker build -t cyclus/cymetric:latest .
+
+test:
+  override:
+    - docker run cyclus/cymetric:latest nosetests3 -w /cymetric/tests
+
