@@ -911,7 +911,7 @@ def setup(ns):
     except (subprocess.CalledProcessError, OSError):
         # fallback for conda version of cyclus
         instdir = safe_output(['cyclus_base', '--install-path']) 
-    fname = os.path.join(instdir.strip(), 'share', 'cyclus', 'dbtypes.json')
+    fname = os.path.join(instdir.strip().decode(), 'share', 'cyclus', 'dbtypes.json')
     with io.open(fname, 'r') as f:
         tab = json.load(f)
     # get cyclus version
