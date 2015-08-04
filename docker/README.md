@@ -7,3 +7,16 @@
   dockerfile uses the base image ``cyclus/cycamore`` from the docker hub
   repository.
 
+* ``cymetric-deps`` builds all cymetric dependencies.  This is used as the
+  base image for other dockerfiles that build cymetric and should be updated
+  only occasionally as needed (i.e. whenever we do a new release of
+  cyclus+cycamore) and pushed up to the docker hub ``cyclus/cyclus-deps``
+  repository:
+
+  ```
+  cd cymetric-deps
+  docker build -t cyclus/cymetric-deps:X.X .
+  docker tag cyclus/cymetric-deps:X.X cyclus/cymetric:latest
+  docker push cyclus/cymetric-deps
+  ```
+
