@@ -21,7 +21,7 @@ except ImportError:
     from .cyclus import Datum, FullBackend, SqliteBack, Hdf5Back, \
         Recorder
     from .typesystem import *  # only grabs code generated defintiions
-    from .tools import dbopen
+    from .tools import dbopen, hashabledict
     from .schemas import schema, canon_dbtype, canon_shape, \
         canon_column, canon_name
     from .root_metrics import root_metric
