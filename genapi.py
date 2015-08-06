@@ -877,8 +877,6 @@ def typesystem_pxd(ts, ns):
 # CLI
 #
 
-DBTYPES_JS_URL = 'http://fuelcycle.org/arche/dbtypes.js'
-
 def parse_args(argv):
     """Parses typesystem arguments for code generation."""
     parser = argparse.ArgumentParser()
@@ -904,23 +902,17 @@ def parse_args(argv):
     ns = parser.parse_args(argv)
     return ns
 
-
 def setup(ns):
     """Ensure that we are ready to perform code generation. Returns typesystem."""
-    # load raw table
-    dbtypes_json = os.path.join(ns.build_dir, 'dbtypes.json')
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
-    if not os.path.isfile(dbtypes_json):
-        print('Downloading ' + DBTYPES_JS_URL + ' ...')
-        f = urlopen(DBTYPES_JS_URL)
-        raw = f.read()
-        if isinstance(raw, bytes):
-            raw = raw.decode()
-        parts = [p for p in raw.split("'") if p.startswith('[')]
-        with io.open(dbtypes_json, 'w') as f:
-            f.write('\n'.join(parts))
-    with io.open(dbtypes_json, 'r') as f:
+    try:
+        instdir = safe_output(['cyclus', '--install-path'])
+    except (subprocess.CalledProcessError, OSError):
+        # fallback for conda version of cyclus
+        instdir = safe_output(['cyclus_base', '--install-path']) 
+    fname = os.path.join(instdir.strip().decode(), 'share', 'cyclus', 'dbtypes.json')
+    with io.open(fname, 'r') as f:
         tab = json.load(f)
     # get cyclus version
     verstr = None

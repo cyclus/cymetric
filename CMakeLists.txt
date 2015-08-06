@@ -31,6 +31,11 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overflow")
 # Find and use dependencues
 #
 
+# Find Cyclus, it is kind of a big deal
+find_package(Cyclus REQUIRED)
+SET(CYMETRIC_INCLUDE_DIR ${CYMETRIC_INCLUDE_DIR} ${CYCLUS_CORE_INCLUDE_DIR})
+SET(LIBS ${LIBS} ${CYCLUS_CORE_LIBRARIES})
+
 # Use new Python library finder
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibsNew REQUIRED)
@@ -78,11 +83,6 @@ SET(CYMETRIC_INCLUDE_DIR "${NUMPY_INCLUDE_DIRS}" ${CYMETRIC_INCLUDE_DIR})
 FIND_PACKAGE(COIN REQUIRED)
 SET(CYMETRIC_INCLUDE_DIR ${CYMETRIC_INCLUDE_DIR} ${COIN_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${COIN_LIBRARIES})
-
-# Find Cyclus, it is kind of a big deal
-find_package(Cyclus REQUIRED)
-SET(CYMETRIC_INCLUDE_DIR ${CYMETRIC_INCLUDE_DIR} ${CYCLUS_CORE_INCLUDE_DIR})
-SET(LIBS ${LIBS} ${CYCLUS_CORE_LIBRARIES})
 
 # Include the accumlated directory
 INCLUDE_DIRECTORIES(${CYMETRIC_INCLUDE_DIR})
