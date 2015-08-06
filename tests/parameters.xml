@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--this file is only used for testing purposes. Ideally, both random and own mode should be tested-->
+<model>
+	<iterations></iterations> <!--number of simulations desired (useful with random parameters). Comment : sould perhaps be a bash file because it is complicated to calculate a metric several times as it is written back in the database. The bash file could rm the sqlite file but store the eco results somewhere else-->
+
+	<region>
+		<id>2</id>
+		<institution>
+			<id>1</id>
+			<facility>
+				<id>13</id>
+			</facility>
+		</institution>
+	</region>
+	
+	<capital>
+		<!--<mode>random</mode>  "default", "own" or "random" -->
+		<!-- "normal", "rapid" or "slow" -->
+		
+	</capital>
+
+</model>

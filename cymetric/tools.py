@@ -25,7 +25,10 @@ def dbopen(fname):
 
 def raw_to_series(df, idx, val):
     """Convert data frame to series with multi-index."""
-    d = df.set_index(list(map(str, idx)))
+    if isinstance(idx[0], tuple):
+        d = df.set_index(list(map(tuple, idx)))
+    else:
+        d = df.set_index(list(map(str, idx)))
     s = df[val].copy()
     s.index = d.index
     return s
@@ -76,3 +79,7 @@ def raise_no_pyne(msg, have_pyne=False):
     """Raise an error when PyNE cannot be found."""
     if not have_pyne:
         raise ImportError('pyne could not be imported: ' + msg)
+        
+class hashabledict(dict):
+    def __hash__(self):
+        return hash(tuple(sorted(self.items())))
