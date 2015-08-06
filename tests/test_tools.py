@@ -11,6 +11,6 @@ from tools import dbtest
 
 @dbtest
 def test_raw_to_series(db, fname, backend):
-    df = evaluator.eval('Materials')
-    df2 = evaluator.eval('Resources')
+    df = evaluator.eval('Materials', db)
+    df2 = evaluator.eval('Resources', db)
     assert_equal(isinstance(df2['Quantity'].index, pd.MultiIndex), False)
