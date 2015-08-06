@@ -6,6 +6,7 @@ from nose.tools import assert_equal
 import pandas as pd
 
 from cymetric import evaluator
+from tools import dbtest
 
 
 @dbtest
