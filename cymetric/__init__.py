@@ -5,7 +5,7 @@ try:
     from cymetric.cyclus import Datum, FullBackend, SqliteBack, Hdf5Back, \
         Recorder
     from cymetric.typesystem import *  # only grabs code generated defintiions
-    from cymetric.tools import dbopen
+    from cymetric.tools import dbopen, hashabledict
     from cymetric.schemas import schema, canon_dbtype, canon_shape, \
         canon_column, canon_name
     from cymetric.root_metrics import root_metric
