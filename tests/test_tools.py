@@ -2,11 +2,13 @@
 from __future__ import print_function, unicode_literals
 
 import nose
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_less
 
 import pandas as pd
 
 from cymetric import evaluator
+from cymetric import metrics
+from cymetric import root_metrics
 from tools import setup, dbtest
 
 
