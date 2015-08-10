@@ -417,7 +417,7 @@ def economic_info(series):
     		if fuel is not None:
     			supply = {}
     			waste = {}
-    			for type in supply.findall('type'):
+    			for type in fuel.findall('type'):
     				supply[type.find('name').text] = int(type.find('supply_cost').text)
     				waste[type.find('name').text] = int(type.find('waste_fee').text)
     			supply = tools.hashabledict(supply)
@@ -457,7 +457,7 @@ def economic_info(series):
     			if fuel is not None:
     				supply = {}
     				waste = {}
-    				for type in supply.findall('type'):
+    				for type in fuel.findall('type'):
     					supply[type.find('name').text] = int(type.find('supply_cost').text)
     					waste[type.find('name').text] = int(type.find('waste_fee').text)
     				supply = tools.hashabledict(supply)
@@ -490,7 +490,7 @@ def economic_info(series):
     				if fuel is not None:
     					supply = {}
     					waste = {}
-    					for type in supply.findall('type'):
+    					for type in fuel.findall('type'):
     						supply[type.find('name').text] = int(type.find('supply_cost').text)
     						waste[type.find('name').text] = int(type.find('waste_fee').text)
     					supply = tools.hashabledict(supply)
