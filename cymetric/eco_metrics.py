@@ -197,7 +197,7 @@ def operation_maintenance(series):
     rtn['Payment'] = 0
     rtn['tmp'] = 0
     for id in dfEcoInfo.index:
-    	if isreactor(id, rtn):
+    	if isreactor(rtn, id):
     		powerGenerated = rtn[rtn.AgentId==id].loc[:,'Value']
     		powerCapacity = max(powerGenerated)
     		powerGenerated *= 8760 / 12
