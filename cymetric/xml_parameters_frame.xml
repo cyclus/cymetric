@@ -9,9 +9,12 @@ The 'truncation' parameters have to be defined at a simulation level. -->
 		<id></id>
 		<institution>
 			<id></id>
-			<facility>
-				<id></id>
-			</facility>
+			<prototype>
+				<name></name>
+				<facility>
+					<id></id>
+				</facility>
+			</prototype>
 		</institution>
 	</region>
 
@@ -26,7 +29,7 @@ The 'truncation' parameters have to be defined at a simulation level. -->
 		<return_on_debt></return_on_debt> <!-- % -->
 		<return_on_equity></return_on_equity> <!-- % -->
 	</finance>
-
+	
 	<capital>
 		<deviation></deviation>  <!-- deviation in the Poisson distribution to have random construction begin and construcion duration-->
 		<begin></begin>  <!-- number of months the construction begins before commissioning -->
