@@ -238,9 +238,9 @@ def economic_info(series):
     finance = root.find('finance')
     if not finance == None:
     	rtn.loc[:, ('Finance', 'TaxRate')] = float(finance.find('tax_rate').text)
-    	rtn.loc[:, ('Finance','ReturnOnDebt')] = float(finance.find('return_on_debt').text)
-    	rtn.loc[:, ('Finance','ReturnOnEquity')] = float(finance.find('return_on_equity').text)
-    	rtn.loc[:, ('Finance','DiscountRate')] = float(finance.find('discount_rate').text)
+    	rtn.loc[:, ('Finance', 'ReturnOnDebt')] = float(finance.find('return_on_debt').text)
+    	rtn.loc[:, ('Finance', 'ReturnOnEquity')] = float(finance.find('return_on_equity').text)
+    	rtn.loc[:, ('Finance', 'DiscountRate')] = float(finance.find('discount_rate').text)
     capital = root.find('capital')
     if not capital == None:
     	rtn.loc[:, ('Capital', 'Begin')] = int(capital.find('begin').text)
@@ -431,35 +431,78 @@ def economic_info(series):
     				dfWaste.loc[agentIndex[idFacility], 'WasteFee'] = waste
     				rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = dfSupply.loc[agentIndex[idFacility], 'SupplyCost']
     				rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = dfWaste.loc[agentIndex[idFacility], 'WasteFee']
-    		for facility in institution.findall('facility'):
-    			idFacility = int(facility.find('id').text)
-    			capital = facility.find('capital')
+    		for prototype in institution.findall('prototype'):
+    			name = prototype.find('name').text
+    			tmp = dfEntry[dfEntry.ParentId==idInstitution]
+    			facilityIdList = tmp[tmp.Prototype==name].loc[:,'AgentId'].tolist()
+    			capital = prototype.find('capital')
     			if capital is not None:
-    				rtn.loc[agentIndex[idFacility], ('Capital', 'Begin')] = int(capital.find('begin').text)
-    				rtn.loc[agentIndex[idFacility], ('Capital', 'Duration')] = int(capital.find('duration').text)
-    				rtn.loc[agentIndex[idFacility], ('Capital', 'Deviation')] = float(capital.find('deviation').text)
-    				rtn.loc[agentIndex[idFacility], ('Capital', 'OvernightCost')] = int(capital.find('overnight_cost').text)
-    			operation_maintenance = facility.find('operation_maintenance')
+    				begin = int(capital.find('begin').text)
+    				duration = int(capital.find('duration').text)
+    				deviation = float(capital.find('deviation').text)
+    				overnight = int(capital.find('overnight_cost').text)
+    				for idFacility in facilityIdList:
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'Begin')] = begin
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'Duration')] = duration
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'Deviation')] = deviation
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'OvernightCost')] = overnight
+    			operation_maintenance = prototype.find('operation_maintenance')
     			if operation_maintenance is not None:
-    				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = int(operation_maintenance.find('fixed').text)
-    				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = int(operation_maintenance.find('variable').text)
-    			fuel = facility.find('fuel')
+    				fixed = int(operation_maintenance.find('fixed').text)
+    				variable = int(operation_maintenance.find('variable').text)
+    				for idFacility in facilityIdList:
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = fixed
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = variable
+    			fuel = prototype.find('fuel')
     			if fuel is not None:
     				supply = {}
     				waste = {}
     				for type in supply.findall('type'):
     					supply[type.find('name').text] = int(type.find('supply_cost').text)
-    					waste[type.find('name').text] = int(type.find('waste_fee').text)
+    					waste[type.find('name').text] = int(type.find('waste_fee').text
     				supply = tools.hashabledict(supply)
     				waste = tools.hashabledict(waste)
-    				dfSupply.loc[agentIndex[idFacility], 'SupplyCost'] = supply
-    				dfWaste.loc[agentIndex[idFacility], 'WasteFee'] = waste
-    				rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = dfSupply.loc[agentIndex[idReactor], 'SupplyCost']
-    				rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = dfWaste.loc[agentIndex[idReactor], 'WasteFee']
-    			decommissioning = facility.find('decommissioning')
+    				for idFacility in facilityIdList:
+    					dfSupply.loc[agentIndex[idFacility], 'SupplyCost'] = supply
+    					dfWaste.loc[agentIndex[idFacility], 'WasteFee'] = waste
+    					rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = dfSupply.loc[agentIndex[idFacility], 'SupplyCost']
+    					rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = dfWaste.loc[agentIndex[idFacility], 'WasteFee']
+    			decommissioning = prototype.find('decommissioning')
     			if decommissioning is not None:
-    				rtn.loc[agentIndex[idFacility], ('Decommissioning', 'Duration')] = int(decommissioning.find('duration').text)
-    				rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = int(decommissioning.find('overnight_cost').text)
+    				duration = int(decommissioning.find('duration').text)
+    				overnight = int(decommissioning.find('overnight_cost').text)
+    				for idFacility in facilityIdList:
+    					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'Duration')] = duration
+    					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = overnight
+    			for facility in prototype.findall('facility'):
+    				idFacility = int(facility.find('id').text)
+    				capital = facility.find('capital')
+    				if capital is not None:
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'Begin')] = int(capital.find('begin').text)
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'Duration')] = int(capital.find('duration').text)
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'Deviation')] = float(capital.find('deviation').text)
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'OvernightCost')] = int(capital.find('overnight_cost').text)
+    				operation_maintenance = facility.find('operation_maintenance')
+    				if operation_maintenance is not None:
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = int(operation_maintenance.find('fixed').text)
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = int(operation_maintenance.find('variable').text)
+    				fuel = facility.find('fuel')
+    				if fuel is not None:
+    					supply = {}
+    					waste = {}
+    					for type in supply.findall('type'):
+    						supply[type.find('name').text] = int(type.find('supply_cost').text)
+    						waste[type.find('name').text] = int(type.find('waste_fee').text)
+    					supply = tools.hashabledict(supply)
+    					waste = tools.hashabledict(waste)
+    					dfSupply.loc[agentIndex[idFacility], 'SupplyCost'] = supply
+    					dfWaste.loc[agentIndex[idFacility], 'WasteFee'] = waste
+    					rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = dfSupply.loc[agentIndex[idFacility], 'SupplyCost']
+    					rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = dfWaste.loc[agentIndex[idFacility], 'WasteFee']
+    				decommissioning = facility.find('decommissioning')
+    				if decommissioning is not None:
+    					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'Duration')] = int(decommissioning.find('duration').text)
+    					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = int(decommissioning.find('overnight_cost').text)
     return rtn
 	
 del _eideps, _eischema
