@@ -459,7 +459,7 @@ def economic_info(series):
     				waste = {}
     				for type in supply.findall('type'):
     					supply[type.find('name').text] = int(type.find('supply_cost').text)
-    					waste[type.find('name').text] = int(type.find('waste_fee').text
+    					waste[type.find('name').text] = int(type.find('waste_fee').text)
     				supply = tools.hashabledict(supply)
     				waste = tools.hashabledict(waste)
     				for idFacility in facilityIdList:
