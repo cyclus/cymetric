@@ -890,10 +890,9 @@ def simulation_period_costs(outputDb, t0=0, period=20, capital=True, annualCosts
 	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
 	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
 	if annualCosts is -1 :
-		costs = simulation_annual_costs(outputDb, capital, truncate=False)
+		costs = simulation_annual_costs(outputDb, capital, truncate=False).sum(axis=1)
 	else:
 		costs = annualCosts
-	costs = costs.sum(axis=1)
 	if powerGenerated is -1 :
 		power = simulation_power_generated(outputDb, truncate=False)
 	else:
@@ -931,10 +930,9 @@ def simulation_period_costs2(outputDb, t0=0, period=20, capital=True, annualCost
 	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
 	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
 	if annualCosts is -1 :
-		costs = simulation_annual_costs(outputDb, capital, truncate=False)
+		costs = simulation_annual_costs(outputDb, capital, truncate=False).sum(axis=1)
 	else:
 		costs = annualCosts
-	costs = costs.sum(axis=1)
 	if powerGenerated is -1 :
 		power = simulation_power_generated(outputDb, truncate=False)
 	else:
