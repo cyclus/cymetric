@@ -246,15 +246,15 @@ def economic_info(series):
     	rtn.loc[:, ('Capital', 'Begin')] = int(capital.find('begin').text)
     	rtn.loc[:, ('Capital', 'Duration')] = int(capital.find('duration').text)
     	rtn.loc[:, ('Capital', 'Deviation')] = float(capital.find('deviation').text)
-    	rtn.loc[:, ('Capital', 'OvernightCost')] = int(capital.find('overnight_cost').text)
+    	rtn.loc[:, ('Capital', 'OvernightCost')] = float(capital.find('overnight_cost').text)
     decommissioning = root.find('decommissioning')
     if not decommissioning == None:
     	rtn.loc[:, ('Decommissioning', 'Duration')] = int(decommissioning.find('duration').text)
-    	rtn.loc[:, ('Decommissioning', 'OvernightCost')] = int(decommissioning.find('overnight_cost').text)
+    	rtn.loc[:, ('Decommissioning', 'OvernightCost')] = float(decommissioning.find('overnight_cost').text)
     operation_maintenance = root.find('operation_maintenance')
     if not operation_maintenance == None:
-    	rtn.loc[:, ('OperationMaintenance', 'FixedCost')] = int(operation_maintenance.find('fixed').text)
-    	rtn.loc[:, ('OperationMaintenance', 'VariableCost')] = int(operation_maintenance.find('variable').text)
+    	rtn.loc[:, ('OperationMaintenance', 'FixedCost')] = float(operation_maintenance.find('fixed').text)
+    	rtn.loc[:, ('OperationMaintenance', 'VariableCost')] = float(operation_maintenance.find('variable').text)
     fuel = root.find('fuel')
     dfSupply = pd.DataFrame(index=rtn.index)
     dfSupply['SupplyCost'] = pd.Series()
@@ -264,8 +264,8 @@ def economic_info(series):
     waste = {}
     if not fuel == None:
     	for type in fuel.findall('type'):
-    		supply[type.find('name').text] = int(type.find('supply_cost').text)
-    		waste[type.find('name').text] = int(type.find('waste_fee').text)
+    		supply[type.find('name').text] = float(type.find('supply_cost').text)
+    		waste[type.find('name').text] = float(type.find('waste_fee').text)
     	supply = tools.hashabledict(supply)
     	waste = tools.hashabledict(waste)
     	for j in rtn.index:
@@ -301,7 +301,7 @@ def economic_info(series):
     		begin = int(capital.find('begin').text)
     		duration = int(capital.find('duration').text)
     		deviation = float(capital.find('deviation').text)
-    		overnightCost = int(capital.find('overnight_cost').text)
+    		overnightCost = float(capital.find('overnight_cost').text)
     		rtn.loc[agentIndex[idRegion], ('Capital', 'Begin')] = begin
     		rtn.loc[agentIndex[idRegion], ('Capital', 'Duration')] = duration
     		rtn.loc[agentIndex[idRegion], ('Capital', 'Deviation')] = deviation
@@ -319,7 +319,7 @@ def economic_info(series):
     	decommissioning = region.find('decommissioning')
     	if decommissioning is not None:
     		duration = int(decommissioning.find('duration').text)
-    		overnightCost = int(decommissioning.find('overnight_cost').text)
+    		overnightCost = float(decommissioning.find('overnight_cost').text)
     		rtn.loc[agentIndex[idRegion], ('Decommissioning', 'Duration')] = duration
     		rtn.loc[agentIndex[idRegion], ('Decommissioning', 'OvernightCost')] = overnightCost
     		for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
@@ -330,8 +330,8 @@ def economic_info(series):
     				rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = overnightCost
     	operation_maintenance = region.find('operation_maintenance')
     	if operation_maintenance is not None:
-    		fixed = int(operation_maintenance.find('fixed').text)
-    		variable = int(operation_maintenance.find('variable').text)
+    		fixed = float(operation_maintenance.find('fixed').text)
+    		variable = float(operation_maintenance.find('variable').text)
     		rtn.loc[agentIndex[idRegion], ('OperationMaintenance', 'FixedCost')] = fixed
     		rtn.loc[agentIndex[idRegion], ('OperationMaintenance', 'VariableCost')] = variable
     		for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
@@ -345,8 +345,8 @@ def economic_info(series):
     		supply = {}
     		waste = {}
     		for type in fuel.findall('type'):
-    			supply[type.find('name').text] = int(type.find('supply_cost').text)
-    			waste[type.find('name').text] = int(type.find('waste_fee').text)
+    			supply[type.find('name').text] = float(type.find('supply_cost').text)
+    			waste[type.find('name').text] = float(type.find('waste_fee').text)
     		supply = tools.hashabledict(supply)
     		waste = tools.hashabledict(waste)
     		dfSupply.loc[agentIndex[idRegion], 'SupplyCost'] = supply
@@ -385,7 +385,7 @@ def economic_info(series):
     			begin = int(capital.find('begin').text)
     			duration = int(capital.find('duration').text)
     			deviation = float(capital.find('deviation').text)
-    			overnightCost = int(capital.find('overnight_cost').text)
+    			overnightCost = float(capital.find('overnight_cost').text)
     			rtn.loc[agentIndex[idInstitution], ('Capital', 'Begin')] = begin
     			rtn.loc[agentIndex[idInstitution], ('Capital', 'Duration')] = duration
     			rtn.loc[agentIndex[idInstitution], ('Capital', 'Deviation')] = deviation
@@ -398,7 +398,7 @@ def economic_info(series):
     		decommissioning = institution.find('decommissioning')
     		if decommissioning is not None:
     			duration = int(decommissioning.find('duration').text)
-    			overnightCost = int(decommissioning.find('overnight_cost').text)
+    			overnightCost = float(decommissioning.find('overnight_cost').text)
     			rtn.loc[agentIndex[idInstitution], ('Decommissioning', 'Duration')] = duration
     			rtn.loc[agentIndex[idInstitution], ('Decommissioning', 'OvernightCost')] = overnightCost
     			for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
@@ -406,8 +406,8 @@ def economic_info(series):
     				rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = overnightCost
     		operation_maintenance = institution.find('operation_maintenance')
     		if operation_maintenance is not None:
-    			fixed = int(operation_maintenance.find('fixed').text)
-    			variable = int(operation_maintenance.find('variable').text)
+    			fixed = float(operation_maintenance.find('fixed').text)
+    			variable = float(operation_maintenance.find('variable').text)
     			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'FixedCost')] = fixed
     			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'VariableCost')] = variable
     			for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
@@ -418,8 +418,8 @@ def economic_info(series):
     			supply = {}
     			waste = {}
     			for type in fuel.findall('type'):
-    				supply[type.find('name').text] = int(type.find('supply_cost').text)
-    				waste[type.find('name').text] = int(type.find('waste_fee').text)
+    				supply[type.find('name').text] = float(type.find('supply_cost').text)
+    				waste[type.find('name').text] = float(type.find('waste_fee').text)
     			supply = tools.hashabledict(supply)
     			waste = tools.hashabledict(waste)
     			dfSupply.loc[agentIndex[idInstitution], 'SupplyCost'] = supply
@@ -440,7 +440,7 @@ def economic_info(series):
     				begin = int(capital.find('begin').text)
     				duration = int(capital.find('duration').text)
     				deviation = float(capital.find('deviation').text)
-    				overnight = int(capital.find('overnight_cost').text)
+    				overnight = float(capital.find('overnight_cost').text)
     				for idFacility in facilityIdList:
     					rtn.loc[agentIndex[idFacility], ('Capital', 'Begin')] = begin
     					rtn.loc[agentIndex[idFacility], ('Capital', 'Duration')] = duration
@@ -448,8 +448,8 @@ def economic_info(series):
     					rtn.loc[agentIndex[idFacility], ('Capital', 'OvernightCost')] = overnight
     			operation_maintenance = prototype.find('operation_maintenance')
     			if operation_maintenance is not None:
-    				fixed = int(operation_maintenance.find('fixed').text)
-    				variable = int(operation_maintenance.find('variable').text)
+    				fixed = float(operation_maintenance.find('fixed').text)
+    				variable = float(operation_maintenance.find('variable').text)
     				for idFacility in facilityIdList:
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = fixed
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = variable
@@ -458,8 +458,8 @@ def economic_info(series):
     				supply = {}
     				waste = {}
     				for type in fuel.findall('type'):
-    					supply[type.find('name').text] = int(type.find('supply_cost').text)
-    					waste[type.find('name').text] = int(type.find('waste_fee').text)
+    					supply[type.find('name').text] = float(type.find('supply_cost').text)
+    					waste[type.find('name').text] = float(type.find('waste_fee').text)
     				supply = tools.hashabledict(supply)
     				waste = tools.hashabledict(waste)
     				for idFacility in facilityIdList:
@@ -470,7 +470,7 @@ def economic_info(series):
     			decommissioning = prototype.find('decommissioning')
     			if decommissioning is not None:
     				duration = int(decommissioning.find('duration').text)
-    				overnight = int(decommissioning.find('overnight_cost').text)
+    				overnight = float(decommissioning.find('overnight_cost').text)
     				for idFacility in facilityIdList:
     					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'Duration')] = duration
     					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = overnight
@@ -481,18 +481,18 @@ def economic_info(series):
     					rtn.loc[agentIndex[idFacility], ('Capital', 'Begin')] = int(capital.find('begin').text)
     					rtn.loc[agentIndex[idFacility], ('Capital', 'Duration')] = int(capital.find('duration').text)
     					rtn.loc[agentIndex[idFacility], ('Capital', 'Deviation')] = float(capital.find('deviation').text)
-    					rtn.loc[agentIndex[idFacility], ('Capital', 'OvernightCost')] = int(capital.find('overnight_cost').text)
+    					rtn.loc[agentIndex[idFacility], ('Capital', 'OvernightCost')] = float(capital.find('overnight_cost').text)
     				operation_maintenance = facility.find('operation_maintenance')
     				if operation_maintenance is not None:
-    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = int(operation_maintenance.find('fixed').text)
-    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = int(operation_maintenance.find('variable').text)
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = float(operation_maintenance.find('fixed').text)
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = float(operation_maintenance.find('variable').text)
     				fuel = facility.find('fuel')
     				if fuel is not None:
     					supply = {}
     					waste = {}
     					for type in fuel.findall('type'):
-    						supply[type.find('name').text] = int(type.find('supply_cost').text)
-    						waste[type.find('name').text] = int(type.find('waste_fee').text)
+    						supply[type.find('name').text] = float(type.find('supply_cost').text)
+    						waste[type.find('name').text] = float(type.find('waste_fee').text)
     					supply = tools.hashabledict(supply)
     					waste = tools.hashabledict(waste)
     					dfSupply.loc[agentIndex[idFacility], 'SupplyCost'] = supply
@@ -502,7 +502,7 @@ def economic_info(series):
     				decommissioning = facility.find('decommissioning')
     				if decommissioning is not None:
     					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'Duration')] = int(decommissioning.find('duration').text)
-    					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = int(decommissioning.find('overnight_cost').text)
+    					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'OvernightCost')] = float(decommissioning.find('overnight_cost').text)
     return rtn
 	
 del _eideps, _eischema
