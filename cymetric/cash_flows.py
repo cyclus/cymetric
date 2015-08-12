@@ -992,13 +992,13 @@ def simulation_lcoe(outputDb, annualCosts=-1, powerGenerated=-1):
 	dfEcoInfo = evaler.eval('EconomicInfo')
 	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
 	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-	if annualCosts==-1:
+	if annualCosts is -1:
 		costs = simulation_annual_costs(outputDb, truncate=False)
 	else:
 		costs = annualCosts
 	costs['TotalCosts'] = costs.sum(axis=1)
 	commissioning = costs['Capital'].idxmax()
-	if powerGenerated==-1:
+	if powerGenerated is -1:
 		costs['Power'] = simulation_power_generated(outputDb)
 	else:
 		costs['Power'] = powerGenerated
