@@ -60,7 +60,7 @@ def capital_cost(series):
     rtn = pd.DataFrame()
     for id in agentIds:
     	tmp = dfEcoInfo.loc[id]
-    	if 'REACTOR' in tmp.loc[('Agent', 'Prototype')].upper():
+    	if isreactor(dfPower, id):
     		deviation = tmp.loc[('Capital', 'Deviation')]
     		variance = deviation ** 2
     		deviation = np.random.poisson(variance) - variance
