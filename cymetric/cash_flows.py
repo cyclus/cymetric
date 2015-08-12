@@ -861,11 +861,11 @@ def simulation_cumulative_capital(outputDb, annualCosts=-1, powerGenerated=-1):
 	"""Input : sqlite output database
 	Output : cumulative sum of total income and total expense (= - expenditures + income) when all reactors of the simulation are taken into account
 	"""
-	if annualCosts == -1 :
+	if annualCosts is -1 :
 		costs = - simulation_annual_costs(outputDb).sum(axis=1)
 	else:
 		costs = annualCosts
-	if powerGenerated == -1 :
+	if powerGenerated is -1 :
 		power_gen = simulation_power_generated(outputDb) * simulation_average_lcoe(outputDb)['Average LCOE']
 	else:
 		power_gen = powerGenerated
@@ -889,12 +889,12 @@ def simulation_period_costs(outputDb, t0=0, period=20, capital=True, annualCosts
 	dfEcoInfo = evaler.eval('EconomicInfo')
 	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
 	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-	if annualCosts == -1 :
+	if annualCosts is -1 :
 		costs = simulation_annual_costs(outputDb, capital, truncate=False).sum(axis=1)
 	else:
 		costs = annualCosts
 	costs = costs.sum(axis=1)
-	if powerGenerated == -1 :
+	if powerGenerated is -1 :
 		power = simulation_power_generated(outputDb, truncate=False)
 	else:
 		power = powerGenerated
@@ -930,12 +930,12 @@ def simulation_period_costs2(outputDb, t0=0, period=20, capital=True, annualCost
 	dfEcoInfo = evaler.eval('EconomicInfo')
 	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
 	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-	if annualCosts == -1 :
+	if annualCosts is -1 :
 		costs = simulation_annual_costs(outputDb, capital, truncate=False).sum(axis=1)
 	else:
 		costs = annualCosts
 	costs = costs.sum(axis=1)
-	if powerGenerated == -1 :
+	if powerGenerated is -1 :
 		power = simulation_power_generated(outputDb, truncate=False)
 	else:
 		power = powerGenerated
