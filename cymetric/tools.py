@@ -79,9 +79,3 @@ def raise_no_pyne(msg, have_pyne=False):
     """Raise an error when PyNE cannot be found."""
     if not have_pyne:
         raise ImportError('pyne could not be imported: ' + msg)
-        
-class hashabledict(dict):
-    """Makes a dict hashable
-    """
-    def __hash__(self):
-        return hash(tuple(sorted(self.items())))

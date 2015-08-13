@@ -32,8 +32,9 @@ The 'truncation' parameters have to be defined at a simulation level. -->
 	
 	<capital>
 		<deviation></deviation>  <!-- deviation in the Poisson distribution to have random construction begin and construcion duration-->
-		<begin></begin>  <!-- number of months the construction begins before commissioning -->
-		<duration></duration>  <!-- duration of construction in months -->
+		<beforePeak></beforePeak>  <!-- number of months the construction begins before peak -->
+		<afterPeak></afterPeak>
+		<constructionDuration></constructionDuration>  <!-- duration of construction in months -->
 		<overnight_cost></overnight_cost>  <!-- $/MW -->
 	</capital>
 

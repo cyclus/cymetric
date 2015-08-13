@@ -220,10 +220,9 @@ def isfuelfab(dfEntry, id):
 # Reactor #
 ###########
 
-shapes = ["triangle", "rectangle", "plateau"]
 
-def capital_shape(t0=5, duration=10, shape='triangle'):
-    """Input : two parameters defining the size of the shape
+def capital_shape(beforePeak=48, afterPeak=48):
+    """Input : relative position of to the peak.two parameters defining the size of the shape
     Output : curve with integral equals to one in the requested shape.
     """
     if not isinstance(t0, int):
@@ -234,15 +233,10 @@ def capital_shape(t0=5, duration=10, shape='triangle'):
         raise Exception("Duration of paiement must be an integer")
     if duration < 0:
         raise Exception("Duration of paiement must be positive")            
-    if "TRIANGLE" in shape.upper():
-        step1 = pd.Series(list(range(t0))).apply(lambda x: 2/(t0*duration)*x)
-        step2 = pd.Series(list(range(duration-t0+1))).apply(lambda x: -2/((
-              duration-t0)*duration)*x+2/duration)
-        return pd.concat([step1, step2]).reset_index()[0]      
-    elif "RECTANGLE" in shape.upper():
-        return pd.Series([1/duration]*duration)
-    else:
-        raise Exception("Wrong shape, valid shapes are in the following list : " + str(shapes))
+    step1 = pd.Series(list(range(beforePeak))).apply(lambda x: 2/(beforePeak*(beforePeak+afterPeak))*x)
+    step2 = pd.Series(list(range(beforePeak, beforePeak + afterPeak + 1))).apply(lambda x: -2/(afterPeak*(beforePeak+afterPeak))*(x-(beforePeak+afterPeak)))
+    return pd.concat([step1, step2])
+    
         
 def discount_rate(amountOfDebt, amountOfEquity, taxRate, returnOnDebt, returnOnEquity, inflationRate):
 	"""Input : share of debt, share of equity, tax rate, return on debt, return on equity and inflation rate
