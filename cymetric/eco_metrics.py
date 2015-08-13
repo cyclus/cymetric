@@ -74,7 +74,7 @@ def capital_cost(series):
     		powerCapacity = max(dfPower[dfPower.AgentId==id]['Value'])
     		discountRate = tmp.loc[('Finance','DiscountRate')]
     		cashFlow = np.around(cashFlowShape * overnightCost * powerCapacity, 3)
-    		cashFlow *= ((1 + discountRate) ** math.ceil(duration / 12) - 1) / (discountRate * math.ceil(duration / 12))
+    		cashFlow *= ((1 + discountRate) ** math.ceil(duration / 12) - 1) / (discountRate * math.ceil((beforePeak + afterPeak) / 12))
     		tmp = pd.DataFrame({'AgentId': id, 'Time': pd.Series(list(range(beforePeak + afterPeak + 1))) + dfEntry.EnterTime[id] - constructionDuration, 'Payment' : cashFlow})
     		rtn = pd.concat([rtn, tmp], ignore_index=True)
     rtn['SimId'] = dfPower['SimId'].iloc[0]
@@ -115,12 +115,17 @@ def fuel_cost(series):
     dfTransactions.loc[:, 'Payment'] = dfTransactions.loc[:, 'Payment'].fillna(0)
     dfTransactions['Tmp'] = pd.Series()
     for agentId in dfEcoInfo.index:
-    	tmpEcoInfo = dfEcoInfo.loc[agentId].copy()
     	tmpTrans = dfTransactions[dfTransactions.ReceiverId==agentId]
-    	for commod in dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]:
+    	if isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], str):
+    		commod = dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]
     		price = dfEcoInfo[dfEcoInfo.Commodity==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     		tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
-    		dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price		
+    		dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price
+    	else:
+    		for commod in dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]:
+    			price = dfEcoInfo[dfEcoInfo.Commodity==commod].loc[agentId, ('Fuel', 'SupplyCost')]
+    			tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
+    			dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price		
     	dfTransactions.loc[:, 'Payment'] += dfTransactions.loc[:, 'Tmp'].fillna(0)
     del dfTransactions['Quantity']
     del dfTransactions['Tmp']
