@@ -822,7 +822,7 @@ def simulation_annual_costs(outputDb, capital=True, truncate=True):
 	dfCapitalCosts = dfCapitalCosts[dfCapitalCosts['AgentId'].apply(lambda x: x in id_reactor)]
 	mini = min(dfCapitalCosts['Time'])
 	dfCapitalCosts = dfCapitalCosts.groupby('Time').sum()
-	costs = pd.DataFrame({'Capital' : dfCapitalCosts['Payment']}, index=list(range(mini, duration)))
+	costs = pd.DataFrame({'Capital' : dfCapitalCosts['Payment']}, index=list(range(0, duration)))
 	dfDecommissioningCosts = evaler.eval('DecommissioningCost').reset_index()
 	if not dfDecommissioningCosts.empty:
 		dfDecommissioningCosts = dfDecommissioningCosts[dfDecommissioningCosts['AgentId'].apply(lambda x: x in id_reactor)]
