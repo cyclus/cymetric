@@ -47,13 +47,12 @@ def root_metric(obj=None, name=None, schema=None, *args, **kwargs):
     return _genrootclass(name=name)
 
 
+#core tables
 resources = root_metric(name='Resources')
 compositions = root_metric(name='Compositions')
 recipes = root_metric(name='Recipes')
 products = root_metric(name='Products')
 res_creators = root_metric(name='ResCreators')
-agent_entry = root_metric(name='AgentEntry')
-agent_exit = root_metric(name='AgentExit')
 transactions = root_metric(name='Transactions')
 info = root_metric(name='Info')
 finish = root_metric(name='Finish')
@@ -63,19 +62,40 @@ build_schedule = root_metric(name='BuildSchedule')
 snapshots = root_metric(name='Snapshots')
 debug_requests = root_metric(name='DebugRequests')
 debug_bids = root_metric(name='DebugBids')
-time_series_power = root_metric(name='TimeSeriesPower')
 
-# Archetype-dependent custom tables that we know about
+#where do these tables come from?
+commod_priority = root_metric(name='CommodPriority')
+decay_mode = root_metric(name='DecayMode')
+field_types = root_metric(name='FieldTypes')
+material_info = root_metric(name='MaterialInfo')
+next_ids = root_metric(name='NextIds')
+prototypes = root_metric(name='Prototypes')
+xmlpp_info = root_metric(name='XMLPPInfo')
+
+#general agent state tables
+agent_entry = root_metric(name='AgentEntry')
+agent_exit = root_metric(name='AgentExit')
+agent_versions = root_metric(name='AgentVersions')
 agentstate_agent = root_metric(name='AgentStateAgent')
 agentstate_inventories = root_metric(name='AgentStateInventories')
-agentstate_brightlite_fuelfabfacilityinfo = root_metric(
-    name='AgentState_Brightlite_FuelfabFacilityInfo')
-agentstate_brightlite_reactorfacilityinfo = root_metric(
-    name='AgentState_Brightlite_ReactorFacilityInfo')
-agentstate_brightlite_reprocessfacilityinfo = root_metric(
-    name='AgentState_Brightlite_ReprocessFacilityInfo')
-agentstate_agent_sinkinfo = root_metric(name='AgentState_agents_SinkInfo')
-agentstate_agent_sourceinfo = root_metric(name='AgentState_agents_SourceInfo')
-agentstate_cycamore_reactorinfo = root_metric(
-    name='AgentState_cycamore_ReactorInfo')
-brightlite_reactor_data = root_metric(name='BrightLite_Reactor_Data')
+
+#tables about solvers
+greedy_solver_info = root_metric(name='GreedySolverInfo')
+exchange_solver_info = root_metric(name='ExchangeSolverInfo')
+prog_solver_info = root_metric(name='ProgSolverInfo')
+solver_info = root_metric(name='SolverInfo')
+
+#cyclus archetype tables
+agentstate_agents_nullinstinfo = root_metric(
+    name='AgentState_agents_NullInstInfo')
+agentstate_agents_nullregioninfo = root_metric(
+    name='AgentState_agents_NullRegionInfo')
+agentstate_agent_sinkinfo = root_metric(
+    name='AgentState_agents_SinkInfo')
+agentstate_agent_sourceinfo = root_metric(
+    name='AgentState_agents_SourceInfo')
+
+#toolkit-enabled tables
+time_series_power = root_metric(name='TimeSeriesPower')
+time_series_enrichmentfeed = root_metric(name='TimeSeriesEnrichmentFeed')
+time_series_enrichmentswu = root_metric(name='TimeSeriesEnrichmentSWU')
