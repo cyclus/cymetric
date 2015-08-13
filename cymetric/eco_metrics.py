@@ -121,7 +121,7 @@ def fuel_cost(series):
     		price = dfEcoInfo[dfEcoInfo.Commodity==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     		tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
     		dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price
-    	else if isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], pd.Series):
+    	elif isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], pd.Series):
     		for commod in dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]:
     			price = dfEcoInfo[dfEcoInfo.Commodity==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     			tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
