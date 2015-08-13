@@ -300,7 +300,6 @@ def economic_info(series):
     				rtn.loc[gent_index[idFacility], ('Finance','DiscountRate')] = discountRate
     	capital = region.find('capital')
     	if capital is not None:
-    	('Capital', 'beforePeak'), ('Capital', 'afterPeak'), ('Capital', 'constructionDuration'), ('Capital', 'Deviation'), ('Capital', 'OvernightCost')
     		beforePeak = int(capital.find('beforePeak').text)
     		afterPeak = int(capital.find('afterPeak').text)
     		constructionDuration = int(capital.find('constructionDuration').text)
