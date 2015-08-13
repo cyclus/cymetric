@@ -59,9 +59,11 @@ def capital_cost(series):
     agentIds = dfEcoInfo.index
     rtn = pd.DataFrame()
     for id in agentIds:
-    	tmp = dfEcoInfo.loc[id]
+    	tmp = dfEcoInfo.loc[id].copy()
+    	if isinstance(tmp, pd.DataFrame):
+    		tmp = tmp.iloc[0]
     	if isreactor(dfPower, id):
-    		deviation = tmp.loc[('Capital', 'Deviation')]
+    		deviation = dfEcoInfo.loc[id, ('Capital', 'Deviation')]
     		variance = deviation ** 2
     		deviation = np.random.poisson(variance) - variance
     		beforePeak = int(tmp.loc[('Capital', 'beforePeak')] + deviation)
@@ -113,10 +115,10 @@ def fuel_cost(series):
     dfTransactions.loc[:, 'Payment'] = dfTransactions.loc[:, 'Payment'].fillna(0)
     dfTransactions['Tmp'] = pd.Series()
     for agentId in dfEcoInfo.index:
-    	tmpEcoInfo = dfEcoInfo.loc[agentId]
+    	tmpEcoInfo = dfEcoInfo.loc[agentId].copy()
     	tmpTrans = dfTransactions[dfTransactions.ReceiverId==agentId]
-    	for commod in tmpEcoInfo.loc[('Fuel', 'SupplyCost')]:
-    		price = tmpEcoInfo.loc[('Fuel', 'SupplyCost')][commod]
+    	for commod in dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]:
+    		price = dfEcoInfo[dfEcoInfo.Commodity==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     		tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
     		dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price		
     	dfTransactions.loc[:, 'Payment'] += dfTransactions.loc[:, 'Tmp'].fillna(0)
@@ -162,9 +164,12 @@ def decommissioning_cost(series):
     reactorsId = dfEntry[dfEntry['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
     rtn = pd.DataFrame()
     for id in reactorsId:
-    	duration = int(dfEcoInfo.loc[id, ('Decommissioning', 'Duration')])
-    	overnightCost = dfEcoInfo.loc[id, ('Decommissioning', 'OvernightCost')]
-    	cashFlowShape = capital_shape(duration // 2, duration-1)
+    	tmp = dfEcoInfo.loc[id].copy()
+    	if isinstance(tmp,pd.DataFrame):
+    		tmp = tmp.iloc[0]
+    	duration = int(tmp.loc[('Decommissioning', 'Duration')])
+    	overnightCost = tmp.loc[('Decommissioning', 'OvernightCost')]
+    	cashFlowShape = capital_shape(duration // 2, duration // 2 + 1)
     	powerCapacity = dfPower[dfPower.AgentId==id]['Value'].iloc[0]
     	cashFlow = cashFlowShape * powerCapacity * overnightCost
     	entryTime = dfEntry[dfEntry.AgentId==id]['EnterTime'].iloc[0]
@@ -202,8 +207,11 @@ def operation_maintenance(series):
     		powerGenerated = rtn[rtn.AgentId==id].loc[:,'Value']
     		powerCapacity = max(powerGenerated)
     		powerGenerated *= 8760 / 12
-    		fixedOM = dfEcoInfo.loc[id, ('OperationMaintenance', 'FixedCost')]
-    		variableOM = dfEcoInfo.loc[id, ('OperationMaintenance', 'VariableCost')]
+    		tmp = dfEcoInfo.loc[id].copy()
+    		if isinstance(tmp,pd.DataFrame):
+    			tmp = tmp.iloc[0]
+    		fixedOM = tmp.loc[('OperationMaintenance', 'FixedCost')]
+    		variableOM = tmp.loc[('OperationMaintenance', 'VariableCost')]
     		rtn['tmp'] = powerGenerated * variableOM + powerCapacity * fixedOM
     		rtn.loc[:, 'Payment'] += rtn.loc[:, 'tmp'].fillna(0)
     rtn = rtn.reset_index()
