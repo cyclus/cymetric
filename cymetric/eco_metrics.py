@@ -118,12 +118,12 @@ def fuel_cost(series):
     	tmpTrans = dfTransactions[dfTransactions.ReceiverId==agentId]
     	if isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], str):
     		commod = dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]
-    		price = dfEcoInfo[dfEcoInfo.Commodity==commod].loc[agentId, ('Fuel', 'SupplyCost')]
+    		price = dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     		tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
     		dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price
     	elif isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], pd.Series):
     		for commod in dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]:
-    			price = dfEcoInfo[dfEcoInfo.Commodity==commod].loc[agentId, ('Fuel', 'SupplyCost')]
+    			price = dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     			tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
     			dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price		
     	dfTransactions.loc[:, 'Payment'] += dfTransactions.loc[:, 'Tmp'].fillna(0)
@@ -179,7 +179,7 @@ def decommissioning_cost(series):
     	cashFlow = cashFlowShape * powerCapacity * overnightCost
     	entryTime = dfEntry[dfEntry.AgentId==id]['EnterTime'].iloc[0]
     	lifetime = dfEntry[dfEntry.AgentId==id]['Lifetime'].iloc[0]
-    	rtn = pd.concat([rtn,pd.DataFrame({'AgentId': id, 'Time': list(range(lifetime + entryTime, lifetime + entryTime + duration)), 'Payment': cashFlow})], ignore_index=True)
+    	rtn = pd.concat([rtn,pd.DataFrame({'AgentId': id, 'Time': list(range(lifetime + entryTime, lifetime + entryTime + duration + 1)), 'Payment': cashFlow})], ignore_index=True)
     rtn['SimId'] = dfPower['SimId'].iloc[0]
     subset = rtn.columns.tolist()
     subset = subset[-1:]+subset[:-1]
