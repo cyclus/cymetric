@@ -225,14 +225,8 @@ def capital_shape(beforePeak=48, afterPeak=48):
     """Input : relative position of to the peak.two parameters defining the size of the shape
     Output : curve with integral equals to one in the requested shape.
     """
-    if not isinstance(t0, int):
-        raise Exception("Year begin for paiement must be an integer")
-    if t0 < 0:
-        raise Exception("Year begin for paiement must be positive")
-    if not isinstance(duration, int):
-        raise Exception("Duration of paiement must be an integer")
-    if duration < 0:
-        raise Exception("Duration of paiement must be positive")            
+    if (not isinstance(beforePeak, int)) or (not isinstance(afterPeak, int)):
+        raise Exception("input parameters must be integers")
     step1 = pd.Series(list(range(beforePeak))).apply(lambda x: 2/(beforePeak*(beforePeak+afterPeak))*x)
     step2 = pd.Series(list(range(beforePeak, beforePeak + afterPeak + 1))).apply(lambda x: -2/(afterPeak*(beforePeak+afterPeak))*(x-(beforePeak+afterPeak)))
     return pd.concat([step1, step2])

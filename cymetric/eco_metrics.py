@@ -47,7 +47,7 @@ def capital_cost(series):
     dfEntry = series[1].reset_index()
     dfInfo = series[2].reset_index()
     dfEcoInfo = series[3].reset_index()
-    tuples = (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Capital', 'beforePeak'), ('Capital', 'constructionDuration'), ('Capital', 'Deviation'), ('Capital', 'OvernightCost'), ('Finance','DiscountRate'))
+    tuples = (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Capital', 'beforePeak'), ('Capital', 'afterPeak'), ('Capital', 'constructionDuration'), ('Capital', 'Deviation'), ('Capital', 'OvernightCost'), ('Finance','DiscountRate'))
     index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
     dfEcoInfo.columns = index
     dfEcoInfo = dfEcoInfo.set_index(('Agent', 'AgentId'))
@@ -91,7 +91,7 @@ del _ccdeps, _ccschema
 
 _fcdeps = [('Resources', ('SimId', 'ResourceId'), 'Quantity'), ('Transactions',
         ('SimId', 'TransactionId', 'ReceiverId', 'ResourceId', 'Commodity'), 
-        'Time'), ('EconomicInfo', (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee')), ('Finance','DiscountRate'))]
+        'Time'), ('EconomicInfo', (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee')), ('Finance','DiscountRate'))]
 
 _fcschema = [('SimId', ts.UUID), ('TransactionId', ts.INT), ('AgentId', 
           ts.INT), ('Commodity', ts.STRING), ('Payment', ts.DOUBLE), ('Time', 
@@ -106,7 +106,7 @@ def fuel_cost(series):
     dfResources = series[0].reset_index().set_index(['ResourceId'])
     dfTransactions = series[1].reset_index().set_index(['ResourceId'])
     dfEcoInfo = series[2].reset_index()
-    tuples = (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Finance','DiscountRate'))
+    tuples = (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Finance','DiscountRate'))
     index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
     dfEcoInfo.columns = index
     dfEcoInfo = dfEcoInfo.set_index(('Agent', 'AgentId'))
