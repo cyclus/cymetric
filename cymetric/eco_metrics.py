@@ -438,30 +438,31 @@ def economic_info(series):
     				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = variable
     		fuel = institution.find('fuel')
     		if fuel is not None:
-    			supply = float(type.find('supply_cost').text)
-    			waste = float(type.find('waste_fee').text)
-    			name = type.find('name').text
-    			if np.isnan(rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')]):
-    				rtn.loc[agentIndex[idInstitution], ('Fuel', 'Commodity')] = name
-    				rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')] = supply
-    				rtn.loc[agentIndex[idInstitution], ('Fuel', 'WasteFee')] = waste
-    			else:
-    				indice = rtn.index.size
-    				rtn.loc[indice] = rtn.loc[agentIndex[idInstitution]]
-    				rtn.loc[indice, ('Fuel', 'Commodity')] = name
-    				rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
-    				rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
-    			for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    				if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
-    					rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
-    					rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
-    					rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    			for type in fuel.findall('type'):
+    				supply = float(type.find('supply_cost').text)
+    				waste = float(type.find('waste_fee').text)
+    				name = type.find('name').text
+    				if np.isnan(rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')]):
+    					rtn.loc[agentIndex[idInstitution], ('Fuel', 'Commodity')] = name
+    					rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')] = supply
+    					rtn.loc[agentIndex[idInstitution], ('Fuel', 'WasteFee')] = waste
     				else:
     					indice = rtn.index.size
-    					rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
+    					rtn.loc[indice] = rtn.loc[agentIndex[idInstitution]]
     					rtn.loc[indice, ('Fuel', 'Commodity')] = name
     					rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     					rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    				for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
+    					if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
+    						rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
+    						rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
+    						rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    					else:
+    						indice = rtn.index.size
+    						rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
+    						rtn.loc[indice, ('Fuel', 'Commodity')] = name
+    						rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
+    						rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
     		for prototype in institution.findall('prototype'):
     			name = prototype.find('name').text
     			tmp = dfEntry[dfEntry.ParentId==idInstitution]
@@ -488,20 +489,21 @@ def economic_info(series):
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = variable
     			fuel = prototype.find('fuel')
     			if fuel is not None:
-    				supply = float(type.find('supply_cost').text)
-    				waste = float(type.find('waste_fee').text)
-    				name = type.find('name').text
-    				for idFacility in facilityIdList:
-    					if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
-    						rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
-    						rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
-    						rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
-    					else:
-    						indice = rtn.index.size
-    						rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
-    						rtn.loc[indice, ('Fuel', 'Commodity')] = name
-    						rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
-    						rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    				for type in fuel.findall('type'):
+    					supply = float(type.find('supply_cost').text)
+    					waste = float(type.find('waste_fee').text)
+    					name = type.find('name').text
+    					for idFacility in facilityIdList:
+    						if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    						else:
+    							indice = rtn.index.size
+    							rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
+    							rtn.loc[indice, ('Fuel', 'Commodity')] = name
+    							rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
+    							rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
     			decommissioning = prototype.find('decommissioning')
     			if decommissioning is not None:
     				duration = int(decommissioning.find('duration').text)
@@ -524,19 +526,20 @@ def economic_info(series):
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = float(operation_maintenance.find('variable').text)
     				fuel = facility.find('fuel')
     				if fuel is not None:
-    					supply = float(type.find('supply_cost').text)
-    					waste = float(type.find('waste_fee').text)
-    					name = type.find('name').text
-    					if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
-    						rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
-    						rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
-    						rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
-    					else:
-    						indice = rtn.index.size
-    						rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
-    						rtn.loc[indice, ('Fuel', 'Commodity')] = name
-    						rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
-    						rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    					for type in fuel.findall('type'):
+    						supply = float(type.find('supply_cost').text)
+    						waste = float(type.find('waste_fee').text)
+    						name = type.find('name').text
+    						if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    						else:
+    							indice = rtn.index.size
+    							rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
+    							rtn.loc[indice, ('Fuel', 'Commodity')] = name
+    							rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
+    							rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
     				decommissioning = facility.find('decommissioning')
     				if decommissioning is not None:
     					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'Duration')] = int(decommissioning.find('duration').text)
