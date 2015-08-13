@@ -349,19 +349,19 @@ def economic_info(series):
     	fuel = region.find('fuel')
     	if fuel is not None:
     		for type in fuel.findall('type'):
-    		supply = float(type.find('supply_cost').text)
-    		waste = float(type.find('waste_fee').text)
-    		name = type.find('name').text
-    		if np.isnan(rtn.loc[agentIndex[idRegion], ('Fuel', 'SupplyCost')]):
-    			rtn.loc[agentIndex[idRegion], ('Fuel', 'Commodity')] = name
-    			rtn.loc[agentIndex[idRegion], ('Fuel', 'SupplyCost')] = supply
-    			rtn.loc[agentIndex[idRegion], ('Fuel', 'WasteFee')] = waste
-    		else:
-    			indice = rtn.index.size
-    			rtn.loc[indice] = rtn.loc[agentIndex[idRegion]]
-    			rtn.loc[indice, ('Fuel', 'Commodity')] = name
-    			rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
-    			rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    			supply = float(type.find('supply_cost').text)
+    			waste = float(type.find('waste_fee').text)
+    			name = type.find('name').text
+    			if np.isnan(rtn.loc[agentIndex[idRegion], ('Fuel', 'SupplyCost')]):
+    				rtn.loc[agentIndex[idRegion], ('Fuel', 'Commodity')] = name
+    				rtn.loc[agentIndex[idRegion], ('Fuel', 'SupplyCost')] = supply
+    				rtn.loc[agentIndex[idRegion], ('Fuel', 'WasteFee')] = waste
+    			else:
+    				indice = rtn.index.size
+    				rtn.loc[indice] = rtn.loc[agentIndex[idRegion]]
+    				rtn.loc[indice, ('Fuel', 'Commodity')] = name
+    				rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
+    				rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
     		for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
     			if np.isnan(rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')]):
     				rtn.loc[agentIndex[idInstitution], ('Fuel', 'Commodity')] = name
