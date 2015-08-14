@@ -118,7 +118,7 @@ def fuel_cost(series):
     	tmpTrans = dfTransactions[dfTransactions.ReceiverId==agentId]
     	if isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], str):
     		commod = dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]
-    		deviation = dfEcoInfo.loc[id, ('Fuel', 'Deviation')]
+    		deviation = dfEcoInfo.loc[agentId, ('Fuel', 'Deviation')]
     		tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
     		deviation = deviation * np.random.randn(1)
     		price = deviation + dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')]
@@ -193,7 +193,7 @@ def decommissioning_cost(series):
 del _dcdeps, _dcschema
 
 
-_omdeps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'), ('EconomicInfo', (('Agent', 'AgentId'), ('OperationMaintenance', 'FixedCost')), ('OperationMaintenance', 'VariableCost'), ('OperationMaintenance', 'Deviation'))]
+_omdeps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'), ('EconomicInfo', (('Agent', 'AgentId'), ('OperationMaintenance', 'FixedCost'), ('OperationMaintenance', 'VariableCost')), ('OperationMaintenance', 'Deviation'))]
 
 _omschema = [('SimId', ts.UUID), ('AgentId', ts.INT), ('Time', ts.INT), 
           ('Payment', ts.DOUBLE)]
