@@ -65,7 +65,8 @@ def capital_cost(series):
     	if isreactor(dfPower, id):
     		deviation = dfEcoInfo.loc[id, ('Capital', 'Deviation')]
     		variance = deviation ** 2
-    		deviation = np.random.poisson(variance) - variance
+    		deviation = deviation * np.random.rand(1)
+    		deviation = int(np.around(deviation))
     		beforePeak = int(tmp.loc[('Capital', 'beforePeak')] + deviation)
     		afterPeak = int(tmp.loc[('Capital', 'beforePeak')])
     		constructionDuration = int(tmp.loc[('Capital', 'constructionDuration')] + deviation)
