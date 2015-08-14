@@ -383,7 +383,8 @@ def institution_power_generated(outputDb, institution_id, truncate=True):
 	dfEntry = evaler.eval('AgentEntry').reset_index()
 	dfEntry = dfEntry[dfEntry.ParentId==institution_id]
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
-	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
+	dfPower = evaler.eval('TimeSeriesPower')
+	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
 	f_power = evaler.eval('TimeSeriesPower').reset_index()
 	f_power = f_power[f_power['AgentId'].apply(lambda x: x in id_reactor)]
 	f_power['Year'] = (f_power['Time'] + initialMonth - 1) // 12 + initialYear
