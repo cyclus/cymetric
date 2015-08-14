@@ -384,7 +384,7 @@ def institution_power_generated(outputDb, institution_id, truncate=True):
 	dfEntry = dfEntry[dfEntry.ParentId==institution_id]
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
 	dfPower = evaler.eval('TimeSeriesPower')
-	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
+	id_reactor = dfEntry[dfEntry['AgentId'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
 	f_power = evaler.eval('TimeSeriesPower').reset_index()
 	f_power = f_power[f_power['AgentId'].apply(lambda x: x in id_reactor)]
 	f_power['Year'] = (f_power['Time'] + initialMonth - 1) // 12 + initialYear
@@ -435,7 +435,7 @@ def institution_average_lcoe(outputDb, institution_id):
 	dfEntry = dfEntry[dfEntry.ParentId==institution_id]
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
 	dfPower = evaler.eval('TimeSeriesPower')
-	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
+	id_reactor = dfEntry[dfEntry['AgentId'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
 	simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear # year instead of months
 	simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
 	f_power = evaler.eval('TimeSeriesPower')
