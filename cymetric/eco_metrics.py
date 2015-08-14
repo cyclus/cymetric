@@ -275,6 +275,7 @@ def economic_info(series):
     if not operation_maintenance == None:
     	rtn.loc[:, ('OperationMaintenance', 'FixedCost')] = float(operation_maintenance.find('fixed').text)
     	rtn.loc[:, ('OperationMaintenance', 'VariableCost')] = float(operation_maintenance.find('variable').text)
+    	rtn.loc[:, ('OperationMaintenance', 'Deviation')] = float(operation_maintenance.find('deviation').text)
     fuel = root.find('fuel')
     indexCopy = rtn.index.copy()
     if not fuel == None:
@@ -359,14 +360,18 @@ def economic_info(series):
     	if operation_maintenance is not None:
     		fixed = float(operation_maintenance.find('fixed').text)
     		variable = float(operation_maintenance.find('variable').text)
+    		deviation = float(operation_maintenance.find('deviation').text)
     		rtn.loc[agentIndex[idRegion], ('OperationMaintenance', 'FixedCost')] = fixed
     		rtn.loc[agentIndex[idRegion], ('OperationMaintenance', 'VariableCost')] = variable
+    		rtn.loc[agentIndex[idRegion], ('OperationMaintenance', 'Deviation')] = deviation
     		for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
     			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'FixedCost')] = fixed
     			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'VariableCost')] = variable
+    			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'Deviation')] = deviation
     			for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
     				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = fixed
     				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = variable
+    				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'Deviation')] = deviation
     	fuel = region.find('fuel')
     	if fuel is not None:
     		for type in fuel.findall('type'):
@@ -459,11 +464,14 @@ def economic_info(series):
     		if operation_maintenance is not None:
     			fixed = float(operation_maintenance.find('fixed').text)
     			variable = float(operation_maintenance.find('variable').text)
+    			deviation = float(operation_maintenance.find('deviation').text)
     			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'FixedCost')] = fixed
     			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'VariableCost')] = variable
+    			rtn.loc[agentIndex[idInstitution], ('OperationMaintenance', 'Deviation')] = deviation
     			for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
     				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = fixed
     				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = variable
+    				rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'Deviation')] = deviation
     		fuel = institution.find('fuel')
     		if fuel is not None:
     			for type in fuel.findall('type'):
@@ -517,9 +525,11 @@ def economic_info(series):
     			if operation_maintenance is not None:
     				fixed = float(operation_maintenance.find('fixed').text)
     				variable = float(operation_maintenance.find('variable').text)
+    				deviation = float(operation_maintenance.find('deviation').text)
     				for idFacility in facilityIdList:
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = fixed
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = variable
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'Deviation')] = deviation
     			fuel = prototype.find('fuel')
     			if fuel is not None:
     				for type in fuel.findall('type'):
@@ -560,6 +570,7 @@ def economic_info(series):
     				if operation_maintenance is not None:
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'FixedCost')] = float(operation_maintenance.find('fixed').text)
     					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'VariableCost')] = float(operation_maintenance.find('variable').text)
+    					rtn.loc[agentIndex[idFacility], ('OperationMaintenance', 'Deviation')] = float(operation_maintenance.find('deviation').text)
     				fuel = facility.find('fuel')
     				if fuel is not None:
     					for type in fuel.findall('type'):
