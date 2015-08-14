@@ -46,6 +46,7 @@ The 'truncation' parameters have to be defined at a simulation level. -->
 	<operation_maintenance>
 		<fixed></fixed>  <!-- $/MW -->
 		<variable></variable>  <!-- $/MWh -->
+		<deviation></deviation>
 	</operation_maintenance>
 
 	<fuel>
@@ -53,11 +54,13 @@ The 'truncation' parameters have to be defined at a simulation level. -->
 			<name></name> <!-- name of the commodity -->
 			<supply_cost></supply_cost> <!-- $/kg -->
 			<waste_fee></waste_fee> <!-- $/kg -->
+			<deviation></deviation>
 		</type> 
 		<type> <!-- fuel 2 -->
 			<name></name> <!-- name of the commodity -->
 			<supply_cost></supply_cost> <!-- $/kg -->
 			<waste_fee></waste_fee> <!-- $/kg -->
+			<deviation></deviation>
 		</type> 
 	</fuel>
 	

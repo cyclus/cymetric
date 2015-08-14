@@ -91,7 +91,7 @@ del _ccdeps, _ccschema
 
 _fcdeps = [('Resources', ('SimId', 'ResourceId'), 'Quantity'), ('Transactions',
         ('SimId', 'TransactionId', 'ReceiverId', 'ResourceId', 'Commodity'), 
-        'Time'), ('EconomicInfo', (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee')), ('Finance','DiscountRate'))]
+        'Time'), ('EconomicInfo', (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation')), ('Finance','DiscountRate'))]
 
 _fcschema = [('SimId', ts.UUID), ('TransactionId', ts.INT), ('AgentId', 
           ts.INT), ('Commodity', ts.STRING), ('Payment', ts.DOUBLE), ('Time', 
@@ -118,12 +118,16 @@ def fuel_cost(series):
     	tmpTrans = dfTransactions[dfTransactions.ReceiverId==agentId]
     	if isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], str):
     		commod = dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]
-    		price = dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')]
+    		deviation = dfEcoInfo.loc[id, ('Fuel', 'Deviation')]
     		tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
+    		deviation = deviation * np.random.randn(1)
+    		price = deviation + dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     		dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price
     	elif isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], pd.Series):
     		for commod in dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]:
-    			price = dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')]
+    			deviation = dfEcoInfo.loc[id, ('Fuel', 'Deviation')]
+    			deviation = deviation * np.random.randn(1)
+    			price = deviation + dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')]
     			tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
     			dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price		
     	dfTransactions.loc[:, 'Payment'] += dfTransactions.loc[:, 'Tmp'].fillna(0)
@@ -189,7 +193,7 @@ def decommissioning_cost(series):
 del _dcdeps, _dcschema
 
 
-_omdeps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'), ('EconomicInfo', (('Agent', 'AgentId'), ('OperationMaintenance', 'FixedCost')), ('OperationMaintenance', 'VariableCost'))]
+_omdeps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'), ('EconomicInfo', (('Agent', 'AgentId'), ('OperationMaintenance', 'FixedCost')), ('OperationMaintenance', 'VariableCost'), ('OperationMaintenance', 'Deviation'))]
 
 _omschema = [('SimId', ts.UUID), ('AgentId', ts.INT), ('Time', ts.INT), 
           ('Payment', ts.DOUBLE)]
@@ -215,8 +219,9 @@ def operation_maintenance(series):
     		tmp = dfEcoInfo.loc[id].copy()
     		if isinstance(tmp,pd.DataFrame):
     			tmp = tmp.iloc[0]
-    		fixedOM = tmp.loc[('OperationMaintenance', 'FixedCost')]
-    		variableOM = tmp.loc[('OperationMaintenance', 'VariableCost')]
+    		deviation = tmp.loc[('OperationMaintenance', 'Deviation')]
+    		fixedOM = tmp.loc[('OperationMaintenance', 'FixedCost')] + deviation
+    		variableOM = tmp.loc[('OperationMaintenance', 'VariableCost')] + deviation
     		rtn['tmp'] = powerGenerated * variableOM + powerCapacity * fixedOM
     		rtn.loc[:, 'Payment'] += rtn.loc[:, 'tmp'].fillna(0)
     rtn = rtn.reset_index()
@@ -234,7 +239,7 @@ _eischema = [('AgentId', ts.INT), ('Prototype', ts.STRING), ('ParentId', ts.INT)
 def economic_info(series):
     """The EconomicInfo metric stores all economic data needed to calculate the economic metrics. These economic parameters are originally written in 'parameters.xml'.
     """
-    tuples = [('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Agent', 'ParentId'), ('Finance','ReturnOnDebt'), ('Finance','ReturnOnEquity'), ('Finance','TaxRate'), ('Finance','DiscountRate'), ('Capital', 'beforePeak'), ('Capital', 'afterPeak'), ('Capital', 'constructionDuration'), ('Capital', 'Deviation'), ('Capital', 'OvernightCost'), ('Decommissioning', 'Duration'), ('Decommissioning', 'OvernightCost'), ('OperationMaintenance', 'FixedCost'), ('OperationMaintenance', 'VariableCost'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Truncation', 'Begin'), ('Truncation', 'End')]
+    tuples = [('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Agent', 'ParentId'), ('Finance','ReturnOnDebt'), ('Finance','ReturnOnEquity'), ('Finance','TaxRate'), ('Finance','DiscountRate'), ('Capital', 'beforePeak'), ('Capital', 'afterPeak'), ('Capital', 'constructionDuration'), ('Capital', 'Deviation'), ('Capital', 'OvernightCost'), ('Decommissioning', 'Duration'), ('Decommissioning', 'OvernightCost'), ('OperationMaintenance', 'FixedCost'), ('OperationMaintenance', 'VariableCost'), ('OperationMaintenance', 'Deviation'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation'), ('Truncation', 'Begin'), ('Truncation', 'End')]
     index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
     rtn = pd.DataFrame(index=index)
     dfEntry = series[0].reset_index()
@@ -277,17 +282,20 @@ def economic_info(series):
     		supply = float(type.find('supply_cost').text)
     		waste = float(type.find('waste_fee').text)
     		name = type.find('name').text
+    		deviation = float(type.find('deviation').text)
     		for j in indexCopy:
     			if np.isnan(rtn.loc[j, ('Fuel', 'SupplyCost')]):
     				rtn.loc[j, ('Fuel', 'Commodity')] = name
     				rtn.loc[j, ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[j, ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[j, ('Fuel', 'Deviation')] = deviation
     			else:
     				indice = rtn.index.size
     				rtn.loc[indice] = rtn.loc[j]
     				rtn.loc[indice, ('Fuel', 'Commodity')] = name
     				rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     # discount rate is only possible at sim or reg level
     for region in root.findall('region'):
     	idRegion = int(region.find('id').text)
@@ -365,38 +373,45 @@ def economic_info(series):
     			supply = float(type.find('supply_cost').text)
     			waste = float(type.find('waste_fee').text)
     			name = type.find('name').text
+    			deviation = float(type.find('deviation').text)
     			if np.isnan(rtn.loc[agentIndex[idRegion], ('Fuel', 'SupplyCost')]):
     				rtn.loc[agentIndex[idRegion], ('Fuel', 'Commodity')] = name
     				rtn.loc[agentIndex[idRegion], ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[agentIndex[idRegion], ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[agentIndex[idRegion], ('Fuel', 'Deviation')] = deviation
     			else:
     				indice = rtn.index.size
     				rtn.loc[indice] = rtn.loc[agentIndex[idRegion]]
     				rtn.loc[indice, ('Fuel', 'Commodity')] = name
     				rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     		for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
     			if np.isnan(rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')]):
     				rtn.loc[agentIndex[idInstitution], ('Fuel', 'Commodity')] = name
     				rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[agentIndex[idInstitution], ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[agentIndex[idInstitution], ('Fuel', 'Deviation')] = deviation
     			else:
     				indice = rtn.index.size
     				rtn.loc[indice] = rtn.loc[agentIndex[idInstitution]]
     				rtn.loc[indice, ('Fuel', 'Commodity')] = name
     				rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     		for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
     			if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
     				rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
     				rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[agentIndex[idFacility], ('Fuel', 'Deviation')] = deviation
     			else:
     				indice = rtn.index.size
     				rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
     				rtn.loc[indice, ('Fuel', 'Commodity')] = name
     				rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     				rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    				rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     	for institution in region.findall('institution'):
     		idInstitution = int(institution.find('id').text)
     		finance = institution.find('finance')
@@ -455,27 +470,32 @@ def economic_info(series):
     				supply = float(type.find('supply_cost').text)
     				waste = float(type.find('waste_fee').text)
     				name = type.find('name').text
+    				deviation = float(type.find('deviation').text)
     				if np.isnan(rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')]):
     					rtn.loc[agentIndex[idInstitution], ('Fuel', 'Commodity')] = name
     					rtn.loc[agentIndex[idInstitution], ('Fuel', 'SupplyCost')] = supply
     					rtn.loc[agentIndex[idInstitution], ('Fuel', 'WasteFee')] = waste
+    					rtn.loc[agentIndex[idInstitution], ('Fuel', 'Deviation')] = deviation
     				else:
     					indice = rtn.index.size
     					rtn.loc[indice] = rtn.loc[agentIndex[idInstitution]]
     					rtn.loc[indice, ('Fuel', 'Commodity')] = name
     					rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     					rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    					rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     				for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
     					if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
     						rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
     						rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
     						rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    						rtn.loc[agentIndex[idFacility], ('Fuel', 'Deviation')] = deviation
     					else:
     						indice = rtn.index.size
     						rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
     						rtn.loc[indice, ('Fuel', 'Commodity')] = name
     						rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     						rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    						rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     		for prototype in institution.findall('prototype'):
     			name = prototype.find('name').text
     			tmp = dfEntry[dfEntry.ParentId==idInstitution]
@@ -506,17 +526,20 @@ def economic_info(series):
     					supply = float(type.find('supply_cost').text)
     					waste = float(type.find('waste_fee').text)
     					name = type.find('name').text
+    					deviation = float(type.find('deviation').text)
     					for idFacility in facilityIdList:
     						if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
     							rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
     							rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
     							rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'Deviation')] = deviation
     						else:
     							indice = rtn.index.size
     							rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
     							rtn.loc[indice, ('Fuel', 'Commodity')] = name
     							rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     							rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    							rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     			decommissioning = prototype.find('decommissioning')
     			if decommissioning is not None:
     				duration = int(decommissioning.find('duration').text)
@@ -543,16 +566,19 @@ def economic_info(series):
     						supply = float(type.find('supply_cost').text)
     						waste = float(type.find('waste_fee').text)
     						name = type.find('name').text
+    						deviation = float(type.find('deviation').text)
     						if np.isnan(rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')]):
     							rtn.loc[agentIndex[idFacility], ('Fuel', 'Commodity')] = name
     							rtn.loc[agentIndex[idFacility], ('Fuel', 'SupplyCost')] = supply
     							rtn.loc[agentIndex[idFacility], ('Fuel', 'WasteFee')] = waste
+    							rtn.loc[agentIndex[idFacility], ('Fuel', 'Deviation')] = deviation
     						else:
     							indice = rtn.index.size
     							rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
     							rtn.loc[indice, ('Fuel', 'Commodity')] = name
     							rtn.loc[indice, ('Fuel', 'SupplyCost')] = supply
     							rtn.loc[indice, ('Fuel', 'WasteFee')] = waste
+    							rtn.loc[indice, ('Fuel', 'Deviation')] = deviation
     				decommissioning = facility.find('decommissioning')
     				if decommissioning is not None:
     					rtn.loc[agentIndex[idFacility], ('Decommissioning', 'Duration')] = int(decommissioning.find('duration').text)
