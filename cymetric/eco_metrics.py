@@ -64,8 +64,7 @@ def capital_cost(series):
     		tmp = tmp.iloc[0]
     	if isreactor(dfPower, id):
     		deviation = dfEcoInfo.loc[id, ('Capital', 'Deviation')]
-    		variance = deviation ** 2
-    		deviation = deviation * np.random.rand(1)
+    		deviation = deviation * np.random.randn(1)
     		deviation = int(np.around(deviation))
     		beforePeak = int(tmp.loc[('Capital', 'beforePeak')] + deviation)
     		afterPeak = int(tmp.loc[('Capital', 'beforePeak')])
@@ -221,6 +220,7 @@ def operation_maintenance(series):
     		if isinstance(tmp,pd.DataFrame):
     			tmp = tmp.iloc[0]
     		deviation = tmp.loc[('OperationMaintenance', 'Deviation')]
+    		deviation *= np.random.randn(1)
     		fixedOM = tmp.loc[('OperationMaintenance', 'FixedCost')] + deviation
     		variableOM = tmp.loc[('OperationMaintenance', 'VariableCost')] + deviation
     		rtn['tmp'] = powerGenerated * variableOM + powerCapacity * fixedOM
