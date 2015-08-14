@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from cymetric.tools import dbopen
 from cymetric.evaluator import Evaluator
-from cymetric.eco_inputs import default_cap_overnight, default_discount_rate, default_fuel_price, actualization_vector
+from cymetric.eco_inputs import default_cap_overnight, default_discount_rate, default_fuel_price, actualization_vector, isreactor
 import warnings
 import os
         
@@ -216,28 +216,18 @@ def institution_annual_costs(outputDb, institution_id, capital=True, truncate=Tr
 	duration = dfInfo.loc[0, 'Duration']
 	initialYear = dfInfo.loc[0, 'InitialYear']
 	initialMonth = dfInfo.loc[0, 'InitialMonth']
-	if os.path.isfile(xml_inputs):
-		tree = ET.parse(xml_inputs)
-		root = tree.getroot()
-		if root.find('truncation') is not None:
-			truncation = root.find('truncation')
-			if truncation.find('simulationBegin') is not None:
-				simulationBegin = int(truncation.find('simulationBegin').text)
-			else:
-				simulationBegin = 0
-			if truncation.find('simulationEnd') is not None:
-				simulationEnd = int(truncation.find('simulationEnd').text)
-			else:
-				simulationEnd = duration
+	dfEcoInfo = evaler.eval('EconomicInfo')
+	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
+	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
 	dfEntry = evaler.eval('AgentEntry').reset_index()
 	dfEntry = dfEntry[dfEntry.ParentId==institution_id]
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
-	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
+	dfPower = evaler.eval('TimeSeriesPower')
+	id_reactor = dfEntry[dfEntry['AgentId'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
 	dfCapitalCosts = evaler.eval('CapitalCost').reset_index()
 	dfCapitalCosts = dfCapitalCosts[dfCapitalCosts['AgentId'].apply(lambda x: x in id_reactor)]
-	mini = min(dfCapitalCosts['Time'])
 	dfCapitalCosts = dfCapitalCosts.groupby('Time').sum()
-	costs = pd.DataFrame({'Capital' : dfCapitalCosts['Payment']}, index=list(range(mini, duration)))
+	costs = pd.DataFrame({'Capital' : dfCapitalCosts['Payment']}, index=list(range(0, duration)))
 	dfDecommissioningCosts = evaler.eval('DecommissioningCost').reset_index()
 	if not dfDecommissioningCosts.empty:
 		dfDecommissioningCosts = dfDecommissioningCosts[dfDecommissioningCosts['AgentId'].apply(lambda x: x in id_reactor)]
@@ -387,19 +377,9 @@ def institution_power_generated(outputDb, institution_id, truncate=True):
 	duration = dfInfo.loc[0, 'Duration']
 	initialYear = dfInfo.loc[0, 'InitialYear']
 	initialMonth = dfInfo.loc[0, 'InitialMonth']
-	if os.path.isfile(xml_inputs):
-		tree = ET.parse(xml_inputs)
-		root = tree.getroot()
-		if root.find('truncation') is not None:
-			truncation = root.find('truncation')
-			if truncation.find('simulationBegin') is not None:
-				simulationBegin = int(truncation.find('simulationBegin').text)
-			else:
-				simulationBegin = 0
-			if truncation.find('simulationEnd') is not None:
-				simulationEnd = int(truncation.find('simulationEnd').text)
-			else:
-				simulationEnd = duration
+	dfEcoInfo = evaler.eval('EconomicInfo')
+	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
+	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
 	dfEntry = evaler.eval('AgentEntry').reset_index()
 	dfEntry = dfEntry[dfEntry.ParentId==institution_id]
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
@@ -422,19 +402,9 @@ def institution_lcoe(outputDb, institution_id):
 	duration = dfInfo.loc[0, 'Duration']
 	initialYear = dfInfo.loc[0, 'InitialYear']
 	initialMonth = dfInfo.loc[0, 'InitialMonth']
-	if os.path.isfile(xml_inputs):
-		tree = ET.parse(xml_inputs)
-		root = tree.getroot()
-		if root.find('truncation') is not None:
-			truncation = root.find('truncation')
-			if truncation.find('simulationBegin') is not None:
-				simulationBegin = int(truncation.find('simulationBegin').text)
-			else:
-				simulationBegin = 0
-			if truncation.find('simulationEnd') is not None:
-				simulationEnd = int(truncation.find('simulationEnd').text)
-			else:
-				simulationEnd = duration
+	dfEcoInfo = evaler.eval('EconomicInfo')
+	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
+	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
 	costs = institution_annual_costs(outputDb, institution_id, truncate=False)
 	costs['TotalCosts'] = costs.sum(axis=1)
 	commissioning = costs['Capital'].idxmax()
@@ -457,23 +427,14 @@ def institution_average_lcoe(outputDb, institution_id):
 	duration = dfInfo.loc[0, 'Duration']
 	initialYear = dfInfo.loc[0, 'InitialYear']
 	initialMonth = dfInfo.loc[0, 'InitialMonth']
-	if os.path.isfile(xml_inputs):
-		tree = ET.parse(xml_inputs)
-		root = tree.getroot()
-		if root.find('truncation') is not None:
-			truncation = root.find('truncation')
-			if truncation.find('simulationBegin') is not None:
-				simulationBegin = int(truncation.find('simulationBegin').text)
-			else:
-				simulationBegin = 0
-			if truncation.find('simulationEnd') is not None:
-				simulationEnd = int(truncation.find('simulationEnd').text)
-			else:
-				simulationEnd = duration
+	dfEcoInfo = evaler.eval('EconomicInfo')
+	simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
+	simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
 	dfEntry = evaler.eval('AgentEntry').reset_index()
 	dfEntry = dfEntry[dfEntry.ParentId==institution_id]
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
-	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
+	dfPower = evaler.eval('TimeSeriesPower')
+	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: isreactor(dfPower, x) x.upper())]['AgentId'].tolist()
 	simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear # year instead of months
 	simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
 	f_power = evaler.eval('TimeSeriesPower')
