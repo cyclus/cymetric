@@ -95,7 +95,7 @@ def lcoe(outputDb, reactorId, capital=True):
 	annualCosts = annual_costs(outputDb, reactorId, capital)
 	powerGenerated = power_generated(outputDb, reactorId)
 	actualization = actualization_vector(powerGenerated.size, discountRate)
-	return (annualCosts.sum(axis=1) * actualization).sum() / ((powerGenerated * actualization).sum())
+	return (annualCosts.sum(axis=1) * actualization).fillna(0).sum() / ((powerGenerated * actualization).fillna(0).sum())
 	
 	return total_costs / power_generated 
 	
