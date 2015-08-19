@@ -28,21 +28,19 @@ def annual_costs(outputDb, reactorId, capital=True):
     dfEntry = evaler.eval('AgentEntry').reset_index()
     commissioning = dfEntry[dfEntry.AgentId==reactorId]['EnterTime'].iloc[0]
     dfCapitalCosts = evaler.eval('CapitalCost').reset_index()
-    dfCapitalCosts = dfCapitalCosts[dfCapitalCosts.AgentId==reactorId]
+    dfCapitalCosts = dfCapitalCosts[dfCapitalCosts.AgentId==reactorId].copy()
     dfCapitalCosts = dfCapitalCosts.groupby('Time').sum()
-    costs = pd.DataFrame({'Capital' : dfCapitalCosts['Payment']}, index=list(range(0, duration)))
+    costs = pd.DataFrame({'Capital' : dfCapitalCosts['Payment']}, index=list(range(duration)))
     dfDecommissioningCosts = evaler.eval('DecommissioningCost').reset_index()
-    if not dfDecommissioningCosts.empty:
-    	dfDecommissioningCosts = dfDecommissioningCosts[dfDecommissioningCosts.AgentId==reactorId]
-    	dfDecommissioningCosts = dfDecommissioningCosts.groupby('Time').sum()
-    	costs['Decommissioning'] = dfDecommissioningCosts['Payment']
+    dfDecommissioningCosts = dfDecommissioningCosts[dfDecommissioningCosts.AgentId==reactorId].copy()
+    dfDecommissioningCosts = dfDecommissioningCosts.groupby('Time').sum()
+    costs['Decommissioning'] = dfDecommissioningCosts['Payment']
     dfOMCosts = evaler.eval('OperationMaintenance').reset_index()
-    dfOMCosts = dfOMCosts[dfOMCosts.AgentId==reactorId]
+    dfOMCosts = dfOMCosts[dfOMCosts.AgentId==reactorId].copy()
     dfOMCosts = dfOMCosts.groupby('Time').sum()
     costs['OandM'] = dfOMCosts['Payment']
-    waste_disposal = 1
     dfFuelCosts = evaler.eval('FuelCost').reset_index()
-    dfFuelCosts = dfFuelCosts[dfFuelCosts.AgentId==reactorId]
+    dfFuelCosts = dfFuelCosts[dfFuelCosts.AgentId==reactorId].copy()
     dfFuelCosts = dfFuelCosts.groupby('Time').sum()
     costs['Fuel'] = dfFuelCosts['Payment']
     costs = costs.fillna(0)
@@ -66,17 +64,17 @@ def average_cost(outputDb, reactorId, capital=True):
     """
     db = dbopen(outputDb)
     evaler = Evaluator(db, write=False)
-    f_power = evaler.eval('TimeSeriesPower').reset_index()
-    power_generated = sum(f_power[f_power.AgentId==reactorId]['Value']) * 8760 / 12
-    return annual_costs(outputDb, reactorId, capital).sum().sum() / power_generated
+    dfPower = evaler.eval('TimeSeriesPower').reset_index()
+    powerGenerated = sum(dfPower[dfPower.AgentId==reactorId].loc[:, 'Value']) * 8760 / 12
+    return annual_costs(outputDb, reactorId, capital).sum().sum() / powerGenerated
     
-def cumulative_capital(outputDb, reactorId):
+def benefit(outputDb, reactorId):
 	"""Input : sqlite output database and reactor agent id
 	Output : cumulative sum of income and expense (= - expenditures + income)
 	"""
 	costs = - annual_costs(outputDb, reactorId).sum(axis=1)
-	power_gen = power_generated(outputDb, reactorId) * lcoe(outputDb, reactorId)
-	rtn = pd.concat([costs, power_gen], axis=1).fillna(0)
+	powerGenerated = power_generated(outputDb, reactorId) * lcoe(outputDb, reactorId)
+	rtn = pd.concat([costs, powerGenerated], axis=1).fillna(0)
 	rtn['Capital'] = (rtn[0] + rtn[1]).cumsum()
 	actualization = actualization_vector(len(rtn))
 	actualization.index = rtn.index
@@ -97,9 +95,7 @@ def lcoe(outputDb, reactorId, capital=True):
 	actualization = actualization_vector(powerGenerated.size, discountRate)
 	actualization.index = powerGenerated.index.copy()
 	return (annualCosts.sum(axis=1) * actualization).fillna(0).sum() / ((powerGenerated * actualization).fillna(0).sum())
-	
-	return total_costs / power_generated 
-	
+		
 def period_costs(outputDb, reactorId, t0=0, period=20, capital=True):
 	"""Input : sqlite output database, reactor id, time window (t0, period) 
 	Output : cost at each time step t corresponding to actualized sum of expense in [t+t0, t+t0+period] divided by actualized power generated in [t+t0, t+t0+period]
@@ -110,19 +106,9 @@ def period_costs(outputDb, reactorId, t0=0, period=20, capital=True):
 	duration = dfInfo.loc[0, 'Duration']
 	initialYear = dfInfo.loc[0, 'InitialYear']
 	initialMonth = dfInfo.loc[0, 'InitialMonth']
-	if os.path.isfile(xml_inputs):
-		tree = ET.parse(xml_inputs)
-		root = tree.getroot()
-		if root.find('truncation') is not None:
-			truncation = root.find('truncation')
-			if truncation.find('simulationBegin') is not None:
-				simulationBegin = int(truncation.find('simulationBegin').text)
-			else:
-				simulationBegin = 0
-			if truncation.find('simulationEnd') is not None:
-				simulationEnd = int(truncation.find('simulationEnd').text)
-			else:
-				simulationEnd = duration
+	dfEcoInfo = evaler.eval('EconomicInfo')
+	simulationBegin = dfEcoInfo.loc[:, ('Truncation', 'Begin')]
+	simulationEnd = dfEcoInfo.loc[:, ('Truncation', 'End')]
 	costs = annual_costs(outputDb, reactorId, capital)
 	costs = costs.sum(axis=1)
 	power = power_generated(outputDb, reactorId)
@@ -165,8 +151,11 @@ def period_costs2(outputDb, reactorId, t0=0, period=20, capital=True):
 	df['Power'] = power
 	df['Costs'] = costs
 	df = df.fillna(0)
-	simulationBegin = initialYear
-	simulationEnd = (duration + initialMonth - 1) // 12 + initialYear
+	dfEcoInfo = evaler.eval('EconomicInfo')
+	simulationBegin = dfEcoInfo.loc[:, ('Truncation', 'Begin')]
+	simulationEnd = dfEcoInfo.loc[:, ('Truncation', 'End')]
+	simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear
+	simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
 	rtn = pd.DataFrame(index=list(range(simulationBegin, simulationEnd + 1)))
 	rtn['Power'] = pd.Series()
 	rtn['Payment'] = pd.Series()
@@ -185,17 +174,19 @@ def power_generated(outputDb, reactorId):
 	"""
 	db = dbopen(outputDb)
 	evaler = Evaluator(db, write=False)
-	f_power = evaler.eval('TimeSeriesPower').reset_index()	
+	dfPower = evaler.eval('TimeSeriesPower').reset_index()	
 	dfInfo = evaler.eval('Info').reset_index()
 	duration = dfInfo.loc[0, 'Duration']
 	initialYear = dfInfo.loc[0, 'InitialYear']
 	initialMonth = dfInfo.loc[0, 'InitialMonth']
-	f_power = f_power[f_power['AgentId']==reactorId]
-	f_power['Year'] = (f_power['Time'] + initialMonth - 1) // 12 + initialYear
-	f_power = f_power.groupby('Year').sum()
-	rtn = pd.Series(f_power['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
+	dfPower = dfPower[dfPower['AgentId']==reactorId].copy()
+	dfPower['Year'] = (dfPower['Time'] + initialMonth - 1) // 12 + initialYear
+	dfPower = dfPower.groupby('Year').sum()
+	rtn = pd.Series(dfPower['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
 	return rtn.fillna(0)
-   
+
+################### verifications done up to here
+
 # Institution level
     
 def institution_annual_costs(outputDb, institution_id, capital=True, truncate=True):
@@ -377,11 +368,11 @@ def institution_power_generated(outputDb, institution_id, truncate=True):
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
 	dfPower = evaler.eval('TimeSeriesPower')
 	id_reactor = dfEntry[dfEntry['AgentId'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
-	f_power = evaler.eval('TimeSeriesPower').reset_index()
-	f_power = f_power[f_power['AgentId'].apply(lambda x: x in id_reactor)]
-	f_power['Year'] = (f_power['Time'] + initialMonth - 1) // 12 + initialYear
-	f_power = f_power.groupby('Year').sum()
-	rtn = pd.Series(f_power['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
+	dfPower = evaler.eval('TimeSeriesPower').reset_index()
+	dfPower = dfPower[dfPower['AgentId'].apply(lambda x: x in id_reactor)]
+	dfPower['Year'] = (dfPower['Time'] + initialMonth - 1) // 12 + initialYear
+	dfPower = dfPower.groupby('Year').sum()
+	rtn = pd.Series(dfPower['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
 	rtn.name = 'Power in MWh'
 	return rtn.fillna(0)
 
@@ -430,7 +421,7 @@ def institution_average_lcoe(outputDb, institution_id):
 	id_reactor = dfEntry[dfEntry['AgentId'].apply(lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
 	simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear # year instead of months
 	simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
-	f_power = evaler.eval('TimeSeriesPower')
+	dfPower = evaler.eval('TimeSeriesPower')
 	rtn = pd.DataFrame(index=list(range(simulationBegin, simulationEnd + 1)))
 	rtn['Weighted sum'] = 0
 	rtn['Power'] = 0
@@ -442,7 +433,7 @@ def institution_average_lcoe(outputDb, institution_id):
 		lifetime = dfEntry[dfEntry.AgentId==id]['Lifetime'].iloc[0]
 		decommissioning = (commissioning + lifetime + initialMonth - 1) // 12 + initialYear
 		commissioning = (commissioning + initialMonth - 1) // 12 + initialYear
-		power = f_power[f_power.AgentId==id]['Value'].iloc[0]
+		power = dfPower[dfPower.AgentId==id]['Value'].iloc[0]
 		rtn['Temp'] = pd.Series(tmp, index=list(range(commissioning, decommissioning + 1))) * power
 		rtn['Weighted sum'] += rtn['Temp'].fillna(0)
 		rtn['Temp2'] = pd.Series(power, index=list(range(commissioning, decommissioning + 1))).fillna(0)
@@ -658,11 +649,11 @@ def region_power_generated(outputDb, region_id, truncate=True):
 	for id in id_inst:
 		dfEntry2 = dfEntry[dfEntry.ParentId==id]
 		id_reactor += dfEntry2[dfEntry2['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-	f_power = evaler.eval('TimeSeriesPower').reset_index()
-	f_power = f_power[f_power['AgentId'].apply(lambda x: x in id_reactor)]
-	f_power['Year'] = (f_power['Time'] + initialMonth - 1) // 12 + initialYear
-	f_power = f_power.groupby('Year').sum()
-	rtn = pd.Series(f_power['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
+	dfPower = evaler.eval('TimeSeriesPower').reset_index()
+	dfPower = dfPower[dfPower['AgentId'].apply(lambda x: x in id_reactor)]
+	dfPower['Year'] = (dfPower['Time'] + initialMonth - 1) // 12 + initialYear
+	dfPower = dfPower.groupby('Year').sum()
+	rtn = pd.Series(dfPower['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
 	rtn.name = 'Power in MWh'
 	return rtn.fillna(0)
 
@@ -729,7 +720,7 @@ def region_average_lcoe(outputDb, region_id):
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
 	id_inst = tmp[tmp.Kind=='Inst']['AgentId'].tolist()
 	id_reactor = []
-	f_power = evaler.eval('TimeSeriesPower')
+	dfPower = evaler.eval('TimeSeriesPower')
 	for id in id_inst:
 		dfEntry2 = dfEntry[dfEntry.ParentId==id]
 		id_reactor += dfEntry2[dfEntry2['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
@@ -746,7 +737,7 @@ def region_average_lcoe(outputDb, region_id):
 		lifetime = dfEntry[dfEntry.AgentId==id]['Lifetime'].iloc[0]
 		decommissioning = (commissioning + lifetime + initialMonth - 1) // 12 + initialYear
 		commissioning = (commissioning + initialMonth - 1) // 12 + initialYear
-		power = f_power[f_power.AgentId==id]['Value'].iloc[0]
+		power = dfPower[dfPower.AgentId==id]['Value'].iloc[0]
 		rtn['Temp'] = pd.Series(tmp, index=list(range(commissioning, decommissioning + 1))) * power
 		rtn['Weighted sum'] += rtn['Temp'].fillna(0)
 		rtn['Temp2'] = pd.Series(power, index=list(range(commissioning, decommissioning + 1))).fillna(0)
@@ -925,11 +916,11 @@ def simulation_power_generated(outputDb, truncate=True):
 	dfEntry = evaler.eval('AgentEntry').reset_index()
 	dfEntry = dfEntry[dfEntry['EnterTime'].apply(lambda x: x>simulationBegin and x<simulationEnd)]
 	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-	f_power = evaler.eval('TimeSeriesPower').reset_index()
-	f_power = f_power[f_power['AgentId'].apply(lambda x: x in id_reactor)]
-	f_power['Year'] = (f_power['Time'] + initialMonth - 1) // 12 + initialYear
-	f_power = f_power.groupby('Year').sum()
-	rtn = pd.Series(f_power['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
+	dfPower = evaler.eval('TimeSeriesPower').reset_index()
+	dfPower = dfPower[dfPower['AgentId'].apply(lambda x: x in id_reactor)]
+	dfPower['Year'] = (dfPower['Time'] + initialMonth - 1) // 12 + initialYear
+	dfPower = dfPower.groupby('Year').sum()
+	rtn = pd.Series(dfPower['Value'] * 8760 / 12, index=list(range(initialYear, initialYear + (initialMonth + duration) // 12 + 1)))
 	rtn.name = 'Power in MWh'
 	return rtn.fillna(0)
 
@@ -981,7 +972,7 @@ def simulation_average_lcoe(outputDb):
 	id_reactor = dfEntry[dfEntry['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
 	simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear # year instead of months
 	simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
-	f_power = evaler.eval('TimeSeriesPower')
+	dfPower = evaler.eval('TimeSeriesPower')
 	rtn = pd.DataFrame(index=list(range(simulationBegin, simulationEnd + 1)))
 	rtn['Weighted sum'] = 0
 	rtn['Power'] = 0
@@ -993,7 +984,7 @@ def simulation_average_lcoe(outputDb):
 		lifetime = dfEntry[dfEntry.AgentId==id]['Lifetime'].iloc[0]
 		decommissioning = (commissioning + lifetime + initialMonth - 1) // 12 + initialYear
 		commissioning = (commissioning + initialMonth - 1) // 12 + initialYear
-		power = f_power[f_power.AgentId==id]['Value'].iloc[0]
+		power = dfPower[dfPower.AgentId==id]['Value'].iloc[0]
 		rtn['Temp'] = pd.Series(tmp, index=list(range(commissioning, decommissioning + 1))) * power
 		rtn['Weighted sum'] += rtn['Temp'].fillna(0)
 		rtn['Temp2'] = pd.Series(power, index=list(range(commissioning, decommissioning + 1)))
