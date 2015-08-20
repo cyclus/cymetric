@@ -1,22 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--this file is only used for testing purposes. Ideally, both random and own mode should be tested-->
 <model>
-	<iterations></iterations> <!--number of simulations desired (useful with random parameters). Comment : sould perhaps be a bash file because it is complicated to calculate a metric several times as it is written back in the database. The bash file could rm the sqlite file but store the eco results somewhere else-->
 
 	<region>
-		<id>2</id>
+		<id>8</id>
+		<capital>
+			<deviation>0</deviation>
+			<beforePeak>10</beforePeak>
+			<afterPeak>5</afterPeak>
+			<constructionDuration>10</constructionDuration> 
+			<overnight_cost>1</overnight_cost> 
+		</capital>
+	
 		<institution>
-			<id>1</id>
-			<facility>
-				<id>13</id>
-			</facility>
+			<id>9</id>
+			<decommissioning>
+				<duration>5</duration>
+				<overnight_cost>1</overnight_cost>
+			</decommissioning>
+			<prototype>
+				<name>Reactor1</name>
+				<operation_maintenance>
+					<fixed>1</fixed>
+					<variable>1</variable>
+					<deviation>0</deviation>
+				</operation_maintenance>
+				<facility>
+					<id>13</id>
+					<fuel>
+						<type>
+							<name>uox</name>
+							<supply_cost>1</supply_cost>
+							<waste_fee>0</waste_fee>
+							<deviation>0</deviation>
+						</type>
+					</fuel>
+				</facility>
+			</prototype>
 		</institution>
 	</region>
 	
-	<capital>
-		<!--<mode>random</mode>  "default", "own" or "random" -->
-		<!-- "normal", "rapid" or "slow" -->
-		
-	</capital>
-
+	<finance>
+		<discount_rate>0.1</discount_rate>
+		<tax_rate>0.1</tax_rate> <!-- % -->
+		<return_on_debt>0.1</return_on_debt>
+		<return_on_equity>0.1</return_on_equity>
+	</finance>
+	
+	<truncation>
+		<simulation_begin>0</simulation_begin><!--all reactors commissionned at this date will be included in the costs calculations-->
+		<simulation_end>100</simulation_end><!--to be able to do period=60yrs (2280)-->
+	</truncation>
+	
 </model>

@@ -183,7 +183,7 @@ def decommissioning_cost(series):
     		tmp = tmp.iloc[0]
     	duration = int(tmp.loc[('Decommissioning', 'Duration')])
     	overnightCost = tmp.loc[('Decommissioning', 'OvernightCost')]
-    	cashFlowShape = capital_shape(duration // 2, duration // 2)
+    	cashFlowShape = capital_shape(duration - duration // 2, duration // 2)
     	powerCapacity = dfPower[dfPower.AgentId==id]['Value'].iloc[0]
     	cashFlow = cashFlowShape * powerCapacity * overnightCost
     	entryTime = dfEntry[dfEntry.AgentId==id]['EnterTime'].iloc[0]

@@ -15,7 +15,6 @@ try:
     from cymetric.execution import ExecutionContext, exec_code
     from cymetric.eco_tools import swu
     from cymetric.eco_metrics import capital_cost
-    from cymetric.cash_flows import lcoe
 except ImportError:
     # again with the wacky CI issues
     from .cyclus import Datum, FullBackend, SqliteBack, Hdf5Back, \
@@ -31,5 +30,4 @@ except ImportError:
     from .execution import ExecutionContext, exec_code
     from .eco_tools import swu
     from .eco_metrics import capital_cost
-    from .cash_flows import lcoe
 
