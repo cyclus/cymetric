@@ -23,7 +23,7 @@ try:
     from cymetric import typesystem as ts
     from cymetric import tools
     from cymetric.evaluator import register_metric
-    from cymetric.eco_tools import capital_shape, rapid_cap_begin, rapid_cap_duration, slow_cap_begin, slow_cap_duration, default_cap_begin, default_cap_duration, default_cap_overnight, default_cap_shape, default_discount_rate, isreactor
+    from cymetric.eco_tools import capital_shape, isreactor
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from .metrics import metric
@@ -32,7 +32,7 @@ except ImportError:
     from . import typesystem as ts
     from . import tools
     from .evaluator import register_metric
-    from .eco_tools import capital_shape, rapid_cap_begin, rapid_cap_duration, slow_cap_begin, slow_cap_duration, default_cap_begin, default_cap_duration, default_cap_overnight, default_cap_shape, default_discount_rate, isreactor
+    from .eco_tools import capital_shape, isreactor
 
 xml_inputs = 'parameters.xml' # This xml file has to be created to store the economic data needed to calculate the EconomicInfo metric
 
