@@ -134,7 +134,7 @@ def isseparation(dfEntry, id):
 # Price actualization #
 #######################
 
-def actualization_vector(size, discountRate=default_discount_rate):
+def actualization_vector(size, discountRate):
 	"""Output : pandas Series with actualization factors
 	"""
 	rtn = pd.Series(1 / (1 + discountRate), index=list(range(size))).cumprod()
