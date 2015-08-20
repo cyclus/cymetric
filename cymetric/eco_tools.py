@@ -140,7 +140,7 @@ def actualization_vector(size, discountRate):
 	rtn = pd.Series(1 / (1 + discountRate), index=list(range(size))).cumprod()
 	return rtn * (1 + discountRate)
 
-def actualize(price, delta_t, discount_rate=default_discount_rate):
+def actualize(price, delta_t, discount_rate):
     """Given a price at date t + delta_t, give the actualized price at t.
     """
     return price / (1 + discount_rate) ** delta_t
