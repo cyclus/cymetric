@@ -5,7 +5,7 @@ Performing economic analysis with the economic tools provided by Cymetric
 Several functions are especially dedicated to the economic analysis of fuel cycles using Cymetric. The related files are the following :
 
 | - eco_metrics.py
-| - eco_inputs.py
+| - eco_tools.py
 | - cash_flows.py
 | - test_eco_metrics.py
 
@@ -16,9 +16,9 @@ Until now, these metrics are all related to reactor costs (capital cost, fixed O
 
 Additional tools needed for analysis
 ------------------------------------
-In order to make the analysis more complex and realistic, some tools are stored in eco_inputs.py.
+In order to make the analysis more complex and realistic, some tools are stored in eco_tools.py.
 First, some financial parameters are used in order to calculate realistic costs. These parameters are then imported in eco_metrics.py.
-Second, eco_inputs.py contains a few functions that mainly add complexity to the calculation of the metrics in eco_metrics.py.
+Second, eco_tools.py contains a few functions that mainly add complexity to the calculation of the metrics in eco_metrics.py.
 
 Cash flows visualization
 ------------------------
