@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Template for 'parameters.xml' files needed to give economic input data to calculate economic metrics.
-The 'capital', 'operation_maintenance', 'fuel' and 'decommissioning' parameters can be defined either at a simulation, region, institution or facility level.
-The 'finance' parameters have to be defined either at the simulation, region or simulation level.
-The 'truncation' parameters have to be defined at a simulation level. -->
+The 'capital', 'operation_maintenance', 'fuel' and 'decommissioning' parameters can be defined either at a simulation, region, institution, prototype or facility level.
+The 'finance' parameters have to be defined either at the simulation or region level.
+The 'truncation' parameters have to be defined at the simulation level. -->
 <model>
 
 	<region>
@@ -22,7 +22,7 @@ The 'truncation' parameters have to be defined at a simulation level. -->
 		<id></id>
 	</region>
 
-<!--  if absent, look for it at a lower level (ie Region) -->
+
 	<finance>
 		<discount_rate></discount_rate> <!-- % -->
 		<tax_rate></tax_rate> <!-- % -->
@@ -65,8 +65,8 @@ The 'truncation' parameters have to be defined at a simulation level. -->
 	</fuel>
 	
 	<truncation>
-		<simulation_begin>0</simulation_begin> <!-- number of months -->
-		<simulation_end>1200</simulation_end> <!-- number of months -->
+		<simulation_begin></simulation_begin> <!-- number of months -->
+		<simulation_end></simulation_end> <!-- number of months -->
 		<!--all reactors commissionned after the date 'simulation_begin' and before the date 'simulation_end' will be included in the costs calculations-->
 	</truncation>
 </model>
