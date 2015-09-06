@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--this file is only used for testing purposes. Ideally, both random and own mode should be tested-->
+<!-- economic parameters needed for the test simulation (test_input.xml and test_output.sqlite) -->
 <model>
 
 	<region>

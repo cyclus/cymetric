@@ -70,7 +70,7 @@ def capital_cost(series):
     		deviation = deviation * np.random.randn(1)
     		deviation = int(np.around(deviation))
     		beforePeak = int(tmp.loc[('Capital', 'beforePeak')] + deviation)
-    		afterPeak = int(tmp.loc[('Capital', 'beforePeak')])
+    		afterPeak = int(tmp.loc[('Capital', 'afterPeak')])
     		constructionDuration = int(tmp.loc[('Capital', 'constructionDuration')] + deviation)
     		overnightCost = tmp.loc[('Capital', 'OvernightCost')]
     		cashFlowShape = capital_shape(beforePeak, afterPeak)
