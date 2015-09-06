@@ -57,8 +57,6 @@ def capital_cost(series):
     dfEcoInfo.columns = index
     dfEcoInfo = dfEcoInfo.set_index(('Agent', 'AgentId'))
     simDuration = dfInfo['Duration'].iloc[0]
-    #std=3.507*12
-    #var=std**2
     dfEntry = pd.DataFrame([dfEntry.EnterTime, dfEntry.AgentId]).transpose()
     dfEntry = dfEntry.set_index(['AgentId'])
     agentIds = dfEcoInfo.index
@@ -78,7 +76,7 @@ def capital_cost(series):
     		cashFlowShape = capital_shape(beforePeak, afterPeak)
     		powerCapacity = max(dfPower[dfPower.AgentId==id]['Value'])
     		discountRate = tmp.loc[('Finance','DiscountRate')]
-    		cashFlow = np.around(cashFlowShape * overnightCost * powerCapacity, 3)
+    		cashFlow = np.around(cashFlowShape * overnightCost * powerCapacity, 4)
     		cashFlow *= ((1 + discountRate) ** math.ceil((beforePeak + afterPeak) / 12) - 1) / (discountRate * math.ceil((beforePeak + afterPeak) / 12))
     		tmp = pd.DataFrame({'AgentId': id, 'Time': pd.Series(list(range(beforePeak + afterPeak + 1))) + dfEntry.EnterTime[id] - constructionDuration, 'Payment' : cashFlow})
     		rtn = pd.concat([rtn, tmp], ignore_index=True)

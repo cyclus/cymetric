@@ -1,5 +1,4 @@
-"""Tests for metrics. These test metric calculation functions unbound to any 
-database. This makes writing the tests easier in a unit test like fashion.
+"""Tests for economic metrics and derived functions.
 """
 from __future__ import print_function, unicode_literals
 from uuid import UUID
@@ -18,16 +17,21 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 
 def test_capital_cost():
-    """Plan for the test : first, with own param (one default) : same as usual, see if obs=exp
-    This test shows that the capital_cost function can calculate the cost given the parameters, and that the different levels of parameters can be read : one at the facility level, the other at region level...
-    To verify that random parameters work, only need to test the iter function and see if we obtain different values
+    """
     """
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 112312.244694),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 114282.634951),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 116253.025209),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 3, 118223.415467),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 4, 115760.427645)
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 0, 0.0945),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 1, 0.1050),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 2, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 3, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 4, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 7, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 8, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 9, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 10, 112312.244694),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 11, 112312.244694)
         ], dtype=ensure_dt_bytes([
         		('SimId','O'), ('AgentId', '<i8'), ('Time','<i8'),
         		('Payment', '<f8')]))
@@ -151,9 +155,31 @@ def test_operation_maintenance():
     series = [s1]
     obs = eco_metrics.operation_maintenance.func(series)
     assert_frame_equal(exp, obs)
+    
+def test_economic_info():
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 25436.85),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 43800.0)
+        ], dtype=ensure_dt_bytes([
+             ('SimId','O'), ('AgentId', '<i8'), ('Time', '<i8'),
+             ('Payment','<f8')]))
+        )
+    power = pd.DataFrame(np.array([
+              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 2.323),
+              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 2.323),
+              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 4.0)
+              ], dtype=ensure_dt_bytes([
+                      ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
+                      ('Value', '<f8')]))
+              )
+    s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
+    series = [s1]
+    obs = eco_metrics.operation_maintenance.func(series)
+    assert_frame_equal(exp, obs)
 
 
-######## Tests of the metrics derived from the cash flows ###########
+##### Tests of the functions derived from the 5 basic economic metrics #####
 
 """test_eco_metrics is supposed to test all side features whereas test_eco_metrics test the calculations of the metrics in a more conventional way (calculating one obs and comparing to an exp)
 """
@@ -161,49 +187,95 @@ def test_operation_maintenance():
 def test_annual_costs():
 	"""
 	"""
-	# Reactor level
-	assert_equal(eco_metrics.annual_costs('test-output.sqlite', 20).sum().sum(),
-				 eco_metrics.annual_costs('test-output.sqlite', 21).sum().sum())
-	assert_equal(eco_metrics.annual_costs_present_value('test-output.sqlite', 20).sum().sum(),
-				 eco_metrics.annual_costs_present_value('test-output.sqlite', 21).sum().sum())
-	# Region / Institution level
-	assert_equal(eco_metrics.region_annual_costs('test-output.sqlite', 11).sum().sum(),
-				eco_metrics.institution_annual_costs('test-output.sqlite', 12).sum().sum())
-	assert_equal(eco_metrics.region_annual_costs_present_value(
-	'test-output.sqlite', 11).sum().sum(),
+	# Reactor / Institution level
+	assert_equal(eco_metrics.annual_costs('test_output.sqlite', 13).sum().sum(),
+				 eco_metrics.institution_annual_costs('test_output.sqlite', 9).sum().sum())
+	assert_equal(eco_metrics.annual_costs_present_value('test_output.sqlite', 13).sum().sum(),
 				 eco_metrics.institution_annual_costs_present_value(
-	'test-output.sqlite', 12).sum().sum())
-	
-def test_average_cost():
-	"""
-	"""
-	assert_equal(eco_metrics.average_cost('test-output.sqlite', 20),
-				 eco_metrics.average_cost('test-output.sqlite', 21))
+	'test_output.sqlite', 9).sum().sum())
+	# Region / Institution level
+	assert_equal(eco_metrics.region_annual_costs('test_output.sqlite', 8).sum().sum(),
+				eco_metrics.institution_annual_costs('test_output.sqlite', 9).sum().sum())
+	assert_equal(eco_metrics.region_annual_costs_present_value(
+	'test_output.sqlite', 8).sum().sum(),
+				 eco_metrics.institution_annual_costs_present_value(
+	'test_output.sqlite', 9).sum().sum())	
+	# Simulation / Reactor level
+	assert_equal(eco_metrics.region_annual_costs('test_output.sqlite', 8).sum().sum(),
+				eco_metrics.simulation_annual_costs('test_output.sqlite').sum().sum())
+	assert_equal(eco_metrics.region_annual_costs_present_value(
+	'test_output.sqlite', 8).sum().sum(),
+				 eco_metrics.simulation_annual_costs_present_value(
+	'test_output.sqlite').sum().sum())
 
 def test_lcoe():
 	"""
 	"""
-	assert_equal(eco_metrics.lcoe('test-output.sqlite', 20),
-				 eco_metrics.lcoe('test-output.sqlite', 21))
+	# Reactor / Institution level
+	assert_equal(eco_metrics.lcoe('test_output.sqlite', 13),
+				 eco_metrics.institution_lcoe('test_output.sqlite', 9))
+	# Region / Institution level
+	assert_equal(eco_metrics.region_lcoe('test_output.sqlite', 8),
+				 eco_metrics.institution_lcoe('test_output.sqlite', 9))
+	# Simulation / Reactor level
+	assert_equal(eco_metrics.region_lcoe('test_output.sqlite', 8),
+				 eco_metrics.simulation_lcoe('test_output.sqlite'))
+				 
+def test_average_lcoe():
+	"""
+	"""
+	# Reactor / Institution level
+	assert_equal(eco_metrics.average_lcoe('test_output.sqlite', 13),
+				 eco_metrics.institution_average_lcoe('test_output.sqlite', 9))
+	# Region / Institution level
+	assert_equal(eco_metrics.region_average_lcoe('test_output.sqlite', 8),
+				 eco_metrics.institution_average_lcoe('test_output.sqlite', 9))
+	# Simulation / Reactor level
+	assert_equal(eco_metrics.region_average_lcoe('test_output.sqlite', 8),
+				 eco_metrics.simulation_average_lcoe('test_output.sqlite'))
+				 
+def test_benefit():
+	"""
+	"""
+	# Reactor / Institution level
+	assert_equal(eco_metrics.benefit('test_output.sqlite', 13),
+				 eco_metrics.institution_benefit('test_output.sqlite', 9))
+	# Region / Institution level
+	assert_equal(eco_metrics.region_benefit('test_output.sqlite', 8),
+				 eco_metrics.institution_benefit('test_output.sqlite', 9))
+	# Simulation / Reactor level
+	assert_equal(eco_metrics.region_benefit('test_output.sqlite', 8),
+				 eco_metrics.simulation_benefit('test_output.sqlite'))
+				 
+def test_power_generated():
+	"""
+	"""
+	# Reactor / Institution level
+	assert_equal(eco_metrics.power_generated('test_output.sqlite', 13),
+				 eco_metrics.institution_power_generated('test_output.sqlite', 9))
+	# Region / Institution level
+	assert_equal(eco_metrics.region_power_generated('test_output.sqlite', 8),
+				 eco_metrics.institution_power_generated('test_output.sqlite', 9))
+	# Simulation / Reactor level
+	assert_equal(eco_metrics.region_power_generated('test_output.sqlite', 8),
+				 eco_metrics.simulation_power_generated('test_output.sqlite'))
 
 def test_period_costs():
 	"""
 	"""
 	# Reactor level
-	assert_equal(eco_metrics.period_costs('test-output.sqlite', 20, 30).sum().sum(),
-				 eco_metrics.period_costs('test-output.sqlite', 21, 30).sum().sum())
+	assert_equal(eco_metrics.period_costs('test_output.sqlite', 13, 30).sum().sum(),
+				 eco_metrics.period_costs2('test_output.sqlite', 13, 30).sum().sum())
+	# Reactor / Institution level
+	assert_equal(eco_metrics.period_costs('test_output.sqlite', 13).sum().sum(),
+				eco_metrics.institution_period_costs('test_output.sqlite', 9).sum().sum())
 	# Region / Institution level
-	assert_equal(eco_metrics.region_period_costs('test-output.sqlite', 11, 25).sum().sum(),
-				eco_metrics.institution_period_costs('test-output.sqlite', 12, 25).sum().sum())
+	assert_equal(eco_metrics.region_period_costs('test_output.sqlite', 8).sum().sum(),
+				eco_metrics.institution_period_costs('test_output.sqlite', 9).sum().sum())
+	# Region / Simulation level
+	assert_equal(eco_metrics.region_period_costs('test_output.sqlite', 8).sum().sum(),
+				eco_metrics.simulation_period_costs('test_output.sqlite').sum().sum())
 				
-"""
-def test_iter_calculation():
-    Important question : testing all metrics ? See if it runs and if we can see small changes (gaussian distribution), calculations should be verified in test_eco_metrics
-    inspired by test_eval
-    
-    df = eco_metrics.iter_calculations(10, test-output.sqlite, 'CapitalCost')
-    assert_less(0, len(df))
-"""
 
 if __name__ == "__main__":
     nose.runmodule()

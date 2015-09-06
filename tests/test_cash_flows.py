@@ -16,43 +16,7 @@ from cymetric import eco_metrics
 from cymetric import cash_flows
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
-def test_annual_costs():
-	"""
-	"""
-	# Reactor level
-	assert_equal(cash_flows.annual_costs('test-output.sqlite', 20).sum().sum(),
-				 cash_flows.annual_costs('test-output.sqlite', 21).sum().sum())
-	assert_equal(cash_flows.annual_costs_present_value('test-output.sqlite', 20).sum().sum(),
-				 cash_flows.annual_costs_present_value('test-output.sqlite', 21).sum().sum())
-	# Region / Institution level
-	assert_equal(cash_flows.region_annual_costs('test-output.sqlite', 11).sum().sum(),
-				cash_flows.institution_annual_costs('test-output.sqlite', 12).sum().sum())
-	assert_equal(cash_flows.region_annual_costs_present_value(
-	'test-output.sqlite', 11).sum().sum(),
-				 cash_flows.institution_annual_costs_present_value(
-	'test-output.sqlite', 12).sum().sum())
-	
-def test_average_cost():
-	"""
-	"""
-	assert_equal(cash_flows.average_cost('test-output.sqlite', 20),
-				 cash_flows.average_cost('test-output.sqlite', 21))
 
-def test_lcoe():
-	"""
-	"""
-	assert_equal(cash_flows.lcoe('test-output.sqlite', 20),
-				 cash_flows.lcoe('test-output.sqlite', 21))
-
-def test_period_costs():
-	"""
-	"""
-	# Reactor level
-	assert_equal(cash_flows.period_costs('test-output.sqlite', 20, 30).sum().sum(),
-				 cash_flows.period_costs('test-output.sqlite', 21, 30).sum().sum())
-	# Region / Institution level
-	assert_equal(cash_flows.region_period_costs('test-output.sqlite', 11, 25).sum().sum(),
-				cash_flows.institution_period_costs('test-output.sqlite', 12, 25).sum().sum())
 				
 """
 def test_iter_calculation():
