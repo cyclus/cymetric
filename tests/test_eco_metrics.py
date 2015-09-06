@@ -20,139 +20,203 @@ def test_capital_cost():
     """
     """
     exp = pd.DataFrame(np.array([
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 0, 0.0945),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 1, 0.1050),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 2, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 3, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 4, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 7, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 8, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 9, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 10, 112312.244694),
-        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 11, 112312.244694)
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 0, 0.126000),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 1, 0.139965),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 2, 0.112035),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 3, 0.084000),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 4, 0.055965),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 0.028035),
+        (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 0.0)
         ], dtype=ensure_dt_bytes([
         		('SimId','O'), ('AgentId', '<i8'), ('Time','<i8'),
         		('Payment', '<f8')]))
         )
     power = pd.DataFrame(np.array([
-          (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 3),
-          (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 4)
+          (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 1)
           ], dtype=ensure_dt_bytes([
                   ('SimId', 'O'), ('AgentId', '<i8'), ('Value', '<f8'),
                   ('Time', '<i8')]))
           )
     entry = pd.DataFrame(np.array([
-          (13, 1, ':cycamore:Reactor', 3),
-          (1, -1, ':cycamore:DeployInst', 2)
+          (13, -1, ':cycamore:Reactor', 1)
           ], dtype=ensure_dt_bytes([('AgentId', '<i8'), ('ParentId', '<i8'),
           		('Spec', 'O'), ('EnterTime', '<i8')]))
           )
     info = pd.DataFrame(np.array([
-    	 (2005, 4, 5)
+    	 (2000, 1, 20)
     	 ], dtype=ensure_dt_bytes([('InitialYear', '<i8'),
     	 		 ('InitialMonth', '<i8'), ('Duration', '<i8')]))
+    	 )
+    ecoInfo = pd.DataFrame(np.array([
+    	 ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
+    	 ], dtype=ensure_dt_bytes([(('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Capital', 'beforePeak'), '<i8'), (('Capital', 'afterPeak'), '<i8'), (('Capital', 'constructionDuration'), '<i8'), (('Capital', 'Deviation'), '<f8'), (('Capital', 'OvernightCost'), '<f8'), (('Finance','DiscountRate'), '<f8')]))
     	 )
     s1 = power.set_index(['SimId', 'AgentId', 'Value'])['Time']
     s2 = entry.set_index(['AgentId', 'ParentId', 'Spec'])['EnterTime']
     s3 = info.set_index(['InitialYear', 'InitialMonth'])['Duration']
-    series = [s1, s2, s3]
+    s4 = ecoInfo.set_index([('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Capital', 'beforePeak'), ('Capital', 'afterPeak'), ('Capital', 'constructionDuration'), ('Capital', 'Deviation'), ('Capital', 'OvernightCost')])[('Finance','DiscountRate')]
+    series = [s1, s2, s3, s4]
     obs = eco_metrics.capital_cost.func(series)
     assert_frame_equal(exp, obs)
 
 
 def test_fuel_cost():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 34, 1, 'uox', 
-        29641.600000000002, 46),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 11, 3, 'mox', 12980.0, 9)
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 0, 13, 'uox', 1, 1),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 1, 13, 'uox', 1, 2),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 2, 13, 'uox', 1, 3),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 3, 13, 'uox', 1, 4),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 4, 13, 'uox', 1, 5),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 5, 13, 'uox', 1, 6),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 6, 13, 'uox', 1, 7),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 7, 13, 'uox', 1, 8),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 13, 'uox', 1, 9)
         ], dtype=ensure_dt_bytes([
              ('SimId','O'), ('TransactionId', '<i8'), ('AgentId','<i8'),
              ('Commodity', 'O'), ('Payment', '<f8'), ('Time', '<i8')]))
         )
     resources = pd.DataFrame(np.array([
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 27, 12.56),
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 5.5),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 5, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 6, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 11, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 17, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 18, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 23, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 24, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 29, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 30, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 35, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 36, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 41, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 42, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 47, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 48, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 53, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 54, 1)
               ], dtype=ensure_dt_bytes([
                       ('SimId', 'O'), ('ResourceId', '<i8'), ('Quantity', 
                       '<f8'),]))
               )
     transactions = pd.DataFrame(np.array([
-                 (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 34, 1, 27,
-                 'uox', 46),
-                 (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 11, 3, 13, 
-                 'mox', 9)
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 0, 12, 13, 5,
+                 'uox', 1),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 1, 12, 13, 11,
+                 'uox', 2),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 2, 12, 13, 17,
+                 'uox', 3),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 3, 12, 13, 23,
+                 'uox', 4),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 4, 12, 13, 29,
+                 'uox', 5),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 5, 12, 13, 35,
+                 'uox', 6),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 6, 12, 13, 41,
+                 'uox', 7),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 7, 12, 13, 47,
+                 'uox', 8),
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 12, 13, 53,
+                 'uox', 9)
                  ], dtype=ensure_dt_bytes([
                          ('SimId', 'O'), ('TransactionId', '<i8'),
                          ('ReceiverId', '<i8'), ('ResourceId', '<i8'), 
                          ('Commodity', 'O'), ('Time', '<i8')]))
                  )
+    ecoInfo = pd.DataFrame(np.array([
+                 ('Reactor1', 13, 'uox', 1, 0, 0, 0.1)
+                 ], dtype=ensure_dt_bytes([     
+                         (('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Fuel', 'Commodity'), 'O'), (('Fuel', 'SupplyCost'), '<f8'), (('Fuel', 'WasteFee'), '<f8'), (('Fuel', 'Deviation'), '<f8'), (('Finance','DiscountRate'), '<f8')]))
+                 )
     s1 = resources.set_index(['SimId', 'ResourceId'])['Quantity']
     s2 = transactions.set_index(['SimId', 'TransactionId', 'ReceiverId', 
        'ResourceId', 'Commodity'])['Time']
-    series = [s1, s2]
+    s3 = ecoInfo.set_index([('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation')])[('Finance','DiscountRate')]
+    series = [s1, s2, s3]
     obs = eco_metrics.fuel_cost.func(series)
     assert_frame_equal(exp, obs)
 
 
 def test_decommissioning_cost():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 27, 0, 60),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 27, 1516.778523, 61),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 27, 3033.557047, 62),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 27, 4550.335570, 63),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 27, 6067.114094, 64)
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.0, 11),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.133333, 12),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.266667, 13),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.4, 14),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.2, 15),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.0, 16)
         ], dtype=ensure_dt_bytes([
              ('SimId','O'), ('AgentId', '<i8'), ('Payment','<f8'),
              ('Time', '<i8')]))
         )
     power = pd.DataFrame(np.array([
-                 (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 27, 11.3)
+                 (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1)
                  ], dtype=ensure_dt_bytes([
                          ('SimId', 'O'), ('AgentId', '<i8'),
                          ('Value', '<f8')]))
                  )
     entry = pd.DataFrame(np.array([
-                 (10, 50, 27, ':cycamore:Reactor'),
-                 (1, 40, 5, ':cycamore:Sink')
+                 (1, 10, 13, ':cycamore:Reactor')
                  ], dtype=ensure_dt_bytes([
                          ('EnterTime', '<i8'), ('Lifetime', '<i8'),
                          ('AgentId', '<i8'), ('Spec', 'O')]))
                  )
     info = pd.DataFrame(np.array([
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2011, 8, 65)
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 2000, 1, 20)
               ], dtype=ensure_dt_bytes([
                       ('SimId', 'O'), ('InitialYear', '<i8'),
                       ('InitialMonth', '<i8'),('Duration', '<i8')]))
               )
+    ecoInfo = pd.DataFrame(np.array([
+              (13, 5, 1)
+              ], dtype=ensure_dt_bytes([
+                      (('Agent', 'AgentId'), '<i8'), (('Decommissioning', 'Duration')), '<f8'), (('Decommissioning', 'OvernightCost'), '<f8')]))
+              )
     s1 = power.set_index(['SimId', 'AgentId'])['Value']
     s2 = entry.set_index(['EnterTime', 'Lifetime', 'AgentId'])['Spec']
     s3 = info.set_index(['SimId', 'InitialYear', 'InitialMonth'])['Duration']
-    series = [s1, s2, s3]
+    s4 = ecoInfo.set_index([('Agent', 'AgentId'), ('Decommissioning', 'Duration')])[('Decommissioning', 'OvernightCost')]
+    series = [s1, s2, s3, s4]
     obs = eco_metrics.decommissioning_cost.func(series)
     assert_frame_equal(exp, obs)
 
 
 def test_operation_maintenance():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 25436.85),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 43800.0)
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 731),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 731)
         ], dtype=ensure_dt_bytes([
              ('SimId','O'), ('AgentId', '<i8'), ('Time', '<i8'),
              ('Payment','<f8')]))
         )
     power = pd.DataFrame(np.array([
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 2.323),
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 2.323),
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 4.0)
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 1)
               ], dtype=ensure_dt_bytes([
                       ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
                       ('Value', '<f8')]))
               )
+    ecoInfo = pd.DataFrame(np.array([
+              (13, 1, 1, 0)
+              ], dtype=ensure_dt_bytes([
+                      (('Agent', 'AgentId'), '<i8'), (('OperationMaintenance', 'FixedCost')), '<f8'), (('OperationMaintenance', 'VariableCost'), '<f8'), (('OperationMaintenance', 'Deviation'), '<f8')]))
+              )
     s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
-    series = [s1]
+    s2 = ecoInfo.set_index([('Agent', 'AgentId'), ('OperationMaintenance', 'FixedCost'), ('OperationMaintenance', 'VariableCost')])[ ('OperationMaintenance', 'Deviation')]
+    series = [s1, s2]
     obs = eco_metrics.operation_maintenance.func(series)
     assert_frame_equal(exp, obs)
     
@@ -165,15 +229,15 @@ def test_economic_info():
              ('SimId','O'), ('AgentId', '<i8'), ('Time', '<i8'),
              ('Payment','<f8')]))
         )
-    power = pd.DataFrame(np.array([
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 2.323),
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 2.323),
-              (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 4.0)
+    entry = pd.DataFrame(np.array([
+              ('Region1', 8, -1, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, None, None, None, None, None, None, None, None, 0, 20),
+              ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, None, None, None, None, None, None, None, 0, 20),
+              ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, None, None, None, None, None, None, None, 0, 20),
+              ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 'uox', 1, 0, 0, 0, 20)
               ], dtype=ensure_dt_bytes([
-                      ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
-                      ('Value', '<f8')]))
+                      (('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Agent', 'ParentId'), '<i8'), (('Finance','ReturnOnDebt'), '<f8'), (('Finance','ReturnOnEquity'), '<f8'), (('Finance','TaxRate'), '<f8'), (('Finance','DiscountRate'), '<f8'), (('Capital', 'beforePeak'), '<i8'), (('Capital', 'afterPeak'), '<i8'), (('Capital', 'constructionDuration'), '<i8'), (('Capital', 'Deviation'), '<f8'), (('Capital', 'OvernightCost'), '<f8'), (('Decommissioning', 'Duration'), '<i8'), (('Decommissioning', 'OvernightCost'), '<f8'), (('OperationMaintenance', 'FixedCost'), '<f8'), (('OperationMaintenance', 'VariableCost'), '<f8'), (('OperationMaintenance', 'Deviation'), '<f8'), (('Fuel', 'Commodity'), 'O'), (('Fuel', 'SupplyCost'), '<f8'), (('Fuel', 'WasteFee'), '<f8'), (('Fuel', 'Deviation'), '<f8'), (('Truncation', 'Begin'), '<i8'), (('Truncation', 'End'), '<i8')]))
               )
-    s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
+    s1 = entry.set_index(['AgentId', 'Prototype'])['ParentId']
     series = [s1]
     obs = eco_metrics.operation_maintenance.func(series)
     assert_frame_equal(exp, obs)

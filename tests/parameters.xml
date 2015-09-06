@@ -49,7 +49,7 @@
 	
 	<truncation>
 		<simulation_begin>0</simulation_begin><!--all reactors commissionned at this date will be included in the costs calculations-->
-		<simulation_end>100</simulation_end><!--to be able to do period=60yrs (2280)-->
+		<simulation_end>20</simulation_end><!--to be able to do period=60yrs (2280)-->
 	</truncation>
 	
 </model>

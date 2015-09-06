@@ -232,7 +232,7 @@ del _omdeps, _omschema
 
 _eideps = [('AgentEntry', ('AgentId', 'Prototype'), 'ParentId')]
 
-_eischema = [('AgentId', ts.INT), ('Prototype', ts.STRING), ('ParentId', ts.INT), ('BeginMonth', ts.INT), ('EndMonth', ts.INT), ('DiscountRate', ts.DOUBLE)]
+_eischema = [(('Agent', 'Prototype'), ts.STRING), (('Agent', 'AgentId'), ts.INT), (('Agent', 'ParentId'), ts.INT), (('Finance','ReturnOnDebt'), ts.DOUBLE), (('Finance','ReturnOnEquity'), ts.DOUBLE), (('Finance','TaxRate'), ts.DOUBLE), (('Finance','DiscountRate'), ts.DOUBLE), (('Capital', 'beforePeak'), ts.INT), (('Capital', 'afterPeak'), ts.INT), (('Capital', 'constructionDuration'), ts.INT), (('Capital', 'Deviation'), ts.DOUBLE), (('Capital', 'OvernightCost'), ts.DOUBLE), (('Decommissioning', 'Duration'), ts.INT), (('Decommissioning', 'OvernightCost'), ts.DOUBLE), (('OperationMaintenance', 'FixedCost'), ts.DOUBLE), (('OperationMaintenance', 'VariableCost'), ts.DOUBLE), (('OperationMaintenance', 'Deviation'), ts.DOUBLE), (('Fuel', 'Commodity'), ts.STRING), (('Fuel', 'SupplyCost'), ts.DOUBLE), (('Fuel', 'WasteFee'), ts.DOUBLE), (('Fuel', 'Deviation'), ts.DOUBLE), (('Truncation', 'Begin'), ts.INT), (('Truncation', 'End'), ts.INT)]
 		
 @metric(name='EconomicInfo', depends=_eideps, schema=_eischema)
 def economic_info(series):
