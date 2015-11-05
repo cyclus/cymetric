@@ -18,7 +18,7 @@ except ImportError:
     HAVE_PYNE = False
 
 from cymetric import cyclus
-from cymetric import metrics
+from cymetric import fco_metrics
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 #################################
@@ -54,7 +54,7 @@ def test_fco_u_mined():
     s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
     s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
     series = [s1,s2]
-    obs = metrics.fco_u_mined.func(series)
+    obs = fco_metrics.fco_u_mined.func(series)
     assert_frame_equal(exp, obs)
 
 
@@ -87,7 +87,7 @@ def test_fco_swu():
     s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
     s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
     series = [s1,s2]
-    obs = metrics.fco_swu.func(series)
+    obs = fco_metrics.fco_swu.func(series)
     np.allclose(exp, obs)
 
 
@@ -118,26 +118,25 @@ def test_fco_fuel_loading():
     s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
     s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
     series = [s1,s2]
-    obs = metrics.fco_fuel_loading.func(series)
+    obs = fco_metrics.fco_fuel_loading.func(series)
     assert_frame_equal(exp, obs)
 
 
 def test_fco_electricity_generated():
-    exp = pd.DataFrame(np.array([(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 1000), 
-                                 (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 2000),
-				 (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 10000)], 
-        dtype=ensure_dt_bytes([('SimId', 'O'), ('AgentId', '<i8'), ('Year', '<i8'), ('Power', '<f8')]))
+    exp = pd.DataFrame(np.array([(0, 3), 
+				 (1, 10)], 
+        dtype=ensure_dt_bytes([('Year', '<i8'), ('Power', '<f8')]))
         )
-    tsp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 3, 1000),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 2000),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 12, 10000),
+    eg = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 1000),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 2000),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 10000),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'), 
-                ('Value', '<f8')]))
+                ('SimId', 'O'), ('AgentId', '<i8'), ('Year', '<i8'), 
+                ('Power', '<f8')]))
         )
-    series = [tsp.set_index(['SimId', 'AgentId', 'Time'])['Value']]
-    obs = metrics.fco_electricity_generated.func(series)
+    series = [eg.set_index(['SimId', 'AgentId', 'Year'])['Power']]
+    obs = fco_metrics.fco_electricity_generated.func(series)
     assert_frame_equal(exp, obs)
 
 
