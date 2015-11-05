@@ -1,4 +1,13 @@
 from cymetric import metric
+from cymetric import tools
+from cymetric import typesystem as ts
+import pandas as pd
+try:
+    from pyne import data
+    import pyne.enrichment as enr
+    HAVE_PYNE = True
+except ImportError:
+    HAVE_PYNE = False
 
 #########################
 ## FCO-related metrics ##
@@ -15,10 +24,10 @@ def fco_electricity_generated(series):
     for all agents in simulation.
     """
     elec = series[0].reset_index()
-    elec = elec.groupby('AgentId').sum()
     elec = pd.DataFrame(data={'Year': elec.Year, 
-                              'Power': elec.Value.apply(lambda x: x/1000)}, 
+                              'Power': elec.Power.apply(lambda x: x/1000)}, 
                         columns=['Year', 'Power'])
+    elec = elec.groupby('Year').sum()
     rtn = elec.reset_index()
     return rtn
 
@@ -36,9 +45,9 @@ _uschema = [('Year', ts.INT), ('UMined', ts.DOUBLE)]
 @metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(series):
     """FcoUMined metric returns the uranium mined in tonnes for each year 
-    in a 200-yr simulation. This is written for FCO databases that use the 
-    Bright-lite Fuel Fab(i.e., the U235 and U238 are given separately in the 
-    FCO simulations).
+    in a simulation. This is written for simulations that use the 
+    Bright-lite Fuel Fab (i.e., the U235 and U238 are given separately in the 
+    FCO simulations, and the filtering is archetype-specific).
     """
     tools.raise_no_pyne('U_Mined could not be computed', HAVE_PYNE)
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(), 
@@ -82,9 +91,9 @@ _swuschema = [('Year', ts.INT), ('SWU', ts.DOUBLE)]
 @metric(name='FcoSwu', depends=_swudeps, schema=_swuschema)
 def fco_swu(series):
     """FcoSwu metric returns the separative work units required for each 
-    year in a 200-yr simulation. This is written for FCO databases that 
-    use the Bright-lite (i.e., the U235 and U238 are given separately 
-    in the FCO simulations).
+    year in a simulation. This is written for simulations that 
+    use the Bright-lite Fuel Fab (i.e., the U235 and U238 are given separately 
+    in the FCO simulations, and the filtering is archetype-specific).
     """
     tools.raise_no_pyne('SWU Required could not be computed', HAVE_PYNE)
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(),
@@ -126,8 +135,9 @@ _flschema = [('Year', ts.INT), ('FuelLoading', ts.DOUBLE)]
 
 @metric(name='FcoFuelLoading', depends=_fldeps, schema=_flschema)
 def fco_fuel_loading(series):
-    """FcoFuelLoading metric returns the fuel loaded in tHM/y in a 200-yr 
-    simulation. This is written for FCO databases.
+    """FcoFuelLoading metric returns the fuel loaded in tHM/y in a 
+    simulation. This is written for FCO databases that use Bright-lite
+    archetypes (the commodity filtering is specific to these archetypes).
     """
     mass = pd.merge(series[0].reset_index(), series[1].reset_index(),
             on=['ResourceId'], how='inner').set_index(['TimeCreated'])
