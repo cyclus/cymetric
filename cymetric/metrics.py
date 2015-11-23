@@ -281,19 +281,20 @@ _egdeps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'),]
 
 _egschema = [
     ('SimId', ts.UUID), ('AgentId', ts.INT), 
-    ('Year', ts.INT), ('Power', ts.DOUBLE)
+    ('Year', ts.INT), ('Energy', ts.DOUBLE)
     ]
 
-@metric(name='ElectricityGenerated', depends=_egdeps, schema=_egschema)
-def electricity_generated(series):
+@metric(name='ElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
+def electricity_generated_by_agent(series):
     """ElectricityGenerated metric returns the total electricity generated in 
-    MWe-y for each agent.
+    MWe-y for each agent from the average monthly power given in TimeSeriesPower.
     """
     elec = series[0].reset_index()
     elec = pd.DataFrame(data={'SimId': elec.SimId,
                               'AgentId': elec.AgentId,
                               'Year': elec.Time.apply(lambda x: x//12), 
-                              'Power': elec.Value}, columns=['SimId', 'AgentId', 'Year', 'Power'])
+                              'Energy': elec.Value.apply(lambda x: x/12)}, 
+			columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()

@@ -14,9 +14,9 @@ except ImportError:
 #########################
 
 # Electricity Generated [GWe-y]
-_egdeps = [('ElectricityGenerated', ('AgentId', 'Year'), 'Power'),]
+_egdeps = [('ElectricityGenerated', ('AgentId', 'Year'), 'Energy'),]
 
-_egschema = [('Year', ts.INT), ('Power', ts.DOUBLE)]
+_egschema = [('Year', ts.INT), ('Energy', ts.DOUBLE)]
 
 @metric(name='FcoElectricityGenerated', depends=_egdeps, schema=_egschema)
 def fco_electricity_generated(series):
@@ -25,8 +25,8 @@ def fco_electricity_generated(series):
     """
     elec = series[0].reset_index()
     elec = pd.DataFrame(data={'Year': elec.Year, 
-                              'Power': elec.Power.apply(lambda x: x/1000)}, 
-                        columns=['Year', 'Power'])
+                              'Energy': elec.Energy.apply(lambda x: x/1000)}, 
+                        columns=['Year', 'Energy'])
     elec = elec.groupby('Year').sum()
     rtn = elec.reset_index()
     return rtn

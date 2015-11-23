@@ -124,18 +124,19 @@ def test_fco_fuel_loading():
 
 def test_fco_electricity_generated():
     exp = pd.DataFrame(np.array([(0, 3), 
-				 (1, 10)], 
-        dtype=ensure_dt_bytes([('Year', '<i8'), ('Power', '<f8')]))
+				 (1, 3)
+	], dtype=ensure_dt_bytes([
+	        ('Year', '<i8'), ('Energy', '<f8')]))
         )
     eg = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 1000),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 2000),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 10000),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 3000),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Year', '<i8'), 
-                ('Power', '<f8')]))
+                ('Energy', '<f8')]))
         )
-    series = [eg.set_index(['SimId', 'AgentId', 'Year'])['Power']]
+    series = [eg.set_index(['SimId', 'AgentId', 'Year'])['Energy']]
     obs = fco_metrics.fco_electricity_generated.func(series)
     assert_frame_equal(exp, obs)
 
