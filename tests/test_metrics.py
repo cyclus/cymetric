@@ -207,8 +207,8 @@ def test_transaction_quantity():
 def test_electricity_generated_by_agent():
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 100), 
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 200),
 	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 1, 100), 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 200),
 	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 200), 
 	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 400)
 	], dtype=ensure_dt_bytes([
