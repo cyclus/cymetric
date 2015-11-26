@@ -303,3 +303,39 @@ def annual_electricity_generated_by_agent(series):
 
 del _egdeps, _egschema
 
+#
+# Not a metric, not a root metric metrics
+#
+
+# These are not metrics that have any end use in mind, but are required for the 
+# calculation of other metrics. Required tables like this should be stored 
+# elsewhere in the future if they become more common.
+
+# TimeList
+
+_tldeps = [
+    ('Info', ('SimId',), 'Duration'), 
+    ('TimeStepDur', ('SimId',), 'DurationSecs')
+    ]
+
+_tlschema = [('SimId', ts.UUID), ('TimeStep', ts.INT)]
+
+@metric(name='TimeList', depends=_tldeps, schema=_tlschema)
+def timelist(series):
+    """In case the sim does not have entries for every timestep, this populates 
+    a list with all timesteps in the duration. 
+    """
+##### This is currently only implemented for a month-long timestep, although this needs to be generalized ASAP #######
+    info = series[0]
+    tl = []
+    for sim, dur in info.iteritems():
+        for i in range(dur):
+            tl.append((sim, i))
+#    tl = pd.Series(tl, index=info.index)
+#    tl.name = 'TimeStep'
+    tl = pd.DataFrame(tl, columns=['SimId', 'TimeStep'])
+#    tl = tl.reset_index()
+    return tl
+
+del _tldeps, _tlschema
+
