@@ -313,10 +313,7 @@ del _egdeps, _egschema
 
 # TimeList
 
-_tldeps = [
-    ('Info', ('SimId',), 'Duration'), 
-    ('TimeStepDur', ('SimId',), 'DurationSecs')
-    ]
+_tldeps = [('Info', ('SimId',), 'Duration')]
 
 _tlschema = [('SimId', ts.UUID), ('TimeStep', ts.INT)]
 
@@ -325,16 +322,12 @@ def timelist(series):
     """In case the sim does not have entries for every timestep, this populates 
     a list with all timesteps in the duration. 
     """
-##### This is currently only implemented for a month-long timestep, although this needs to be generalized ASAP #######
     info = series[0]
     tl = []
     for sim, dur in info.iteritems():
         for i in range(dur):
             tl.append((sim, i))
-#    tl = pd.Series(tl, index=info.index)
-#    tl.name = 'TimeStep'
     tl = pd.DataFrame(tl, columns=['SimId', 'TimeStep'])
-#    tl = tl.reset_index()
     return tl
 
 del _tldeps, _tlschema
