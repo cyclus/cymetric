@@ -200,21 +200,11 @@ _csschema = [
     ]
 
 @metric(name='CommissioningSeries', depends=_csdeps, schema=_csschema)
-def agents(series):
+def commissioning_series(series):
     """Provides a time series of the commissioning of agents by prototype.
     """
-    #ptype = series[0]
-    #enter = series[1]
-    #entry_index = ['SimId', enter.name, ptype.name]
-    #entry = pd.merge(ptype.reset_index(), enter.reset_index(), on=['SimId'], how='inner')
     entry = series[0].reset_index()
     entry_index = ['SimId', 'Prototype', 'EnterTime']
-#    entry = pd.DataFrame(data={'SimId': entry.SimId,
-#	                       'Prototype': entry.Prototype,
-#			       'EnterTime': entry.EnterTime, 
-#			       'Count': 1}, 
-#			 columns=['SimId', 'Prototype', 'EnterTime', 'Count'])
-#    count = entry.groupby(entry_index).sum()
     count = entry.groupby(entry_index).size()
     count.name = 'Count'
     rtn = count.reset_index()
