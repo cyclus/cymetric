@@ -192,10 +192,10 @@ del _dhdeps, _dhschema
 
 
 # Agent Commissioning
-_csdeps = [('AgentEntry', ('SimId', 'Prototype'), 'EnterTime')]
+_csdeps = [('AgentEntry', ('SimId', 'EnterTime'), 'Prototype')]
 
 _csschema = [
-    ('SimId', ts.UUID), ('Prototype', ts.STRING), ('EnterTime', ts.INT), 
+    ('SimId', ts.UUID), ('EnterTime', ts.STRING), ('Prototype', ts.INT), 
     ('Count', ts.INT)
     ]
 
@@ -204,7 +204,7 @@ def commissioning_series(series):
     """Provides a time series of the commissioning of agents by prototype.
     """
     entry = series[0].reset_index()
-    entry_index = ['SimId', 'Prototype', 'EnterTime']
+    entry_index = ['SimId', 'EnterTime', 'Prototype']
     count = entry.groupby(entry_index).size()
     count.name = 'Count'
     rtn = count.reset_index()

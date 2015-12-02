@@ -27,25 +27,27 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 def test_commissioning_series():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'FRx', -1, 1),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'LWR', -1, 1),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'LWR', 1, 2),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'FRx', 5, 2),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), -1, 'FRx', 1),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), -1, 'LWR', 1),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 'FRx', 1),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 'LWR', 2),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 'FRx', 2),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('Prototype', 'O'), ('EnterTime', '<i8'), 
+                ('SimId', 'O'), ('EnterTime', '<i8'), ('Prototype', 'O'), 
 		('Count', '<i8')]))
         )
     agent_entry = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'FRx', -1),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'LWR', -1),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'LWR', 1),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'FRx', 1),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'LWR', 1),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'FRx', 5),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'FRx', 5),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('Prototype', 'O'), ('EnterTime', '<i8')]))
         )
-    series = [agent_entry.set_index(['SimId', 'Prototype'])['EnterTime']]
+    series = [agent_entry.set_index(['SimId', 'EnterTime'])['Prototype']]
     obs = metrics.commissioning_series.func(series)
     assert_frame_equal(exp, obs)
 
