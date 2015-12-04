@@ -228,9 +228,14 @@ _dsschema = [
 def decommissioning_series(series):
     """Provides a time series of the commissioning of agents by prototype.
     """
+    agent_entry = series[0]
+    agent_exit = series[1]
     exit_index = ['SimId', 'ExitTime', 'Prototype']
-    exit = pd.merge(series[0].reset_index(), series[1].reset_index(),
+    if agent_exit is not None:
+    	exit = pd.merge(agent_entry.reset_index(), agent_exit.reset_index(),
             on=['SimId', 'AgentId'], how='inner').set_index(exit_index)
+    else:
+        return print('No agents were decommissioned during this simulaiton.')
     count = exit.groupby(exit_index).size()
     count.name = 'Count'
     rtn = count.reset_index()
