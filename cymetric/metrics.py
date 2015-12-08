@@ -220,7 +220,7 @@ _dsdeps = [
     ]
 
 _dsschema = [
-    ('SimId', ts.UUID), ('ExitTime', ts.STRING), ('Prototype', ts.STRING), 
+    ('SimId', ts.UUID), ('ExitTime', ts.INT), ('Prototype', ts.STRING), 
     ('Count', ts.INT)
     ]
 
