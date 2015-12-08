@@ -236,7 +236,7 @@ def decommissioning_series(series):
             on=['SimId', 'AgentId'], how='inner').set_index(exit_index)
     else:
         return print('No agents were decommissioned during this simulaiton.')
-    count = exit.groupby(exit_index).size()
+    count = exit.groupby(level=exit_index).size()
     count.name = 'Count'
     rtn = count.reset_index()
     return rtn
