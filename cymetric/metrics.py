@@ -195,7 +195,7 @@ del _dhdeps, _dhschema
 _csdeps = [('AgentEntry', ('SimId', 'EnterTime'), 'Prototype')]
 
 _csschema = [
-    ('SimId', ts.UUID), ('EnterTime', ts.STRING), ('Prototype', ts.INT), 
+    ('SimId', ts.UUID), ('EnterTime', ts.STRING), ('Prototype', ts.STRING), 
     ('Count', ts.INT)
     ]
 
