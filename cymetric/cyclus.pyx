@@ -188,7 +188,7 @@ class FullBackend(_FullBackend, object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.flush()
+        self.close()
 
 
 cdef class _SqliteBack(_FullBackend):
@@ -201,6 +201,11 @@ cdef class _SqliteBack(_FullBackend):
     def flush(self):
         """Flushes the database to disk."""
         (<cpp_cyclus.SqliteBack*> self.ptx).Flush()
+
+    def close(self):
+        """Closes the backend, flushing it in the process."""
+        self.flush()  # just in case
+        (<cpp_cyclus.FullBackend*> self.ptx).Close()
 
     property name:
         """The name of the database."""
@@ -224,6 +229,10 @@ cdef class _Hdf5Back(_FullBackend):
     def flush(self):
         """Flushes the database to disk."""
         (<cpp_cyclus.Hdf5Back*> self.ptx).Flush()
+
+    def close(self):
+        """Closes the backend, flushing it in the process."""
+        (<cpp_cyclus.Hdf5Back*> self.ptx).Close()
 
     property name:
         """The name of the database."""

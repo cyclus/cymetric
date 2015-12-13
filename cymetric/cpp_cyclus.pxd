@@ -87,7 +87,8 @@ cdef extern from "cyclus.h" namespace "cyclus":
         set[std_string] Tables() except +
 
     cdef cppclass FullBackend(QueryableBackend, RecBackend):
-        FullBackend() except + 
+        FullBackend() except +
+        void Close() except +
 
     cdef cppclass Recorder:
         Recorder() except +
