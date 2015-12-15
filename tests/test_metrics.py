@@ -204,7 +204,7 @@ def test_transaction_quantity():
     assert_frame_equal(exp, obs)
 
 
-def test_electricity_generated_by_agent():
+def test_annual_electricity_generated_by_agent():
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 100), 
 	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 1, 100), 
@@ -226,7 +226,7 @@ def test_electricity_generated_by_agent():
                 ('Value', '<f8')]))
         )
     series = [tsp.set_index(['SimId', 'AgentId', 'Time'])['Value']]
-    obs = metrics.electricity_generated_by_agent.func(series)
+    obs = metrics.annual_electricity_generated_by_agent.func(series)
     assert_frame_equal(exp, obs)
 
 

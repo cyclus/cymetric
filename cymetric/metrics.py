@@ -261,7 +261,7 @@ _transschema = [
 
 @metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
 def transaction_quantity(series):
-    """TransQuant metric returns the quantity of each transaction throughout 
+    """Transaction Quantity metric returns the quantity of each transaction throughout 
     the simulation.
     """
     trans_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId', 
@@ -284,10 +284,11 @@ _egschema = [
     ('Year', ts.INT), ('Energy', ts.DOUBLE)
     ]
 
-@metric(name='ElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
-def electricity_generated_by_agent(series):
-    """ElectricityGenerated metric returns the total electricity generated in 
-    MWe-y for each agent from the average monthly power given in TimeSeriesPower.
+@metric(name='AnnualElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
+def annual_electricity_generated_by_agent(series):
+    """Annual Electricity Generated metric returns the total electricity
+    generated in MWe-y for each agent, calculated from the average monthly 
+    power given in TimeSeriesPower.
     """
     elec = series[0].reset_index()
     elec = pd.DataFrame(data={'SimId': elec.SimId,
