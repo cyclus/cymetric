@@ -64,7 +64,7 @@ class Evaluator(object):
         if (m.name in self.known_tables) or (not self.write):
             return raw
         rec = self.recorder
-        rawd = raw.to_dict(outtype='list')
+        rawd = raw.to_dict(orient='list')
         for i in range(len(raw)):
             d = rec.new_datum(m.name)
             for field, dbtype, shape in m.schema:
