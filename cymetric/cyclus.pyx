@@ -188,7 +188,7 @@ class FullBackend(_FullBackend, object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.flush()
+        self.close()
 
 
 cdef class _SqliteBack(_FullBackend):
