@@ -205,7 +205,7 @@ cdef class _SqliteBack(_FullBackend):
     def close(self):
         """Closes the backend, flushing it in the process."""
         self.flush()  # just in case
-        (<cpp_cyclus.FullBackend*> self.ptx).Close()
+        (<cpp_cyclus.SqliteBack*> self.ptx).Close()
 
     property name:
         """The name of the database."""
@@ -237,7 +237,7 @@ cdef class _Hdf5Back(_FullBackend):
     property name:
         """The name of the database."""
         def __get__(self):
-            name = (<cpp_cyclus.SqliteBack*> self.ptx).Name()
+            name = (<cpp_cyclus.Hdf5Back*> self.ptx).Name()
             name = name.decode()
             return name
 
