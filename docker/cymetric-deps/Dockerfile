@@ -1,7 +1,8 @@
 
 FROM cyclus/cycamore
 
-RUN apt-get install -y --force-yes python3-pip
+RUN apt-get update
+RUN apt-get install -y --force-yes --fix-missing python3-pip
 RUN pip3 install cython numpy
 RUN pip3 install tables
 RUN pip3 install jinja2
