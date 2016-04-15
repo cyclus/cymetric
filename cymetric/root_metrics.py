@@ -62,6 +62,8 @@ build_schedule = root_metric(name='BuildSchedule')
 snapshots = root_metric(name='Snapshots')
 debug_requests = root_metric(name='DebugRequests')
 debug_bids = root_metric(name='DebugBids')
+explicit_inventory = root_metric(name='ExplicitInventory')
+explicit_inventory_compact = root_metric(name='ExplicitInventoryCompact')
 
 #where do these tables come from?
 commod_priority = root_metric(name='CommodPriority')
