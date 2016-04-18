@@ -329,6 +329,83 @@ def transaction_quantity(series):
 del _transdeps, _transschema
 
 
+# Explicit Inventory By Agent
+_invdeps = [
+    ('ExplicitInventory', ('SimId', 'AgentId', 'InventoryName', 'NucId'), 
+        'Quantity')
+    ]
+
+_invschema = [
+    ('SimId', ts.UUID), ('AgentId', ts.INT), 
+    ('InventoryName', ts.STRING), ('NucId', ts.INT), 
+    ('Quantity', ts.DOUBLE)
+    ]
+
+@metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
+def explicit_inventory_by_agent(series):
+    """
+    """
+    inv_index = ['SimId', 'AgentId', 'InventoryName', 'NucId']
+    inv = series[0]
+    inv = inv.groupby(level=inv_index).sum()
+    inv.name = 'Quantity'
+    rtn = inv.reset_index()
+    return rtn
+
+del _invdeps, _invschema
+
+
+# Explicit Inventory By Nuc
+_invdeps = [
+    ('ExplicitInventory', ('SimId', 'Time', 'InventoryName', 'NucId'), 
+        'Quantity')
+    ]
+
+_invschema = [
+    ('SimId', ts.UUID), ('Time', ts.INT), 
+    ('InventoryName', ts.STRING), ('NucId', ts.INT), 
+    ('Quantity', ts.DOUBLE)
+    ]
+
+@metric(name='ExplicitInventoryByNuc', depends=_invdeps, schema=_invschema)
+def explicit_inventory_by_nuc(series):
+    """
+    """
+    inv_index = ['SimId', 'Time', 'InventoryName', 'NucId']
+    inv = series[0]
+    inv = inv.groupby(level=inv_index).sum()
+    inv.name = 'Quantity'
+    rtn = inv.reset_index()
+    return rtn
+
+del _invdeps, _invschema
+
+# Compact Explicit Inventory By Agent
+_invdeps = [
+    ('ExplicitInventoryCompact', ('SimId', 'AgentId', 'InventoryName', 'Composition'), 
+        'Quantity')
+    ]
+
+_invschema = [
+    ('SimId', ts.UUID), ('AgentId', ts.INT), 
+    ('InventoryName', ts.STRING), ('Composition', ts.MAP_INT_DOUBLE), 
+    ('Quantity', ts.DOUBLE)
+    ]
+
+@metric(name='ExplicitInventoryCompactByAgent', depends=_invdeps, schema=_invschema)
+def explicit_inventory_by_agent(series):
+    """
+    """
+    inv_index = ['SimId', 'AgentId', 'InventoryName', 'Composition']
+    inv = series[0]
+    inv = inv.groupby(level=inv_index).sum()
+    inv.name = 'Quantity'
+    rtn = inv.reset_index()
+    return rtn
+
+del _invdeps, _invschema
+
+
 # Electricity Generated [MWe-y]
 _egdeps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'),]
 
