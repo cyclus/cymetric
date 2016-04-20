@@ -224,9 +224,9 @@ _dsschema = [
     ('Count', ts.INT)
     ]
 
-@metric(name='DecommissioningSeries', depends=_dsdeps, schema=_dsschema)
-def decommissioning_series(series):
-    """Provides a time series of the commissioning of agents by prototype.
+@metric(name='DecommissionSeries', depends=_dsdeps, schema=_dsschema)
+def decommission_series(series):
+    """Provides a time series of the decommissioning of agents by prototype.
     """
     agent_entry = series[0]
     agent_exit = series[1]
