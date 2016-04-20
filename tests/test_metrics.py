@@ -204,121 +204,29 @@ def test_transaction_quantity():
     assert_frame_equal(exp, obs)
 
 
-#################################
-####### FCO METRICS TESTS #######
-#################################
-
-def test_fco_u_mined():
-    if not HAVE_PYNE:
-        raise SkipTest
-    exp = pd.DataFrame(np.array([(0, 3.780034), (1, 2.185349)], 
-        dtype=ensure_dt_bytes([('Year', '<i8'), ('UMined', '<f8')]))
-        )
-    mats = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922350000, 8.328354),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922380000, 325.004979),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922350000, 11.104472),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922380000, 322.228861),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922350000, 11.104472),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922380000, 322.228861),
-        ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'),
-                ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('NucId', '<i8'), 
-                ('Mass', '<f8')]))
-        )
-    trans = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 'LWR Fuel'),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 'LWR Fuel'),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 'LWR Fuel'),
-        ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'), 
-                ('Commodity', 'O')]))
-        )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
-    s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
-    series = [s1,s2]
-    obs = metrics.fco_u_mined.func(series)
-    assert_frame_equal(exp, obs)
-
-
-def test_fco_swu():
-    if not HAVE_PYNE:
-        raise SkipTest
-    exp = pd.DataFrame(np.array([(0, 0.002407), (1, 0.001473)], 
-        dtype=ensure_dt_bytes([('Year', '<i8'), ('SWU', '<f8')]))
-        )
-    mats = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922350000, 8.328354),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922380000, 325.004979),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922350000, 11.104472),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922380000, 322.228861),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922350000, 11.104472),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922380000, 322.228861),
-        ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'),
-                ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('NucId', '<i8'), 
-                ('Mass', '<f8')]))
-        )
-    trans = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 'LWR Fuel'),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 'LWR Fuel'),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 'LWR Fuel'),
-        ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'), 
-                ('Commodity', 'O')]))
-        )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
-    s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
-    series = [s1,s2]
-    obs = metrics.fco_swu.func(series)
-    np.allclose(exp, obs)
-
-
-def test_fco_fuel_loading():
-    exp = pd.DataFrame(np.array([(0, 0.666666), (1, 0.333333)], 
-        dtype=ensure_dt_bytes([('Year', '<i8'), ('FuelLoading', '<f8')]))
-        )
-    mats = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922350000, 8.328354),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 7, 3, 3, 922380000, 325.004979),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922350000, 11.104472),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 8, 4, 3, 922380000, 322.228861),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922350000, 11.104472),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 9, 5, 12, 922380000, 322.228861),
-        ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'),
-                ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('NucId', '<i8'), 
-                ('Mass', '<f8')]))
-        )
-    trans = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 'LWR Fuel'),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 'FR Fuel'),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 'FR Fuel'),
-        ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'), 
-                ('Commodity', 'O')]))
-        )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
-    s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
-    series = [s1,s2]
-    obs = metrics.fco_fuel_loading.func(series)
-    assert_frame_equal(exp, obs)
-
-
-def test_fco_electricity_generated():
-    exp = pd.DataFrame(np.array([(0, 3), (1, 10)], 
-        dtype=ensure_dt_bytes([('Year', '<i8'), ('Power', '<f8')]))
+def test_annual_electricity_generated_by_agent():
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 100), 
+	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 1, 100), 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 200),
+	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 200), 
+	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 400)
+	], dtype=ensure_dt_bytes([
+	        ('SimId', 'O'), ('AgentId', '<i8'), ('Year', '<i8'), 
+		('Energy', '<f8')]))
         )
     tsp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 3, 1000),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 2000),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 12, 10000),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 3, 1200),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 2400),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 12, 1200),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 12, 2400),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 12, 4800),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'), 
                 ('Value', '<f8')]))
         )
     series = [tsp.set_index(['SimId', 'AgentId', 'Time'])['Value']]
-    obs = metrics.fco_electricity_generated.func(series)
+    obs = metrics.annual_electricity_generated_by_agent.func(series)
     assert_frame_equal(exp, obs)
 
 
