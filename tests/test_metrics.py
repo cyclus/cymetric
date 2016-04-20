@@ -25,7 +25,7 @@ from cymetric import metrics
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 
-def test_commissioning_series():
+def test_build_series():
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), -1, 'FRx', 1),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), -1, 'LWR', 1),
@@ -34,7 +34,7 @@ def test_commissioning_series():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 'FRx', 2),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('EnterTime', '<i8'), ('Prototype', 'O'), 
-		('Count', '<i8')]))
+        		('Count', '<i8')]))
         )
     agent_entry = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 'FRx', -1),
@@ -48,7 +48,7 @@ def test_commissioning_series():
                 ('SimId', 'O'), ('Prototype', 'O'), ('EnterTime', '<i8')]))
         )
     series = [agent_entry.set_index(['SimId', 'EnterTime'])['Prototype']]
-    obs = metrics.commissioning_series.func(series)
+    obs = metrics.build_series.func(series)
     assert_frame_equal(exp, obs)
 
 def test_agents():

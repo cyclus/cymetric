@@ -191,17 +191,17 @@ def decay_heat(series):
 del _dhdeps, _dhschema
 
 
-# Agent Commissioning
-_csdeps = [('AgentEntry', ('SimId', 'EnterTime'), 'Prototype')]
+# Agent Building
+_bsdeps = [('AgentEntry', ('SimId', 'EnterTime'), 'Prototype')]
 
-_csschema = [
+_bsschema = [
     ('SimId', ts.UUID), ('EnterTime', ts.INT), ('Prototype', ts.STRING), 
     ('Count', ts.INT)
     ]
 
-@metric(name='CommissioningSeries', depends=_csdeps, schema=_csschema)
-def commissioning_series(series):
-    """Provides a time series of the commissioning of agents by prototype.
+@metric(name='BuildSeries', depends=_bsdeps, schema=_bsschema)
+def build_series(series):
+    """Provides a time series of the building of agents by prototype.
     """
     entry = series[0].reset_index()
     entry_index = ['SimId', 'EnterTime', 'Prototype']
@@ -210,7 +210,7 @@ def commissioning_series(series):
     rtn = count.reset_index()
     return rtn
 
-del _csdeps, _csschema
+del _bsdeps, _bsschema
 
 # Agents
 
