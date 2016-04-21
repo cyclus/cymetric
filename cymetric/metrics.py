@@ -331,21 +331,21 @@ del _transdeps, _transschema
 
 # Explicit Inventory By Agent
 _invdeps = [
-    ('ExplicitInventory', ('SimId', 'AgentId', 'InventoryName', 'NucId'), 
+    ('ExplicitInventory', ('SimId', 'AgentId', 'Time', 'InventoryName', 'NucId'), 
         'Quantity')
     ]
 
 _invschema = [
     ('SimId', ts.UUID), ('AgentId', ts.INT), 
-    ('InventoryName', ts.STRING), ('NucId', ts.INT), 
-    ('Quantity', ts.DOUBLE)
+    ('Time', ts.INT), ('InventoryName', ts.STRING), 
+    ('NucId', ts.INT), ('Quantity', ts.DOUBLE)
     ]
 
 @metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
 def explicit_inventory_by_agent(series):
     """
     """
-    inv_index = ['SimId', 'AgentId', 'InventoryName', 'NucId']
+    inv_index = ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId']
     inv = series[0]
     inv = inv.groupby(level=inv_index).sum()
     inv.name = 'Quantity'

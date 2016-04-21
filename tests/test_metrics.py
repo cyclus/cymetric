@@ -264,19 +264,19 @@ def test_transaction_quantity():
 
 def test_explicit_inventory_by_agent():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 'core', 922350000, 3.0), 
-    	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 'core', 922380000, 2.0), 
-	    (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 'core', 922350000, 2.0),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 'inventory', 922350000, 1.0),
-	    (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 'inventory', 922380000, 2.0) 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 1, 'core', 922350000, 1.0), 
+    	(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 4.0), 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'inventory', 922350000, 1.0),
+	    (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'inventory', 922380000, 2.0), 
+	    (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 2, 'core', 922350000, 2.0)
 	], dtype=ensure_dt_bytes([
-	        ('SimId', 'O'), ('AgentId', '<i8'), ('InventoryName', 'O'), 
-    		('NucId', '<i8'), ('Quantity', '<f8')]))
+	        ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'), 
+            ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
         )
     inv = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 1, 'core', 922350000, 1.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 2.0),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922380000, 2.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 2.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'inventory', 922350000, 1.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'inventory', 922380000, 2.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 2, 'core', 922350000, 2.0),
@@ -284,7 +284,7 @@ def test_explicit_inventory_by_agent():
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'), 
                 ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
         )
-    series = [inv.set_index(['SimId', 'AgentId', 'InventoryName', 'NucId'])['Quantity']]
+    series = [inv.set_index(['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId'])['Quantity']]
     obs = metrics.explicit_inventory_by_agent.func(series)
     assert_frame_equal(exp, obs)
 
