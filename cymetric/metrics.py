@@ -343,7 +343,8 @@ _invschema = [
 
 @metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
 def explicit_inventory_by_agent(series):
-    """
+    """The Inventory By Agent metric groups the inventories by Agent 
+    (keeping all nuc information)
     """
     inv_index = ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId']
     inv = series[0]
@@ -369,7 +370,9 @@ _invschema = [
 
 @metric(name='ExplicitInventoryByNuc', depends=_invdeps, schema=_invschema)
 def explicit_inventory_by_nuc(series):
-    """
+    """The Inventory By Nuc metric groups the inventories by nuclide 
+    and discards the agent information it is attached to (providing fuel 
+    cycle-wide nuclide inventories)
     """
     inv_index = ['SimId', 'Time', 'InventoryName', 'NucId']
     inv = series[0]
