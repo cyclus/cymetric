@@ -191,6 +191,27 @@ def decay_heat(series):
 del _dhdeps, _dhschema
 
 
+# Agent Building
+_bsdeps = [('AgentEntry', ('SimId', 'EnterTime'), 'Prototype')]
+
+_bsschema = [
+    ('SimId', ts.UUID), ('EnterTime', ts.INT), ('Prototype', ts.STRING), 
+    ('Count', ts.INT)
+    ]
+
+@metric(name='BuildSeries', depends=_bsdeps, schema=_bsschema)
+def build_series(series):
+    """Provides a time series of the building of agents by prototype.
+    """
+    entry = series[0].reset_index()
+    entry_index = ['SimId', 'EnterTime', 'Prototype']
+    count = entry.groupby(entry_index).size()
+    count.name = 'Count'
+    rtn = count.reset_index()
+    return rtn
+
+del _bsdeps, _bsschema
+
 # Agents
 
 _agentsdeps = [
