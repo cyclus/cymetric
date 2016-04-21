@@ -212,6 +212,38 @@ def build_series(series):
 
 del _bsdeps, _bsschema
 
+
+# Agent Decommissioning
+_dsdeps = [
+    ('AgentEntry', ('SimId', 'AgentId'), 'Prototype'),
+    ('AgentExit', ('SimId', 'AgentId'), 'ExitTime')
+    ]
+
+_dsschema = [
+    ('SimId', ts.UUID), ('ExitTime', ts.INT), ('Prototype', ts.STRING), 
+    ('Count', ts.INT)
+    ]
+
+@metric(name='DecommissionSeries', depends=_dsdeps, schema=_dsschema)
+def decommission_series(series):
+    """Provides a time series of the decommissioning of agents by prototype.
+    """
+    agent_entry = series[0]
+    agent_exit = series[1]
+    exit_index = ['SimId', 'ExitTime', 'Prototype']
+    if agent_exit is not None:
+    	exit = pd.merge(agent_entry.reset_index(), agent_exit.reset_index(),
+            on=['SimId', 'AgentId'], how='inner').set_index(exit_index)
+    else:
+        return print('No agents were decommissioned during this simulation.')
+    count = exit.groupby(level=exit_index).size()
+    count.name = 'Count'
+    rtn = count.reset_index()
+    return rtn
+
+del _dsdeps, _dsschema
+
+
 # Agents
 
 _agentsdeps = [

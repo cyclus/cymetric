@@ -51,6 +51,38 @@ def test_build_series():
     obs = metrics.build_series.func(series)
     assert_frame_equal(exp, obs)
 
+def test_decommission_series():
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 10, 'LWR', 1),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 20, 'LWR', 2),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('ExitTime', '<i8'), ('Prototype', 'O'), 
+		        ('Count', '<i8')]))
+        )
+    agent_entry = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 'FRx'),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 'LWR'),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 'LWR'),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 4, 'FRx'),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 'LWR'),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 6, 'FRx'),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 7, 'FRx'),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), ('Prototype', 'O')]))
+        )
+    agent_exit = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 10),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 20),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 20),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), ('ExitTime', '<i8')]))
+        )
+    s1 = agent_entry.set_index(['SimId', 'AgentId'])['Prototype']
+    s2 = agent_exit.set_index(['SimId', 'AgentId'])['ExitTime']
+    series = [s1, s2]
+    obs = metrics.decommission_series.func(series)
+    assert_frame_equal(exp, obs)
+
 def test_agents():
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 22, 'Region', ':agents:NullRegion', 'USA', -1, -1, 0, 120.0),
