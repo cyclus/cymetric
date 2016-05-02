@@ -288,5 +288,24 @@ def test_annual_electricity_generated_by_agent():
     assert_frame_equal(exp, obs)
 
 
+def test_timelist():
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 0), 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1), 
+        (UUID('f2952c34-0a0e-47df-b495-6f9afc351d1b'), 0),
+        (UUID('f2952c34-0a0e-47df-b495-6f9afc351d1b'), 1)
+        ], dtype=ensure_dt_bytes([('SimId', 'O'), ('TimeStep', '<i8')]))
+        )
+    info = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2),
+        (UUID('f2952c34-0a0e-47df-b495-6f9afc351d1b'), 2)
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('Duration', '<i8')]))
+        )
+    series = [info.set_index(['SimId'])['Duration']]
+    obs = metrics.timelist.func(series)
+    assert_frame_equal(exp, obs)
+
+
 if __name__ == "__main__":
     nose.runmodule()
