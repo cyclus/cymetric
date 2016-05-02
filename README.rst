@@ -1,9 +1,6 @@
 This repository holds scripts to analyze Cyclus' output and to convert it into
 nuclear fuel cycle metrics.
 
-A tutorial and the API doucmentation can be found on `fuelcycle.org`_ in the
-`User Guide`_.
-
 Installing Cymetric
 ----------------
 
@@ -61,6 +58,23 @@ following command:
 .. code-block:: bash
 
     $ conda install cymetric --yes
+
+Using Cymetric
+--------------
+
+Tutorial
+~~~~~~~~
+
+The tutorial and the API doucmentation can be found on `fuelcycle.org`_ in the
+`User Guide`_.
+
+Use-case Examples
+~~~~~~~~~~~~~~~~~
+
+See the examples directory within the main cymetric directory to review an
+example of how an analysis may be carried out using cymetric's capabilities.
+
+
 
 .. _`PyNE`: http://github.com/pyne/pyne
 .. _`fuelcycle.org`: http://fuelcycle.org
