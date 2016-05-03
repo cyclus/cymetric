@@ -5,6 +5,8 @@
     <duration>5</duration>
     <startmonth>1</startmonth>
     <startyear>2000</startyear>
+    <explicit_inventory>true</explicit_inventory>
+    <explicit_inventory_compact>true</explicit_inventory_compact>
   </control>
 
   <archetypes>
