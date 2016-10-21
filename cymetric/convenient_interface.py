@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import cymetric as cym
 
-def GetTransactionTimeSerie(db, sender='None', receiver='None', *xargs):
+def GetTransactionTimeSeries(db, sender='None', receiver='None', *xargs):
 
   if sender == 'None' and receiver == 'None':
     print( " Please choose a Receiver or a Sender or both!!")
@@ -94,7 +94,7 @@ def GetTransactionTimeSerie(db, sender='None', receiver='None', *xargs):
   return trans_table
 
 
-def GetInventoryTimeSerie(db, facility, *xargs):
+def GetInventoryTimeSeries(db, facility, *xargs):
   
   nuc_list = []
   for inx, nuc in enumerate(xargs):
