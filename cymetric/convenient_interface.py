@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 import cymetric as cym
 
-def GetTransactionTimeSeries(db, sender='None', receiver='None', *xargs):
+def GetTransactionTimeSeries(db, sender='All', receiver='All', *xargs):
 
-  if sender == 'None' and receiver == 'None':
+  if sender == 'All' and receiver == 'All':
     print( " Please choose a Receiver or a Sender or both!!")
     return 0
   
@@ -21,9 +21,9 @@ def GetTransactionTimeSeries(db, sender='None', receiver='None', *xargs):
   agents = evaler.eval('AgentEntry')
   
 # build 2 table for SenderId and ReceiverId
-  # get receiveri
+  # get receiver
   agents_receiver = agents.rename(index=str, columns={'AgentId': 'ReceiverId'})
-  if receiver != 'None':
+  if receiver != 'All':
     agents_receiver_ = agents_receiver.loc[lambda df: df.Prototype == receiver,:]
     # check if receiver exists
     if agents_receiver_.empty:
@@ -32,11 +32,9 @@ def GetTransactionTimeSeries(db, sender='None', receiver='None', *xargs):
         print(receiver_name)
     else:
       agents_receiver = agents_receiver_
-
-
   # get sender
   agents_sender = agents.rename(index=str, columns={'AgentId': 'SenderId'})
-  if sender != 'None':
+  if sender != 'All':
     agents_sender_ = agents_sender.loc[lambda df: df.Prototype == sender,:]
     # check if sender exists
     if agents_sender_.empty:
@@ -46,7 +44,7 @@ def GetTransactionTimeSeries(db, sender='None', receiver='None', *xargs):
     else:
       agents_sender = agents_sender_
 
-  #check if seider and receiver exist
+  # check if sender and receiver exist
   if( agents_sender.empty or agents_receiver.empty):
     return 0
   else: 
@@ -82,10 +80,10 @@ def GetTransactionTimeSeries(db, sender='None', receiver='None', *xargs):
     
     grouped_trans = df[['ReceiverProto', 'SenderProto','Time', 'Quantity']].groupby(['ReceiverProto', 'SenderProto','Time']).sum()
 
-    if sender == 'None':
+    if sender == 'All':
       grouped_trans = df[['ReceiverProto','Time', 'Quantity']].groupby(['ReceiverProto','Time']).sum()
       trans_table = grouped_trans.loc[receiver]
-    elif receiver == 'None':
+    elif receiver == 'All':
       grouped_trans = df[['SenderProto','Time', 'Quantity']].groupby(['SenderProto','Time']).sum()
       trans_table = grouped_trans.loc[sender]
     else:
