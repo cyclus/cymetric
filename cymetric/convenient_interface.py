@@ -5,9 +5,6 @@ import cymetric as cym
 
 def GetTransactionTimeSeries(db, sender='All', receiver='All', *xargs):
 
-  if sender == 'All' and receiver == 'All':
-    print( " Please choose a Receiver or a Sender or both!!")
-    return 0
   
   nuc_list = []
   for inx, nuc in enumerate(xargs):
