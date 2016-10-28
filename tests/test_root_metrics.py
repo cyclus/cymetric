@@ -118,6 +118,22 @@ def test_snapshots(db, fname, backend):
 
 
 @dbtest
+def test_inventories(db, fname, backend):
+    r = root_metrics.explicit_inventory(db=db)
+    obs = r()
+    assert_less(0, len(obs))
+    assert_equal('ExplicitInventory', r.name)
+
+
+@dbtest
+def test_inventories_compact(db, fname, backend):
+    r = root_metrics.explicit_inventory_compact(db=db)
+    obs = r()
+    assert_less(0, len(obs))
+    assert_equal('ExplicitInventoryCompact', r.name)
+
+
+@dbtest
 def test_resources_non_existent_filter(db, fname, backend):
     r = root_metrics.resources(db=db)
     obs = r(conds=[('NotAColumn', '!=', 'not-a-value')])

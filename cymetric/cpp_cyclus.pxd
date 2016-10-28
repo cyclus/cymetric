@@ -42,6 +42,7 @@ cdef extern from "rec_backend.h" namespace "cyclus":
         void Notify(DatumList) except +
         std_string Name() except +
         void Flush()  except +
+        void Close() except +
 
 
 cdef extern from "cyclus.h" namespace "cyclus":
@@ -87,7 +88,7 @@ cdef extern from "cyclus.h" namespace "cyclus":
         set[std_string] Tables() except +
 
     cdef cppclass FullBackend(QueryableBackend, RecBackend):
-        FullBackend() except + 
+        FullBackend() except +
 
     cdef cppclass Recorder:
         Recorder() except +

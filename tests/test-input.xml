@@ -5,6 +5,8 @@
     <duration>5</duration>
     <startmonth>1</startmonth>
     <startyear>2000</startyear>
+    <explicit_inventory>true</explicit_inventory>
+    <explicit_inventory_compact>true</explicit_inventory_compact>
   </control>
 
   <archetypes>
@@ -69,7 +71,7 @@
           <val>mox_used_fuel_recipe</val>
         </fuel_outrecipes>
         <fuel_prefs>
-          <val>0.0</val>
+          <val>0.1</val>
           <val>1.0</val>
         </fuel_prefs>
         <cycle_time>1</cycle_time>
@@ -110,7 +112,7 @@
           <val>mox_used_fuel_recipe</val>
         </fuel_outrecipes>
         <fuel_prefs>
-          <val>0.0</val>
+          <val>0.1</val>
           <val>1.0</val>
         </fuel_prefs>
         <cycle_time>1</cycle_time>
@@ -148,7 +150,7 @@
           <val>mox_used_fuel_recipe</val>
         </fuel_outrecipes>
         <fuel_prefs>
-          <val>0.0</val>
+          <val>0.1</val>
           <val>0.5</val>
         </fuel_prefs>
         <cycle_time>1</cycle_time>

@@ -249,7 +249,7 @@ def main():
     try:
         _, cympath, _ = imp.find_module('cymetric', cympath)
     except ImportError:
-        pynepath = "${HOME}/.local/python2.7/site-packages"
+        cympath = "${HOME}/.local/python2.7/site-packages"
     libpath = abspath(joinpath(cympath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
     msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
