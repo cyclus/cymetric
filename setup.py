@@ -42,7 +42,7 @@ from distutils import core, dir_util
 
 import genapi
 
-VERSION = '0.0-dev'
+VERSION = '1.4.0'
 IS_NT = os.name == 'nt'
 
 CMAKE_BUILD_TYPES = {
