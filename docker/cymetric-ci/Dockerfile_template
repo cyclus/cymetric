@@ -1,5 +1,5 @@
 
-FROM cyclus/cymetric-deps
+FROM cyclus/cymetric-deps:CYMETRIC_VERSION
 
 COPY . /cymetric
 WORKDIR /cymetric
