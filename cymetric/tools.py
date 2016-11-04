@@ -7,10 +7,10 @@ import sys
 import numpy as np
 import pandas as pd
 
-from cymetric import cyclus
+from cyclus import lib
 
 
-EXT_BACKENDS = {'.h5': cyclus.Hdf5Back, '.sqlite': cyclus.SqliteBack}
+EXT_BACKENDS = {'.h5': lib.Hdf5Back, '.sqlite': lib.SqliteBack}
 
 def dbopen(fname):
     """Opens a Cyclus database."""
@@ -34,7 +34,7 @@ def raw_to_series(df, idx, val):
 def merge_and_fillna_col(left, right, lcol, rcol, how='inner', on=None):
     """Merges two dataframes and fills the values of the left column
     with the values from the right column. A copy of left is returned.
-    
+
     Parameters
     ----------
     left : pd.DataFrame
