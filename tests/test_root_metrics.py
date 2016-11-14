@@ -7,10 +7,10 @@ from functools import wraps
 import nose
 from nose.tools import assert_equal, assert_less
 
-from cymetric import cyclus
 from cymetric import root_metrics
 
 from tools import setup, dbtest
+
 
 @dbtest
 def test_resources(db, fname, backend):

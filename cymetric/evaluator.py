@@ -4,7 +4,7 @@ from __future__ import unicode_literals, print_function
 
 import pandas as pd
 
-from cymetric import cyclus
+from cyclus import lib
 from cymetric.tools import raw_to_series
 
 METRIC_REGISTRY = {}
@@ -35,7 +35,7 @@ class Evaluator(object):
         self.metrics = {}
         self.rawcache = {}
         self.db = db
-        self.recorder = rec = cyclus.Recorder(inject_sim_id=False)
+        self.recorder = rec = lib.Recorder(inject_sim_id=False)
         rec.register_backend(db)
         self.known_tables = db.tables
 
