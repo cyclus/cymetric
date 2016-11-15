@@ -4,6 +4,8 @@ machine:
 
 dependencies:
   override:
+    # build cymetric:latest docker container
+    - docker/cymetric-ci/build_dockerfile_cymetric.sh latest
     - docker build -t cyclus/cymetric:latest .
 
 test:
@@ -14,17 +16,25 @@ deployment:
   develop:
     branch: develop
     commands:
-        - docker build -t cyclus/cymetric-deps:latest docker/cymetric-deps
-        - docker build -t cyclus/cymetric:latest .
         - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+        #build cymetric-deps:latest docker container and push it
+        - docker/cymetric-deps/build_dockerfile_deps.sh latest
+        - docker build -t cyclus/cymetric-deps:latest docker/cymetric-deps
         - docker push cyclus/cymetric-deps:latest
+        #build cymetric:latest docker container and push it
+        - docker/cymetric-ci/build_dockerfile_cymetric.sh latest
+        - docker build -t cyclus/cymetric:latest .
         - docker push cyclus/cymetric:latest
 
   master:
     branch: master
     commands:
-        - docker build -t cyclus/cymetric-deps:stable docker/cymetric-deps
-        - docker build -t cyclus/cymetric:stable .
         - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+        #build cymetric-deps:stable docker container and push it
+        - docker/cymetric-deps/build_dockerfile_deps.sh stable
+        - docker build -t cyclus/cymetric-deps:stable docker/cymetric-deps
         - docker push cyclus/cymetric-deps:stable
+        #build cymetric-ci:stable docker container and push it
+        - docker/cymetric-ci/build_dockerfile_cymetric.sh stable
+        - docker build -t cyclus/cymetric:stable .
         - docker push cyclus/cymetric:stable
