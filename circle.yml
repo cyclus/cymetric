@@ -4,6 +4,8 @@ machine:
 
 dependencies:
   override:
+    # build cymetric:latest docker container
+    - docker/cymetric-ci/build_dockerfile_cymetric.sh latest
     - docker build -t cyclus/cymetric:latest .
 
 test:
