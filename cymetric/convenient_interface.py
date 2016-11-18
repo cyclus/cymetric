@@ -3,14 +3,13 @@ import pandas as pd
 import numpy as np
 import cymetric as cym
 
-def GetTransactionTimeSeries(db, sender='All', receiver='All', *xargs):
-
+def GetTransactionTimeSeries(db, sender='All', receiver='All', *args):
   
   nuc_list = []
-  for inx, nuc in enumerate(xargs):
+  for inx, nuc in enumerate(args):
     nuc_list.append(nucname.id(nuc))
 
-  #initiate evaluation
+  # initiate evaluation
   evaler = cym.Evaluator(db)
   
   # get transation & Agent tables
@@ -25,7 +24,7 @@ def GetTransactionTimeSeries(db, sender='All', receiver='All', *xargs):
     # check if receiver exists
     if agents_receiver_.empty:
       print("unknown Receiver, available Receiver are:")
-      for receiver_name in agents_receiver.Prototype.unique(): #check if the loop is correct should it not be trans.XX.XX
+      for receiver_name in agents_receiver.Prototype.unique(): # check if the loop is correct should it not be trans.XX.XX
         print(receiver_name)
     else:
       agents_receiver = agents_receiver_
@@ -89,10 +88,10 @@ def GetTransactionTimeSeries(db, sender='All', receiver='All', *xargs):
   return trans_table
 
 
-def GetInventoryTimeSeries(db, facility, *xargs):
+def GetInventoryTimeSeries(db, facility, *args):
   
   nuc_list = []
-  for inx, nuc in enumerate(xargs):
+  for inx, nuc in enumerate(args):
     nuc_list.append(nucname.id(nuc))
   
   #initiate evaluation
