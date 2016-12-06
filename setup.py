@@ -37,6 +37,7 @@ import argparse
 import platform
 import warnings
 import subprocess
+import site
 from glob import glob
 from distutils import core, dir_util
 
@@ -44,6 +45,11 @@ from distutils import core, dir_util
 VERSION = '1.5.0'
 IS_NT = os.name == 'nt'
 
+HOME = os.getenv("HOME")
+PY_VERSION = str(sys.version_info[0]) +'.' + str(sys.version_info[1])
+
+site.USER_BASE = HOME + '/.local'
+site.USER_SITE = HOME + '/.local/lib/python'+ PY_VERSION + '/site-packages'
 
 def main():
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
