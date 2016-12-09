@@ -61,7 +61,7 @@ def main():
             print("\nWARING: --user flag have been disabled.")
         else:
             print("\nWARNING: Default installation path have been override"
-                  "to' ~/.local\'.")
+                  " to' ~/.local\'.")
         print("WARNING: To specify the install prefix use"
               " --prefix=your/install/path flag.\n")  
 
