@@ -45,13 +45,20 @@ from distutils import core, dir_util
 VERSION = '1.5.0'
 IS_NT = os.name == 'nt'
 
-HOME = os.getenv("HOME")
-PY_VERSION = str(sys.version_info[0]) +'.' + str(sys.version_info[1])
-
-site.USER_BASE = HOME + '/.local'
-site.USER_SITE = HOME + '/.local/lib/python'+ PY_VERSION + '/site-packages'
 
 def main():
+    
+    arguments = []
+    for arg in sys.argv[1:]:
+        if not arg == "--user":
+            arguments.append(arg)
+   
+    if not( any("--prefix" in arg for arg in arguments)):
+        home = os.getenv("HOME")
+        prefix = '--prefix=' + home + '/.local'
+        arguments.append(prefix)
+    
+    
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if ((IS_NT and s.endswith('.bat'))
                                       or (not IS_NT and
@@ -68,6 +75,7 @@ def main():
         "packages": packages,
         "package_dir": pack_dir,
         "scripts": scripts,
+        "script_args": arguments,
         }
     rtn = core.setup(**setup_kwargs)
     return rtn
