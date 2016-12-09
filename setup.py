@@ -37,7 +37,6 @@ import argparse
 import platform
 import warnings
 import subprocess
-import site
 from glob import glob
 from distutils import core, dir_util
 
@@ -47,18 +46,25 @@ IS_NT = os.name == 'nt'
 
 
 def main():
-    
+
     arguments = []
     for arg in sys.argv[1:]:
         if not arg == "--user":
             arguments.append(arg)
-   
+
     if not( any("--prefix" in arg for arg in arguments)):
         home = os.getenv("HOME")
         prefix = '--prefix=' + home + '/.local'
         arguments.append(prefix)
-    
-    
+
+        if any("--user" in arg for arg in arguments):
+            print("\nWARING: --user flag have been desabled.")
+        else:
+            print("\nWARNING: Default installation path have been override"
+                  "to'~/.local\'.")
+        print("WARNING: To specify the install prefix use"
+              "--prefix=your/install/path flag.\n")  
+
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if ((IS_NT and s.endswith('.bat'))
                                       or (not IS_NT and
