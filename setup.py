@@ -57,7 +57,7 @@ def main():
         prefix = '--prefix=' + home + '/.local'
         arguments.append(prefix)
 
-        if any("--user" in arg for arg in arguments):
+        if any("--user" in arg for arg in sys.argv):
             print("\nWARING: --user flag have been desabled.")
         else:
             print("\nWARNING: Default installation path have been override"
