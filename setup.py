@@ -58,12 +58,12 @@ def main():
         arguments.append(prefix)
 
         if any("--user" in arg for arg in sys.argv):
-            print("\nWARING: --user flag have been desabled.")
+            print("\nWARING: --user flag have been disabled.")
         else:
             print("\nWARNING: Default installation path have been override"
-                  "to'~/.local\'.")
+                  "to' ~/.local\'.")
         print("WARNING: To specify the install prefix use"
-              "--prefix=your/install/path flag.\n")  
+              " --prefix=your/install/path flag.\n")  
 
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if ((IS_NT and s.endswith('.bat'))
