@@ -40,7 +40,7 @@ Then build and install:
 .. code-block:: bash
 
     $ cd cymetric
-    $ python setup.py install --user
+    $ python setup.py install
 
 Next, run the tests to ensure everything is working properly:
 
