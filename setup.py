@@ -58,8 +58,8 @@ def main():
         arguments.append(prefix)
 
         if any("--user" in arg for arg in sys.argv):
-            print("\nWARING: --user flag have been disabled and installation"
-                  "path set to '~/.local'.")
+            print("\nWARNING: --user flag have been disabled and installation"
+                  " path set to '~/.local'.")
         else:
             print("\nWARNING: Default installation path have been overrided"
                   " to '~/.local'.")
