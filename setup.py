@@ -46,6 +46,28 @@ IS_NT = os.name == 'nt'
 
 
 def main():
+
+    arguments = []
+    for arg in sys.argv[1:]:
+        if not arg == "--user":
+            arguments.append(arg)
+
+    if not( any("--prefix" in arg for arg in arguments)):
+        home = os.getenv("HOME")
+        prefix = '--prefix=' + home + '/.local'
+        arguments.append(prefix)
+
+        if any("--user" in arg for arg in sys.argv):
+            print("\nWARNING: To be consistent with the Cyclus installation"
+                    " options, '--user' flag have been disabled and"
+                    " installation path set to '~/.local'.")
+        else:
+            print("\nWARNING: To be consistent with the Cyclus installation"
+                    " options, the default installation path have been"
+                    " overrided to '~/.local'.")
+        print("WARNING: To manually specify the install prefix use"
+              " --prefix=your/install/path flag.\n")  
+
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if ((IS_NT and s.endswith('.bat'))
                                       or (not IS_NT and
@@ -62,6 +84,7 @@ def main():
         "packages": packages,
         "package_dir": pack_dir,
         "scripts": scripts,
+        "script_args": arguments,
         }
     rtn = core.setup(**setup_kwargs)
     return rtn
