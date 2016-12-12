@@ -58,10 +58,11 @@ def main():
         arguments.append(prefix)
 
         if any("--user" in arg for arg in sys.argv):
-            print("\nWARING: --user flag have been disabled.")
+            print("\nWARING: --user flag have been disabled and installation"
+                  "path set to '~/.local'.")
         else:
-            print("\nWARNING: Default installation path have been override"
-                  " to' ~/.local\'.")
+            print("\nWARNING: Default installation path have been overrided"
+                  " to '~/.local'.")
         print("WARNING: To specify the install prefix use"
               " --prefix=your/install/path flag.\n")  
 
