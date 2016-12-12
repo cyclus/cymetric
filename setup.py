@@ -58,12 +58,14 @@ def main():
         arguments.append(prefix)
 
         if any("--user" in arg for arg in sys.argv):
-            print("\nWARNING: --user flag have been disabled and installation"
-                  " path set to '~/.local'.")
+            print("\nWARNING: To be consistent with the Cyclus installation"
+                    " options, '--user' flag have been disabled and"
+                    " installation path set to '~/.local'.")
         else:
-            print("\nWARNING: Default installation path have been overrided"
-                  " to '~/.local'.")
-        print("WARNING: To specify the install prefix use"
+            print("\nWARNING: To be consistent with the Cyclus installation"
+                    " options, the default installation path have been"
+                    " overrided to '~/.local'.")
+        print("WARNING: To manually specify the install prefix use"
               " --prefix=your/install/path flag.\n")  
 
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
