@@ -4,17 +4,17 @@ import shutil
 import subprocess
 from functools import wraps
 
-from cymetric import cyclus
+from cyclus import lib
 
 HAS_BEEN_RUN = False
 
-DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back), 
-       ('test.sqlite', 'orig.sqlite', cyclus.SqliteBack)]
-#DBS = [('test.h5', 'orig.h5', cyclus.Hdf5Back)]
-#DBS = [('test.sqlite', 'orig.sqlite', cyclus.SqliteBack)]
+DBS = [('test.h5', 'orig.h5', lib.Hdf5Back),
+       ('test.sqlite', 'orig.sqlite', lib.SqliteBack)]
+#DBS = [('test.h5', 'orig.h5', lib.Hdf5Back)]
+#DBS = [('test.sqlite', 'orig.sqlite', lib.SqliteBack)]
 
 def safe_call(cmd, shell=False, *args, **kwargs):
-    """Checks that a command successfully runs with/without shell=True. 
+    """Checks that a command successfully runs with/without shell=True.
     Returns the process return code.
     """
     try:
@@ -22,7 +22,8 @@ def safe_call(cmd, shell=False, *args, **kwargs):
     except (subprocess.CalledProcessError, OSError):
         cmd = ' '.join(cmd)
         rtn = subprocess.call(cmd, shell=True, *args, **kwargs)
-    return rtn     
+    return rtn
+
 
 def setup():
     global HAS_BEEN_RUN
@@ -37,6 +38,7 @@ def setup():
         if os.path.isfile(oname):
             continue
         safe_call(['cyclus', '-o' + oname, 'test-input.xml'])
+
 
 def dbtest(f):
     @wraps(f)

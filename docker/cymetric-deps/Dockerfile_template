@@ -1,5 +1,5 @@
 
-FROM cyclus/cycamore
+FROM cyclus/cycamore:CYCAMORE_VERSION
 
 RUN apt-get update
 RUN apt-get install -y --force-yes --fix-missing python3-pip

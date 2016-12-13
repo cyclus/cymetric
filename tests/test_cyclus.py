@@ -6,8 +6,6 @@ from functools import wraps
 import nose
 from nose.tools import assert_equal, assert_less
 
-from cymetric import cyclus
-
 from tools import setup, dbtest
 
 @dbtest

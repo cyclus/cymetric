@@ -8,8 +8,8 @@ if sys.version_info[0] > 2:
 else:
     str_types = (str, unicode)
 
-from cymetric import typesystem as ts
-from cymetric.typesystem import NAMES, RANKS, IDS
+from cyclus import typesystem as ts
+from cyclus.typesystem import NAMES, RANKS, IDS
 
 def canon_dbtype(dbtype):
     """Returns the canonical form for a Cyclus database type."""
@@ -140,7 +140,7 @@ class SchemaProperty(MutableSequence):
 
 
 class schema(MutableSequence):
-    """A type represented compound schema composed of column names, 
+    """A type represented compound schema composed of column names,
     associated types from the Cyclus type system, and optional shapes.
     """
 
