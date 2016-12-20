@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from pyne import nucname
 import pandas as pd
 import numpy as np
@@ -6,114 +8,131 @@ import warnings
 
 
 
-def select_agent(agent_name, agent, agent_type = "Agent"):
-    if agent_name != 'All':
-        agents_selected = agents.loc[
-            lambda df: df.Prototype == agent_name, :]
-        # check if exists
-        if agent_selected.empty:
-            wng_msg = "unknown " + agent_type + ", available Agents are:"
-            for receiver_name in agents.Prototype.unique():
-                wng_msg += " " + receiver_name
-            warnings.wrn(wng_msg, UserWarning)
-        else:
-            agents_pdf = agents_selected
-    return agents
-
 def merge_n_drop(pdf, base_col, add_pdf, add_col):
-    pdf = pd.merge(add_pdf[add_col], pdf, on = base_col);
-    pdf.drop(base_col[1],1)
+    pdf = pd.merge(add_pdf[add_col], pdf, on=base_col)
+    pdf.drop(base_col[1], 1)
     return pdf
 
+def get_reduced_pdf(db, rdc_list):
+    for rdc in rdc_list:
+        if len(rdc[1]) != 0:
+            db = db.loc[compo[rdc[0].isin(rdc[1])]
+        else:
+            wng_msg = "Empty list provided for " + rdc[0] + " key."
+            warnings.wrn(wng_msg, UserWarning)
+    return db
 
-def get_transaction_timeseries(db, send_name='All', rec_name='All'):
-
+def get_reduced__trans_pdf(db, send_name, rec_name):
 
     # initiate evaluation
     evaler = cym.Evaluator(db)
-
-    # get transation & Agent tables
     trans = evaler.eval('Transactions')
     agents = evaler.eval('AgentEntry')
-    resources=evaler.eval('Resources')
+    rsc = evaler.eval('Resources')
 
-    # build 2 table for SenderId and ReceiverId
-    # get receiver
     rec_list = agents.rename(index=str, columns={'AgentId': 'ReceiverId'})
-    rec_list = select_agent(receiver, rec_list, "Receiver")
-
-    # get sender
-    send_list = agents.rename(index=str, columns={'AgentId': 'SenderId'})
-    send_list = select_agent(send_name, send_list, "Sender")
+    if rec_name != 'All':
+        rec_list = rec_list.loc[lambda df: df.Prototype == rec_name,:]
     
+    send_list = agents.rename(index=str, columns={'AgentId': 'SenderId'})
+    if send_name != 'All':
+        send_list = send_list.loc[lambda df: df.Prototype == send_name,:]
+
     # check if sender and receiver exist
     if rec_list.empty or send_list.empty:
         return None
     else:
-    # Both receiver and sender exist:
-        trans = trans.loc[trans['ReceiverId'].isin(rec_list.ReceiveriId)]
-        trans = trans.loc[trans['SenderId'].isin(send_list.SenderId)]
-        resources=resources.loc[resource['ResourceId'].isin(trans.ResourceId)]
+        # Both receiver and sender exist:
 
-        df = merge_n_drop(trans, ['SimId', 'SenderId'], send_list, ['SimId', 'SenderId', 'Prototype'])
-        df= df.rename(index = str, columns = {'Prototype': 'SenderProto'}) 
+        trans = get_reduced_pdf(trans, [[['ReceiverId',[rec_list.ReceiveriId]],
+                                        [['SenderId',[SenderId]]])
+        rsc = rsc.loc[rsc['ResourceId'].isin(trans.ResourceId)]
 
-        df = merge_n_drop(trans, ['SimId', 'ReceiverId'], rec_list, ['SimId', 'ReceiverId', 'Prototype'])
-        df= df.rename(index = str, columns = {'Prototype': 'ReceiverProto'}) 
+        base_col = ['SimId', 'SenderId']
+        added_col = base_col + ['Prototype']
+        trans = merge_n_drop(trans, base_col, send_list, added_col)
+        trans = df.rename(index=str, columns={'Prototype': 'SenderProto'})
 
-        df = merge_n_drop(trans, ['SimId', 'RessourceId'], resources, ['SimId', 'ResourceId', 'QualId', 'Quantity', 'Unit'])
-    
-    return df
+        base_col = ['SimId', 'ReceiverId']
+        added_col = base_col + ['Prototype']
+        trans = merge_n_drop(trans, base_col, send_list, added_col)
+        trans = df.rename(index=str, columns={'Prototype': 'ReceiverProto'})
 
-def get_transaction_timeseries(db, send_name='All', rec_name='All', *args):
+        base_col = ['SimId', 'RessourceId']
+        added_col = base_col + ['QualId', 'Quantity', 'Unit']
+        trans = merge_n_drop(trans, base_col, rsc, added_col)
+
+    return trans
+
+
+def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list):
 
     df = get_transaction_timeseries(db, send_name, rec_name)
-        group_trans=df[['ReceiverProto', 'SenderProto', 'Time', 'Quantity']].groupby(
-            ['ReceiverProto', 'SenderProto', 'Time']).sum()
 
-        if sender == 'All':
-            grouped_trans=df[['ReceiverProto', 'Time', 'Quantity']].groupby(
-                ['ReceiverProto', 'Time']).sum()
-            trans_table=grouped_trans.loc[receiver]
-        elif receiver == 'All':
-            grouped_trans=df[['SenderProto', 'Time', 'Quantity']].groupby(
-                ['SenderProto', 'Time']).sum()
-            trans_table=grouped_trans.loc[sender]
-        else:
-            trans_table=grouped_trans.loc[receiver].loc[sender]
+    if len(nuc_list) != 0:
+        compo = evaler.eval('Compositions')
+        compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
+
+        base_col = ['SimId', 'QualId']
+        added_col = base_col + ['NucId', 'MassFrac']
+        df = merge_n_drop(df, base_col, compo, added_co)
+
+        df['Quantity'] = df['Quantity'] * df['MassFrac']
+
+        group_end = ['ReceiverProto', 'SenderProto', 'Time']
+        group_start = group_end + ['Quantity']
+        df = df[group_start].groupby(gourp_end).sum()
+    else:
+        wng_msg = "no nuclide provided"
+        warnings.wrn(wng_msg, UserWarning)
+
+
+    if sender == 'All':
+        grouped_trans = df[['ReceiverProto', 'Time', 'Quantity']].groupby(
+            ['ReceiverProto', 'Time']).sum()
+        trans_table = grouped_trans.loc[receiver]
+    elif receiver == 'All':
+        grouped_trans = df[['SenderProto', 'Time', 'Quantity']].groupby(
+            ['SenderProto', 'Time']).sum()
+        trans_table = grouped_trans.loc[sender]
+    else:
+        grouped_trans = df[['ReceiverProto', 'SenderProto', 'Time',
+                            'Quantity']].groupby(['ReceiverProto', 'SenderProto',
+                                                  'Tme']).sum()
+        trans_table = grouped_trans.loc[receiver].loc[sender]
 
     return trans_table
 
 
-def GetInventoryTimeSeries(db, facility, *args):
-
-    nuc_list = []
-    for inx, nuc in enumerate(args):
-        nuc_list.append(nucname.id(nuc))
-
-    # initiate evaluation
+def GetInventoryTimeSeries(db, facility, nuc_list):
     evaler = cym.Evaluator(db)
 
     # Get inventory table
     inv = evaler.eval('ExplicitInventory')
+
+    rdc_list =[] # because we want to get reed of the nuclide asap
     if len(nuc_list) != 0:
-        inv = inv.loc[inv['NucId'].isin(nuc_list)]
-    agents = evaler.eval('AgentEntry')
-
-    selected_agents = agents.loc[lambda df: df.Prototype == facility, :]
-    if selected_agents.empty:
-        print("unknown Facitlity, available Facilities are:")
-        for fac_name in agents.Prototype.unique():
-            print(fac_name)
-        inv_table = None
+        rdc_list.append(['NucId', nuc_list])
     else:
-        selected_inv = inv.loc[inv['AgentId'].isin(selected_agents.AgentId)]
+        wng_msg = "no nuclide provided"
+        warnings.wrn(wng_msg, UserWarning)
 
-        df = pd.merge(selected_agents[
-                      ['SimId', 'AgentId', 'Prototype']], selected_inv, on=['SimId', 'AgentId'])
-        df = df.drop('AgentId', 1)
+    
+    selected_agents = agents.loc[lambda df: df.Prototype == facility, :]
+    if facility != 'All':
+        rdc_list.append(['AgentId', agents.ReceiverId])
+    else:
+        wng_msg = "no faciity provided"
+        warnings.wrn(wng_msg, UserWarning)
 
-        inv_table = df[['Prototype', 'Time', 'Quantity']
-                       ].groupby(['Prototype', 'Time']).sum()
+    inv = get_reduced_pdf(inv, rdc_list) 
+    
+    base_col = ['SimId', 'AgentId']
+    added_col = base_col + ['Prototype']
+    inv = merge_n_drop(inv, base_col, send_list, added_col)
+
+    group_end = ['prototype', 'time']
+    group_start = group_end + ['Quantity']
+    inv = inv[group_start].groupby(gourp_end).sum()
 
     return inv_table
