@@ -7,22 +7,59 @@ import cymetric as cym
 import warnings
 
 
-
 def merge_n_drop(pdf, base_col, add_pdf, add_col):
+        """
+        Merge some additionnal columns fram an additionnal Pandas Data Frame
+        onother one and then remove the second base column (keeping SimID
+        information).
+        Parameters
+        ----------
+        pdf : Pandas Data Frame
+        base_col : list of the base columns names
+        add_pdf : Pandas Data Frame to add in the pdf one
+        add_col : columns tobe added
+
+        Attributes
+        ----------
+        """
     pdf = pd.merge(add_pdf[add_col], pdf, on=base_col)
     pdf.drop(base_col[1], 1)
     return pdf
 
-def get_reduced_pdf(db, rdc_list):
+def get_reduced_pdf(pdf, rdc_list):
+        """
+        Filter the pdf Pandas Data Frame according to the rdc_list (list of item
+        in the corresponding columns).
+        Parameters
+        ----------
+        pdf : Pandas Data Frame
+        rdc_list : list of pair of string and string list.
+
+        Attributes
+        ----------
+        """
     for rdc in rdc_list:
         if len(rdc[1]) != 0:
-            db = db.loc[compo[rdc[0].isin(rdc[1])]
+            pdf = pdf.loc[compo[rdc[0].isin(rdc[1])]
         else:
             wng_msg = "Empty list provided for " + rdc[0] + " key."
             warnings.wrn(wng_msg, UserWarning)
-    return db
+    return pdf
 
 def get_reduced__trans_pdf(db, send_name, rec_name):
+        """
+        Filter the Transaction Data Frame on specific sending facility and
+        receving facility.
+
+        Parameters
+        ----------
+        db : database
+        send_name : name of the sending facility ('All' for any)
+        rec_name : name of the receiving facility ('All for any)
+
+        Attributes
+        ----------
+        """
 
     # initiate evaluation
     evaler = cym.Evaluator(db)
@@ -42,8 +79,6 @@ def get_reduced__trans_pdf(db, send_name, rec_name):
     if rec_list.empty or send_list.empty:
         return None
     else:
-        # Both receiver and sender exist:
-
         trans = get_reduced_pdf(trans, [[['ReceiverId',[rec_list.ReceiveriId]],
                                         [['SenderId',[SenderId]]])
         rsc = rsc.loc[rsc['ResourceId'].isin(trans.ResourceId)]
@@ -66,6 +101,20 @@ def get_reduced__trans_pdf(db, send_name, rec_name):
 
 
 def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list):
+        """
+        Shape the reduced transation Dta Frame into a simple time serie. Apply
+        some nuclei selection if required.
+
+        Parameters
+        ----------
+        db : database
+        send_name : name of the sending facility
+        rec_name : name of the receiving facility
+        nuc_list : list of nuclide to select.
+
+        Attributes
+        ----------
+        """
 
     df = get_transaction_timeseries(db, send_name, rec_name)
 
@@ -86,7 +135,6 @@ def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list):
         wng_msg = "no nuclide provided"
         warnings.wrn(wng_msg, UserWarning)
 
-
     if sender == 'All':
         grouped_trans = df[['ReceiverProto', 'Time', 'Quantity']].groupby(
             ['ReceiverProto', 'Time']).sum()
@@ -104,7 +152,20 @@ def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list):
     return trans_table
 
 
-def GetInventoryTimeSeries(db, facility, nuc_list):
+def GetInventoryTimeSeries(db, fac_name, nuc_list):
+        """
+        Shape the reduced inventory Dta Frame into a simple time serie. Apply
+        some nuclei selection if required.
+
+        Parameters
+        ----------
+        db : database
+        fac_name : name of the facility
+        nuc_list : list of nuclide to select.
+
+        Attributes
+        ----------
+        """
     evaler = cym.Evaluator(db)
 
     # Get inventory table
@@ -116,10 +177,9 @@ def GetInventoryTimeSeries(db, facility, nuc_list):
     else:
         wng_msg = "no nuclide provided"
         warnings.wrn(wng_msg, UserWarning)
-
     
-    selected_agents = agents.loc[lambda df: df.Prototype == facility, :]
-    if facility != 'All':
+    selected_agents = agents.loc[lambda df: df.Prototype == fac_name, :]
+    if fac_name != 'All':
         rdc_list.append(['AgentId', agents.ReceiverId])
     else:
         wng_msg = "no faciity provided"
