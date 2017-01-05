@@ -8,7 +8,7 @@ Cymetric is available on the same platforms as Cyclus: Ubuntu and Max OS.
 
 Dependencies
 ~~~~~~~~~~~~
-First, please check to make sure you have all of the dependencies. 
+First, please check to make sure you have all of the dependencies.
 
 Required dependencies:
 
@@ -23,7 +23,7 @@ Optional dependencies:
 * `PyNE`_ and its dependencies
 
 PyNE is what the Cyclus project uses for its nuclear data, and many metrics
-in cymetric depend on it. 
+in cymetric depend on it.
 
 Building from Source
 ~~~~~~~~~~~~~~~~~~~~
@@ -35,12 +35,12 @@ GitHub repository:
 
     $ git clone https://github.com/cyclus/cymetric
 
-Then build and install:
+Then build and install to the same location Cyclus is installed:
 
 .. code-block:: bash
 
     $ cd cymetric
-    $ python setup.py install
+    $ python setup.py install --prefix $(cyclus --install-path)
 
 Next, run the tests to ensure everything is working properly:
 
@@ -79,4 +79,4 @@ example of how an analysis may be carried out using cymetric's capabilities.
 .. _`PyNE`: http://github.com/pyne/pyne
 .. _`fuelcycle.org`: http://fuelcycle.org
 .. _`User Guide`: http://fuelcycle.org/user/index.html
-.. _`here`: http://fuelcycle.org/user/install.html 
+.. _`here`: http://fuelcycle.org/user/install.html
