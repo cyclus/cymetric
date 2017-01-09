@@ -164,9 +164,12 @@ def get_inventory_timeseries(db, fac_name, nuc_list):
 
     # Get inventory table
     inv = evaler.eval('ExplicitInventory')
+    agents = evaler.eval('AgentEntry')
 
     rdc_list =[] # because we want to get reed of the nuclide asap
     if len(nuc_list) != 0:
+        for i in range(len(nuc_list)):
+            nuc_list[i] = nucname.id(nuc_list[i])
         rdc_list.append(['NucId', nuc_list])
     else:
         wng_msg = "no nuclide provided"
@@ -174,19 +177,20 @@ def get_inventory_timeseries(db, fac_name, nuc_list):
     
     selected_agents = agents.loc[lambda df: df.Prototype == fac_name, :]
     if fac_name != 'All':
-        rdc_list.append(['AgentId', agents.ReceiverId])
+        agents = agents.loc[lambda df: df.Prototype == fac_name,:]
+        rdc_list.append(['AgentId', agents['AgentId'].tolist() ])
     else:
         wng_msg = "no faciity provided"
         warnings.wrn(wng_msg, UserWarning)
 
-    inv = get_reduced_pdf(inv, rdc_list) 
+    inv = get_reduced_pdf(inv, rdc_list)
     
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
-    inv = merge_n_drop(inv, base_col, send_list, added_col)
-
-    group_end = ['prototype', 'time']
+    inv = merge_n_drop(inv, base_col, agents, added_col)
+    group_end = ['Prototype', 'Time']
     group_start = group_end + ['Quantity']
-    inv = inv[group_start].groupby(gourp_end).sum()
+    inv = inv[group_start].groupby(group_end).sum()
+    inv.reset_index(inplace=True)
 
-    return inv_table
+    return inv
