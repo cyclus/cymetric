@@ -34,8 +34,6 @@ def get_reduced_pdf(pdf, rdc_list):
     """
     for rdc in rdc_list:
         if len(rdc[1]) != 0:
-            print(rdc[0])
-            print(rdc[1])
             pdf = pdf[ pdf[rdc[0]].isin(rdc[1]) ]
         else:
             wng_msg = "Empty list provided for " + rdc[0] + " key."
@@ -87,11 +85,11 @@ def get_reduced__trans_pdf(db, send_name, rec_name):
 
         base_col = ['SimId', 'ReceiverId']
         added_col = base_col + ['Prototype']
-        trans = merge_n_drop(trans, base_col, send_list, added_col)
+        trans = merge_n_drop(trans, base_col, rec_list, added_col)
         trans = trans.rename(index=str, columns={'Prototype': 'ReceiverProto'})
 
-        base_col = ['SimId', 'RessourceId']
-        added_col = base_col + ['QualId', 'Quantity', 'Unit']
+        base_col = ['SimId', 'ResourceId']
+        added_col = base_col + ['QualId']+  ['Quantity'] + ['Units']
         trans = merge_n_drop(trans, base_col, rsc, added_col)
 
     return trans
@@ -113,35 +111,40 @@ def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list=[])
     df = get_reduced__trans_pdf(db, send_name, rec_name)
 
     if len(nuc_list) != 0:
+        for i in range(len(nuc_list)):
+            nuc_list[i] = nucname.id(nuc_list[i])
+
+        evaler = cym.Evaluator(db)
         compo = evaler.eval('Compositions')
         compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
 
         base_col = ['SimId', 'QualId']
         added_col = base_col + ['NucId', 'MassFrac']
-        df = merge_n_drop(df, base_col, compo, added_co)
+        df = merge_n_drop(df, base_col, compo, added_col)
 
         df['Quantity'] = df['Quantity'] * df['MassFrac']
 
         group_end = ['ReceiverProto', 'SenderProto', 'Time']
         group_start = group_end + ['Quantity']
-        df = df[group_start].groupby(gourp_end).sum()
+        df = df[group_start].groupby(group_end).sum()
     else:
         wng_msg = "no nuclide provided"
         warnings.wrn(wng_msg, UserWarning)
 
-    if sender == 'All':
+    if send_name == 'All':
         grouped_trans = df[['ReceiverProto', 'Time', 'Quantity']].groupby(
             ['ReceiverProto', 'Time']).sum()
         trans_table = grouped_trans.loc[receiver]
-    elif receiver == 'All':
+    elif rec_name == 'All':
         grouped_trans = df[['SenderProto', 'Time', 'Quantity']].groupby(
             ['SenderProto', 'Time']).sum()
         trans_table = grouped_trans.loc[sender]
     else:
+        df.reset_index(inplace=True)
         grouped_trans = df[['ReceiverProto', 'SenderProto', 'Time',
                             'Quantity']].groupby(['ReceiverProto', 'SenderProto',
-                                                  'Tme']).sum()
-        trans_table = grouped_trans.loc[receiver].loc[sender]
+                                                  'Time']).sum()
+        trans_table = grouped_trans.loc[rec_name].loc[send_name]
 
     return trans_table
 
