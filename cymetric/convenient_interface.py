@@ -23,6 +23,7 @@ def merge_n_drop(pdf, base_col, add_pdf, add_col):
     pdf.drop(base_col[1], 1)
     return pdf
 
+
 def get_reduced_pdf(pdf, rdc_list):
     """
     Filter the pdf Pandas Data Frame according to the rdc_list (list of item
@@ -34,11 +35,12 @@ def get_reduced_pdf(pdf, rdc_list):
     """
     for rdc in rdc_list:
         if len(rdc[1]) != 0:
-            pdf = pdf[ pdf[rdc[0]].isin(rdc[1]) ]
+            pdf = pdf[pdf[rdc[0]].isin(rdc[1])]
         else:
             wng_msg = "Empty list provided for " + rdc[0] + " key."
             warnings.wrn(wng_msg, UserWarning)
     return pdf
+
 
 def get_reduced__trans_pdf(db, send_name, rec_name):
     """
@@ -63,20 +65,19 @@ def get_reduced__trans_pdf(db, send_name, rec_name):
 
     rec_list = agents.rename(index=str, columns={'AgentId': 'ReceiverId'})
     if rec_name != 'All':
-        rec_list = rec_list.loc[lambda df: df.Prototype == rec_name,:]
-    
+        rec_list = rec_list.loc[lambda df: df.Prototype == rec_name, :]
+
     send_list = agents.rename(index=str, columns={'AgentId': 'SenderId'})
     if send_name != 'All':
-        send_list = send_list.loc[lambda df: df.Prototype == send_name,:]
+        send_list = send_list.loc[lambda df: df.Prototype == send_name, :]
 
     # check if sender and receiver exist
     if rec_list.empty or send_list.empty:
         return None
     else:
-        trans = get_reduced_pdf(trans, [
-            ['ReceiverId', rec_list['ReceiverId'].tolist() ],
-            ['SenderId', send_list['SenderId'].tolist() ] ])
-        rsc = rsc[ rsc['ResourceId'].isin( trans.ResourceId ) ]
+        trans = get_reduced_pdf(trans, [['ReceiverId', rec_list['ReceiverId'].tolist()], [
+                                'SenderId', send_list['SenderId'].tolist()]])
+        rsc = rsc[rsc['ResourceId'].isin(trans.ResourceId)]
 
         base_col = ['SimId', 'SenderId']
         added_col = base_col + ['Prototype']
@@ -89,7 +90,7 @@ def get_reduced__trans_pdf(db, send_name, rec_name):
         trans = trans.rename(index=str, columns={'Prototype': 'ReceiverProto'})
 
         base_col = ['SimId', 'ResourceId']
-        added_col = base_col + ['QualId']+  ['Quantity'] + ['Units']
+        added_col = base_col + ['QualId'] + ['Quantity'] + ['Units']
         trans = merge_n_drop(trans, base_col, rsc, added_col)
 
     return trans
@@ -166,7 +167,7 @@ def get_inventory_timeseries(db, fac_name, nuc_list):
     inv = evaler.eval('ExplicitInventory')
     agents = evaler.eval('AgentEntry')
 
-    rdc_list =[] # because we want to get reed of the nuclide asap
+    rdc_list = []  # because we want to get reed of the nuclide asap
     if len(nuc_list) != 0:
         for i in range(len(nuc_list)):
             nuc_list[i] = nucname.id(nuc_list[i])
@@ -174,17 +175,16 @@ def get_inventory_timeseries(db, fac_name, nuc_list):
     else:
         wng_msg = "no nuclide provided"
         warnings.wrn(wng_msg, UserWarning)
-    
+
     selected_agents = agents.loc[lambda df: df.Prototype == fac_name, :]
     if fac_name != 'All':
-        agents = agents.loc[lambda df: df.Prototype == fac_name,:]
-        rdc_list.append(['AgentId', agents['AgentId'].tolist() ])
+        agents = agents.loc[lambda df: df.Prototype == fac_name, :]
+        rdc_list.append(['AgentId', agents['AgentId'].tolist()])
     else:
         wng_msg = "no faciity provided"
         warnings.wrn(wng_msg, UserWarning)
-
     inv = get_reduced_pdf(inv, rdc_list)
-    
+
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
     inv = merge_n_drop(inv, base_col, agents, added_col)
