@@ -6,7 +6,6 @@ import numpy as np
 import cymetric as cym
 import warnings
 
-
 def merge_n_drop(pdf, base_col, add_pdf, add_col):
     """
     Merge some additionnal columns fram an additionnal Pandas Data Frame
@@ -22,7 +21,6 @@ def merge_n_drop(pdf, base_col, add_pdf, add_col):
     pdf = pd.merge(add_pdf[add_col], pdf, on=base_col)
     pdf.drop(base_col[1], 1)
     return pdf
-
 
 def get_reduced_pdf(pdf, rdc_list):
     """
@@ -41,7 +39,6 @@ def get_reduced_pdf(pdf, rdc_list):
             warnings.wrn(wng_msg, UserWarning)
     return pdf
 
-
 def get_reduced__trans_pdf(db, send_name, rec_name):
     """
     Filter the Transaction Data Frame on specific sending facility and
@@ -52,9 +49,6 @@ def get_reduced__trans_pdf(db, send_name, rec_name):
     db : database
     send_name : name of the sending facility ('All' for any)
     rec_name : name of the receiving facility ('All for any)
-
-    Attributes
-    ----------
     """
 
     # initiate evaluation
@@ -94,7 +88,6 @@ def get_reduced__trans_pdf(db, send_name, rec_name):
         trans = merge_n_drop(trans, base_col, rsc, added_col)
 
     return trans
-
 
 def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list=[]):
     """
@@ -148,7 +141,6 @@ def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list=[])
         trans_table = grouped_trans.loc[rec_name].loc[send_name]
 
     return trans_table
-
 
 def get_inventory_timeseries(db, fac_name, nuc_list):
     """
