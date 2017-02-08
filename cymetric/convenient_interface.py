@@ -144,7 +144,7 @@ def get_transaction_timeseries(db, send_name='All', rec_name='All', nuc_list=[])
 
 def get_inventory_timeseries(db, fac_name, nuc_list):
     """
-    Shape the reduced inventory Dta Frame into a simple time serie. Apply
+    Shape the reduced inventory Data Frame into a simple time serie. Apply
     some nuclei selection if required.
 
     Parameters
@@ -186,3 +186,37 @@ def get_inventory_timeseries(db, fac_name, nuc_list):
     inv.reset_index(inplace=True)
 
     return inv
+
+def get_power_timeseries(db, fac_list = []):
+    """
+    Shape the reduced Power Data Frame into a simple time serie. Apply
+    some facility selection if required.
+
+    Parameters
+    ----------
+    db : database
+    fac_list : list of name of the facility
+    """
+    evaler = cym.Evaluator(db)
+
+    # Get inventory table
+    power = evaler.eval('TimeSeriesPower')
+    agents = evaler.eval('AgentEntry')
+
+    rdc_list = []  # because we want to get reed of the facility asap
+    print(fac_list)
+    if len(fac_list) != 0:
+        agents = agents[agents['Prototype'].isin(fac_list)]
+        rdc_list.append(['AgentId', agents['AgentId'].tolist()])
+    power = get_reduced_pdf(power, rdc_list)
+
+    base_col = ['SimId', 'AgentId']
+    added_col = base_col + ['Prototype']
+    power = merge_n_drop(power, base_col, agents, added_col)
+    
+    group_end = ['Time']
+    group_start = group_end + ['Value']
+    power = power[group_start].groupby(group_end).sum()
+    power.reset_index(inplace=True)
+
+    return power
