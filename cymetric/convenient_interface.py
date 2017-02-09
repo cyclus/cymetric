@@ -42,22 +42,21 @@ def get_reduced_pdf(pdf, rdc_list):
     return pdf
 
 
-def get_transaction_pdf(db, send_list=[], rec_list=[], commod_list=[]):
+def get_transaction_pdf(evaler, send_list=[], rec_list=[], commod_list=[]):
     """
     Filter the Transaction Data Frame on specific sending facility and
     receving facility.
 
     Parameters
     ----------
-    db : database
+    evaler : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the commodity exchanged
     """
 
     # initiate evaluation
-    evaler = cym.Evaluator(db)
-    trans = evaler.eval('Transactions')
+        trans = evaler.eval('Transactions')
     agents = evaler.eval('AgentEntry')
     rsc = evaler.eval('Resources')
 
@@ -103,28 +102,27 @@ def get_transaction_pdf(db, send_list=[], rec_list=[], commod_list=[]):
     return trans
 
 
-def get_transaction_timeseries(db, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_timeseries(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Dta Frame into a simple time serie. Apply
     some nuclei selection if required.
 
     Parameters
     ----------
-    db : database
+    evaler : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the receiving facility
     nuc_list : list of nuclide to select.
     """
 
-    df = get_transaction_pdf(db, send_list, rec_list, commod_list)
+    df = get_transaction_pdf(evaler, send_list, rec_list, commod_list)
 
     if len(nuc_list) != 0:
         for i in range(len(nuc_list)):
             nuc_list[i] = nucname.id(nuc_list[i])
 
-        evaler = cym.Evaluator(db)
-        compo = evaler.eval('Compositions')
+                compo = evaler.eval('Compositions')
         compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
 
         base_col = ['SimId', 'QualId']
@@ -146,19 +144,18 @@ def get_transaction_timeseries(db, send_list=[], rec_list=[], commod_list=[], nu
     return trans
 
 
-def get_inventory_timeseries(db, fac_list=[], nuc_list=[]):
+def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
     """
     Shape the reduced inventory Data Frame into a simple time serie. Apply
     some nuclei selection if required.
 
     Parameters
     ----------
-    db : database
+    evaler : evaler
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
-    evaler = cym.Evaluator(db)
-
+    
     # Get inventory table
     inv = evaler.eval('ExplicitInventory')
     agents = evaler.eval('AgentEntry')
@@ -191,18 +188,17 @@ def get_inventory_timeseries(db, fac_list=[], nuc_list=[]):
     return inv
 
 
-def get_power_timeseries(db, fac_list=[]):
+def get_power_timeseries(evaler, fac_list=[]):
     """
     Shape the reduced Power Data Frame into a simple time serie. Apply
     some facility selection if required.
 
     Parameters
     ----------
-    db : database
+    evaler : evaler
     fac_list : list of name of the facility
     """
-    evaler = cym.Evaluator(db)
-
+    
     # Get inventory table
     power = evaler.eval('TimeSeriesPower')
     agents = evaler.eval('AgentEntry')
@@ -224,3 +220,71 @@ def get_power_timeseries(db, fac_list=[]):
     power.reset_index(inplace=True)
 
     return power
+
+
+def get_deployment_timeseries(evaler, fac_list=[]):
+    """
+    Get a simple time series with deployment schedule of the selected facilities. Apply
+    some nuclei selection if required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    fac_name : name of the facility
+    """
+
+    # Get inventory table
+    agents = evaler.eval('AgentEntry')
+
+    if len(fac_list) != 0:
+        agents = agents[agents['Prototype'].isin(fac_list)]
+        rdc_list.append(['AgentId', agents['AgentId'].tolist()])
+    else:
+        wng_msg = "no faciity provided"
+        warnings.warn(wng_msg, UserWarning)
+
+    # Adding a constante column to easely sum the amount of facilities build per
+    # time step
+    agents['Value'] = 1
+
+    group_end = ['EnterTime']
+    group_start = group_end + ['Value']
+    agents = agents[group_start].groupby(group_end).sum()
+    agents.reset_index(inplace=True)
+
+    return inv
+
+
+def get_retieremnt_timeseries(evaler, fac_list=[]):
+    """
+    Get a simple time series with retirement schedule of the selected facilities. Apply
+    some nuclei selection if required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    fac_name : name of the facility
+    """
+
+    # Get inventory table
+    agents = evaler.eval('AgentEntry')
+    agents = agents[agenst['LifeTime'] > 0]
+    if len(fac_list) != 0:
+        agents = agents[agents['Prototype'].isin(fac_list)]
+        rdc_list.append(['AgentId', agents['AgentId'].tolist()])
+    else:
+        wng_msg = "no faciity provided"
+        warnings.warn(wng_msg, UserWarning)
+
+    # Adding a constante column to easely sum the amount of facilities build per
+    # time stepi
+    
+    agents['Value'] = 1
+    agents['DecomTime'] = agents['EntryTime'] + agents['LifeTime']
+    
+    group_end = ['DecomTime']
+    group_start = group_end + ['Value']
+    agents = agents[group_start].groupby(group_end).sum()
+    agents.reset_index(inplace=True)
+
+    return inv
