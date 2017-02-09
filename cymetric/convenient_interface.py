@@ -6,6 +6,7 @@ import numpy as np
 import cymetric as cym
 import warnings
 
+
 def merge_n_drop(pdf, base_col, add_pdf, add_col):
     """
     Merge some additionnal columns fram an additionnal Pandas Data Frame
@@ -21,6 +22,7 @@ def merge_n_drop(pdf, base_col, add_pdf, add_col):
     pdf = pd.merge(add_pdf[add_col], pdf, on=base_col)
     pdf.drop(base_col[1], 1)
     return pdf
+
 
 def get_reduced_pdf(pdf, rdc_list):
     """
@@ -39,7 +41,8 @@ def get_reduced_pdf(pdf, rdc_list):
             warnings.warn(wng_msg, UserWarning)
     return pdf
 
-def get_transaction_pdf(db, send_list=[], rec_list=[]):
+
+def get_transaction_pdf(db, send_list=[], rec_list=[], commod_list=[]):
     """
     Filter the Transaction Data Frame on specific sending facility and
     receving facility.
@@ -49,6 +52,7 @@ def get_transaction_pdf(db, send_list=[], rec_list=[]):
     db : database
     send_list : list of the sending facility
     rec_list : list of the receiving facility
+    commod_list : list of the commodity exchanged
     """
 
     # initiate evaluation
@@ -70,8 +74,14 @@ def get_transaction_pdf(db, send_list=[], rec_list=[]):
         return None
     else:
         # Clean Transation PDF
-        trans = get_reduced_pdf(trans, [['ReceiverId', rec_agent['ReceiverId'].tolist()], 
-                                        ['SenderId', send_agent['SenderId'].tolist()]])
+        rdc_list = []
+        rdc_list.append(['ReceiverId', rec_agent['ReceiverId'].tolist()])
+        rdc_list.append(['SenderId',send_agent['SenderId'].tolist()])
+        if len(commod_list) != 0:
+            rdc_list.append(['Commodity',commod_list])
+            
+        trans = get_reduced_pdf(trans, rdc_list )
+
         # Merge Sender to Transaction PDF
         base_col = ['SimId', 'SenderId']
         added_col = base_col + ['Prototype']
@@ -92,7 +102,8 @@ def get_transaction_pdf(db, send_list=[], rec_list=[]):
 
     return trans
 
-def get_transaction_timeseries(db, send_list=[], rec_list=[], nuc_list=[]):
+
+def get_transaction_timeseries(db, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Dta Frame into a simple time serie. Apply
     some nuclei selection if required.
@@ -100,12 +111,13 @@ def get_transaction_timeseries(db, send_list=[], rec_list=[], nuc_list=[]):
     Parameters
     ----------
     db : database
-    send_name : name of the sending facility
-    rec_name : name of the receiving facility
+    send_list : list of the sending facility
+    rec_list : list of the receiving facility
+    commod_list : list of the receiving facility
     nuc_list : list of nuclide to select.
     """
 
-    df = get_transaction_pdf(db, send_list, rec_list)
+    df = get_transaction_pdf(db, send_list, rec_list, commod_list)
 
     if len(nuc_list) != 0:
         for i in range(len(nuc_list)):
@@ -132,6 +144,7 @@ def get_transaction_timeseries(db, send_list=[], rec_list=[], nuc_list=[]):
     trans.reset_index(inplace=True)
 
     return trans
+
 
 def get_inventory_timeseries(db, fac_list=[], nuc_list=[]):
     """
