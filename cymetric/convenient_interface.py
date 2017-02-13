@@ -66,7 +66,6 @@ def get_transaction_pdf(evaler, send_list=[], rec_list=[], commod_list=[]):
     # initiate evaluation
     trans = evaler.eval('Transactions')
     agents = evaler.eval('AgentEntry')
-    rsc = evaler.eval('Resources')
 
     rec_agent = agents.rename(index=str, columns={'AgentId': 'ReceiverId'})
     if len(rec_list) != 0:
@@ -101,11 +100,101 @@ def get_transaction_pdf(evaler, send_list=[], rec_list=[], commod_list=[]):
         trans = merge_n_drop(trans, base_col, rec_agent, added_col)
         trans = trans.rename(index=str, columns={'Prototype': 'ReceiverProto'})
 
-        # Merge Resource to Transaction PDF
-        rsc = rsc[rsc['ResourceId'].isin(trans.ResourceId)]
-        base_col = ['SimId', 'ResourceId']
-        added_col = base_col + ['QualId'] + ['Quantity'] + ['Units']
-        trans = merge_n_drop(trans, base_col, rsc, added_col)
+    return trans
+
+
+def get_transaction_nuc_pdf(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+    """
+    Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    send_list : list of the sending facility
+    rec_list : list of the receiving facility
+    commod_list : list of the receiving facility
+    nuc_list : list of nuclide to select.
+    """
+
+    df = get_transaction_pdf(evaler, send_list, rec_list, commod_list)
+
+    if len(nuc_list) != 0:
+        for i in range(len(nuc_list)):
+            nuc_list[i] = nucname.id(nuc_list[i])
+
+        compo = evaler.eval('Materials')
+        compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
+
+        base_col = ['SimId', 'QualId']
+        added_col = base_col + ['NucId', 'Mass']
+        df = merge_n_drop(df, base_col, compo, added_col)
+    else:
+        wng_msg = "no nuclide provided"
+        warnings.warn(wng_msg, UserWarning)
+
+    return trans
+
+
+def get_transaction_activity_pdf(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+    """
+    Return the transation pdf, with the activities. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    send_list : list of the sending facility
+    rec_list : list of the receiving facility
+    commod_list : list of the receiving facility
+    nuc_list : list of nuclide to select.
+    """
+
+    df = get_transaction_pdf(evaler, send_list, rec_list, commod_list)
+
+    if len(nuc_list) != 0:
+        for i in range(len(nuc_list)):
+            nuc_list[i] = nucname.id(nuc_list[i])
+
+        compo = evaler.eval('Activity')
+        compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
+
+        base_col = ['SimId', 'QualId']
+        added_col = base_col + ['NucId', 'Activity']
+        df = merge_n_drop(df, base_col, compo, added_col)
+    else:
+        wng_msg = "no nuclide provided"
+        warnings.warn(wng_msg, UserWarning)
+
+    return trans
+
+
+def get_transaction_decayheat_pdf(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+    """
+    Return the transation pdf, with the decayheat. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    send_list : list of the sending facility
+    rec_list : list of the receiving facility
+    commod_list : list of the receiving facility
+    nuc_list : list of nuclide to select.
+    """
+
+    df = get_transaction_pdf(evaler, send_list, rec_list, commod_list)
+
+    if len(nuc_list) != 0:
+        for i in range(len(nuc_list)):
+            nuc_list[i] = nucname.id(nuc_list[i])
+
+        compo = evaler.eval('DecayHeat')
+        compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
+
+        base_col = ['SimId', 'QualId']
+        added_col = base_col + ['NucId', 'DecayHeat']
+        df = merge_n_drop(df, base_col, compo, added_col)
+    else:
+        wng_msg = "no nuclide provided"
+        warnings.warn(wng_msg, UserWarning)
 
     return trans
 
@@ -123,34 +212,68 @@ def get_transaction_timeseries(evaler, send_list=[], rec_list=[], commod_list=[]
     nuc_list : list of nuclide to select.
     """
 
-    tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
-    df = get_transaction_pdf(evaler, send_list, rec_list, commod_list)
+    df = get_transaction_nuc_pdf(evaler, send_list, rec_list, commod_list,
+            nuc_list)
 
-    if len(nuc_list) != 0:
-        for i in range(len(nuc_list)):
-            nuc_list[i] = nucname.id(nuc_list[i])
+    group_end = ['ReceiverProto', 'SenderProto', 'Time']
+    group_start = group_end + ['Mass']
+    df = df[group_start].groupby(group_end).sum()
 
-        compo = evaler.eval('Compositions')
-        compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
-
-        base_col = ['SimId', 'QualId']
-        added_col = base_col + ['NucId', 'MassFrac']
-        df = merge_n_drop(df, base_col, compo, added_col)
-
-        df['Quantity'] = df['Quantity'] * df['MassFrac']
-
-        group_end = ['ReceiverProto', 'SenderProto', 'Time']
-        group_start = group_end + ['Quantity']
-        df = df[group_start].groupby(group_end).sum()
-    else:
-        wng_msg = "no nuclide provided"
-        warnings.warn(wng_msg, UserWarning)
-
-    trans = df[['Time', 'Quantity']].groupby(['Time']).sum()
+    trans = df[['Time', 'Mass']].groupby(['Time']).sum()
     trans.reset_index(inplace=True)
 
     return trans
 
+
+def get_transaction_activity_timeseries(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+    """
+    Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    send_list : list of the sending facility
+    rec_list : list of the receiving facility
+    commod_list : list of the receiving facility
+    nuc_list : list of nuclide to select.
+    """
+
+    df = get_transaction_activity_pdf(evaler, send_list, rec_list, commod_list,
+            nuc_list)
+
+    group_end = ['ReceiverProto', 'SenderProto', 'Time']
+    group_start = group_end + ['Activity']
+    df = df[group_start].groupby(group_end).sum()
+
+    trans = df[['Time', 'Activity']].groupby(['Time']).sum()
+    trans.reset_index(inplace=True)
+
+    return trans
+
+def get_transaction_decayheat_timeseries(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+    """
+    Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    send_list : list of the sending facility
+    rec_list : list of the receiving facility
+    commod_list : list of the receiving facility
+    nuc_list : list of nuclide to select.
+    """
+
+    df = get_transaction_activity_pdf(evaler, send_list, rec_list, commod_list,
+            nuc_list)
+
+    group_end = ['ReceiverProto', 'SenderProto', 'Time']
+    group_start = group_end + ['DecayHeat']
+    df = df[group_start].groupby(group_end).sum()
+
+    trans = df[['Time', 'DecayHeat']].groupby(['Time']).sum()
+    trans.reset_index(inplace=True)
+
+    return trans
 
 
 def get_inventory_pdf(evaler, fac_list=[], nuc_list=[]):
@@ -164,7 +287,6 @@ def get_inventory_pdf(evaler, fac_list=[], nuc_list=[]):
     nuc_list : list of nuclide to select.
     """
 
-    tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
     # Get inventory table
     inv = evaler.eval('ExplicitInventory')
     agents = evaler.eval('AgentEntry')
@@ -204,7 +326,6 @@ def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
-    tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
     inv = get_inventory_pdf(evaler, gac_list, nuc_list)
 
     group_end = ['Time']
@@ -315,7 +436,7 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     return inv
 
 
-def get_activity_pdf(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_activity_pdf(evaler, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the activity of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -334,7 +455,7 @@ def get_activity_pdf(evaler, fac_list=[], nuc_list=[]):
     
     return activity
 
-def get_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -355,7 +476,7 @@ def get_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
     return activity
 
 
-def get_decayheat_pdf(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_decayheat_pdf(evaler, fac_list=[], nuc_list=[]):
     """
     Get a Inventory PDF including the decay heat of the inventory in the selected
     facilities. Applying nuclides selection when required.
@@ -375,7 +496,7 @@ def get_decayheat_pdf(evaler, fac_list=[], nuc_list=[]):
     return decayheat
 
 
-def get_decayheat_timeseries(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_decayheat_timeseries(evaler, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
