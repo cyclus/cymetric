@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import cymetric as cym
 import warnings
+from cymetric import tools
 
 try:
     from pyne import data
@@ -126,13 +127,12 @@ def get_transaction_nuc_pdf(evaler, send_list=[], rec_list=[], commod_list=[], n
 
     df = get_transaction_pdf(evaler, send_list, rec_list, commod_list)
 
+    compo = evaler.eval('Materials')
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
+        compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
 
-    compo = evaler.eval('Materials')
-    compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
-
-    base_col = ['SimId', 'QualId']
+    base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'Mass']
     df = merge_n_drop(df, base_col, compo, added_col)
 
@@ -160,7 +160,7 @@ def get_transaction_activity_pdf(evaler, send_list=[], rec_list=[], commod_list=
     compo = evaler.eval('Activity')
     compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
 
-    base_col = ['SimId', 'QualId']
+    base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'Activity']
     df = merge_n_drop(df, base_col, compo, added_col)
 
@@ -188,7 +188,7 @@ def get_transaction_decayheat_pdf(evaler, send_list=[], rec_list=[], commod_list
     compo = evaler.eval('DecayHeat')
     compo = get_reduced_pdf(compo, [['NucId', nuc_list]])
 
-    base_col = ['SimId', 'QualId']
+    base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'DecayHeat']
     df = merge_n_drop(df, base_col, compo, added_col)
 
@@ -211,12 +211,12 @@ def get_transaction_timeseries(evaler, send_list=[], rec_list=[], commod_list=[]
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    df = get_transaction_nuc_pdf(evaler, send_list, rec_list, commod_list,
-            nuc_list)
+    df = get_transaction_nuc_pdf(evaler, send_list, rec_list, commod_list, nuc_list)
 
     group_end = ['ReceiverProto', 'SenderProto', 'Time']
     group_start = group_end + ['Mass']
     df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
     df = df[['Time', 'Mass']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
@@ -246,6 +246,7 @@ def get_transaction_activity_timeseries(evaler, send_list=[], rec_list=[], commo
     group_end = ['ReceiverProto', 'SenderProto', 'Time']
     group_start = group_end + ['Activity']
     df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
     df = df[['Time', 'Activity']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
@@ -268,12 +269,13 @@ def get_transaction_decayheat_timeseries(evaler, send_list=[], rec_list=[], comm
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list) 
 
-    df = get_transaction_activity_pdf(evaler, send_list, rec_list, commod_list,
+    df = get_transaction_decayheat_pdf(evaler, send_list, rec_list, commod_list,
             nuc_list)
 
     group_end = ['ReceiverProto', 'SenderProto', 'Time']
     group_start = group_end + ['DecayHeat']
     df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
     df = df[['Time', 'DecayHeat']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
@@ -334,7 +336,7 @@ def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
     
-    inv = get_inventory_pdf(evaler, gac_list, nuc_list)
+    inv = get_inventory_pdf(evaler, fac_list, nuc_list)
 
     group_end = ['Time']
     group_start = group_end + ['Quantity']
@@ -342,6 +344,102 @@ def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
     inv.reset_index(inplace=True)
 
     return inv
+
+
+def get_inventory_activity_pdf(evaler, fac_list=[], nuc_list=[]):
+    """
+    Get a simple time series of the activity of the inventory in the selcted
+    facilities. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    fac_name : name of the facility
+    nuc_list : list of nuclide to select.
+    """
+
+    if len(nuc_list) != 0:
+        nuc_list = format_nuclist(nuc_list)
+
+    df = get_inventory_pdf(evaler, fac_list, nuc_list)
+    for i, row in df.iterrows():
+        val = 1000 * data.N_A * df.ix[i, 'Quantity'] * \
+            data.decay_const(int(df.ix[i, 'NucId']))
+        df.set_value(i, 'Activity', val)
+
+    return df
+
+
+def get_inventory_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
+    """
+    Get a simple time series of the decay heat of the inventory in the selcted
+    facilities. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    fac_name : name of the facility
+    nuc_list : list of nuclide to select.
+    """
+    
+    if len(nuc_list) != 0:
+        nuc_list = format_nuclist(nuc_list) 
+    
+    activity = get_inventory_activity_pdf(evaler, fac_list, nuc_list)
+    group_end = ['Time']
+    group_start = group_end + ['Activity']
+    activity = activity[group_start].groupby(group_end).sum()
+    activity.reset_index(inplace=True)
+    
+    return activity
+
+
+def get_inventory_decayheat_pdf(evaler, fac_list=[], nuc_list=[]):
+    """
+    Get a Inventory PDF including the decay heat of the inventory in the selected
+    facilities. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    fac_name : name of the facility
+    nuc_list : list of nuclide to select.
+    """
+
+    if len(nuc_list) != 0:
+        nuc_list = format_nuclist(nuc_list)
+
+    df = get_inventory_activity_pdf(evaler, fac_list, nuc_list)
+    for i, row in df.iterrows():
+        val = data.MeV_per_MJ * \
+            df.ix[i, 'Activity'] * data.q_val(int(df.ix[i, 'NucId']))
+        df.set_value(i, 'DecayHeat', val)
+
+    return df
+
+
+def get_inventory_decayheat_timeseries(evaler, fac_list=[], nuc_list=[]):
+    """
+    Get a simple time series of the decay heat of the inventory in the selcted
+    facilities. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    fac_name : name of the facility
+    nuc_list : list of nuclide to select.
+    """
+    
+    if len(nuc_list) != 0:
+        nuc_list = format_nuclist(nuc_list)
+    
+    decayheat = get_inventory_decayheat_pdf(evaler, fac_list, nuc_list)
+    group_end = ['Time']
+    group_start = group_end + ['DecayHeat']
+    decayheat = decayheat[group_start].groupby(group_end).sum()
+    decayheat.reset_index(inplace=True)
+    
+    return decayheat
 
 
 def get_power_timeseries(evaler, fac_list=[]):
@@ -444,92 +542,3 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     return inv
 
 
-def get_inventory_activity_pdf(evaler, fac_list=[], nuc_list=[]):
-    """
-    Get a simple time series of the activity of the inventory in the selcted
-    facilities. Applying nuclides selection when required.
-
-    Parameters
-    ----------
-    evaler : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
-    """
-    
-    if len(nuc_list) != 0:
-        nuc_list = format_nuclist(nuc_list) 
-    
-    activity = get_inventory_pdf(evaler, fac_list, nuc_list)
-    activity.assign( Activity = lambda x: 
-            1000 * data.N_A * activity.Quantity * data.decay_const(nuc) )
-    
-    return activity
-
-def get_inventory_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
-    """
-    Get a simple time series of the decay heat of the inventory in the selcted
-    facilities. Applying nuclides selection when required.
-
-    Parameters
-    ----------
-    evaler : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
-    """
-    
-    if len(nuc_list) != 0:
-        nuc_list = format_nuclist(nuc_list) 
-    
-    activity = get_activity_pdf(evaler, fac_list, nuc_list)
-    group_end = ['Time']
-    group_start = group_end + ['Activity']
-    activity = activity[group_start].groupby(group_end).sum()
-    activity.reset_index(inplace=True)
-    
-    return activity
-
-
-def get_inventory_decayheat_pdf(evaler, fac_list=[], nuc_list=[]):
-    """
-    Get a Inventory PDF including the decay heat of the inventory in the selected
-    facilities. Applying nuclides selection when required.
-
-    Parameters
-    ----------
-    evaler : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
-    """
-    
-    if len(nuc_list) != 0:
-        nuc_list = format_nuclist(nuc_list)
-      
-    decayheat = get_activity_pdf(evaler, fac_list, nuc_list)
-    decayheat.assign( DecayHeat = lambda x: 
-            data.MeV_per_MJ * decayheat.Activity * data.q_val(nuc))
-    
-    return decayheat
-
-
-def get_inventory_decayheat_timeseries(evaler, fac_list=[], nuc_list=[]):
-    """
-    Get a simple time series of the decay heat of the inventory in the selcted
-    facilities. Applying nuclides selection when required.
-
-    Parameters
-    ----------
-    evaler : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
-    """
-    
-    if len(nuc_list) != 0:
-        nuc_list = format_nuclist(nuc_list)
-    
-    decayheat = get_decayheat_pdf(evaler, fac_list, nuc_list)
-    group_end = ['Time']
-    group_start = group_end + ['DecayHeat']
-    decayheat = decayheat[group_start].groupby(group_end).sum()
-    decayheat.reset_index(inplace=True)
-    
-    return decayheat
