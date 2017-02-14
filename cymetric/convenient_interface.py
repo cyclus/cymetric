@@ -487,25 +487,26 @@ def get_deployment_timeseries(evaler, fac_list=[]):
     """
 
     # Get inventory table
-    agents = evaler.eval('AgentEntry')
+    df = evaler.eval('AgentEntry')
 
+    rdc_list = []  # because we want to get reed of the facility asap
     if len(fac_list) != 0:
-        agents = agents[agents['Prototype'].isin(fac_list)]
-        rdc_list.append(['AgentId', agents['AgentId'].tolist()])
+        df = df[df['Prototype'].isin(fac_list)]
+        rdc_list.append(['AgentId', df['AgentId'].tolist()])
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
 
     # Adding a constante column to easely sum the amount of facilities build per
     # time step
-    agents['Value'] = 1
+    df = df.assign(Value = lambda x: 1)
 
     group_end = ['EnterTime']
     group_start = group_end + ['Value']
-    agents = agents[group_start].groupby(group_end).sum()
-    agents.reset_index(inplace=True)
+    df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
-    return inv
+    return df
 
 
 def get_retirement_timeseries(evaler, fac_list=[]):
@@ -519,11 +520,13 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     """
 
     # Get inventory table
-    agents = evaler.eval('AgentEntry')
-    agents = agents[agenst['LifeTime'] > 0]
+    df = evaler.eval('AgentEntry')
+    df = df[df['Lifetime'] > 0]
+    
+    rdc_list = []  # because we want to get reed of the facility asap
     if len(fac_list) != 0:
-        agents = agents[agents['Prototype'].isin(fac_list)]
-        rdc_list.append(['AgentId', agents['AgentId'].tolist()])
+        df = df[df['Prototype'].isin(fac_list)]
+        rdc_list.append(['AgentId', df['AgentId'].tolist()])
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
@@ -531,14 +534,15 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     # Adding a constante column to easely sum the amount of facilities build per
     # time stepi
 
-    agents['Value'] = 1
-    agents['DecomTime'] = agents['EntryTime'] + agents['LifeTime']
+    df = df.assign(Value = lambda x: 1)
+    
+    df['DecomTime'] = df['EnterTime'] + df['Lifetime']
 
     group_end = ['DecomTime']
     group_start = group_end + ['Value']
-    agents = agents[group_start].groupby(group_end).sum()
-    agents.reset_index(inplace=True)
+    df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
-    return inv
+    return df
 
 
