@@ -17,7 +17,7 @@ except ImportError:
 
 def format_nuclist(nuc_list):
     tools.raise_no_pyne('Unable to format nuclide list!', HAVE_PYNE)
-    
+
     for i in range(len(nuc_list)):
         nuc_list[i] = nucname.id(nuc_list[i])
 
@@ -33,7 +33,7 @@ def add_missing_time_step(df, ref_time):
     metrics)
     """
     ref_time.rename(index=str, columns={'TimeStep': 'Time'}, inplace=True)
-   
+
     print(ref_time.columns.values)
     if 'SimId' in ref_time.columns.values:
         ref_time.drop('SimId', 1, inplace=True)
@@ -259,7 +259,7 @@ def get_transaction_activity_timeseries(evaler, send_list=[], rec_list=[], commo
 
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
-    
+
     df = get_transaction_activity_df(evaler, send_list, rec_list, commod_list,
             nuc_list)
 
@@ -287,9 +287,9 @@ def get_transaction_decayheat_timeseries(evaler, send_list=[], rec_list=[], comm
     commod_list : list of the receiving facility
     nuc_list : list of nuclide to select.
     """
-    
+
     if len(nuc_list) != 0:
-        nuc_list = format_nuclist(nuc_list) 
+        nuc_list = format_nuclist(nuc_list)
 
     df = get_transaction_decayheat_df(evaler, send_list, rec_list, commod_list,
             nuc_list)
@@ -341,9 +341,9 @@ def get_inventory_df(evaler, fac_list=[], nuc_list=[]):
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
     df = merge_n_drop(df, base_col, agents, added_col)
-    
+
     return df
-    
+
 
 def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
     """
@@ -356,10 +356,10 @@ def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
-    
+
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
-    
+
     df = get_inventory_df(evaler, fac_list, nuc_list)
 
     group_end = ['Time']
@@ -407,16 +407,16 @@ def get_inventory_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
-    
+
     if len(nuc_list) != 0:
-        nuc_list = format_nuclist(nuc_list) 
-    
+        nuc_list = format_nuclist(nuc_list)
+
     activity = get_inventory_activity_df(evaler, fac_list, nuc_list)
     group_end = ['Time']
     group_start = group_end + ['Activity']
     activity = activity[group_start].groupby(group_end).sum()
     activity.reset_index(inplace=True)
-    
+
     time = evaler.eval('TimeList')
     df = add_missing_time_step(df,time)
     return activity
@@ -457,16 +457,16 @@ def get_inventory_decayheat_timeseries(evaler, fac_list=[], nuc_list=[]):
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
-    
+
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
-    
+
     decayheat = get_inventory_decayheat_df(evaler, fac_list, nuc_list)
     group_end = ['Time']
     group_start = group_end + ['DecayHeat']
     decayheat = decayheat[group_start].groupby(group_end).sum()
     decayheat.reset_index(inplace=True)
-    
+
     time = evaler.eval('TimeList')
     df = add_missing_time_step(df,time)
     return decayheat
@@ -557,7 +557,7 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     # Get inventory table
     df = evaler.eval('AgentEntry')
     df = df[df['Lifetime'] > 0]
-    
+
     rdc_list = []  # because we want to get reed of the facility asap
     if len(fac_list) != 0:
         df = df[df['Prototype'].isin(fac_list)]
@@ -570,7 +570,7 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     # time stepi
 
     df = df.assign(Value = lambda x: 1)
-    
+
     df['DecomTime'] = df['EnterTime'] + df['Lifetime']
 
     group_end = ['DecomTime']
@@ -582,5 +582,4 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     time = evaler.eval('TimeList')
     df = add_missing_time_step(df,time)
     return df
-
 
