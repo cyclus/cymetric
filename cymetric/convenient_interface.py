@@ -34,7 +34,6 @@ def add_missing_time_step(df, ref_time):
     """
     ref_time.rename(index=str, columns={'TimeStep': 'Time'}, inplace=True)
 
-    print(ref_time.columns.values)
     if 'SimId' in ref_time.columns.values:
         ref_time.drop('SimId', 1, inplace=True)
     df = pd.merge(ref_time, df, how="outer")
@@ -488,7 +487,6 @@ def get_power_timeseries(evaler, fac_list=[]):
     agents = evaler.eval('AgentEntry')
 
     rdc_list = []  # because we want to get reed of the facility asap
-    print(fac_list)
     if len(fac_list) != 0:
         agents = agents[agents['Prototype'].isin(fac_list)]
         rdc_list.append(['AgentId', agents['AgentId'].tolist()])
@@ -500,12 +498,12 @@ def get_power_timeseries(evaler, fac_list=[]):
 
     group_end = ['Time']
     group_start = group_end + ['Value']
-    power = power[group_start].groupby(group_end).sum()
-    power.reset_index(inplace=True)
+    df = power[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
     df = add_missing_time_step(df,time)
-    return power
+    return df
 
 
 def get_deployment_timeseries(evaler, fac_list=[]):
