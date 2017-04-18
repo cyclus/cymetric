@@ -29,8 +29,7 @@ def add_missing_time_step(df, ref_time):
     Parameters
     ----------
     df: Pandas Data Frame
-    ref_time: list of the time step references (should some from TimeStep
-    metrics)
+    ref_time: list of the time step references (Coming from TimeStep metrics)
     """
     ref_time.rename(index=str, columns={'TimeStep': 'Time'}, inplace=True)
 
