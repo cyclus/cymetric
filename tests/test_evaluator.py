@@ -13,7 +13,8 @@ from tools import setup, dbtest
 
 @dbtest
 def test_eval(db, fname, backend):
-    df = evaluator.eval('Materials', db)
+    
+    df = evaluator.eval('Materials', db, write=False)
     assert_less(0, len(df))
 
 
