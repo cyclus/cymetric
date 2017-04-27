@@ -19,36 +19,44 @@ import cymetric as cym
 from cymetric import convenient_interface as com
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
-def test_convint_gettransactiondf():
-    db = cym.dbopen(example_path)
+@dbtest
+def test_convint_gettransactiondf(db,fname,backend):
+    #db = cym.dbopen()
     myEval = cym.Evaluator(db)
     cal = com.get_transaction_df(myEval)
+    
+    exp_head = ['SimId', 'ReceiverId', 'ReceiverProto',
+                'SenderId', 'SenderProto', 'TransactionId',
+                'ResourceId', 'Commodity', 'Time']
 
+    assert_equal(list(cal), exp_head)
+
+    cal = cal.drop('SimId', 1) #SimId change at each test need to drop it
+    cal = cal.drop('TransactionId', 1) #SimId change at each test need to drop it
+    cal = cal.drop('ResourceId', 1) #SimId change at each test need to drop it
+    
     refs = pd.DataFrame(np.array([
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 15,
-         'Reactor1', 13, 'UOX_Source', 8, 78, 'uox', 4),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 15,
-         'Reactor1', 14, 'MOX_Source', 0, 8,  'mox', 1),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 15,
-         'Reactor1', 14, 'MOX_Source', 1, 23, 'mox', 2),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 15,
-         'Reactor1', 14, 'MOX_Source', 3, 47, 'mox', 3),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 16,
-         'Reactor2', 14, 'MOX_Source', 2, 25, 'mox', 2),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 16,
-         'Reactor2', 14, 'MOX_Source', 4, 49, 'mox', 3),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 16,
-         'Reactor2', 14, 'MOX_Source', 6, 74, 'mox', 4),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 17,
-         'Reactor3', 13, 'UOX_Source', 5, 51, 'uox', 3),
-        (UUID('4485c97d-59bc-4eda-ad42-63a7f042053a'), 17,
-         'Reactor3', 14, 'MOX_Source', 7, 76, 'mox', 4),
+        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
+        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
+        (17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
     ], dtype = ensure_dt_bytes([
-        ('SimId', 'O'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'), 
-        ('SenderId', '<i8'), ('SenderProto', 'O'), ('TransactionId', '<i8'),
-        ('ResourceId', '<i8'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverId', '<i8'), ('ReceiverProto', 'O'), ('SenderId', '<i8'),
+        ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
         ]))
     )
+    refs.index = refs.index.astype('str')
+    assert_frame_equal(cal, refs)
+
+
+#[left]:  [6, 0, 2, 5, 1, 4, 8, 3, 7]
+#[left]:  [6, 0, 1, 4, 2, 5, 7, 3, 8]
+#[right]: [6, 0, 2, 5, 1, 4, 8, 3, 7]
 
 #@dbtest
 #def test_resources(db, fname, backend):
