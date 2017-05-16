@@ -297,7 +297,7 @@ del _agentsdeps, _agentsschema
 
 # Transaction Quantity
 _transdeps = [
-    ('Materials', ('SimId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'),
+    ('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
         'Mass'),
     ('Transactions', ('SimId', 'TransactionId', 'SenderId', 'ReceiverId',
         'ResourceId'), 'Commodity')

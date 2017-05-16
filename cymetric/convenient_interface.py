@@ -23,6 +23,7 @@ def format_nuclist(nuc_list):
 
     return nuc_list
 
+
 def add_missing_time_step(df, ref_time):
     """
     Add the missing time step to a Panda Data Frame.
@@ -75,22 +76,22 @@ def get_reduced_df(df, rdc_list):
     return df
 
 
-def get_transaction_df(evaler, send_list=[], rec_list=[], commod_list=[]):
+def get_transaction_df(evaler_, send_list=[], rec_list=[], commod_list=[]):
     """
     Filter the Transaction Data Frame on specific sending facility and
     receving facility.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the commodity exchanged
     """
 
     # initiate evaluation
-    trans = evaler.eval('Transactions')
-    agents = evaler.eval('AgentEntry')
+    trans = evaler_.eval('Transactions')
+    agents = evaler_.eval('AgentEntry')
 
     rec_agent = agents.rename(index=str, columns={'AgentId': 'ReceiverId'})
     if len(rec_list) != 0:
@@ -128,22 +129,23 @@ def get_transaction_df(evaler, send_list=[], rec_list=[], commod_list=[]):
     return trans
 
 
-def get_transaction_nuc_df(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_nuc_df(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
-    Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
+    Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the receiving facility
     nuc_list : list of nuclide to select.
     """
 
-    df = get_transaction_df(evaler, send_list, rec_list, commod_list)
+    compo = evaler_.eval('Materials')
 
-    compo = evaler.eval('Materials')
+    df = get_transaction_df(evaler_, send_list, rec_list, commod_list)
+
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
         compo = get_reduced_df(compo, [['NucId', nuc_list]])
@@ -155,25 +157,25 @@ def get_transaction_nuc_df(evaler, send_list=[], rec_list=[], commod_list=[], nu
     return df
 
 
-def get_transaction_activity_df(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_activity_df(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Return the transation df, with the activities. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the receiving facility
     nuc_list : list of nuclide to select.
     """
 
-    df = get_transaction_df(evaler, send_list, rec_list, commod_list)
+    df = get_transaction_df(evaler_, send_list, rec_list, commod_list)
 
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    compo = evaler.eval('Activity')
+    compo = evaler_.eval('Activity')
     compo = get_reduced_df(compo, [['NucId', nuc_list]])
 
     base_col = ['SimId', 'ResourceId']
@@ -183,25 +185,25 @@ def get_transaction_activity_df(evaler, send_list=[], rec_list=[], commod_list=[
     return df
 
 
-def get_transaction_decayheat_df(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_decayheat_df(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Return the transation df, with the decayheat. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the receiving facility
     nuc_list : list of nuclide to select.
     """
 
-    df = get_transaction_df(evaler, send_list, rec_list, commod_list)
+    df = get_transaction_df(evaler_, send_list, rec_list, commod_list)
 
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    compo = evaler.eval('DecayHeat')
+    compo = evaler_.eval('DecayHeat')
     compo = get_reduced_df(compo, [['NucId', nuc_list]])
 
     base_col = ['SimId', 'ResourceId']
@@ -211,13 +213,13 @@ def get_transaction_decayheat_df(evaler, send_list=[], rec_list=[], commod_list=
     return df
 
 
-def get_transaction_timeseries(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the receiving facility
@@ -227,7 +229,8 @@ def get_transaction_timeseries(evaler, send_list=[], rec_list=[], commod_list=[]
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    df = get_transaction_nuc_df(evaler, send_list, rec_list, commod_list, nuc_list)
+    df = get_transaction_nuc_df(
+        evaler_, send_list, rec_list, commod_list, nuc_list)
 
     group_end = ['ReceiverProto', 'SenderProto', 'Time']
     group_start = group_end + ['Mass']
@@ -237,18 +240,18 @@ def get_transaction_timeseries(evaler, send_list=[], rec_list=[], commod_list=[]
     df = df[['Time', 'Mass']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return df
 
 
-def get_transaction_activity_timeseries(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_activity_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the receiving facility
@@ -258,8 +261,8 @@ def get_transaction_activity_timeseries(evaler, send_list=[], rec_list=[], commo
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    df = get_transaction_activity_df(evaler, send_list, rec_list, commod_list,
-            nuc_list)
+    df = get_transaction_activity_df(evaler_, send_list, rec_list, commod_list,
+                                     nuc_list)
 
     group_end = ['ReceiverProto', 'SenderProto', 'Time']
     group_start = group_end + ['Activity']
@@ -269,17 +272,18 @@ def get_transaction_activity_timeseries(evaler, send_list=[], rec_list=[], commo
     df = df[['Time', 'Activity']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return df
 
-def get_transaction_decayheat_timeseries(evaler, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+
+def get_transaction_decayheat_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     send_list : list of the sending facility
     rec_list : list of the receiving facility
     commod_list : list of the receiving facility
@@ -289,8 +293,8 @@ def get_transaction_decayheat_timeseries(evaler, send_list=[], rec_list=[], comm
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    df = get_transaction_decayheat_df(evaler, send_list, rec_list, commod_list,
-            nuc_list)
+    df = get_transaction_decayheat_df(evaler_, send_list, rec_list, commod_list,
+                                      nuc_list)
 
     group_end = ['ReceiverProto', 'SenderProto', 'Time']
     group_start = group_end + ['DecayHeat']
@@ -300,25 +304,25 @@ def get_transaction_decayheat_timeseries(evaler, send_list=[], rec_list=[], comm
     df = df[['Time', 'DecayHeat']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return df
 
 
-def get_inventory_df(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_df(evaler_, fac_list=[], nuc_list=[]):
     """
     Shape the reduced inventory Data Frame. Applying nuclides/facilities selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
 
     # Get inventory table
-    df = evaler.eval('ExplicitInventory')
-    agents = evaler.eval('AgentEntry')
+    df = evaler_.eval('ExplicitInventory')
+    agents = evaler_.eval('AgentEntry')
 
     rdc_list = []  # because we want to get reed of the nuclide asap
     if len(nuc_list) != 0:
@@ -343,14 +347,14 @@ def get_inventory_df(evaler, fac_list=[], nuc_list=[]):
     return df
 
 
-def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_timeseries(evaler_, fac_list=[], nuc_list=[]):
     """
     Shape the reduced inventory Data Frame into a simple time serie. Applying
     nuclides/facilities selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
@@ -358,26 +362,26 @@ def get_inventory_timeseries(evaler, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    df = get_inventory_df(evaler, fac_list, nuc_list)
+    df = get_inventory_df(evaler_, fac_list, nuc_list)
 
     group_end = ['Time']
     group_start = group_end + ['Quantity']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return df
 
 
-def get_inventory_activity_df(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_activity_df(evaler_, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the activity of the inventory in the selcted
     facilities. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
@@ -385,7 +389,7 @@ def get_inventory_activity_df(evaler, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    df = get_inventory_df(evaler, fac_list, nuc_list)
+    df = get_inventory_df(evaler_, fac_list, nuc_list)
     for i, row in df.iterrows():
         val = 1000 * data.N_A * df.ix[i, 'Quantity'] * \
             data.decay_const(int(df.ix[i, 'NucId']))
@@ -394,14 +398,14 @@ def get_inventory_activity_df(evaler, fac_list=[], nuc_list=[]):
     return df
 
 
-def get_inventory_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_activity_timeseries(evaler_, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
@@ -409,25 +413,25 @@ def get_inventory_activity_timeseries(evaler, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    activity = get_inventory_activity_df(evaler, fac_list, nuc_list)
+    activity = get_inventory_activity_df(evaler_, fac_list, nuc_list)
     group_end = ['Time']
     group_start = group_end + ['Activity']
     activity = activity[group_start].groupby(group_end).sum()
     activity.reset_index(inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return activity
 
 
-def get_inventory_decayheat_df(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_decayheat_df(evaler_, fac_list=[], nuc_list=[]):
     """
     Get a Inventory PDF including the decay heat of the inventory in the selected
     facilities. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
@@ -435,7 +439,7 @@ def get_inventory_decayheat_df(evaler, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    df = get_inventory_activity_df(evaler, fac_list, nuc_list)
+    df = get_inventory_activity_df(evaler_, fac_list, nuc_list)
     for i, row in df.iterrows():
         val = data.MeV_per_MJ * \
             df.ix[i, 'Activity'] * data.q_val(int(df.ix[i, 'NucId']))
@@ -444,14 +448,14 @@ def get_inventory_decayheat_df(evaler, fac_list=[], nuc_list=[]):
     return df
 
 
-def get_inventory_decayheat_timeseries(evaler, fac_list=[], nuc_list=[]):
+def get_inventory_decayheat_timeseries(evaler_, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     nuc_list : list of nuclide to select.
     """
@@ -459,31 +463,31 @@ def get_inventory_decayheat_timeseries(evaler, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    decayheat = get_inventory_decayheat_df(evaler, fac_list, nuc_list)
+    decayheat = get_inventory_decayheat_df(evaler_, fac_list, nuc_list)
     group_end = ['Time']
     group_start = group_end + ['DecayHeat']
     decayheat = decayheat[group_start].groupby(group_end).sum()
     decayheat.reset_index(inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return decayheat
 
 
-def get_power_timeseries(evaler, fac_list=[]):
+def get_power_timeseries(evaler_, fac_list=[]):
     """
     Shape the reduced Power Data Frame into a simple time serie. Applying
     facilities selection when required.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_list : list of name of the facility
     """
 
     # Get inventory table
-    power = evaler.eval('TimeSeriesPower')
-    agents = evaler.eval('AgentEntry')
+    power = evaler_.eval('TimeSeriesPower')
+    agents = evaler_.eval('AgentEntry')
 
     rdc_list = []  # because we want to get reed of the facility asap
     if len(fac_list) != 0:
@@ -500,23 +504,23 @@ def get_power_timeseries(evaler, fac_list=[]):
     df = power[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return df
 
 
-def get_deployment_timeseries(evaler, fac_list=[]):
+def get_deployment_timeseries(evaler_, fac_list=[]):
     """
     Get a simple time series with deployment schedule of the selected facilities.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     """
 
     # Get inventory table
-    df = evaler.eval('AgentEntry')
+    df = evaler_.eval('AgentEntry')
 
     rdc_list = []  # because we want to get reed of the facility asap
     if len(fac_list) != 0:
@@ -528,31 +532,30 @@ def get_deployment_timeseries(evaler, fac_list=[]):
 
     # Adding a constante column to easely sum the amount of facilities build per
     # time step
-    df = df.assign(Value = lambda x: 1)
-
+    df = df.assign(Value=lambda x: 1)
     group_end = ['EnterTime']
     group_start = group_end + ['Value']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
     df.rename(index=str, columns={'EnterTime': 'Time'}, inplace=True)
 
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return df
 
 
-def get_retirement_timeseries(evaler, fac_list=[]):
+def get_retirement_timeseries(evaler_, fac_list=[]):
     """
     Get a simple time series with retirement schedule of the selected facilities.
 
     Parameters
     ----------
-    evaler : evaler
+    evaler_ : evaler
     fac_name : name of the facility
     """
 
     # Get inventory table
-    df = evaler.eval('AgentEntry')
+    df = evaler_.eval('AgentEntry')
     df = df[df['Lifetime'] > 0]
 
     rdc_list = []  # because we want to get reed of the facility asap
@@ -566,17 +569,14 @@ def get_retirement_timeseries(evaler, fac_list=[]):
     # Adding a constante column to easely sum the amount of facilities build per
     # time stepi
 
-    df = df.assign(Value = lambda x: 1)
-
+    df = df.assign(Value=lambda x: 1)
     df['DecomTime'] = df['EnterTime'] + df['Lifetime']
-
     group_end = ['DecomTime']
     group_start = group_end + ['Value']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
     df.rename(index=str, columns={'DecomTime': 'Time'}, inplace=True)
-    time = evaler.eval('TimeList')
-    df = add_missing_time_step(df,time)
+    time = evaler_.eval('TimeList')
+    df = add_missing_time_step(df, time)
     return df
-
