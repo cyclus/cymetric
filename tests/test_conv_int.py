@@ -246,15 +246,18 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
         (942390000, 0.0444814879803, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
         (942390000, 0.0444814879803, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId',
+                                            '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto',
+                              'O'), ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     #refs.index = refs.index.astype('str')
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = com.get_transaction_nuc_df(myEval, nuc_list=['942390000', '922380000'])
+    cal = com.get_transaction_nuc_df(
+        myEval, nuc_list=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -279,8 +282,10 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
         (922380000, 0.9600000000000, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
         (922380000, 0.9600000000000, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId',
+                                            '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto',
+                              'O'), ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     #refs.index = refs.index.astype('str')
@@ -314,15 +319,17 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
         (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
         (942390000, 102084984531.0, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId',
+                                                '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto',
+                              'O'), ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
-    #refs.index = refs.index.astype('str')
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = com.get_transaction_activity_df(myEval, nuc_list=['942390000', '922380000'])
+    cal = com.get_transaction_activity_df(
+        myEval, nuc_list=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -347,23 +354,87 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
         (922380000, 11938805.97080, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
         (922380000, 11938805.97080, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId',
+                                                '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto',
+                              'O'), ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
-    #refs.index = refs.index.astype('str')
     assert_frame_equal(cal, refs)
+
+
+@dbtest
+def test_convint_get_transaction_decayheat_df(db, fname, backend):
+    myEval = cym.Evaluator(db)
+    cal = com.get_transaction_decayheat_df(myEval)
+
+    exp_head = ['SimId', 'ResourceId', 'NucId', 'DecayHeat', 'ReceiverId', 'ReceiverProto',
+                'SenderId', 'SenderProto', 'TransactionId', 'Commodity', 'Time']
+
+    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+
+    # test single nuclide selection
+    cal = com.get_transaction_decayheat_df(myEval, nuc_list=['942390000'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    # SimId change at each test need to drop it
+    cal = cal.drop('TransactionId', 1)
+    # SimId change at each test need to drop it
+    cal = cal.drop('ResourceId', 1)
+
+    refs = pd.DataFrame(np.array([
+        (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 3.34065303191e+30, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 3.34065303191e+30, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 3.34065303191e+30, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 3.34065303191e+30, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+    ], dtype=ensure_dt_bytes([
+        ('NucId', '<i8'), ('DecayHeat', '<f8'), ('ReceiverId',
+                                                '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto',
+                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+
+    # test multiple nuclide selection
+    cal = com.get_transaction_decayheat_df(
+        myEval, nuc_list=['942390000', '922380000'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    # SimId change at each test need to drop it
+    cal = cal.drop('TransactionId', 1)
+    # SimId change at each test need to drop it
+    cal = cal.drop('ResourceId', 1)
+
+    refs = pd.DataFrame(np.array([
+        (922380000, 2.609253035160e26, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (922380000, 2.609253035160e26, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (922380000, 2.609253035160e26, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 3.34065303191e+30, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (922380000, 2.609253035160e26, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (922380000, 2.609253035160e26, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 3.34065303191e+30, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (922380000, 2.609253035160e26, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 3.34065303191e+30, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (922380000, 2.609253035160e26, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 3.34065303191e+30, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        (922380000, 3.18184057182e+26, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
+        (922380000, 3.18184057182e+26, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
+    ], dtype=ensure_dt_bytes([
+        ('NucId', '<i8'), ('DecayHeat', '<f8'), ('ReceiverId',
+                                                '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto',
+                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+
+
 if __name__ == "__main__":
     nose.runmodule()
 
 
-#[left]:  [6, 0, 2, 5, 1, 4, 8, 3, 7]
-#[left]:  [6, 0, 1, 4, 2, 5, 7, 3, 8]
-#[right]: [6, 0, 2, 5, 1, 4, 8, 3, 7]
-
-#@dbtest
-# def test_resources(db, fname, backend):
-#    r = root_metrics.resources(db=db)
-#    obs = r()
-#    assert_less(0, len(obs))
-#    assert_equal('Resources', r.name)
