@@ -246,10 +246,9 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
         (942390000, 0.0444814879803, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
         (942390000, 0.0444814879803, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId',
-                                            '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto',
-                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId', '<i8'),
+        ('ReceiverProto', 'O'), ('SenderId', '<i8'), ('SenderProto', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     #refs.index = refs.index.astype('str')
@@ -282,10 +281,9 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
         (922380000, 0.9600000000000, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
         (922380000, 0.9600000000000, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId',
-                                            '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto',
-                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId', '<i8'),
+        ('ReceiverProto', 'O'), ('SenderId', '<i8'), ('SenderProto', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     #refs.index = refs.index.astype('str')
@@ -319,10 +317,9 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
         (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
         (942390000, 102084984531.0, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId',
-                                                '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto',
-                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId','<i8'),
+        ('ReceiverProto', 'O'), ('SenderId', '<i8'), ('SenderProto', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     assert_frame_equal(cal, refs)
@@ -354,10 +351,9 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
         (922380000, 11938805.97080, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
         (922380000, 11938805.97080, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId',
-                                                '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto',
-                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId','<i8'),
+        ('ReceiverProto', 'O'), ('SenderId', '<i8'), ('SenderProto', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     assert_frame_equal(cal, refs)
@@ -390,10 +386,9 @@ def test_convint_get_transaction_decayheat_df(db, fname, backend):
         (942390000, 3.34065303191e+30, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
         (942390000, 3.34065303191e+30, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('DecayHeat', '<f8'), ('ReceiverId',
-                                                '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto',
-                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('DecayHeat', '<f8'), ('ReceiverId','<i8'),
+        ('ReceiverProto', 'O'), ('SenderId', '<i8'), ('SenderProto', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     assert_frame_equal(cal, refs)
@@ -425,10 +420,9 @@ def test_convint_get_transaction_decayheat_df(db, fname, backend):
         (922380000, 3.18184057182e+26, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
         (922380000, 3.18184057182e+26, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
     ], dtype=ensure_dt_bytes([
-        ('NucId', '<i8'), ('DecayHeat', '<f8'), ('ReceiverId',
-                                                '<i8'), ('ReceiverProto', 'O'),
-        ('SenderId', '<i8'), ('SenderProto',
-                              'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('NucId', '<i8'), ('DecayHeat', '<f8'), ('ReceiverId','<i8'),
+        ('ReceiverProto', 'O'), ('SenderId', '<i8'), ('SenderProto', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     assert_frame_equal(cal, refs)
