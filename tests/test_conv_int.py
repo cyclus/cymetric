@@ -21,8 +21,7 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 
 @dbtest
-def test_convint_gettransactiondf(db, fname, backend):
-    #db = cym.dbopen()
+def test_convint_get_transaction_df(db, fname, backend):
     myEval = cym.Evaluator(db)
     cal = com.get_transaction_df(myEval)
 
@@ -221,8 +220,7 @@ def test_convint_gettransactiondf(db, fname, backend):
 
 
 @dbtest
-def test_convint_gettransactioninucdf(db, fname, backend):
-    #db = cym.dbopen()
+def test_convint_get_transaction_nuc_df(db, fname, backend):
     myEval = cym.Evaluator(db)
     cal = com.get_transaction_nuc_df(myEval)
 
@@ -254,8 +252,7 @@ def test_convint_gettransactioninucdf(db, fname, backend):
     )
     #refs.index = refs.index.astype('str')
     assert_frame_equal(cal, refs)
-    
-    
+
     # test multiple nuclide selection
     cal = com.get_transaction_nuc_df(myEval, nuc_list=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
@@ -289,6 +286,73 @@ def test_convint_gettransactioninucdf(db, fname, backend):
     #refs.index = refs.index.astype('str')
     assert_frame_equal(cal, refs)
 
+
+@dbtest
+def test_convint_get_transaction_activity_df(db, fname, backend):
+    myEval = cym.Evaluator(db)
+    cal = com.get_transaction_activity_df(myEval)
+
+    exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverProto',
+                'SenderId', 'SenderProto', 'TransactionId', 'Commodity', 'Time']
+
+    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+
+    # test single nuclide selection
+    cal = com.get_transaction_activity_df(myEval, nuc_list=['942390000'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    # SimId change at each test need to drop it
+    cal = cal.drop('TransactionId', 1)
+    # SimId change at each test need to drop it
+    cal = cal.drop('ResourceId', 1)
+
+    refs = pd.DataFrame(np.array([
+        (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 102084984531.0, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+    ], dtype=ensure_dt_bytes([
+        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+    ]))
+    )
+    #refs.index = refs.index.astype('str')
+    assert_frame_equal(cal, refs)
+
+    # test multiple nuclide selection
+    cal = com.get_transaction_activity_df(myEval, nuc_list=['942390000', '922380000'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    # SimId change at each test need to drop it
+    cal = cal.drop('TransactionId', 1)
+    # SimId change at each test need to drop it
+    cal = cal.drop('ResourceId', 1)
+
+    refs = pd.DataFrame(np.array([
+        (922380000, 9790360.331530, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (922380000, 9790360.331530, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (922380000, 9790360.331530, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (922380000, 9790360.331530, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (922380000, 9790360.331530, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (922380000, 9790360.331530, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 102084984531.0, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (922380000, 9790360.331530, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 102084984531.0, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        (922380000, 11938805.97080, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
+        (922380000, 11938805.97080, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
+    ], dtype=ensure_dt_bytes([
+        ('NucId', '<i8'), ('Activity', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+    ]))
+    )
+    #refs.index = refs.index.astype('str')
+    assert_frame_equal(cal, refs)
 if __name__ == "__main__":
     nose.runmodule()
 
