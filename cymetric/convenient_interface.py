@@ -215,7 +215,7 @@ def get_transaction_decayheat_df(evaler_, send_list=[], rec_list=[], commod_list
 
 def get_transaction_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
-    Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
+    Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
     Parameters
     ----------
@@ -247,7 +247,7 @@ def get_transaction_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[
 
 def get_transaction_activity_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
-    Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
+    Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
     Parameters
     ----------
@@ -279,7 +279,7 @@ def get_transaction_activity_timeseries(evaler_, send_list=[], rec_list=[], comm
 
 def get_transaction_decayheat_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
-    Shape the reduced transation Dta Frame into a simple time serie. Applying nuclides selection when required.
+    Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
     Parameters
     ----------
