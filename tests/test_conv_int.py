@@ -26,9 +26,8 @@ def test_convint_gettransactiondf(db, fname, backend):
     myEval = cym.Evaluator(db)
     cal = com.get_transaction_df(myEval)
 
-    exp_head = ['SimId', 'ReceiverId', 'ReceiverProto',
-                'SenderId', 'SenderProto', 'TransactionId',
-                'ResourceId', 'Commodity', 'Time']
+    exp_head = ['SimId', 'ReceiverId', 'ReceiverProto', 'SenderId',
+                'SenderProto', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
 
     assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
 
@@ -220,6 +219,40 @@ def test_convint_gettransactiondf(db, fname, backend):
     refs.index = refs.index.astype('str')
     assert_frame_equal(cal, refs)
 
+
+@dbtest
+def test_convint_gettransactioninucdf(db, fname, backend):
+    #db = cym.dbopen()
+    myEval = cym.Evaluator(db)
+    cal = com.get_transaction_nuc_df(myEval)
+
+    exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverProto',
+                'SenderId', 'SenderProto', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
+
+    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+
+#    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+#    # SimId change at each test need to drop it
+#    cal = cal.drop('TransactionId', 1)
+#    # SimId change at each test need to drop it
+#    cal = cal.drop('ResourceId', 1)
+#
+#    refs = pd.DataFrame(np.array([
+#        (942390000, 0.044481, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+#        (942390000, 0.044481, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+#        (942390000, 0.044481, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+#        (942390000, 0.044481, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+#        (942390000, 0.044481, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+#        (942390000, 0.044481, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+#        (942390000, 0.044481, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+#    ], dtype=ensure_dt_bytes([
+#        ('NucId', '<i8'), ('Mass', '<i8'), ('ReceiverId',
+#                                            '<i8'), ('ReceiverProto', 'O'), ('SenderId', '<i8'),
+#        ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+#    ]))
+#    )
+#    refs.index = refs.index.astype('str')
+#    assert_frame_equal(cal, refs)
 
 if __name__ == "__main__":
     nose.runmodule()
