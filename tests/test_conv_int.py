@@ -231,7 +231,7 @@ def test_convint_gettransactioninucdf(db, fname, backend):
 
     assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
 
-    # test single nuclide sectection
+    # test single nuclide selection
     cal = com.get_transaction_nuc_df(myEval, nuc_list=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -247,6 +247,40 @@ def test_convint_gettransactioninucdf(db, fname, backend):
         (942390000, 0.0444814879803, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
         (942390000, 0.0444814879803, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
         (942390000, 0.0444814879803, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+    ], dtype=ensure_dt_bytes([
+        ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
+        ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+    ]))
+    )
+    #refs.index = refs.index.astype('str')
+    assert_frame_equal(cal, refs)
+    
+    
+    # test multiple nuclide selection
+    cal = com.get_transaction_nuc_df(myEval, nuc_list=['942390000', '922380000'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    # SimId change at each test need to drop it
+    cal = cal.drop('TransactionId', 1)
+    # SimId change at each test need to drop it
+    cal = cal.drop('ResourceId', 1)
+
+    refs = pd.DataFrame(np.array([
+        (922380000, 0.7872433760310, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
+        (922380000, 0.7872433760310, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
+        (922380000, 0.7872433760310, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (942390000, 0.0444814879803, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
+        (922380000, 0.7872433760310, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        (922380000, 0.7872433760310, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (942390000, 0.0444814879803, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
+        (922380000, 0.7872433760310, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 0.0444814879803, 16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        (922380000, 0.7872433760310, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        (942390000, 0.0444814879803, 17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        (922380000, 0.9600000000000, 17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
+        (922380000, 0.9600000000000, 15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
     ], dtype=ensure_dt_bytes([
         ('NucId', '<i8'), ('Mass', '<f8'), ('ReceiverId', '<i8'), ('ReceiverProto', 'O'),
         ('SenderId', '<i8'), ('SenderProto', 'O'), ('Commodity', 'O'), ('Time', '<i8')
