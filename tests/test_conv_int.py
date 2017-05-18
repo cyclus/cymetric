@@ -655,6 +655,57 @@ def test_convint_get_inventory_activity_df(db, fname, backend):
 
 
 
+@dbtest
+def test_convint_get_inventory_decayheat_df(db, fname, backend):
+    myEval = cym.Evaluator(db)
+    cal = com.get_inventory_decayheat_df(myEval)
+
+    exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
+            'NucId', 'Quantity', 'Activity', 'DecayHeat']
+
+    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+
+    cal = com.get_inventory_decayheat_df(myEval, fac_list=['Reactor1'],
+                               nuc_list=['94239'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    refs = pd.DataFrame(np.array([
+        (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803, 2.44036364223e+13, 7.98590335085e+32),
+        (15, 'Reactor1', 2, 'core',  942390000, 0.0444814879803, 2.44036364223e+13, 7.98590335085e+32),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.0176991150442, 9.71016906463e+12, 3.17757855136e+32),
+        (15, 'Reactor1', 3, 'core',  942390000, 0.0444814879803, 2.44036364223e+13, 7.98590335085e+32),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.0353982300885, 1.94203381293e+13, 6.35515710272e+32),
+        (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327, 2.91305071939e+13, 9.53273565408e+32)
+    ], dtype=ensure_dt_bytes([
+        ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8'),
+        ('Activity', '<f8'), ('DecayHeat', '<f8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+    cal = com.get_inventory_decayheat_df(myEval, fac_list=['Reactor1'],
+                               nuc_list=['94239', '92235'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    refs = pd.DataFrame(np.array([
+        (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534, 29671782.9213    , 8.65609466244e+26),
+        (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803 , 2.44036364223e+13, 7.98590335085e+32),
+        (15, 'Reactor1', 2, 'core',  922350000, 0.00157922442534, 29671782.9213    , 8.65609466244e+26),
+        (15, 'Reactor1', 2, 'core',  942390000, 0.0444814879803 , 2.44036364223e+13, 7.98590335085e+32),
+        (15, 'Reactor1', 2, 'spent', 922350000, 0.00884955752212, 166272852.378    , 4.85064734329e+27),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.0176991150442 , 9.71016906463e+12, 3.17757855136e+32),
+        (15, 'Reactor1', 3, 'core',  922350000, 0.00157922442534, 29671782.9213    , 8.65609466244e+26),
+        (15, 'Reactor1', 3, 'core',  942390000, 0.0444814879803 , 2.44036364223e+13, 7.98590335085e+32),
+        (15, 'Reactor1', 3, 'spent', 922350000, 0.0176991150442 , 332545704.756    , 9.70129468658e+27),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.0353982300885 , 1.94203381293e+13, 6.35515710272e+32),
+        (15, 'Reactor1', 4, 'core',  922350000, 0.04            , 751553292.748    , 2.19249259917e+28),
+        (15, 'Reactor1', 4, 'spent', 922350000, 0.0265486725664 , 498818557.134    , 1.45519420299e+28),
+        (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327 , 2.91305071939e+13, 9.53273565408e+32)
+    ], dtype=ensure_dt_bytes([
+        ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8'),
+        ('Activity', '<f8'), ('DecayHeat', '<f8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
 
 
 
