@@ -579,8 +579,6 @@ def test_convint_get_inventory_df(db, fname, backend):
     cal = com.get_inventory_df(myEval, fac_list=['Reactor1'],
                                nuc_list=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    print(cal)
-
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534),
         (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803 ),
@@ -601,6 +599,71 @@ def test_convint_get_inventory_df(db, fname, backend):
     ]))
     )
     assert_frame_equal(cal, refs)
+
+
+@dbtest
+def test_convint_get_inventory_activity_df(db, fname, backend):
+    myEval = cym.Evaluator(db)
+    cal = com.get_inventory_activity_df(myEval)
+
+    exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
+            'NucId', 'Quantity', 'Activity']
+
+    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+
+    cal = com.get_inventory_activity_df(myEval, fac_list=['Reactor1'],
+                               nuc_list=['94239'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    refs = pd.DataFrame(np.array([
+        (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 2, 'core',  942390000, 0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.0176991150442, 9.71016906463e+12),
+        (15, 'Reactor1', 3, 'core',  942390000, 0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.0353982300885, 1.94203381293e+13),
+        (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327, 2.91305071939e+13)
+    ], dtype=ensure_dt_bytes([
+        ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8'),
+        ('Activity', '<f8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+    cal = com.get_inventory_activity_df(myEval, fac_list=['Reactor1'],
+                               nuc_list=['94239', '92235'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    refs = pd.DataFrame(np.array([
+        (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534, 29671782.9213    ),
+        (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803 , 2.44036364223e+13),
+        (15, 'Reactor1', 2, 'core',  922350000, 0.00157922442534, 29671782.9213    ),
+        (15, 'Reactor1', 2, 'core',  942390000, 0.0444814879803 , 2.44036364223e+13),
+        (15, 'Reactor1', 2, 'spent', 922350000, 0.00884955752212, 166272852.378    ),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.0176991150442 , 9.71016906463e+12),
+        (15, 'Reactor1', 3, 'core',  922350000, 0.00157922442534, 29671782.9213    ),
+        (15, 'Reactor1', 3, 'core',  942390000, 0.0444814879803 , 2.44036364223e+13),
+        (15, 'Reactor1', 3, 'spent', 922350000, 0.0176991150442 , 332545704.756    ),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.0353982300885 , 1.94203381293e+13),
+        (15, 'Reactor1', 4, 'core',  922350000, 0.04            , 751553292.748    ),
+        (15, 'Reactor1', 4, 'spent', 922350000, 0.0265486725664 , 498818557.134    ),
+        (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327 , 2.91305071939e+13)
+    ], dtype=ensure_dt_bytes([
+        ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8'),
+        ('Activity', '<f8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
