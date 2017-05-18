@@ -231,7 +231,7 @@ def decommission_series(series):
     agent_exit = series[1]
     exit_index = ['SimId', 'ExitTime', 'Prototype']
     if agent_exit is not None:
-    	exit = pd.merge(agent_entry.reset_index(), agent_exit.reset_index(),
+        exit = pd.merge(agent_entry.reset_index(), agent_exit.reset_index(),
             on=['SimId', 'AgentId'], how='inner').set_index(exit_index)
     else:
         return print('No agents were decommissioned during this simulation.')
@@ -297,7 +297,7 @@ del _agentsdeps, _agentsschema
 
 # Transaction Quantity
 _transdeps = [
-    ('Materials', ('SimId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'),
+    ('Materials', ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
         'Mass'),
     ('Transactions', ('SimId', 'TransactionId', 'SenderId', 'ReceiverId',
         'ResourceId'), 'Commodity')
@@ -402,7 +402,7 @@ def annual_electricity_generated_by_agent(series):
                               'AgentId': elec.AgentId,
                               'Year': elec.Time.apply(lambda x: x//12),
                               'Energy': elec.Value.apply(lambda x: x/12)},
-			columns=['SimId', 'AgentId', 'Year', 'Energy'])
+                        columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
