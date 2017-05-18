@@ -549,5 +549,35 @@ def test_convint_get_transaction_decayheat_timeserie(db, fname, backend):
     assert_frame_equal(cal, refs)
 
 
+@dbtest
+def test_convint_get_inventory_df(db, fname, backend):
+    myEval = cym.Evaluator(db)
+    cal = com.get_inventory_df(myEval)
+
+    exp_head = ['SimId', 'AgentId', 'Prototype',
+                'Time', 'InventoryName', 'NucId', 'Quantity']
+
+    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+
+    cal = com.get_inventory_df(myEval, fac_list=['Reactor1'],
+                               nuc_list=['94239'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    print(cal)
+
+    refs = pd.DataFrame(np.array([
+        (0, 15, 'Reactor1', 1, 'core', 942390000, 0.044481),
+        (1, 15, 'Reactor1', 2, 'core', 942390000, 0.044481),
+        (2, 15, 'Reactor1', 2, 'spent', 942390000, 0.017699),
+        (3, 15, 'Reactor1', 3, 'core', 942390000, 0.044481),
+        (4, 15, 'Reactor1', 3, 'spent', 942390000, 0.035398),
+        (5, 15, 'Reactor1', 4, 'spent', 942390000, 0.053097)
+    ], dtype=ensure_dt_bytes([
+        ('AgentId', '<i8'), ('Prototype', '0'), ('Time', '<i8'),
+        ('InventoryName', 'O'), ('NucIdId', '<i8'), ('Quantity', '<f8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+
+
 if __name__ == "__main__":
     nose.runmodule()
