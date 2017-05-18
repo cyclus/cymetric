@@ -565,15 +565,15 @@ def test_convint_get_inventory_df(db, fname, backend):
     print(cal)
 
     refs = pd.DataFrame(np.array([
-        (0, 15, 'Reactor1', 1, 'core', 942390000, 0.044481),
-        (1, 15, 'Reactor1', 2, 'core', 942390000, 0.044481),
-        (2, 15, 'Reactor1', 2, 'spent', 942390000, 0.017699),
-        (3, 15, 'Reactor1', 3, 'core', 942390000, 0.044481),
-        (4, 15, 'Reactor1', 3, 'spent', 942390000, 0.035398),
-        (5, 15, 'Reactor1', 4, 'spent', 942390000, 0.053097)
+        (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803),
+        (15, 'Reactor1', 2, 'core',  942390000, 0.0444814879803),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.0176991150442),
+        (15, 'Reactor1', 3, 'core',  942390000, 0.0444814879803),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.0353982300885),
+        (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327)
     ], dtype=ensure_dt_bytes([
-        ('AgentId', '<i8'), ('Prototype', '0'), ('Time', '<i8'),
-        ('InventoryName', 'O'), ('NucIdId', '<i8'), ('Quantity', '<f8')
+        ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')
     ]))
     )
     assert_frame_equal(cal, refs)
