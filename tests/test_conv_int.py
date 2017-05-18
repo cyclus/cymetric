@@ -508,6 +508,46 @@ def test_convint_get_transaction_activity_timeserie(db, fname, backend):
 
     assert_frame_equal(cal, refs)
 
+@dbtest
+def test_convint_get_transaction_decayheat_timeserie(db, fname, backend):
+    myEval = cym.Evaluator(db)
+    cal = com.get_transaction_decayheat_timeseries(myEval)
+
+    exp_head = ['Time', 'DecayHeat']
+
+    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+
+    # test single nuclide selection
+    cal = com.get_transaction_decayheat_timeseries(
+        myEval, nuc_list=['942390000'])
+    refs = pd.DataFrame(np.array([
+        (0, 0.000000000),
+        (1, 3.34065303191e+30),
+        (2, 6.68130606382e+30),
+        (3, 6.68130606382e+30),
+        (4, 6.68130606382e+30),
+    ], dtype=ensure_dt_bytes([
+        ('Time', '<i8'), ('DecayHeat', '<f8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+
+    # test multiple nuclide selection
+    cal = com.get_transaction_decayheat_timeseries(
+        myEval, nuc_list=['942390000', '922380000'])
+    refs = pd.DataFrame(np.array([
+        (0, 0.000000000),
+        (1, 3.34091395721e+30),
+        (2, 6.68182791443e+30),
+        (3, 6.68214609848e+30),
+        (4, 6.68214609848e+30),
+    ], dtype=ensure_dt_bytes([
+        ('Time', '<i8'), ('DecayHeat', '<f8')
+    ]))
+    )
+
+    assert_frame_equal(cal, refs)
+
 
 if __name__ == "__main__":
     nose.runmodule()
