@@ -562,8 +562,6 @@ def test_convint_get_inventory_df(db, fname, backend):
     cal = com.get_inventory_df(myEval, fac_list=['Reactor1'],
                                nuc_list=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    print(cal)
-
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803),
         (15, 'Reactor1', 2, 'core',  942390000, 0.0444814879803),
@@ -571,6 +569,32 @@ def test_convint_get_inventory_df(db, fname, backend):
         (15, 'Reactor1', 3, 'core',  942390000, 0.0444814879803),
         (15, 'Reactor1', 3, 'spent', 942390000, 0.0353982300885),
         (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327)
+    ], dtype=ensure_dt_bytes([
+        ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')
+    ]))
+    )
+    assert_frame_equal(cal, refs)
+    
+    cal = com.get_inventory_df(myEval, fac_list=['Reactor1'],
+                               nuc_list=['94239', '92235'])
+    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    print(cal)
+
+    refs = pd.DataFrame(np.array([
+        (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534),
+        (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803 ),
+        (15, 'Reactor1', 2, 'core',  922350000, 0.00157922442534),
+        (15, 'Reactor1', 2, 'core',  942390000, 0.0444814879803 ),
+        (15, 'Reactor1', 2, 'spent', 922350000, 0.00884955752212),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.0176991150442 ),
+        (15, 'Reactor1', 3, 'core',  922350000, 0.00157922442534),
+        (15, 'Reactor1', 3, 'core',  942390000, 0.0444814879803 ),
+        (15, 'Reactor1', 3, 'spent', 922350000, 0.0176991150442 ),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.0353982300885 ),
+        (15, 'Reactor1', 4, 'core',  922350000, 0.04            ),
+        (15, 'Reactor1', 4, 'spent', 922350000, 0.0265486725664 ),
+        (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327 )
     ], dtype=ensure_dt_bytes([
         ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
         ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')
