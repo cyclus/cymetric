@@ -131,7 +131,9 @@ def get_transaction_df(evaler_, send_list=[], rec_list=[], commod_list=[]):
 
 def get_transaction_nuc_df(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
-    Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
+
+    Filter the Transaction Data Frame, which include nuclide composition, on specific sending facility and
+    receving facility. Applying nuclides selection when required.
 
     Parameters
     ----------
