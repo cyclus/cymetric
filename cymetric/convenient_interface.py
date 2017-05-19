@@ -215,7 +215,7 @@ def get_transaction_decayheat_df(evaler_, send_list=[], rec_list=[], commod_list
     return df
 
 
-def get_transaction_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_timeserie(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -247,7 +247,7 @@ def get_transaction_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[
     return df
 
 
-def get_transaction_activity_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_activity_timeserie(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -279,7 +279,7 @@ def get_transaction_activity_timeseries(evaler_, send_list=[], rec_list=[], comm
     return df
 
 
-def get_transaction_decayheat_timeseries(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
+def get_transaction_decayheat_timeserie(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -349,7 +349,7 @@ def get_inventory_df(evaler_, fac_list=[], nuc_list=[]):
     return df
 
 
-def get_inventory_timeseries(evaler_, fac_list=[], nuc_list=[]):
+def get_inventory_timeserie(evaler_, fac_list=[], nuc_list=[]):
     """
     Shape the reduced inventory Data Frame into a simple time serie. Applying
     nuclides/facilities selection when required.
@@ -400,7 +400,7 @@ def get_inventory_activity_df(evaler_, fac_list=[], nuc_list=[]):
     return df
 
 
-def get_inventory_activity_timeseries(evaler_, fac_list=[], nuc_list=[]):
+def get_inventory_activity_timeserie(evaler_, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -415,15 +415,15 @@ def get_inventory_activity_timeseries(evaler_, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    activity = get_inventory_activity_df(evaler_, fac_list, nuc_list)
+    df = get_inventory_activity_df(evaler_, fac_list, nuc_list)
     group_end = ['Time']
     group_start = group_end + ['Activity']
-    activity = activity[group_start].groupby(group_end).sum()
-    activity.reset_index(inplace=True)
+    df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
     time = evaler_.eval('TimeList')
     df = add_missing_time_step(df, time)
-    return activity
+    return df
 
 
 def get_inventory_decayheat_df(evaler_, fac_list=[], nuc_list=[]):
@@ -450,7 +450,7 @@ def get_inventory_decayheat_df(evaler_, fac_list=[], nuc_list=[]):
     return df
 
 
-def get_inventory_decayheat_timeseries(evaler_, fac_list=[], nuc_list=[]):
+def get_inventory_decayheat_timeserie(evaler_, fac_list=[], nuc_list=[]):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -465,18 +465,18 @@ def get_inventory_decayheat_timeseries(evaler_, fac_list=[], nuc_list=[]):
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
 
-    decayheat = get_inventory_decayheat_df(evaler_, fac_list, nuc_list)
+    df = get_inventory_decayheat_df(evaler_, fac_list, nuc_list)
     group_end = ['Time']
     group_start = group_end + ['DecayHeat']
-    decayheat = decayheat[group_start].groupby(group_end).sum()
-    decayheat.reset_index(inplace=True)
+    df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
 
     time = evaler_.eval('TimeList')
     df = add_missing_time_step(df, time)
-    return decayheat
+    return df
 
 
-def get_power_timeseries(evaler_, fac_list=[]):
+def get_power_timeserie(evaler_, fac_list=[]):
     """
     Shape the reduced Power Data Frame into a simple time serie. Applying
     facilities selection when required.
@@ -511,7 +511,7 @@ def get_power_timeseries(evaler_, fac_list=[]):
     return df
 
 
-def get_deployment_timeseries(evaler_, fac_list=[]):
+def get_deployment_timeserie(evaler_, fac_list=[]):
     """
     Get a simple time series with deployment schedule of the selected facilities.
 
@@ -546,7 +546,7 @@ def get_deployment_timeseries(evaler_, fac_list=[]):
     return df
 
 
-def get_retirement_timeseries(evaler_, fac_list=[]):
+def get_retirement_timeserie(evaler_, fac_list=[]):
     """
     Get a simple time series with retirement schedule of the selected facilities.
 
