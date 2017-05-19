@@ -13,7 +13,8 @@ try:
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
-
+ 
+from graphviz import Digraph
 
 def format_nuclist(nuc_list):
     tools.raise_no_pyne('Unable to format nuclide list!', HAVE_PYNE)
@@ -309,6 +310,42 @@ def get_transaction_decayheat_timeserie(evaler_, send_list=[], rec_list=[], comm
     time = evaler_.eval('TimeList')
     df = add_missing_time_step(df, time)
     return df
+
+
+def get_flow_graph(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[],
+        time={-1,-1}):
+    """
+    Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
+
+    Parameters
+    ----------
+    evaler_ : evaler
+    send_list : list of the sending facility
+    rec_list : list of the receiving facility
+    commod_list : list of the receiving facility
+    nuc_list : list of nuclide to select.
+    """
+    df = get_transaction_nuc_df(evaler_, send_list, rec_list, commod_list, nuc_list)
+    group_end = ['ReceiverProto', 'SenderProto']
+    group_start = group_end + ['Mass']
+    df = df[group_start].groupby(group_end).sum()
+    df.reset_index(inplace=True)
+ 
+    agents_list = evaler_.eval('AgentEntry')['Prototype'].tolist()
+
+    dot= Digraph('G', filename='my_flow.gv')
+    
+    for agent in agents_list:
+        dot.node(agent)
+
+    for index, row in df.iterrows():
+        dot.edge(row['SenderProto'], row['ReceiverProto'], label=str(row['Mass']))
+    
+    return dot
+
+
+
+
 
 
 def get_inventory_df(evaler_, fac_list=[], nuc_list=[]):
