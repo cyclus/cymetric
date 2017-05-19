@@ -76,3 +76,8 @@ def raise_no_pyne(msg, have_pyne=False):
     """Raise an error when PyNE cannot be found."""
     if not have_pyne:
         raise ImportError('pyne could not be imported: ' + msg)
+
+def raise_no_graphviz(msg, have_graphviz=False):
+    """Raise an error when Graphviz cannot be found."""
+    if not have_graphviz:
+        raise ImportError('Graphviz python lib could not be imported: ' + msg)
