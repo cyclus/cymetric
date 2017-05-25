@@ -20,7 +20,15 @@ try:
 except ImportError:
     HAVE_GRAPHVIZ = False
 
+
 def format_nuclist(nuc_list):
+    """
+    format the nuclide list provided by the users into a standart format:
+    ZZAAIIIII.
+    Parameters
+    ----------
+    nuc_list:  list of nuclides
+    """
     tools.raise_no_pyne('Unable to format nuclide list!', HAVE_PYNE)
 
     for i in range(len(nuc_list)):
@@ -34,10 +42,10 @@ def add_missing_time_step(df, ref_time):
     Add the missing time step to a Panda Data Frame.
     Parameters
     ----------
-    df: Pandas Data Frame
-    ref_time: list of the time step references (Coming from TimeStep metrics)
+    df:  Pandas Data Frame
+    ref_time:  list of the time step references (Coming from TimeStep metrics)
     """
-    ref_time.rename(index=str, columns={'TimeStep': 'Time'}, inplace=True)
+    ref_time.rename(index=str, columns={'TimeStep':  'Time'}, inplace=True)
 
     if 'SimId' in ref_time.columns.values:
         ref_time.drop('SimId', 1, inplace=True)
@@ -46,17 +54,17 @@ def add_missing_time_step(df, ref_time):
     return df
 
 
-def merge_n_drop(df, base_col, add_df, add_col):
+def merge(df, base_col, add_df, add_col):
     """
     Merge some additionnal columns fram an additionnal Pandas Data Frame
     onother one and then remove the second base column (keeping SimID
     information).
     Parameters
     ----------
-    df : Pandas Data Frame
-    base_col : list of the base columns names
-    add_df : Pandas Data Frame to add in the df one
-    add_col : columns tobe added
+    df: Pandas Data Frame
+    base_col: list of the base columns names
+    add_df: Pandas Data Frame to add in the df one
+    add_col: columns tobe added
     """
     df = pd.merge(add_df[add_col], df, on=base_col)
     df.drop(base_col[1], 1)
@@ -69,8 +77,8 @@ def get_reduced_df(df, rdc_list):
     in the corresponding columns).
     Parameters
     ----------
-    df : Pandas Data Frame
-    rdc_list : list of pair of string and string list.
+    df: Pandas Data Frame
+    rdc_list: list of pair of string and string list.
     """
     for rdc in rdc_list:
         if len(rdc[1]) != 0:
@@ -88,21 +96,21 @@ def get_transaction_df(evaler_, send_list=[], rec_list=[], commod_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the commodity exchanged
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
     """
 
     # initiate evaluation
     trans = evaler_.eval('Transactions')
     agents = evaler_.eval('AgentEntry')
 
-    rec_agent = agents.rename(index=str, columns={'AgentId': 'ReceiverId'})
+    rec_agent = agents.rename(index=str, columns={'AgentId':  'ReceiverId'})
     if len(rec_list) != 0:
         rec_agent = rec_agent[rec_agent['Prototype'].isin(rec_list)]
 
-    send_agent = agents.rename(index=str, columns={'AgentId': 'SenderId'})
+    send_agent = agents.rename(index=str, columns={'AgentId':  'SenderId'})
     if len(send_list) != 0:
         send_agent = send_agent[send_agent['Prototype'].isin(send_list)]
 
@@ -122,31 +130,30 @@ def get_transaction_df(evaler_, send_list=[], rec_list=[], commod_list=[]):
         # Merge Sender to Transaction PDF
         base_col = ['SimId', 'SenderId']
         added_col = base_col + ['Prototype']
-        trans = merge_n_drop(trans, base_col, send_agent, added_col)
-        trans = trans.rename(index=str, columns={'Prototype': 'SenderProto'})
+        trans = merge(trans, base_col, send_agent, added_col)
+        trans = trans.rename(index=str, columns={'Prototype':  'SenderPrototype'})
 
         # Merge Receiver to Transaction PDF
         base_col = ['SimId', 'ReceiverId']
         added_col = base_col + ['Prototype']
-        trans = merge_n_drop(trans, base_col, rec_agent, added_col)
-        trans = trans.rename(index=str, columns={'Prototype': 'ReceiverProto'})
+        trans = merge(trans, base_col, rec_agent, added_col)
+        trans = trans.rename(index=str, columns={'Prototype':  'ReceiverPrototype'})
 
     return trans
 
 
 def get_transaction_nuc_df(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[]):
     """
-
     Filter the Transaction Data Frame, which include nuclide composition, on specific sending facility and
     receving facility. Applying nuclides selection when required.
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the receiving facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
+    nuc_list: list of nuclide to select.
     """
 
     compo = evaler_.eval('Materials')
@@ -159,7 +166,7 @@ def get_transaction_nuc_df(evaler_, send_list=[], rec_list=[], commod_list=[], n
 
     base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'Mass']
-    df = merge_n_drop(df, base_col, compo, added_col)
+    df = merge(df, base_col, compo, added_col)
 
     return df
 
@@ -170,11 +177,11 @@ def get_transaction_activity_df(evaler_, send_list=[], rec_list=[], commod_list=
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the receiving facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
+    nuc_list: list of nuclide to select.
     """
 
     df = get_transaction_df(evaler_, send_list, rec_list, commod_list)
@@ -187,7 +194,7 @@ def get_transaction_activity_df(evaler_, send_list=[], rec_list=[], commod_list=
 
     base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'Activity']
-    df = merge_n_drop(df, base_col, compo, added_col)
+    df = merge(df, base_col, compo, added_col)
 
     return df
 
@@ -198,11 +205,11 @@ def get_transaction_decayheat_df(evaler_, send_list=[], rec_list=[], commod_list
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the receiving facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
+    nuc_list: list of nuclide to select.
     """
 
     df = get_transaction_df(evaler_, send_list, rec_list, commod_list)
@@ -215,7 +222,7 @@ def get_transaction_decayheat_df(evaler_, send_list=[], rec_list=[], commod_list
 
     base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'DecayHeat']
-    df = merge_n_drop(df, base_col, compo, added_col)
+    df = merge(df, base_col, compo, added_col)
 
     return df
 
@@ -226,11 +233,11 @@ def get_transaction_timeserie(evaler_, send_list=[], rec_list=[], commod_list=[]
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the receiving facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
@@ -239,7 +246,7 @@ def get_transaction_timeserie(evaler_, send_list=[], rec_list=[], commod_list=[]
     df = get_transaction_nuc_df(
         evaler_, send_list, rec_list, commod_list, nuc_list)
 
-    group_end = ['ReceiverProto', 'SenderProto', 'Time']
+    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
     group_start = group_end + ['Mass']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
@@ -258,11 +265,11 @@ def get_transaction_activity_timeserie(evaler_, send_list=[], rec_list=[], commo
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the receiving facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
@@ -271,7 +278,7 @@ def get_transaction_activity_timeserie(evaler_, send_list=[], rec_list=[], commo
     df = get_transaction_activity_df(evaler_, send_list, rec_list, commod_list,
                                      nuc_list)
 
-    group_end = ['ReceiverProto', 'SenderProto', 'Time']
+    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
     group_start = group_end + ['Activity']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
@@ -290,11 +297,11 @@ def get_transaction_decayheat_timeserie(evaler_, send_list=[], rec_list=[], comm
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the receiving facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
@@ -303,7 +310,7 @@ def get_transaction_decayheat_timeserie(evaler_, send_list=[], rec_list=[], comm
     df = get_transaction_decayheat_df(evaler_, send_list, rec_list, commod_list,
                                       nuc_list)
 
-    group_end = ['ReceiverProto', 'SenderProto', 'Time']
+    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
     group_start = group_end + ['DecayHeat']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
@@ -317,28 +324,30 @@ def get_transaction_decayheat_timeserie(evaler_, send_list=[], rec_list=[], comm
 
 
 def get_flow_graph(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=[],
-        time=[-1,-1]):
+                   time=[-1, -1]):
     """
-    Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
+    Generate the dot graph of the transation between facilitiese. Applying times
+    nuclides selection when required.
 
     Parameters
     ----------
-    evaler_ : evaler
-    send_list : list of the sending facility
-    rec_list : list of the receiving facility
-    commod_list : list of the receiving facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    send_list: list of the sending facility
+    rec_list: list of the receiving facility
+    commod_list: list of the commodity exchanged
+    nuc_list: list of nuclide to select.
     """
     tools.raise_no_graphviz('Unable to generate flow graph!', HAVE_GRAPHVIZ)
 
-    df = get_transaction_nuc_df(evaler_, send_list, rec_list, commod_list, nuc_list)
+    df = get_transaction_nuc_df(
+        evaler_, send_list, rec_list, commod_list, nuc_list)
 
     if time[0] != -1:
         df = df.loc[(df['Time'] > time[0])]
     if time[1] != -1:
         df = df.loc[(df['Time'] < time[1])]
 
-    group_end = ['ReceiverProto', 'SenderProto']
+    group_end = ['ReceiverPrototype', 'SenderPrototype']
     group_start = group_end + ['Mass']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
@@ -351,13 +360,10 @@ def get_flow_graph(evaler_, send_list=[], rec_list=[], commod_list=[], nuc_list=
         dot.node(agent)
 
     for index, row in df.iterrows():
-        dot.edge(row['SenderProto'], row['ReceiverProto'], label=str(row['Mass']))
+        dot.edge(row['SenderPrototype'], row['ReceiverPrototype'],
+                 label=str(row['Mass']))
 
     return dot
-
-
-
-
 
 
 def get_inventory_df(evaler_, fac_list=[], nuc_list=[]):
@@ -366,22 +372,19 @@ def get_inventory_df(evaler_, fac_list=[], nuc_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    fac_list:  list of the facility
+    nuc_list: list of nuclide to select.
     """
 
     # Get inventory table
     df = evaler_.eval('ExplicitInventory')
     agents = evaler_.eval('AgentEntry')
 
-    rdc_list = []  # because we want to get reed of the nuclide asap
+    rdc_list = []  # because we want to get rid of the nuclide asap
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
         rdc_list.append(['NucId', nuc_list])
-    else:
-        wng_msg = "no nuclide provided"
-        warnings.warn(wng_msg, UserWarning)
 
     if len(fac_list) != 0:
         agents = agents[agents['Prototype'].isin(fac_list)]
@@ -393,7 +396,7 @@ def get_inventory_df(evaler_, fac_list=[], nuc_list=[]):
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
-    df = merge_n_drop(df, base_col, agents, added_col)
+    df = merge(df, base_col, agents, added_col)
 
     return df
 
@@ -405,13 +408,16 @@ def get_inventory_timeserie(evaler_, fac_list=[], nuc_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    fac_list:  list of the facility
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
+    else:
+        wng_msg = "no nuclide provided"
+        warnings.warn(wng_msg, UserWarning)
 
     df = get_inventory_df(evaler_, fac_list, nuc_list)
 
@@ -432,9 +438,9 @@ def get_inventory_activity_df(evaler_, fac_list=[], nuc_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    fac_list:  list of the facility
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
@@ -456,13 +462,16 @@ def get_inventory_activity_timeserie(evaler_, fac_list=[], nuc_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    fac_list:  list of the facility
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
+    else:
+        wng_msg = "no nuclide provided"
+        warnings.warn(wng_msg, UserWarning)
 
     df = get_inventory_activity_df(evaler_, fac_list, nuc_list)
     group_end = ['Time']
@@ -482,9 +491,9 @@ def get_inventory_decayheat_df(evaler_, fac_list=[], nuc_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    fac_list:  list of the facility
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
@@ -506,13 +515,16 @@ def get_inventory_decayheat_timeserie(evaler_, fac_list=[], nuc_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
-    nuc_list : list of nuclide to select.
+    evaler_: evaler
+    fac_list: list of the facility
+    nuc_list: list of nuclide to select.
     """
 
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
+    else:
+        wng_msg = "no nuclide provided"
+        warnings.warn(wng_msg, UserWarning)
 
     df = get_inventory_decayheat_df(evaler_, fac_list, nuc_list)
     group_end = ['Time']
@@ -532,23 +544,26 @@ def get_power_timeserie(evaler_, fac_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_list : list of name of the facility
+    evaler_: evaler
+    fac_list: list of the facility
     """
 
     # Get inventory table
     power = evaler_.eval('TimeSeriesPower')
     agents = evaler_.eval('AgentEntry')
 
-    rdc_list = []  # because we want to get reed of the facility asap
+    rdc_list = []  # because we want to get rid of the facility asap
     if len(fac_list) != 0:
         agents = agents[agents['Prototype'].isin(fac_list)]
         rdc_list.append(['AgentId', agents['AgentId'].tolist()])
+    else:
+        wng_msg = "no faciity provided"
+        warnings.warn(wng_msg, UserWarning)
     power = get_reduced_df(power, rdc_list)
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
-    power = merge_n_drop(power, base_col, agents, added_col)
+    power = merge(power, base_col, agents, added_col)
 
     group_end = ['Time']
     group_start = group_end + ['Value']
@@ -566,14 +581,14 @@ def get_deployment_timeserie(evaler_, fac_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
+    evaler_: evaler
+    fac_list: list of the facility
     """
 
     # Get inventory table
     df = evaler_.eval('AgentEntry')
 
-    rdc_list = []  # because we want to get reed of the facility asap
+    rdc_list = []  # because we want to get rid of the facility asap
     if len(fac_list) != 0:
         df = df[df['Prototype'].isin(fac_list)]
         rdc_list.append(['AgentId', df['AgentId'].tolist()])
@@ -583,12 +598,12 @@ def get_deployment_timeserie(evaler_, fac_list=[]):
 
     # Adding a constante column to easely sum the amount of facilities build per
     # time step
-    df = df.assign(Value=lambda x: 1)
+    df = df.assign(Value=lambda x:  1)
     group_end = ['EnterTime']
     group_start = group_end + ['Value']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
-    df.rename(index=str, columns={'EnterTime': 'Time'}, inplace=True)
+    df.rename(index=str, columns={'EnterTime':  'Time'}, inplace=True)
 
     time = evaler_.eval('TimeList')
     df = add_missing_time_step(df, time)
@@ -601,15 +616,15 @@ def get_retirement_timeserie(evaler_, fac_list=[]):
 
     Parameters
     ----------
-    evaler_ : evaler
-    fac_name : name of the facility
+    evaler_: evaler
+    fac_list:  list of the facility
     """
 
     # Get inventory table
     df = evaler_.eval('AgentEntry')
     df = df[df['Lifetime'] > 0]
 
-    rdc_list = []  # because we want to get reed of the facility asap
+    rdc_list = []  # because we want to get rid of the facility asap
     if len(fac_list) != 0:
         df = df[df['Prototype'].isin(fac_list)]
         rdc_list.append(['AgentId', df['AgentId'].tolist()])
@@ -620,14 +635,14 @@ def get_retirement_timeserie(evaler_, fac_list=[]):
     # Adding a constante column to easely sum the amount of facilities build per
     # time stepi
 
-    df = df.assign(Value=lambda x: 1)
+    df = df.assign(Value=lambda x:  1)
     df['DecomTime'] = df['EnterTime'] + df['Lifetime']
     group_end = ['DecomTime']
     group_start = group_end + ['Value']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
-    df.rename(index=str, columns={'DecomTime': 'Time'}, inplace=True)
+    df.rename(index=str, columns={'DecomTime':  'Time'}, inplace=True)
     time = evaler_.eval('TimeList')
     df = add_missing_time_step(df, time)
     return df
