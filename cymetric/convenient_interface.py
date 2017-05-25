@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+import warnings
+
 import pandas as pd
 import numpy as np
+
 import cymetric as cym
-import warnings
 from cymetric import tools
 
 try:
@@ -64,14 +66,14 @@ def merge(df, base_col, add_df, add_col):
     df: Pandas Data Frame
     base_col: list of the base columns names
     add_df: Pandas Data Frame to add in the df one
-    add_col: columns tobe added
+    add_col: columns to be added
     """
     df = pd.merge(add_df[add_col], df, on=base_col)
     df.drop(base_col[1], 1)
     return df
 
 
-def get_reduced_df(df, rdc_list):
+def reduce(df, rdc_list):
     """
     Filter the df Pandas Data Frame according to the rdc_list (list of item
     in the corresponding columns).
@@ -125,7 +127,7 @@ def get_transaction_df(evaler_, send_list=[], rec_list=[], commod_list=[]):
         if len(commod_list) != 0:
             rdc_list.append(['Commodity', commod_list])
 
-        trans = get_reduced_df(trans, rdc_list)
+        trans = reduce(trans, rdc_list)
 
         # Merge Sender to Transaction PDF
         base_col = ['SimId', 'SenderId']
@@ -162,7 +164,7 @@ def get_transaction_nuc_df(evaler_, send_list=[], rec_list=[], commod_list=[], n
 
     if len(nuc_list) != 0:
         nuc_list = format_nuclist(nuc_list)
-        compo = get_reduced_df(compo, [['NucId', nuc_list]])
+        compo = reduce(compo, [['NucId', nuc_list]])
 
     base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'Mass']
@@ -190,7 +192,7 @@ def get_transaction_activity_df(evaler_, send_list=[], rec_list=[], commod_list=
         nuc_list = format_nuclist(nuc_list)
 
     compo = evaler_.eval('Activity')
-    compo = get_reduced_df(compo, [['NucId', nuc_list]])
+    compo = reduce(compo, [['NucId', nuc_list]])
 
     base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'Activity']
@@ -218,7 +220,7 @@ def get_transaction_decayheat_df(evaler_, send_list=[], rec_list=[], commod_list
         nuc_list = format_nuclist(nuc_list)
 
     compo = evaler_.eval('DecayHeat')
-    compo = get_reduced_df(compo, [['NucId', nuc_list]])
+    compo = reduce(compo, [['NucId', nuc_list]])
 
     base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['NucId', 'DecayHeat']
@@ -392,7 +394,7 @@ def get_inventory_df(evaler_, fac_list=[], nuc_list=[]):
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
-    df = get_reduced_df(df, rdc_list)
+    df = reduce(df, rdc_list)
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
@@ -559,7 +561,7 @@ def get_power_timeserie(evaler_, fac_list=[]):
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
-    power = get_reduced_df(power, rdc_list)
+    power = reduce(power, rdc_list)
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
