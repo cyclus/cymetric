@@ -22,11 +22,11 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 @dbtest
 def test_convint_get_transaction_df(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_transaction_df(myEval)
+    evaler = cym.Evaluator(db)
+    cal = com.get_transaction_df(evaler)
     exp_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
                 'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -52,7 +52,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test single sender
-    cal = com.get_transaction_df(myEval, send_list=['UOX_Source'])
+    cal = com.get_transaction_df(evaler, senders=['UOX_Source'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -71,7 +71,7 @@ def test_convint_get_transaction_df(db, fname, backend):
 
     # test multiple sender
     cal = com.get_transaction_df(
-        myEval, send_list=['UOX_Source', 'MOX_Source'])
+        evaler, senders=['UOX_Source', 'MOX_Source'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -96,7 +96,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test single receiver
-    cal = com.get_transaction_df(myEval, rec_list=['Reactor1'])
+    cal = com.get_transaction_df(evaler, receivers=['Reactor1'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -116,7 +116,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender
-    cal = com.get_transaction_df(myEval, rec_list=['Reactor1', 'Reactor3'])
+    cal = com.get_transaction_df(evaler, receivers=['Reactor1', 'Reactor3'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -138,8 +138,8 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender and multiple receiver
-    cal = com.get_transaction_df(myEval, send_list=['UOX_Source', 'MOX_Source'],
-                                 rec_list=['Reactor1', 'Reactor2'])
+    cal = com.get_transaction_df(evaler, senders=['UOX_Source', 'MOX_Source'],
+                                 receivers=['Reactor1', 'Reactor2'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -162,7 +162,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test single commodity
-    cal = com.get_transaction_df(myEval, commod_list=['uox'])
+    cal = com.get_transaction_df(evaler, commodities=['uox'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -180,7 +180,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender
-    cal = com.get_transaction_df(myEval, commod_list=['uox', 'mox'])
+    cal = com.get_transaction_df(evaler, commodities=['uox', 'mox'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -207,14 +207,14 @@ def test_convint_get_transaction_df(db, fname, backend):
 
 @dbtest
 def test_convint_get_transaction_nuc_df(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_transaction_nuc_df(myEval)
+    evaler = cym.Evaluator(db)
+    cal = com.get_transaction_nuc_df(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = com.get_transaction_nuc_df(myEval, nuc_list=['942390000'])
+    cal = com.get_transaction_nuc_df(evaler, nucs=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -239,7 +239,7 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
 
     # test multiple nuclide selection
     cal = com.get_transaction_nuc_df(
-        myEval, nuc_list=['942390000', '922380000'])
+        evaler, nucs=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -274,14 +274,14 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
 
 @dbtest
 def test_convint_get_transaction_activity_df(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_transaction_activity_df(myEval)
+    evaler = cym.Evaluator(db)
+    cal = com.get_transaction_activity_df(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = com.get_transaction_activity_df(myEval, nuc_list=['942390000'])
+    cal = com.get_transaction_activity_df(evaler, nucs=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -305,7 +305,7 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
 
     # test multiple nuclide selection
     cal = com.get_transaction_activity_df(
-        myEval, nuc_list=['942390000', '922380000'])
+        evaler, nucs=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -340,14 +340,14 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
 
 @dbtest
 def test_convint_get_transaction_decayheat_df(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_transaction_decayheat_df(myEval)
+    evaler = cym.Evaluator(db)
+    cal = com.get_transaction_decayheat_df(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'DecayHeat', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = com.get_transaction_decayheat_df(myEval, nuc_list=['942390000'])
+    cal = com.get_transaction_decayheat_df(evaler, nucs=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -371,7 +371,7 @@ def test_convint_get_transaction_decayheat_df(db, fname, backend):
 
     # test multiple nuclide selection
     cal = com.get_transaction_decayheat_df(
-        myEval, nuc_list=['942390000', '922380000'])
+        evaler, nucs=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -404,14 +404,14 @@ def test_convint_get_transaction_decayheat_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_timeserie(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_transaction_timeserie(myEval)
+def test_convint_get_transaction_timeseries(db, fname, backend):
+    evaler = cym.Evaluator(db)
+    cal = com.get_transaction_timeseries(evaler)
     exp_head = ['Time', 'Mass']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = com.get_transaction_timeserie(myEval, nuc_list=['942390000'])
+    cal = com.get_transaction_timeseries(evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
         (1, 0.0444814879803),
@@ -425,8 +425,8 @@ def test_convint_get_transaction_timeserie(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = com.get_transaction_timeserie(
-        myEval, nuc_list=['942390000', '922380000'])
+    cal = com.get_transaction_timeseries(
+        evaler, nucs=['942390000', '922380000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
         (1, 0.831724864011),
@@ -441,15 +441,15 @@ def test_convint_get_transaction_timeserie(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_activity_timeserie(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_transaction_activity_timeserie(myEval)
+def test_convint_get_transaction_activity_timeseries(db, fname, backend):
+    evaler = cym.Evaluator(db)
+    cal = com.get_transaction_activity_timeseries(evaler)
     exp_head = ['Time', 'Activity']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = com.get_transaction_activity_timeserie(
-        myEval, nuc_list=['942390000'])
+    cal = com.get_transaction_activity_timeseries(
+        evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
         (1, 102084984531.0),
@@ -463,8 +463,8 @@ def test_convint_get_transaction_activity_timeserie(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = com.get_transaction_activity_timeserie(
-        myEval, nuc_list=['942390000', '922380000'])
+    cal = com.get_transaction_activity_timeseries(
+        evaler, nucs=['942390000', '922380000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
         (1, 102094774891.0),
@@ -479,15 +479,15 @@ def test_convint_get_transaction_activity_timeserie(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_decayheat_timeserie(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_transaction_decayheat_timeserie(myEval)
+def test_convint_get_transaction_decayheat_timeseries(db, fname, backend):
+    evaler = cym.Evaluator(db)
+    cal = com.get_transaction_decayheat_timeseries(evaler)
     exp_head = ['Time', 'DecayHeat']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = com.get_transaction_decayheat_timeserie(
-        myEval, nuc_list=['942390000'])
+    cal = com.get_transaction_decayheat_timeseries(
+        evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
         (1, 3.34065303191e+30),
@@ -501,8 +501,8 @@ def test_convint_get_transaction_decayheat_timeserie(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = com.get_transaction_decayheat_timeserie(
-        myEval, nuc_list=['942390000', '922380000'])
+    cal = com.get_transaction_decayheat_timeseries(
+        evaler, nucs=['942390000', '922380000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
         (1, 3.34091395721e+30),
@@ -518,14 +518,14 @@ def test_convint_get_transaction_decayheat_timeserie(db, fname, backend):
 
 @dbtest
 def test_convint_get_inventory_df(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_inventory_df(myEval)
+    evaler = cym.Evaluator(db)
+    cal = com.get_inventory_df(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype',
                 'Time', 'InventoryName', 'NucId', 'Quantity']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = com.get_inventory_df(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239'])
+    cal = com.get_inventory_df(evaler, facilities=['Reactor1'],
+                               nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803),
@@ -541,8 +541,8 @@ def test_convint_get_inventory_df(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = com.get_inventory_df(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239', '92235'])
+    cal = com.get_inventory_df(evaler, facilities=['Reactor1'],
+                               nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534),
@@ -568,14 +568,14 @@ def test_convint_get_inventory_df(db, fname, backend):
 
 @dbtest
 def test_convint_get_inventory_activity_df(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_inventory_activity_df(myEval)
+    evaler = cym.Evaluator(db)
+    cal = com.get_inventory_activity_df(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
             'NucId', 'Quantity', 'Activity']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = com.get_inventory_activity_df(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239'])
+    cal = com.get_inventory_activity_df(evaler, facilities=['Reactor1'],
+                               nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  942390000,
@@ -597,8 +597,8 @@ def test_convint_get_inventory_activity_df(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = com.get_inventory_activity_df(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239', '92235'])
+    cal = com.get_inventory_activity_df(evaler, facilities=['Reactor1'],
+                               nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534, 29671782.9213),
@@ -630,14 +630,14 @@ def test_convint_get_inventory_activity_df(db, fname, backend):
 
 @dbtest
 def test_convint_get_inventory_decayheat_df(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_inventory_decayheat_df(myEval)
+    evaler = cym.Evaluator(db)
+    cal = com.get_inventory_decayheat_df(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
             'NucId', 'Quantity', 'Activity', 'DecayHeat']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = com.get_inventory_decayheat_df(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239'])
+    cal = com.get_inventory_decayheat_df(evaler, facilities=['Reactor1'],
+                               nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  942390000,
@@ -660,8 +660,8 @@ def test_convint_get_inventory_decayheat_df(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = com.get_inventory_decayheat_df(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239', '92235'])
+    cal = com.get_inventory_decayheat_df(evaler, facilities=['Reactor1'],
+                               nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  922350000,
@@ -700,14 +700,14 @@ def test_convint_get_inventory_decayheat_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_timeserie(db, fname, backend):
-    myEval = cym.Evaluator(db)
-    cal = com.get_inventory_timeserie(myEval)
+def test_convint_get_inventory_timeseries(db, fname, backend):
+    evaler = cym.Evaluator(db)
+    cal = com.get_inventory_timeseries(evaler)
     exp_head = ['Time', 'Quantity']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = com.get_inventory_timeserie(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239'])
+    cal = com.get_inventory_timeseries(evaler, facilities=['Reactor1'],
+                               nucs=['94239'])
     refs = pd.DataFrame(np.array([
         (0, 0.0            ),
         (1, 0.0444814879803),
@@ -720,8 +720,8 @@ def test_convint_get_inventory_timeserie(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal=com.get_inventory_timeserie(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239', '92235'])
+    cal=com.get_inventory_timeseries(evaler, facilities=['Reactor1'],
+                               nucs=['94239', '92235'])
     refs=pd.DataFrame(np.array([
         (0, 0.0            ),
         (1, 0.0460607124057),
@@ -736,14 +736,14 @@ def test_convint_get_inventory_timeserie(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_activity_timeserie(db, fname, backend):
-    myEval=cym.Evaluator(db)
-    cal=com.get_inventory_activity_timeserie(myEval)
+def test_convint_get_inventory_activity_timeseries(db, fname, backend):
+    evaler=cym.Evaluator(db)
+    cal=com.get_inventory_activity_timeseries(evaler)
     exp_head=['Time', 'Activity']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal=com.get_inventory_activity_timeserie(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239'])
+    cal=com.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
+                               nucs=['94239'])
     refs=pd.DataFrame(np.array([
         (0, 0.0             ),
         (1, 2.44036364223e+13),
@@ -756,8 +756,8 @@ def test_convint_get_inventory_activity_timeserie(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal=com.get_inventory_activity_timeserie(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239', '92235'])
+    cal=com.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
+                               nucs=['94239', '92235'])
     refs=pd.DataFrame(np.array([
         (0, 0.0             ),
         (1, 2.4403666094e+13),
@@ -772,14 +772,14 @@ def test_convint_get_inventory_activity_timeserie(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_decayheat_timeserie(db, fname, backend):
-    myEval=cym.Evaluator(db)
-    cal=com.get_inventory_decayheat_timeserie(myEval)
+def test_convint_get_inventory_decayheat_timeseries(db, fname, backend):
+    evaler=cym.Evaluator(db)
+    cal=com.get_inventory_decayheat_timeseries(evaler)
     exp_head=['Time', 'DecayHeat']
-    assert_equal(list(cal), exp_head)  # CHeck we have the correct headers
+    assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal=com.get_inventory_decayheat_timeserie(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239'])
+    cal=com.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
+                               nucs=['94239'])
     refs=pd.DataFrame(np.array([
         (0, 0.0             ),
         (1, 7.98590335085e+32),
@@ -792,8 +792,8 @@ def test_convint_get_inventory_decayheat_timeserie(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal=com.get_inventory_decayheat_timeserie(myEval, fac_list=['Reactor1'],
-                               nuc_list=['94239', '92235'])
+    cal=com.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
+                               nucs=['94239', '92235'])
     refs=pd.DataFrame(np.array([
         (0, 0.0             ),
         (1, 7.98591200694e+32),
