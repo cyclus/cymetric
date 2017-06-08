@@ -21,6 +21,7 @@ from cyclus import lib
 
 EXT_BACKENDS = {'.h5': lib.Hdf5Back, '.sqlite': lib.SqliteBack}
 
+
 def dbopen(fname):
     """Opens a Cyclus database."""
     _, ext = os.path.splitext(fname)
@@ -155,6 +156,7 @@ def raise_no_pyne(msg, have_pyne=False):
     """Raise an error when PyNE cannot be found."""
     if not have_pyne:
         raise ImportError('pyne could not be imported: ' + msg)
+
 
 def raise_no_graphviz(msg, have_graphviz=False):
     """Raise an error when Graphviz cannot be found."""
