@@ -116,7 +116,8 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender
-    cal = filters.get_transaction_df(evaler, receivers=['Reactor1', 'Reactor3'])
+    cal = filters.get_transaction_df(
+        evaler, receivers=['Reactor1', 'Reactor3'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -139,7 +140,7 @@ def test_convint_get_transaction_df(db, fname, backend):
 
     # test multiple sender and multiple receiver
     cal = filters.get_transaction_df(evaler, senders=['UOX_Source', 'MOX_Source'],
-                                 receivers=['Reactor1', 'Reactor2'])
+                                     receivers=['Reactor1', 'Reactor2'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -412,7 +413,7 @@ def test_convint_get_inventory_df(db, fname, backend):
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     cal = filters.get_inventory_df(evaler, facilities=['Reactor1'],
-                               nucs=['94239'])
+                                   nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  942390000, 0.0444814879803),
@@ -429,7 +430,7 @@ def test_convint_get_inventory_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     cal = filters.get_inventory_df(evaler, facilities=['Reactor1'],
-                               nucs=['94239', '92235'])
+                                   nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534),
@@ -458,11 +459,11 @@ def test_convint_get_inventory_activity_df(db, fname, backend):
     evaler = cym.Evaluator(db)
     cal = filters.get_inventory_activity_df(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
-            'NucId', 'Quantity', 'Activity']
+                'NucId', 'Quantity', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     cal = filters.get_inventory_activity_df(evaler, facilities=['Reactor1'],
-                               nucs=['94239'])
+                                            nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  942390000,
@@ -485,7 +486,7 @@ def test_convint_get_inventory_activity_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     cal = filters.get_inventory_activity_df(evaler, facilities=['Reactor1'],
-                               nucs=['94239', '92235'])
+                                            nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  922350000, 0.00157922442534, 29671782.9213),
@@ -520,11 +521,11 @@ def test_convint_get_inventory_decayheat_df(db, fname, backend):
     evaler = cym.Evaluator(db)
     cal = filters.get_inventory_decayheat_df(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
-            'NucId', 'Quantity', 'Activity', 'DecayHeat']
+                'NucId', 'Quantity', 'Activity', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     cal = filters.get_inventory_decayheat_df(evaler, facilities=['Reactor1'],
-                               nucs=['94239'])
+                                             nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  942390000,
@@ -548,7 +549,7 @@ def test_convint_get_inventory_decayheat_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     cal = filters.get_inventory_decayheat_df(evaler, facilities=['Reactor1'],
-                               nucs=['94239', '92235'])
+                                             nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core',  922350000,

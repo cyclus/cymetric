@@ -141,9 +141,9 @@ def test_convint_get_inventory_timeseries(db, fname, backend):
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     cal = ts.get_inventory_timeseries(evaler, facilities=['Reactor1'],
-                               nucs=['94239'])
+                                      nucs=['94239'])
     refs = pd.DataFrame(np.array([
-        (0, 0.0            ),
+        (0, 0.0),
         (1, 0.0444814879803),
         (2, 0.0621806030246),
         (3, 0.0798797180688),
@@ -154,14 +154,14 @@ def test_convint_get_inventory_timeseries(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal=ts.get_inventory_timeseries(evaler, facilities=['Reactor1'],
-                               nucs=['94239', '92235'])
-    refs=pd.DataFrame(np.array([
-        (0, 0.0            ),
+    cal = ts.get_inventory_timeseries(evaler, facilities=['Reactor1'],
+                                      nucs=['94239', '92235'])
+    refs = pd.DataFrame(np.array([
+        (0, 0.0),
         (1, 0.0460607124057),
         (2, 0.0726093849721),
         (3, 0.0991580575384),
-        (4, 0.119646017699 )
+        (4, 0.119646017699)
     ], dtype=ensure_dt_bytes([
         ('Time', '<i8'), ('Quantity', '<f8')
     ]))
@@ -171,15 +171,15 @@ def test_convint_get_inventory_timeseries(db, fname, backend):
 
 @dbtest
 def test_convint_get_inventory_activity_timeseries(db, fname, backend):
-    evaler=cym.Evaluator(db)
-    cal=ts.get_inventory_activity_timeseries(evaler)
-    exp_head=['Time', 'Activity']
+    evaler = cym.Evaluator(db)
+    cal = ts.get_inventory_activity_timeseries(evaler)
+    exp_head = ['Time', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal=ts.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
-                               nucs=['94239'])
-    refs=pd.DataFrame(np.array([
-        (0, 0.0             ),
+    cal = ts.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
+                                               nucs=['94239'])
+    refs = pd.DataFrame(np.array([
+        (0, 0.0),
         (1, 2.44036364223e+13),
         (2, 3.41138054869e+13),
         (3, 4.38239745515e+13),
@@ -190,10 +190,10 @@ def test_convint_get_inventory_activity_timeseries(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal=ts.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
-                               nucs=['94239', '92235'])
-    refs=pd.DataFrame(np.array([
-        (0, 0.0             ),
+    cal = ts.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
+                                               nucs=['94239', '92235'])
+    refs = pd.DataFrame(np.array([
+        (0, 0.0),
         (1, 2.4403666094e+13),
         (2, 3.41140014315e+13),
         (3, 4.3824336769e+13),
@@ -207,15 +207,15 @@ def test_convint_get_inventory_activity_timeseries(db, fname, backend):
 
 @dbtest
 def test_convint_get_inventory_decayheat_timeseries(db, fname, backend):
-    evaler=cym.Evaluator(db)
-    cal=ts.get_inventory_decayheat_timeseries(evaler)
-    exp_head=['Time', 'DecayHeat']
+    evaler = cym.Evaluator(db)
+    cal = ts.get_inventory_decayheat_timeseries(evaler)
+    exp_head = ['Time', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal=ts.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
-                               nucs=['94239'])
-    refs=pd.DataFrame(np.array([
-        (0, 0.0             ),
+    cal = ts.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
+                                                nucs=['94239'])
+    refs = pd.DataFrame(np.array([
+        (0, 0.0),
         (1, 7.98590335085e+32),
         (2, 1.11634819022e+33),
         (3, 1.43410604536e+33),
@@ -226,10 +226,10 @@ def test_convint_get_inventory_decayheat_timeseries(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal=ts.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
-                               nucs=['94239', '92235'])
-    refs=pd.DataFrame(np.array([
-        (0, 0.0             ),
+    cal = ts.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
+                                                nucs=['94239', '92235'])
+    refs = pd.DataFrame(np.array([
+        (0, 0.0),
         (1, 7.98591200694e+32),
         (2, 1.11635390648e+33),
         (3, 1.43411661226e+33),
