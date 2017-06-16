@@ -17,8 +17,6 @@ try:
 except ImportError:
     HAVE_PYNE = False
 
-
-import cymetric as cym
 from cymetric import tools
 from cymetric.filter import get_transaction_nuc_df
 
