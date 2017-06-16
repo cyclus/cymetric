@@ -22,8 +22,9 @@ import cymetric as cym
 from cymetric import tools
 from cymetric.filter import get_transaction_nuc_df
 
-def get_flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
-                   time=[-1, -1]):
+
+def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
+               start=None, stop=None):
     """
     Generate the dot graph of the transation between facilitiese. Applying times
     nuclides selection when required.
@@ -31,20 +32,22 @@ def get_flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
     Parameters
     ----------
     evaler : evaler
-    senders :  of the sending facility
-    receivers :  of the receiving facility
-    commodities :  of the commodity exchanged
-    nucs :  of nuclide to select.
+    senders : list of the sending facility to consider
+    receivers : list of the receiving facility to consider
+    commodities : list of the commodity exchanged to consider
+    nucs : list of nuclide to consider
+    start : first timestep to consider, start included
+    stop : last timestep to consider, stop included
     """
     tools.raise_no_graphviz('Unable to generate flow graph!', HAVE_GRAPHVIZ)
 
     df = get_transaction_nuc_df(
         evaler, senders, receivers, commodities, nucs)
 
-    if time[0] != -1:
-        df = df.loc[(df['Time'] > time[0])]
-    if time[1] != -1:
-        df = df.loc[(df['Time'] < time[1])]
+    if start != None:
+        df = df.loc[(df['Time'] >= time[0])]
+    if stop != None:
+        df = df.loc[(df['Time'] <= time[1])]
 
     group_end = ['ReceiverPrototype', 'SenderPrototype']
     group_start = group_end + ['Mass']

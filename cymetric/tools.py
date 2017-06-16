@@ -83,7 +83,7 @@ def ensure_dt_bytes(dt):
     return dety
 
 
-def format_nuc(nucs):
+def format_nucs(nucs):
     """
     format the nuclide  provided by the users into a standard format:
     ZZAASSSS.

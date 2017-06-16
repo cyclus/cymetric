@@ -12,19 +12,11 @@ except ImportError:
     HAVE_PYNE = False
 
 
-import cymetric as cym
 from cymetric import tools
-
-from cymetric.filter import get_transaction_df
-from cymetric.filter import get_transaction_nuc_df
-from cymetric.filter import get_transaction_activity_df
-from cymetric.filter import get_transaction_decayheat_df
-from cymetric.filter import get_inventory_df
-from cymetric.filter import get_inventory_activity_df
-from cymetric.filter import get_inventory_decayheat_df
+from cymetric import filters
 
 
-def get_transaction_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -38,9 +30,9 @@ def get_transaction_timeseries(evaler, senders=(), receivers=(), commodities=(),
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
 
-    df = get_transaction_nuc_df(
+    df = filters.transactions_nuc_df(
         evaler, senders, receivers, commodities, nucs)
 
     group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
@@ -52,11 +44,11 @@ def get_transaction_timeseries(evaler, senders=(), receivers=(), commodities=(),
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
-def get_transaction_activity_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_activity_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -70,9 +62,9 @@ def get_transaction_activity_timeseries(evaler, senders=(), receivers=(), commod
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
 
-    df = get_transaction_activity_df(evaler, senders, receivers, commodities,
+    df = filters.transactions_activity_df(evaler, senders, receivers, commodities,
                                      nucs)
 
     group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
@@ -84,11 +76,11 @@ def get_transaction_activity_timeseries(evaler, senders=(), receivers=(), commod
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
-def get_transaction_decayheat_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_decayheat_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -102,9 +94,9 @@ def get_transaction_decayheat_timeseries(evaler, senders=(), receivers=(), commo
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
 
-    df = get_transaction_decayheat_df(evaler, senders, receivers, commodities,
+    df = filters.transactions_decayheat_df(evaler, senders, receivers, commodities,
                                       nucs)
 
     group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
@@ -116,13 +108,13 @@ def get_transaction_decayheat_timeseries(evaler, senders=(), receivers=(), commo
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
 
 
-def get_inventory_timeseries(evaler, facilities=(), nucs=()):
+def inventories_timeseries(evaler, facilities=(), nucs=()):
     """
     Shape the reduced inventory Data Frame into a simple time serie. Applying
     nuclides/facilities selection when required.
@@ -135,12 +127,12 @@ def get_inventory_timeseries(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
     else:
         wng_msg = "no nuclide provided"
         warnings.warn(wng_msg, UserWarning)
 
-    df = get_inventory_df(evaler, facilities, nucs)
+    df = filters.inventories_df(evaler, facilities, nucs)
 
     group_end = ['Time']
     group_start = group_end + ['Quantity']
@@ -148,11 +140,11 @@ def get_inventory_timeseries(evaler, facilities=(), nucs=()):
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
-def get_inventory_activity_timeseries(evaler, facilities=(), nucs=()):
+def inventories_activity_timeseries(evaler, facilities=(), nucs=()):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -165,23 +157,23 @@ def get_inventory_activity_timeseries(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
     else:
         wng_msg = "no nuclide provided"
         warnings.warn(wng_msg, UserWarning)
 
-    df = get_inventory_activity_df(evaler, facilities, nucs)
+    df = filters.inventories_activity_df(evaler, facilities, nucs)
     group_end = ['Time']
     group_start = group_end + ['Activity']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
-def get_inventory_decayheat_timeseries(evaler, facilities=(), nucs=()):
+def inventories_decayheat_timeseries(evaler, facilities=(), nucs=()):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -194,19 +186,19 @@ def get_inventory_decayheat_timeseries(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
     else:
         wng_msg = "no nuclide provided"
         warnings.warn(wng_msg, UserWarning)
 
-    df = get_inventory_decayheat_df(evaler, facilities, nucs)
+    df = filters.inventories_decayheat_df(evaler, facilities, nucs)
     group_end = ['Time']
     group_start = group_end + ['DecayHeat']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
@@ -244,7 +236,7 @@ def get_power_timeseries(evaler, facilities=()):
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
@@ -279,7 +271,7 @@ def get_deployment_timeseries(evaler, facilities=()):
     df.rename(index=str, columns={'EnterTime': 'Time'}, inplace=True)
 
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
 
 
@@ -317,5 +309,5 @@ def get_retirement_timeseries(evaler, facilities=()):
 
     df.rename(index=str, columns={'DecomTime': 'Time'}, inplace=True)
     time = evaler.eval('TimeList')
-    df = add_missing_time_step(df, time)
+    df = tools.add_missing_time_step(df, time)
     return df
