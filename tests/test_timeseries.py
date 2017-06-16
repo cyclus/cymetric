@@ -21,14 +21,14 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 
 @dbtest
-def test_convint_get_transaction_timeseries(db, fname, backend):
+def test_timeseries_transactions(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = ts.get_transaction_timeseries(evaler)
+    cal = ts.transactions(evaler)
     exp_head = ['Time', 'Mass']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = ts.get_transaction_timeseries(evaler, nucs=['942390000'])
+    cal = ts.transactions(evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
         (1, 0.0444814879803),
@@ -42,7 +42,7 @@ def test_convint_get_transaction_timeseries(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = ts.get_transaction_timeseries(
+    cal = ts.transactions(
         evaler, nucs=['942390000', '922380000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
@@ -58,14 +58,14 @@ def test_convint_get_transaction_timeseries(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_activity_timeseries(db, fname, backend):
+def test_timeseries_transactions_activity(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = ts.get_transaction_activity_timeseries(evaler)
+    cal = ts.transactions_activity(evaler)
     exp_head = ['Time', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = ts.get_transaction_activity_timeseries(
+    cal = ts.transactions_activity(
         evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
@@ -80,7 +80,7 @@ def test_convint_get_transaction_activity_timeseries(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = ts.get_transaction_activity_timeseries(
+    cal = ts.transactions_activity(
         evaler, nucs=['942390000', '922380000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
@@ -96,14 +96,14 @@ def test_convint_get_transaction_activity_timeseries(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_decayheat_timeseries(db, fname, backend):
+def test_timeseries_transactions_decayheat(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = ts.get_transaction_decayheat_timeseries(evaler)
+    cal = ts.transactions_decayheat(evaler)
     exp_head = ['Time', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = ts.get_transaction_decayheat_timeseries(
+    cal = ts.transactions_decayheat(
         evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
@@ -118,7 +118,7 @@ def test_convint_get_transaction_decayheat_timeseries(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = ts.get_transaction_decayheat_timeseries(
+    cal = ts.transactions_decayheat(
         evaler, nucs=['942390000', '922380000'])
     refs = pd.DataFrame(np.array([
         (0, 0.000000000),
@@ -134,13 +134,13 @@ def test_convint_get_transaction_decayheat_timeseries(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_timeseries(db, fname, backend):
+def test_timeseries_inventories(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = ts.get_inventory_timeseries(evaler)
+    cal = ts.inventories(evaler)
     exp_head = ['Time', 'Quantity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = ts.get_inventory_timeseries(evaler, facilities=['Reactor1'],
+    cal = ts.inventories(evaler, facilities=['Reactor1'],
                                       nucs=['94239'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
@@ -154,7 +154,7 @@ def test_convint_get_inventory_timeseries(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = ts.get_inventory_timeseries(evaler, facilities=['Reactor1'],
+    cal = ts.inventories(evaler, facilities=['Reactor1'],
                                       nucs=['94239', '92235'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
@@ -170,13 +170,13 @@ def test_convint_get_inventory_timeseries(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_activity_timeseries(db, fname, backend):
+def test_timeseries_inventories_activity(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = ts.get_inventory_activity_timeseries(evaler)
+    cal = ts.inventories_activity(evaler)
     exp_head = ['Time', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = ts.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
+    cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
                                                nucs=['94239'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
@@ -190,7 +190,7 @@ def test_convint_get_inventory_activity_timeseries(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = ts.get_inventory_activity_timeseries(evaler, facilities=['Reactor1'],
+    cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
                                                nucs=['94239', '92235'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
@@ -206,13 +206,13 @@ def test_convint_get_inventory_activity_timeseries(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_decayheat_timeseries(db, fname, backend):
+def test_timeseries_inventories_decayheat(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = ts.get_inventory_decayheat_timeseries(evaler)
+    cal = ts.inventories_decayheat(evaler)
     exp_head = ['Time', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = ts.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
+    cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
                                                 nucs=['94239'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
@@ -226,7 +226,7 @@ def test_convint_get_inventory_decayheat_timeseries(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = ts.get_inventory_decayheat_timeseries(evaler, facilities=['Reactor1'],
+    cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
                                                 nucs=['94239', '92235'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),

@@ -21,9 +21,9 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 
 @dbtest
-def test_convint_get_transaction_df(db, fname, backend):
+def test_transactions(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = filters.get_transaction_df(evaler)
+    cal = filters.transactions(evaler)
     exp_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
                 'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
@@ -52,7 +52,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test single sender
-    cal = filters.get_transaction_df(evaler, senders=['UOX_Source'])
+    cal = filters.transactions(evaler, senders=['UOX_Source'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -70,7 +70,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender
-    cal = filters.get_transaction_df(
+    cal = filters.transactions(
         evaler, senders=['UOX_Source', 'MOX_Source'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -96,7 +96,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test single receiver
-    cal = filters.get_transaction_df(evaler, receivers=['Reactor1'])
+    cal = filters.transactions(evaler, receivers=['Reactor1'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -116,7 +116,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender
-    cal = filters.get_transaction_df(
+    cal = filters.transactions(
         evaler, receivers=['Reactor1', 'Reactor3'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -139,7 +139,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender and multiple receiver
-    cal = filters.get_transaction_df(evaler, senders=['UOX_Source', 'MOX_Source'],
+    cal = filters.transactions(evaler, senders=['UOX_Source', 'MOX_Source'],
                                      receivers=['Reactor1', 'Reactor2'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -163,7 +163,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test single filters.odity
-    cal = filters.get_transaction_df(evaler, commodities=['uox'])
+    cal = filters.transactions(evaler, commodities=['uox'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -181,7 +181,7 @@ def test_convint_get_transaction_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple sender
-    cal = filters.get_transaction_df(evaler, commodities=['uox', 'mox'])
+    cal = filters.transactions(evaler, commodities=['uox', 'mox'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -207,15 +207,15 @@ def test_convint_get_transaction_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_nuc_df(db, fname, backend):
+def test_transactions_nuc(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = filters.get_transaction_nuc_df(evaler)
+    cal = filters.transactions_nuc(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = filters.get_transaction_nuc_df(evaler, nucs=['942390000'])
+    cal = filters.transactions_nuc(evaler, nucs=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -239,7 +239,7 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = filters.get_transaction_nuc_df(
+    cal = filters.transactions_nuc(
         evaler, nucs=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -274,15 +274,15 @@ def test_convint_get_transaction_nuc_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_activity_df(db, fname, backend):
+def test_transactions_activity(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = filters.get_transaction_activity_df(evaler)
+    cal = filters.transactions_activity(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = filters.get_transaction_activity_df(evaler, nucs=['942390000'])
+    cal = filters.transactions_activity(evaler, nucs=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -305,7 +305,7 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = filters.get_transaction_activity_df(
+    cal = filters.transactions_activity(
         evaler, nucs=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -340,15 +340,15 @@ def test_convint_get_transaction_activity_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_transaction_decayheat_df(db, fname, backend):
+def test_transactions_decayheat(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = filters.get_transaction_decayheat_df(evaler)
+    cal = filters.transactions_decayheat(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'DecayHeat', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # test single nuclide selection
-    cal = filters.get_transaction_decayheat_df(evaler, nucs=['942390000'])
+    cal = filters.transactions_decayheat(evaler, nucs=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
     cal = cal.drop('TransactionId', 1)
@@ -371,7 +371,7 @@ def test_convint_get_transaction_decayheat_df(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     # test multiple nuclide selection
-    cal = filters.get_transaction_decayheat_df(
+    cal = filters.transactions_decayheat(
         evaler, nucs=['942390000', '922380000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
@@ -405,14 +405,14 @@ def test_convint_get_transaction_decayheat_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_df(db, fname, backend):
+def test_inventories(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = filters.get_inventory_df(evaler)
+    cal = filters.inventories(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype',
                 'Time', 'InventoryName', 'NucId', 'Quantity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = filters.get_inventory_df(evaler, facilities=['Reactor1'],
+    cal = filters.inventories(evaler, facilities=['Reactor1'],
                                    nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
@@ -429,7 +429,7 @@ def test_convint_get_inventory_df(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = filters.get_inventory_df(evaler, facilities=['Reactor1'],
+    cal = filters.inventories(evaler, facilities=['Reactor1'],
                                    nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
@@ -455,14 +455,14 @@ def test_convint_get_inventory_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_activity_df(db, fname, backend):
+def test_inventories_activity(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = filters.get_inventory_activity_df(evaler)
+    cal = filters.inventories_activity(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
                 'NucId', 'Quantity', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = filters.get_inventory_activity_df(evaler, facilities=['Reactor1'],
+    cal = filters.inventories_activity(evaler, facilities=['Reactor1'],
                                             nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
@@ -485,7 +485,7 @@ def test_convint_get_inventory_activity_df(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = filters.get_inventory_activity_df(evaler, facilities=['Reactor1'],
+    cal = filters.inventories_activity(evaler, facilities=['Reactor1'],
                                             nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
@@ -517,14 +517,14 @@ def test_convint_get_inventory_activity_df(db, fname, backend):
 
 
 @dbtest
-def test_convint_get_inventory_decayheat_df(db, fname, backend):
+def test_inventories_decayheat(db, fname, backend):
     evaler = cym.Evaluator(db)
-    cal = filters.get_inventory_decayheat_df(evaler)
+    cal = filters.inventories_decayheat(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
                 'NucId', 'Quantity', 'Activity', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = filters.get_inventory_decayheat_df(evaler, facilities=['Reactor1'],
+    cal = filters.inventories_decayheat(evaler, facilities=['Reactor1'],
                                              nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
@@ -548,7 +548,7 @@ def test_convint_get_inventory_decayheat_df(db, fname, backend):
     )
     assert_frame_equal(cal, refs)
 
-    cal = filters.get_inventory_decayheat_df(evaler, facilities=['Reactor1'],
+    cal = filters.inventories_decayheat(evaler, facilities=['Reactor1'],
                                              nucs=['94239', '92235'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([

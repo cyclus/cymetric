@@ -1,4 +1,4 @@
-import warning
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -16,7 +16,7 @@ from cymetric import tools
 from cymetric import filters
 
 
-def transactions_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -30,9 +30,9 @@ def transactions_timeseries(evaler, senders=(), receivers=(), commodities=(), nu
     """
 
     if len(nucs) != 0:
-        nucs = format_nucs(nucs)
+        nucs = tools.format_nucs(nucs)
 
-    df = filters.transactions_nuc_df(
+    df = filters.transactions_nuc(
         evaler, senders, receivers, commodities, nucs)
 
     group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
@@ -48,7 +48,7 @@ def transactions_timeseries(evaler, senders=(), receivers=(), commodities=(), nu
     return df
 
 
-def transactions_activity_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -62,9 +62,9 @@ def transactions_activity_timeseries(evaler, senders=(), receivers=(), commoditi
     """
 
     if len(nucs) != 0:
-        nucs = format_nucs(nucs)
+        nucs = tools.format_nucs(nucs)
 
-    df = filters.transactions_activity_df(evaler, senders, receivers, commodities,
+    df = filters.transactions_activity(evaler, senders, receivers, commodities,
                                      nucs)
 
     group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
@@ -80,7 +80,7 @@ def transactions_activity_timeseries(evaler, senders=(), receivers=(), commoditi
     return df
 
 
-def transactions_decayheat_timeseries(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -94,9 +94,9 @@ def transactions_decayheat_timeseries(evaler, senders=(), receivers=(), commodit
     """
 
     if len(nucs) != 0:
-        nucs = format_nucs(nucs)
+        nucs = tools.format_nucs(nucs)
 
-    df = filters.transactions_decayheat_df(evaler, senders, receivers, commodities,
+    df = filters.transactions_decayheat(evaler, senders, receivers, commodities,
                                       nucs)
 
     group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
@@ -114,7 +114,7 @@ def transactions_decayheat_timeseries(evaler, senders=(), receivers=(), commodit
 
 
 
-def inventories_timeseries(evaler, facilities=(), nucs=()):
+def inventories(evaler, facilities=(), nucs=()):
     """
     Shape the reduced inventory Data Frame into a simple time serie. Applying
     nuclides/facilities selection when required.
@@ -127,12 +127,12 @@ def inventories_timeseries(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nucs(nucs)
+        nucs = tools.format_nucs(nucs)
     else:
         wng_msg = "no nuclide provided"
         warnings.warn(wng_msg, UserWarning)
 
-    df = filters.inventories_df(evaler, facilities, nucs)
+    df = filters.inventories(evaler, facilities, nucs)
 
     group_end = ['Time']
     group_start = group_end + ['Quantity']
@@ -144,7 +144,7 @@ def inventories_timeseries(evaler, facilities=(), nucs=()):
     return df
 
 
-def inventories_activity_timeseries(evaler, facilities=(), nucs=()):
+def inventories_activity(evaler, facilities=(), nucs=()):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -157,12 +157,12 @@ def inventories_activity_timeseries(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nucs(nucs)
+        nucs = tools.format_nucs(nucs)
     else:
         wng_msg = "no nuclide provided"
         warnings.warn(wng_msg, UserWarning)
 
-    df = filters.inventories_activity_df(evaler, facilities, nucs)
+    df = filters.inventories_activity(evaler, facilities, nucs)
     group_end = ['Time']
     group_start = group_end + ['Activity']
     df = df[group_start].groupby(group_end).sum()
@@ -173,7 +173,7 @@ def inventories_activity_timeseries(evaler, facilities=(), nucs=()):
     return df
 
 
-def inventories_decayheat_timeseries(evaler, facilities=(), nucs=()):
+def inventories_decayheat(evaler, facilities=(), nucs=()):
     """
     Get a simple time series of the decay heat of the inventory in the selcted
     facilities. Applying nuclides selection when required.
@@ -186,12 +186,12 @@ def inventories_decayheat_timeseries(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nucs(nucs)
+        nucs = tools.format_nucs(nucs)
     else:
         wng_msg = "no nuclide provided"
         warnings.warn(wng_msg, UserWarning)
 
-    df = filters.inventories_decayheat_df(evaler, facilities, nucs)
+    df = filters.inventories_decayheat(evaler, facilities, nucs)
     group_end = ['Time']
     group_start = group_end + ['DecayHeat']
     df = df[group_start].groupby(group_end).sum()
@@ -202,7 +202,7 @@ def inventories_decayheat_timeseries(evaler, facilities=(), nucs=()):
     return df
 
 
-def get_power_timeseries(evaler, facilities=()):
+def get_power(evaler, facilities=()):
     """
     Shape the reduced Power Data Frame into a simple time serie. Applying
     facilities selection when required.
@@ -240,7 +240,7 @@ def get_power_timeseries(evaler, facilities=()):
     return df
 
 
-def get_deployment_timeseries(evaler, facilities=()):
+def get_deployment(evaler, facilities=()):
     """
     Get a simple time series with deployment schedule of the selected facilities.
 
@@ -275,7 +275,7 @@ def get_deployment_timeseries(evaler, facilities=()):
     return df
 
 
-def get_retirement_timeseries(evaler, facilities=()):
+def get_retirement(evaler, facilities=()):
     """
     Get a simple time series with retirement schedule of the selected facilities.
 

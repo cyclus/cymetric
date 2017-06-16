@@ -1,3 +1,4 @@
+import warnings
 import pandas as pd
 import numpy as np
 
@@ -16,7 +17,7 @@ except ImportError:
     HAVE_PYNE = False
 
 
-from cymetric import tools, format_nuc, reduce, merge, add_missing_time_step
+from cymetric.tools import format_nucs, reduce, merge, add_missing_time_step
 
 
 def transactions(evaler, senders=(), receivers=(), commodities=()):
@@ -74,7 +75,7 @@ def transactions(evaler, senders=(), receivers=(), commodities=()):
     return trans
 
 
-def get_transactions_nuc(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_nuc(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Filter the Transaction Data Frame, which include nuclide composition, on
     specific sending facility and receving facility. Applying nuclides
@@ -94,7 +95,7 @@ def get_transactions_nuc(evaler, senders=(), receivers=(), commodities=(), nucs=
     df = transactions(evaler, senders, receivers, commodities)
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
         compo = reduce(compo, [['NucId', nucs]])
 
     base_col = ['SimId', 'ResourceId']
@@ -104,7 +105,7 @@ def get_transactions_nuc(evaler, senders=(), receivers=(), commodities=(), nucs=
     return df
 
 
-def get_transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Return the transation df, with the activities. Applying nuclides selection
     when required.
@@ -121,7 +122,7 @@ def get_transactions_activity(evaler, senders=(), receivers=(), commodities=(), 
     df = transactions(evaler, senders, receivers, commodities)
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
 
     compo = evaler.eval('Activity')
     compo = reduce(compo, [['NucId', nucs]])
@@ -133,7 +134,7 @@ def get_transactions_activity(evaler, senders=(), receivers=(), commodities=(), 
     return df
 
 
-def get_transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Return the transation df, with the decayheat. Applying nuclides selection
     when required.
@@ -150,7 +151,7 @@ def get_transactions_decayheat(evaler, senders=(), receivers=(), commodities=(),
     df = transactions(evaler, senders, receivers, commodities)
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
 
     compo = evaler.eval('DecayHeat')
     compo = reduce(compo, [['NucId', nucs]])
@@ -179,7 +180,7 @@ def inventories(evaler, facilities=(), nucs=()):
 
     rdc_table = []  # because we want to get rid of the nuclide asap
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
         rdc_table.append(['NucId', nucs])
 
     if len(facilities) != 0:
@@ -210,7 +211,7 @@ def inventories_activity(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
 
     df = inventories(evaler, facilities, nucs)
     for i, row in df.iterrows():
@@ -234,7 +235,7 @@ def inventories_decayheat(evaler, facilities=(), nucs=()):
     """
 
     if len(nucs) != 0:
-        nucs = format_nuc(nucs)
+        nucs = format_nucs(nucs)
 
     df = inventories_activity(evaler, facilities, nucs)
     for i, row in df.iterrows():

@@ -92,7 +92,7 @@ def format_nucs(nucs):
     ----------
     nucs :  of nuclides
     """
-    tools.raise_no_pyne('Unable to format nuclide !', HAVE_PYNE)
+    raise_no_pyne('Unable to format nuclide !', HAVE_PYNE)
 
     return [nucname.id(nuc) for nuc in nucs]
 
