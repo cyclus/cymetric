@@ -19,6 +19,13 @@ import cymetric as cym
 from cymetric import timeseries as ts
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
+try:
+    from pyne import data
+    import pyne.enrichment as enr
+    HAVE_PYNE = True
+except ImportError:
+    HAVE_PYNE = False
+
 
 @dbtest
 def test_timeseries_transactions(db, fname, backend):
