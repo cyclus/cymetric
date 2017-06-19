@@ -109,6 +109,8 @@ def test_timeseries_transactions_activity(db, fname, backend):
 
 @dbtest
 def test_timeseries_transactions_decayheat(db, fname, backend):
+    if not HAVE_PYNE:
+        raise SkipTest
     evaler = cym.Evaluator(db)
     cal = ts.transactions_decayheat(evaler)
     exp_head = ['Time', 'DecayHeat']
