@@ -35,6 +35,8 @@ def test_timeseries_transactions(db, fname, backend):
     exp_head = ['Time', 'Mass']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     # test single nuclide selection
     cal = ts.transactions(evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
@@ -67,6 +69,8 @@ def test_timeseries_transactions(db, fname, backend):
 
 @dbtest
 def test_timeseries_transactions_activity(db, fname, backend):
+    if not HAVE_PYNE:
+        raise SkipTest
     evaler = cym.Evaluator(db)
     cal = ts.transactions_activity(evaler)
     exp_head = ['Time', 'Activity']
@@ -181,13 +185,13 @@ def test_timeseries_inventories(db, fname, backend):
 
 @dbtest
 def test_timeseries_inventories_activity(db, fname, backend):
+    if not HAVE_PYNE:
+        raise SkipTest
     evaler = cym.Evaluator(db)
     cal = ts.inventories_activity(evaler)
     exp_head = ['Time', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    if not HAVE_PYNE:
-        raise SkipTest
     cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
                                                nucs=['94239'])
     refs = pd.DataFrame(np.array([
@@ -219,13 +223,13 @@ def test_timeseries_inventories_activity(db, fname, backend):
 
 @dbtest
 def test_timeseries_inventories_decayheat(db, fname, backend):
+    if not HAVE_PYNE:
+        raise SkipTest
     evaler = cym.Evaluator(db)
     cal = ts.inventories_decayheat(evaler)
     exp_head = ['Time', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    if not HAVE_PYNE:
-        raise SkipTest
     cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
                                                 nucs=['94239'])
     refs = pd.DataFrame(np.array([
