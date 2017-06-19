@@ -140,6 +140,8 @@ def test_timeseries_inventories(db, fname, backend):
     exp_head = ['Time', 'Quantity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = ts.inventories(evaler, facilities=['Reactor1'],
                                       nucs=['94239'])
     refs = pd.DataFrame(np.array([
@@ -176,6 +178,8 @@ def test_timeseries_inventories_activity(db, fname, backend):
     exp_head = ['Time', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
                                                nucs=['94239'])
     refs = pd.DataFrame(np.array([
@@ -212,6 +216,8 @@ def test_timeseries_inventories_decayheat(db, fname, backend):
     exp_head = ['Time', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
                                                 nucs=['94239'])
     refs = pd.DataFrame(np.array([

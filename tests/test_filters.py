@@ -12,12 +12,18 @@ import numpy as np
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
-
 from tools import setup, dbtest
 
 import cymetric as cym
 from cymetric import filters
 from cymetric.tools import raw_to_series, ensure_dt_bytes
+
+try:
+    from pyne import data
+    import pyne.enrichment as enr
+    HAVE_PYNE = True
+except ImportError:
+    HAVE_PYNE = False
 
 
 @dbtest
@@ -412,6 +418,8 @@ def test_inventories(db, fname, backend):
                 'Time', 'InventoryName', 'NucId', 'Quantity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = filters.inventories(evaler, facilities=['Reactor1'],
                                    nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
@@ -462,6 +470,8 @@ def test_inventories_activity(db, fname, backend):
                 'NucId', 'Quantity', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = filters.inventories_activity(evaler, facilities=['Reactor1'],
                                             nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
@@ -523,6 +533,8 @@ def test_inventories_decayheat(db, fname, backend):
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
                 'NucId', 'Quantity', 'Activity', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    if not HAVE_PYNE:
+        raise SkipTest
 
     cal = filters.inventories_decayheat(evaler, facilities=['Reactor1'],
                                              nucs=['94239'])
