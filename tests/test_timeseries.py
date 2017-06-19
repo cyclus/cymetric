@@ -7,6 +7,7 @@ from functools import wraps
 
 import nose
 from nose.tools import assert_equal, assert_less
+from nose.plugins.skip import SkipTest
 
 import numpy as np
 import pandas as pd
