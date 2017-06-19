@@ -19,6 +19,13 @@ import cymetric as cym
 from cymetric import timeseries as ts
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
+try:
+    from pyne import data
+    import pyne.enrichment as enr
+    HAVE_PYNE = True
+except ImportError:
+    HAVE_PYNE = False
+
 
 @dbtest
 def test_timeseries_transactions(db, fname, backend):
@@ -140,6 +147,8 @@ def test_timeseries_inventories(db, fname, backend):
     exp_head = ['Time', 'Quantity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = ts.inventories(evaler, facilities=['Reactor1'],
                                       nucs=['94239'])
     refs = pd.DataFrame(np.array([
@@ -176,6 +185,8 @@ def test_timeseries_inventories_activity(db, fname, backend):
     exp_head = ['Time', 'Activity']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
                                                nucs=['94239'])
     refs = pd.DataFrame(np.array([
@@ -212,6 +223,8 @@ def test_timeseries_inventories_decayheat(db, fname, backend):
     exp_head = ['Time', 'DecayHeat']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
+    if not HAVE_PYNE:
+        raise SkipTest
     cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
                                                 nucs=['94239'])
     refs = pd.DataFrame(np.array([
