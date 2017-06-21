@@ -175,7 +175,6 @@ def inventories(evaler, facilities=(), nucs=()):
     """
 
     # Get inventory table
-    df = evaler.eval('ExplicitInventory')
     agents = evaler.eval('AgentEntry')
 
     rdc_table = []  # because we want to get rid of the nuclide asap
@@ -183,12 +182,19 @@ def inventories(evaler, facilities=(), nucs=()):
         nucs = format_nucs(nucs)
         rdc_table.append(['NucId', nucs])
 
+    conditionnal_agent = []
+    df = pd.DataFrame()
     if len(facilities) != 0:
         agents = agents[agents['Prototype'].isin(facilities)]
-        rdc_table.append(['AgentId', agents['AgentId'].tolist()])
+        dfs = []
+        for id in agents['AgentId'].tolist():
+            conditionnal_agent = ('AgentId','==',id)
+            dfs.append(evaler.eval('ExplicitInventory', conds=[conditionnal_agent]))
+            df = pd.concat(dfs)
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
+        df = evaler.eval('ExplicitInventory')
     df = reduce(df, rdc_table)
 
     base_col = ['SimId', 'AgentId']
