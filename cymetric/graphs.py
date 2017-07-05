@@ -18,11 +18,10 @@ except ImportError:
     HAVE_PYNE = False
 
 from cymetric import tools
-from cymetric.filter import get_transaction_nuc_df
+from cymetric.filters import transactions_nuc
 
 
-def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
-               start=None, stop=None):
+def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(), start=None, stop=None):
     """
     Generate the dot graph of the transation between facilitiese. Applying times
     nuclides selection when required.
@@ -39,7 +38,7 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
     """
     tools.raise_no_graphviz('Unable to generate flow graph!', HAVE_GRAPHVIZ)
 
-    df = get_transaction_nuc_df(
+    df = transactions_nuc(
         evaler, senders, receivers, commodities, nucs)
 
     if start != None:
