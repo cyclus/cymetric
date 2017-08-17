@@ -3,6 +3,7 @@ FROM cyclus/cycamore:CYCAMORE_VERSION
 
 RUN apt-get update
 RUN apt-get install -y --force-yes --fix-missing python3-pip
+RUN apt-get install -y --force-yes  libhdf5-serial-dev 
 RUN pip3 install cython numpy
 RUN pip3 install tables
 RUN pip3 install jinja2
