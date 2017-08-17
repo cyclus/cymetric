@@ -1,3 +1,5 @@
+"""A plot generator for Cymetric.
+"""
 import warnings
 
 import pandas as pd
@@ -42,11 +44,11 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(), start=
         evaler, senders, receivers, commodities, nucs)
 
     if start != None:
-        df = df.loc[(df['Time'] >= time[0])]
+        df = df.loc[(df['Time'] >= start)]
     if stop != None:
-        df = df.loc[(df['Time'] <= time[1])]
+        df = df.loc[(df['Time'] <= stop)]
 
-    group_end = ['ReceiverPrototype', 'SenderPrototype']
+    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Commodity']
     group_start = group_end + ['Mass']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
@@ -59,7 +61,8 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(), start=
         dot.node(agent)
 
     for index, row in df.iterrows():
+        lbl = str(row['Commodity']) + " " + str('{:.2e}'.format(row['Mass']))
         dot.edge(row['SenderPrototype'], row['ReceiverPrototype'],
-                 label=str(row['Mass']))
+                 label= lbl)
 
     return dot
