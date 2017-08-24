@@ -1,3 +1,5 @@
+"""A plot generator for Cymetric.
+"""
 import warnings
 
 import pandas as pd
@@ -18,11 +20,10 @@ except ImportError:
     HAVE_PYNE = False
 
 from cymetric import tools
-from cymetric.filter import get_transaction_nuc_df
+from cymetric.filters import transactions_nuc
 
 
-def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
-               start=None, stop=None):
+def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(), start=None, stop=None):
     """
     Generate the dot graph of the transation between facilitiese. Applying times
     nuclides selection when required.
@@ -39,15 +40,15 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
     """
     tools.raise_no_graphviz('Unable to generate flow graph!', HAVE_GRAPHVIZ)
 
-    df = get_transaction_nuc_df(
+    df = transactions_nuc(
         evaler, senders, receivers, commodities, nucs)
 
     if start != None:
-        df = df.loc[(df['Time'] >= time[0])]
+        df = df.loc[(df['Time'] >= start)]
     if stop != None:
-        df = df.loc[(df['Time'] <= time[1])]
+        df = df.loc[(df['Time'] <= stop)]
 
-    group_end = ['ReceiverPrototype', 'SenderPrototype']
+    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Commodity']
     group_start = group_end + ['Mass']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
@@ -60,7 +61,8 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
         dot.node(agent)
 
     for index, row in df.iterrows():
+        lbl = str(row['Commodity']) + " " + str('{:.2e}'.format(row['Mass']))
         dot.edge(row['SenderPrototype'], row['ReceiverPrototype'],
-                 label=str(row['Mass']))
+                 label= lbl)
 
     return dot

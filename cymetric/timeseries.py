@@ -224,11 +224,11 @@ def get_power(evaler, facilities=()):
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
-    power = reduce(power, rdc_)
+    power = tools.reduce(power, rdc_)
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
-    power = merge(power, base_col, agents, added_col)
+    power = tools.merge(power, base_col, agents, added_col)
 
     group_end = ['Time']
     group_start = group_end + ['Value']
