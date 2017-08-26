@@ -1,8 +1,6 @@
-
-FROM cyclus/cymetric-deps:CYMETRIC_VERSION
+FROM cyclus/cycamore:latest
 
 COPY . /cymetric
 WORKDIR /cymetric
 RUN python setup.py install
 WORKDIR /
-
