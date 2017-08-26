@@ -56,6 +56,7 @@ def test_transactions(db, fname, backend):
     ]))
     )
     refs.index = refs.index.astype('str')
+    print(cal)
     assert_frame_equal(cal, refs)
 
     # test single sender
