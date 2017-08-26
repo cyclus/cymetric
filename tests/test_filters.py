@@ -35,43 +35,36 @@ def test_transactions(db, fname, backend):
                 'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    # SimId et al. change at each test need to drop it
+    drop_cols = ['SimId', 'TransactionId', 'ResourceId', 'ReceiverId', 'SenderId']
+    cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
-        (17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
-        (17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
-    print(cal)
     assert_frame_equal(cal, refs)
 
     # test single sender
     cal = filters.transactions(evaler, senders=['UOX_Source'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -80,24 +73,20 @@ def test_transactions(db, fname, backend):
     # test multiple sender
     cal = filters.transactions(
         evaler, senders=['UOX_Source', 'MOX_Source'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
-        (17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
-        (17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -105,19 +94,15 @@ def test_transactions(db, fname, backend):
 
     # test single receiver
     cal = filters.transactions(evaler, receivers=['Reactor1'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -126,21 +111,17 @@ def test_transactions(db, fname, backend):
     # test multiple sender
     cal = filters.transactions(
         evaler, receivers=['Reactor1', 'Reactor3'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
-        (17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
-        (17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -149,22 +130,18 @@ def test_transactions(db, fname, backend):
     # test multiple sender and multiple receiver
     cal = filters.transactions(evaler, senders=['UOX_Source', 'MOX_Source'],
                                      receivers=['Reactor1', 'Reactor2'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -172,17 +149,13 @@ def test_transactions(db, fname, backend):
 
     # test single filters.odity
     cal = filters.transactions(evaler, commodities=['uox'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -190,24 +163,20 @@ def test_transactions(db, fname, backend):
 
     # test multiple sender
     cal = filters.transactions(evaler, commodities=['uox', 'mox'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
-    # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
-    # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 13, 'UOX_Source', 'uox', 4),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
-        (15, 'Reactor1', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 2),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 3),
-        (16, 'Reactor2', 14, 'MOX_Source', 'mox', 4),
-        (17, 'Reactor3', 13, 'UOX_Source', 'uox', 3),
-        (17, 'Reactor3', 14, 'MOX_Source', 'mox', 4),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
-        ('ReceiverId', '<i8'), ('ReceiverPrototype', 'O'), ('SenderId', '<i8'),
-        ('SenderPrototype', 'O'), ('Commodity', 'O'), ('Time', '<i8')
+        ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
