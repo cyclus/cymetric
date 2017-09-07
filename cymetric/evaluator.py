@@ -70,7 +70,7 @@ class Evaluator(object):
             for field, dbtype, shape in m.schema:
                 fname = m.schema.byte_names[field]
                 val = rawd[str(field)][i]
-                d = d.add_val(fname, val, dbtype=dbtype, shape=shape)
+                d = d.add_val(fname, val, type=dbtype, shape=shape)
             d.record()
         self.known_tables.add(m.name)
         return raw
