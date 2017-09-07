@@ -11,14 +11,14 @@ test:
     - docker run cyclus/cymetric:latest nosetests -w /cymetric/tests
 
 deployment:
-  develop:
-    branch: develop
+  master:
+    branch: master
     commands:
         - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
         - docker push cyclus/cymetric:latest
 
-  master:
-    branch: master
+  releases:
+    tag: /.*/
     commands:
         - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
         - docker build -t cyclus/cymetric:stable .
