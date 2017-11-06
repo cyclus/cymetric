@@ -17,7 +17,7 @@ from cymetric import tools
 #########################
 
 # Electricity Generated [GWe-y]
-_egdeps = [('ElectricityGenerated', ('AgentId', 'Year'), 'Energy'),]
+_egdeps = [('AnnualElectricityGeneratedByAgent', ('AgentId', 'Year'), 'Energy'),]
 
 _egschema = [('Year', ts.INT), ('Energy', ts.DOUBLE)]
 
