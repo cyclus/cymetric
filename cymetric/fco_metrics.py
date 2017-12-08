@@ -126,7 +126,7 @@ _fldeps = ['Materials', 'Transactions']
 _flschema = [('Year', ts.INT), ('FuelLoading', ts.DOUBLE)]
 
 @metric(name='FcoFuelLoading', depends=_fldeps, schema=_flschema)
-def fco_fuel_loading(series):
+def fco_fuel_loading(mats, trans):
     """FcoFuelLoading metric returns the fuel loaded in tHM/y in a
     simulation. This is written for FCO databases that use Bright-lite
     archetypes (the commodity filtering is specific to these archetypes).
