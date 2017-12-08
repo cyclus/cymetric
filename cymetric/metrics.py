@@ -232,7 +232,7 @@ def decommission_series(entry, exit):
     """Provides a time series of the decommissioning of agents by prototype.
     """
     exit_index = ['SimId', 'ExitTime', 'Prototype']
-    if agent_exit is not None:
+    if exit is not None:
         exit = pd.merge(entry, exit, on=['SimId', 'AgentId'], how='inner')
         exit = exit.set_index(exit_index)
     else:
@@ -273,13 +273,13 @@ def agents(entry, exit, decom, info):
     idx = ent.index
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
-    if agent_exit is None:
+    if exit is None:
         agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx))
         agent_exit.name = 'ExitTime'
     else:
         agent_exit = agent_exit.reindex(index=idx)
     df = pd.merge(df, agent_exit.reset_index(), on=mergeon)
-    if decom_time is not None:
+    if decom is not None:
         df = tools.merge_and_fillna_col(df, decom[['SimId', 'AgentId', 'DecomTime']],
                                         'ExitTime', 'DecomTime', on=mergeon)
     df = tools.merge_and_fillna_col(df, info[['SimId', 'Duration']],
