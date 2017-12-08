@@ -1,4 +1,6 @@
+"""Root metrics for Bright-lite"""
 from cymetric.root_metrics import root_metric
+
 
 agentstate_brightlite_fuelfabfacilityinfo = root_metric(
     name='AgentState_Brightlite_FuelfabFacilityInfo')

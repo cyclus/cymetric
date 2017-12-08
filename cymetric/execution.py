@@ -210,6 +210,7 @@ class ExecutionContext(MutableMapping):
         """Closes db, flushing remaining buffers."""
         self.evaler.db.flush()
 
+
 def exec_code(code, db, write=True):
     """Runs a code snipper in the context of a database."""
     evaler = Evaluator(db, write=write)
