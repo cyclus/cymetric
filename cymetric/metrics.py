@@ -410,6 +410,26 @@ def annual_electricity_generated_by_agent(series):
 
 del _egdeps, _egschema
 
+
+# Mass of SNF+HLW disposed
+dependencies = [
+	('Mass', (Col1), 'Value1')
+	('Energy', (Col2), 'Value2')
+	]
+
+schema = [('SimId', ts.INT), ('Mass', ts.INT), ('Energy', ts.DOUBLE)]
+
+@metric(name='MassOfSNF+HLWdisposedPerEnergyGenerated', depends=dependencies, schema=schema)
+def mass_of_SNF_HLW_disposed_per_energy_generated(series):
+	"""Mass of SNF+HLW per energy generated metric returns the total mass of Spent Nuclear Fuel and HLW per the unit energy generated,
+	 calculated by total mass of SNF+HLW generated per year divided by the total energy generated per year"""
+	one = series[0]
+	two = series[1]
+	return dataframe
+
+del dependencies, schema
+
+
 #
 # Not a metric, not a root metric metrics
 #
