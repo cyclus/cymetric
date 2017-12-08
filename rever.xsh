@@ -1,0 +1,6 @@
+$PROJECT = $GITHUB_REPO = 'cymetric'
+$GITHUB_ORG = 'cyclus'
+
+$ACTIVITIES = ['changelog']
+$CHANGELOG_FILENAME = 'CHANGELOG.rst'
+$CHANGELOG_TEMPLATE = 'TEMPLATE.rst'
