@@ -1,4 +1,3 @@
-This is just a test line. will be removed shortly
 This repository holds scripts to analyze Cyclus' output and to convert it into
 nuclear fuel cycle metrics.
 
