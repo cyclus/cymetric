@@ -10,3 +10,6 @@ tests/*.sqlite
 cymetric/cpp_typesystem.pxd
 cymetric/typesystem.pxd
 cymetric/typesystem.pyx
+
+# Rever
+rever/
