@@ -73,7 +73,7 @@ def _genmetricclass(f, name, depends, scheme):
                 known_tables = self.db.tables()
             if self.name in known_tables:
                 return self.db.query(self.name, conds=conds)
-            return f(**frames)
+            return f(*frames)
 
     Cls.__name__ = str(name)
     register_metric(Cls)
