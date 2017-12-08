@@ -412,22 +412,47 @@ del _egdeps, _egschema
 
 
 # Mass of SNF+HLW disposed
-dependencies = [
-	('Mass', (Col1), 'Value1')
-	('Energy', (Col2), 'Value2')
-	]
 
-schema = [('SimId', ts.INT), ('Mass', ts.INT), ('Energy', ts.DOUBLE)]
+deps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'),
+        ('TimeSeriesUsedFuel', ('SimId', 'AgentId', 'Time'), 'Value')]
 
-@metric(name='MassOfSNF+HLWdisposedPerEnergyGenerated', depends=dependencies, schema=schema)
+schema = [
+    ('SimId', ts.UUID), ('AgentId', ts.INT),
+    ('Time', ts.INT), ('Energy', ts.DOUBLE),
+    ('Mass', ts.DOUBLE)
+    ]
+
+@metric(name='MassOfSNFandHLWdisposedPerEnergyGenerated',
+	 depends=deps, schema=schema)
+
 def mass_of_SNF_HLW_disposed_per_energy_generated(series):
-	"""Mass of SNF+HLW per energy generated metric returns the total mass of Spent Nuclear Fuel and HLW per the unit energy generated,
-	 calculated by total mass of SNF+HLW generated per year divided by the total energy generated per year"""
-	one = series[0]
-	two = series[1]
-	return dataframe
+    """Mass of SNF+HLW per energy generated metric returns the total mass
+    of Spent Nuclear Fuel and HLW per the unit energy generated,
+    calculated by total mass of SNF+HLW generated per year divided by
+    the total energy generated per year"""
+    mass = series[1].reset_index()
+    mass = pd.DataFrame(data={'SimId': mass.SimId,
+                              'AgentId': mass.AgentId,
+                              'Time': mass.Time,
+                              'Mass': mass.Value},
+                        columns=['SimId', 'AgentId', 'Time', 'Mass'])
+    mass_index = ['SimId', 'AgentId', 'Time']
+    #mass = mass.groupby(mass_index).sum()
 
-del dependencies, schema
+
+    elec = series[0].reset_index()
+    elec = pd.DataFrame(data={'SimId': elec.SimId,
+                              'AgentId': elec.AgentId,
+                              'Time': elec.Time,
+                              'Energy': elec.Value},
+                        columns=['SimId', 'AgentId', 'Time', 'Energy'])
+    el_index = ['SimId', 'AgentId', 'Time']
+    #elec = elec.groupby(el_index).sum()
+    elec = pd.merge(elec, mass, on=['SimId', 'AgentId', 'Time'])
+    rtn = elec.reset_index()
+    return rtn
+
+del deps, schema
 
 
 #
@@ -436,7 +461,8 @@ del dependencies, schema
 
 # These are not metrics that have any end use in mind, but are required for the
 # calculation of other metrics. Required tables like this should be stored
-# elsewhere in the future if they become more common.
+# elsewhere in the future     elec = series[0].reset_index()
+# if they become more common.
 
 # TimeList
 

@@ -102,3 +102,4 @@ agentstate_agent_sourceinfo = root_metric(
 time_series_power = root_metric(name='TimeSeriesPower')
 time_series_enrichmentfeed = root_metric(name='TimeSeriesEnrichmentFeed')
 time_series_enrichmentswu = root_metric(name='TimeSeriesEnrichmentSWU')
+time_series_used_fuel = root_metric(name='TimeSeriesUsedFuel')
