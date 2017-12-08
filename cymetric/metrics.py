@@ -144,7 +144,9 @@ def activity(mats):
     indexed by the SimId, QualId, ResourceId, ObjId, TimeCreated, and NucId.
     """
     tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
-    mass = mats.set_index(('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'))
+    mass = tools.raw_to_series(mats,
+                               ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+                               'Mass')
     act = []
     for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
         val = (1000 * data.N_A * m * data.decay_const(nuc) \
@@ -162,9 +164,12 @@ del _actdeps, _actschema
 _dhdeps = ['Activity']
 
 _dhschema = [
-    ('SimId', ts.UUID), ('QualId', ts.INT),
-    ('ResourceId', ts.INT), ('ObjId', ts.INT),
-    ('TimeCreated', ts.INT), ('NucId', ts.INT),
+    ('SimId', ts.UUID),
+    ('QualId', ts.INT),
+    ('ResourceId', ts.INT),
+    ('ObjId', ts.INT),
+    ('TimeCreated', ts.INT),
+    ('NucId', ts.INT),
     ('DecayHeat', ts.DOUBLE)
     ]
 
@@ -175,7 +180,9 @@ def decay_heat(acts):
     ResourceId, ObjId, TimeCreated, and NucId.
     """
     tools.raise_no_pyne('DecayHeat could not be computed', HAVE_PYNE)
-    act = acts.set_index(('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'))
+    act = tools.raw_to_series(acts,
+                              ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+                              'Activity')
     dh = []
     for (simid, qual, res, obj, time, nuc), a in act.iteritems():
         val = (data.MeV_per_MJ * a * data.q_val(nuc))
