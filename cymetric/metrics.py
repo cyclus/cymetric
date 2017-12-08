@@ -283,30 +283,30 @@ del _agentsdeps, _agentsschema
 
 
 # Transaction Quantity
-_transdeps = [
-    ('Materials', ('SimId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'),
-        'Mass'),
-    ('Transactions', ('SimId', 'TransactionId', 'SenderId', 'ReceiverId',
-        'ResourceId'), 'Commodity')
-    ]
+_transdeps = ['Materials', 'Transactions']
 
 _transschema = [
-    ('SimId', ts.UUID), ('TransactionId', ts.INT),
-    ('ResourceId', ts.INT), ('ObjId', ts.INT),
-    ('TimeCreated', ts.INT), ('SenderId', ts.INT),
-    ('ReceiverId', ts.INT), ('Commodity', ts.STRING),
-    ('Units', ts.STRING), ('Quantity', ts.DOUBLE)
+    ('SimId', ts.UUID),
+    ('TransactionId', ts.INT),
+    ('ResourceId', ts.INT),
+    ('ObjId', ts.INT),
+    ('TimeCreated', ts.INT),
+    ('SenderId', ts.INT),
+    ('ReceiverId', ts.INT),
+    ('Commodity', ts.STRING),
+    ('Units', ts.STRING),
+    ('Quantity', ts.DOUBLE)
     ]
 
 @metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
-def transaction_quantity(series):
+def transaction_quantity(mats, tranacts):
     """Transaction Quantity metric returns the quantity of each transaction throughout
     the simulation.
     """
     trans_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId',
-            'TimeCreated', 'SenderId', 'ReceiverId', series[1].name, 'Units']
-    trans = pd.merge(series[0].reset_index(), series[1].reset_index(),
-            on=['SimId', 'ResourceId'], how='inner').set_index(trans_index)
+            'TimeCreated', 'SenderId', 'ReceiverId', 'Commodity', 'Units']
+    trans = pd.merge(mats, tranacts, on=['SimId', 'ResourceId'], how='inner')
+    trans = trans.set_index(trans_index)
     trans = trans.groupby(level=trans_index)['Mass'].sum()
     trans.name = 'Quantity'
     rtn = trans.reset_index()
@@ -316,24 +316,26 @@ del _transdeps, _transschema
 
 
 # Explicit Inventory By Agent
-_invdeps = [
-    ('ExplicitInventory', ('SimId', 'AgentId', 'Time', 'InventoryName', 'NucId'),
-        'Quantity')
-    ]
+_invdeps = ['ExplicitInventory']
 
 _invschema = [
-    ('SimId', ts.UUID), ('AgentId', ts.INT),
-    ('Time', ts.INT), ('InventoryName', ts.STRING),
-    ('NucId', ts.INT), ('Quantity', ts.DOUBLE)
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Time', ts.INT),
+    ('InventoryName', ts.STRING),
+    ('NucId', ts.INT),
+    ('Quantity', ts.DOUBLE)
     ]
 
 @metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
-def explicit_inventory_by_agent(series):
+def explicit_inventory_by_agent(expinv):
     """The Inventory By Agent metric groups the inventories by Agent
     (keeping all nuc information)
     """
     inv_index = ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId']
-    inv = series[0]
+    inv = tools.raw_to_series(expinv,
+                              ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId'],
+                              'Quantity')
     inv = inv.groupby(level=inv_index).sum()
     inv.name = 'Quantity'
     rtn = inv.reset_index()
@@ -343,25 +345,26 @@ del _invdeps, _invschema
 
 
 # Explicit Inventory By Nuc
-_invdeps = [
-    ('ExplicitInventory', ('SimId', 'Time', 'InventoryName', 'NucId'),
-        'Quantity')
-    ]
+_invdeps = ['ExplicitInventory']
 
 _invschema = [
-    ('SimId', ts.UUID), ('Time', ts.INT),
-    ('InventoryName', ts.STRING), ('NucId', ts.INT),
+    ('SimId', ts.UUID),
+    ('Time', ts.INT),
+    ('InventoryName', ts.STRING),
+    ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
     ]
 
 @metric(name='ExplicitInventoryByNuc', depends=_invdeps, schema=_invschema)
-def explicit_inventory_by_nuc(series):
+def explicit_inventory_by_nuc(expinv):
     """The Inventory By Nuc metric groups the inventories by nuclide
     and discards the agent information it is attached to (providing fuel
     cycle-wide nuclide inventories)
     """
     inv_index = ['SimId', 'Time', 'InventoryName', 'NucId']
-    inv = series[0]
+    inv = tools.raw_to_series(expinv,
+                              ('SimId', 'Time', 'InventoryName', 'NucId'),
+                              'Quantity')
     inv = inv.groupby(level=inv_index).sum()
     inv.name = 'Quantity'
     rtn = inv.reset_index()
@@ -371,20 +374,21 @@ del _invdeps, _invschema
 
 
 # Electricity Generated [MWe-y]
-_egdeps = [('TimeSeriesPower', ('SimId', 'AgentId', 'Time'), 'Value'),]
+_egdeps = ['TimeSeriesPower']
 
 _egschema = [
-    ('SimId', ts.UUID), ('AgentId', ts.INT),
-    ('Year', ts.INT), ('Energy', ts.DOUBLE)
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Year', ts.INT),
+    ('Energy', ts.DOUBLE)
     ]
 
 @metric(name='AnnualElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
-def annual_electricity_generated_by_agent(series):
+def annual_electricity_generated_by_agent(elec):
     """Annual Electricity Generated metric returns the total electricity
     generated in MWe-y for each agent, calculated from the average monthly
     power given in TimeSeriesPower.
     """
-    elec = series[0].reset_index()
     elec = pd.DataFrame(data={'SimId': elec.SimId,
                               'AgentId': elec.AgentId,
                               'Year': elec.Time.apply(lambda x: x//12),
@@ -407,22 +411,26 @@ del _egdeps, _egschema
 
 # TimeList
 
-_tldeps = [('Info', ('SimId',), 'Duration')]
+_tldeps = ['Info']
 
-_tlschema = [('SimId', ts.UUID), ('TimeStep', ts.INT)]
+_tlschema = [
+    ('SimId', ts.UUID),
+    ('TimeStep', ts.INT)
+    ]
 
 @metric(name='TimeList', depends=_tldeps, schema=_tlschema)
-def timelist(series):
+def timelist(info):
     """In case the sim does not have entries for every timestep, this populates
     a list with all timesteps in the duration.
     """
-    info = series[0]
+    info = tools.raw_to_series(info, ('SimId',), 'Duration')
     tl = []
     for sim, dur in info.iteritems():
         for i in range(dur):
             tl.append((sim, i))
     tl = pd.DataFrame(tl, columns=['SimId', 'TimeStep'])
     return tl
+
 
 del _tldeps, _tlschema
 
