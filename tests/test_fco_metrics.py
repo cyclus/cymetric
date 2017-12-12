@@ -50,10 +50,7 @@ def test_fco_u_mined():
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'),
                 ('Commodity', 'O')]))
         )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
-    s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
-    series = [s1,s2]
-    obs = fco_metrics.fco_u_mined.func(series)
+    obs = fco_metrics.fco_u_mined.func(mats, trans)
     assert_frame_equal(exp, obs)
 
 
@@ -83,10 +80,7 @@ def test_fco_swu():
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'),
                 ('Commodity', 'O')]))
         )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
-    s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
-    series = [s1,s2]
-    obs = fco_metrics.fco_swu.func(series)
+    obs = fco_metrics.fco_swu.func(mats, trans)
     np.allclose(exp, obs)
 
 
@@ -114,10 +108,7 @@ def test_fco_fuel_loading():
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'),
                 ('Commodity', 'O')]))
         )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']
-    s2 = trans.set_index(['SimId', 'TransactionId', 'ResourceId'])['Commodity']
-    series = [s1,s2]
-    obs = fco_metrics.fco_fuel_loading.func(series)
+    obs = fco_metrics.fco_fuel_loading.func(mats, trans)
     assert_frame_equal(exp, obs)
 
 
@@ -135,8 +126,7 @@ def test_fco_electricity_generated():
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Year', '<i8'),
                 ('Energy', '<f8')]))
         )
-    series = [eg.set_index(['SimId', 'AgentId', 'Year'])['Energy']]
-    obs = fco_metrics.fco_electricity_generated.func(series)
+    obs = fco_metrics.fco_electricity_generated.func(eg)
     assert_frame_equal(exp, obs)
 
 

@@ -11,6 +11,7 @@ else:
 from cyclus import typesystem as ts
 from cyclus.typesystem import NAMES, RANKS, IDS
 
+
 def canon_dbtype(dbtype):
     """Returns the canonical form for a Cyclus database type."""
     if dbtype in NAMES:

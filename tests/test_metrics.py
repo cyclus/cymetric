@@ -46,9 +46,9 @@ def test_build_series():
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('Prototype', 'O'), ('EnterTime', '<i8')]))
         )
-    series = [agent_entry.set_index(['SimId', 'EnterTime'])['Prototype']]
-    obs = metrics.build_series.func(series)
+    obs = metrics.build_series.func(agent_entry)
     assert_frame_equal(exp, obs)
+
 
 def test_decommission_series():
     exp = pd.DataFrame(np.array([
@@ -76,11 +76,9 @@ def test_decommission_series():
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('ExitTime', '<i8')]))
         )
-    s1 = agent_entry.set_index(['SimId', 'AgentId'])['Prototype']
-    s2 = agent_exit.set_index(['SimId', 'AgentId'])['ExitTime']
-    series = [s1, s2]
-    obs = metrics.decommission_series.func(series)
+    obs = metrics.decommission_series.func(agent_entry, agent_exit)
     assert_frame_equal(exp, obs)
+
 
 def test_agents():
     exp = pd.DataFrame(np.array([
@@ -130,12 +128,7 @@ def test_agents():
     info = pd.DataFrame({'Duration': {0: 120},
         'SimId': {0: UUID('f22f2281-2464-420a-8325-37320fd418f8')},
         })
-    dur = info.set_index(['SimId'])
-    series = [raw_to_series(agent_entry, ['SimId', 'AgentId'], col) \
-              for col in ('Kind', 'Spec', 'Prototype', 'ParentId',
-                          'Lifetime', 'EnterTime')]
-    series += [None, None, dur]
-    obs = metrics.agents.func(series)
+    obs = metrics.agents.func(agent_entry, None, None, info)
     assert_frame_equal(exp, obs)
 
 
@@ -164,10 +157,7 @@ def test_materials():
                 ('SimId', 'O'), ('QualId', '<i8'), ('NucId', '<i8'),
                 ('MassFrac', '<f8')]))
         )
-    s1 = res.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'Units'])['Quantity']
-    s2 = comps.set_index(['SimId', 'QualId', 'NucId'])['MassFrac']
-    series = [s1,s2]
-    obs = metrics.materials.func(series)
+    obs = metrics.materials.func(res, comps)
     assert_frame_equal(exp, obs)
 
 
@@ -191,8 +181,7 @@ def test_activity():
                 ('SimId', 'O'), ('QualId', '<i8'), ('ResourceId', '<i8'), ('ObjId', '<i8'),
                 ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Mass', '<f8')]))
         )
-    series = [mass.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'])['Mass']]
-    obs = metrics.activity.func(series)
+    obs = metrics.activity.func(mass)
     assert_frame_equal(exp, obs)
 
 
@@ -217,9 +206,7 @@ def test_decayheat():
                 ('TimeCreated', '<i8'), ('NucId', '<i8'), ('Activity', '<f8')]))
         )
 
-    series = [act.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', \
-                  'NucId'])['Activity']]
-    obs = metrics.decay_heat.func(series)
+    obs = metrics.decay_heat.func(act)
     assert_frame_equal(exp, obs)
 
 
@@ -254,10 +241,7 @@ def test_transaction_quantity():
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('SenderId', '<i8'),
                 ('ReceiverId', '<i8'), ('ResourceId', '<i8'), ('Commodity', 'O')]))
         )
-    s1 = mats.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId', 'Units'])['Mass']
-    s2 = trans.set_index(['SimId', 'TransactionId', 'SenderId', 'ReceiverId', 'ResourceId'])['Commodity']
-    series = [s1,s2]
-    obs = metrics.transaction_quantity.func(series)
+    obs = metrics.transaction_quantity.func(mats, trans)
     assert_frame_equal(exp, obs)
 
 
@@ -283,8 +267,7 @@ def test_explicit_inventory_by_agent():
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
                 ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
         )
-    series = [inv.set_index(['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId'])['Quantity']]
-    obs = metrics.explicit_inventory_by_agent.func(series)
+    obs = metrics.explicit_inventory_by_agent.func(inv)
     assert_frame_equal(exp, obs)
 
 
@@ -310,8 +293,7 @@ def test_explicit_inventory_by_nuc():
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
                 ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
         )
-    series = [inv.set_index(['SimId', 'Time', 'InventoryName', 'NucId'])['Quantity']]
-    obs = metrics.explicit_inventory_by_nuc.func(series)
+    obs = metrics.explicit_inventory_by_nuc.func(inv)
     assert_frame_equal(exp, obs)
 
 
@@ -336,8 +318,7 @@ def test_annual_electricity_generated_by_agent():
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
                 ('Value', '<f8')]))
         )
-    series = [tsp.set_index(['SimId', 'AgentId', 'Time'])['Value']]
-    obs = metrics.annual_electricity_generated_by_agent.func(series)
+    obs = metrics.annual_electricity_generated_by_agent.func(tsp)
     assert_frame_equal(exp, obs)
 
 
@@ -355,8 +336,7 @@ def test_timelist():
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('Duration', '<i8')]))
         )
-    series = [info.set_index(['SimId'])['Duration']]
-    obs = metrics.timelist.func(series)
+    obs = metrics.timelist.func(info)
     assert_frame_equal(exp, obs)
 
 

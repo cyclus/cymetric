@@ -3,11 +3,13 @@
 from __future__ import unicode_literals, print_function
 
 import pandas as pd
-
 from cyclus import lib
+
 from cymetric.tools import raw_to_series
 
+
 METRIC_REGISTRY = {}
+
 
 def register_metric(cls):
     """Adds a metric to the registry."""
@@ -51,12 +53,11 @@ class Evaluator(object):
         if rawkey in self.rawcache:
             return self.rawcache[rawkey]
         m = self.get_metric(metric)
-        series = []
+        frames = []
         for dep in m.dependencies:
-            d = self.eval(dep[0], conds=conds)
-            s = None if d is None else raw_to_series(d, dep[1], dep[2])
-            series.append(s)
-        raw = m(series=series, conds=conds, known_tables=self.known_tables)
+            frame = self.eval(dep, conds=conds)
+            frames.append(frame)
+        raw = m(frames=frames, conds=conds, known_tables=self.known_tables)
         if raw is None:
             return raw
         self.rawcache[rawkey] = raw
