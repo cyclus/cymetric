@@ -14,4 +14,4 @@ $VERSION_BUMP_PATTERNS = [
     ('setup.py', 'VERSION\s*=.*', "VERSION = '$VERSION'"),
 ]
 
-$NOSE_COMMAND = 'cd tests/ && rm test_filters.py && nosetests -w tests'
+$NOSE_COMMAND = 'cd tests/ && rm test_filters.py && nosetests'
