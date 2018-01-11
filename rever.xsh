@@ -5,7 +5,8 @@ $ACTIVITIES = ['changelog', 'nose', 'tag', 'push_tag', 'conda_forge', 'ghrelease
 $CHANGELOG_FILENAME = 'CHANGELOG.rst'
 $CHANGELOG_TEMPLATE = 'TEMPLATE.rst'
 
-$DOCKER_CONDA_DEPS = ['cyclus', 'cycamore', 'nose', 'pytables']
+$DOCKER_CONDA_DEPS = ['cyclus', 'cycamore', 'nose', 'pytables', 'pandas',
+                      'python-graphviz', 'pyne', 'numpy']
 $DOCKER_INSTALL_COMMAND = 'git clean -fdx && ./setup.py install --user'
 
 $VERSION_BUMP_PATTERNS = [
