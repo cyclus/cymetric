@@ -25,5 +25,5 @@ except ImportError:
         raw_to_series, Evaluator, eval
     from .execution import ExecutionContext, exec_code
 
-__version__ = '1.5.0'
+__version__ = '1.5.3'
 
