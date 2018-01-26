@@ -23,7 +23,8 @@ from cymetric import tools
 from cymetric.filters import transactions_nuc
 
 
-def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(), start=None, stop=None):
+def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
+        label='', start=None, stop=None):
     """
     Generate the dot graph of the transation between facilitiese. Applying times
     nuclides selection when required.
@@ -35,6 +36,8 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(), start=
     receivers : list of the receiving facility to consider
     commodities : list of the commodity exchanged to consider
     nucs : list of nuclide to consider
+    label : label key, used to add label on the arrow connecting facilities (for
+    commodity use 'com', for mass use 'mass', for both use com,mass)
     start : first timestep to consider, start included
     stop : last timestep to consider, stop included
     """
@@ -61,7 +64,11 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(), start=
         dot.node(agent)
 
     for index, row in df.iterrows():
-        lbl = str(row['Commodity']) + " " + str('{:.2e}'.format(row['Mass']))
+        lbl = ''
+        if 'com' in label:
+            lbl += str(row['Commodity']) + ' '
+        if 'mass' in label:
+            lbl += str('{:.2e}'.format(row['Mass'])) + ' '
         dot.edge(row['SenderPrototype'], row['ReceiverPrototype'],
                  label= lbl)
 
