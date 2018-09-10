@@ -13,7 +13,7 @@ jobs:
             - run:
                 name: Build Cymetric
                 command: |
-                    python setup.py --user
+                    python setup.py --prefix $(cyclus --install-path)
             - run:
                 name: save SHA to a file
                 command: echo $CIRCLE_SHA1 > .circle-sha
@@ -40,8 +40,8 @@ jobs:
             - run:
                 name: Nosetests
                 command: nosetests -w ~/cymetric/tests; exit $?
-    
-    
+
+
     # Update docker container
     deploy: # Cymetric -> Cymetric:latest
         docker:
