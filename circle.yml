@@ -93,9 +93,6 @@ workflows:
 
             # on a pr // all branch
             - build
-            - unit_test:
-                requires:
-                    - build
             - nosetest:
                 requires:
                     - build
