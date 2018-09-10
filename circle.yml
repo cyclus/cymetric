@@ -2,6 +2,7 @@ version: 2
 
 jobs:
     # Build Cymetric
+    build:
         docker:
             - image: cyclus/cycamore:latest
         working_directory: ~/cymetric
