@@ -13,7 +13,7 @@ jobs:
             - run:
                 name: Build Cymetric
                 command: |
-                    python setup.py 
+                    pwd; ls; ython setup.py 
             - run:
                 name: save SHA to a file
                 command: echo $CIRCLE_SHA1 > .circle-sha
