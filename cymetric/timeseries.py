@@ -203,11 +203,11 @@ def get_power(evaler, facilities=()):
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
-    df = tools.reduce(power, rdc_)
+    df = tools.reduce(df, rdc_)
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
-    df = tools.merge(power, base_col, agents, added_col)
+    df = tools.merge(df, base_col, agents, added_col)
 
     df = df[['Time','Value']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
