@@ -241,7 +241,7 @@ def get_deployment(evaler, facilities=()):
     # Adding a constant column to easily sum the amount of facilities build per
     # time step
     df = df.assign(Value=lambda x: 1)
-    df = df[['EnterTime','Value']].groupby(['Time']).sum()
+    df = df[['EnterTime', 'Value']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
     df.rename(index=str, columns={'EnterTime': 'Time'}, inplace=True)
 
