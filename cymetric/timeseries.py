@@ -209,7 +209,7 @@ def get_power(evaler, facilities=()):
     added_col = base_col + ['Prototype']
     df = tools.merge(df, base_col, agents, added_col)
 
-    df = df[['Time','Value']].groupby(['Time']).sum()
+    df = df[['Time', 'Value']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
