@@ -45,10 +45,6 @@ def transactions(evaler, senders=(), receivers=(), commodities=()):
     if len(senders) != 0:
         send_agent = send_agent[send_agent['Prototype'].isin(senders)]
 
-    # check if sender and receiver exist
-    if rec_agent.empty or send_agent.empty:
-        return None
-
     # Clean Transation PDF
     rdc_table = []
     rdc_table.append(['ReceiverId', rec_agent['ReceiverId'].tolist()])

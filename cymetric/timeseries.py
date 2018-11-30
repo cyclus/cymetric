@@ -35,11 +35,6 @@ def transactions(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     df = filters.transactions_nuc(
         evaler, senders, receivers, commodities, nucs)
 
-    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
-    group_start = group_end + ['Mass']
-    df = df[group_start].groupby(group_end).sum()
-    df.reset_index(inplace=True)
-
     df = df[['Time', 'Mass']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
@@ -67,11 +62,6 @@ def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs
     df = filters.transactions_activity(evaler, senders, receivers, commodities,
                                      nucs)
 
-    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
-    group_start = group_end + ['Activity']
-    df = df[group_start].groupby(group_end).sum()
-    df.reset_index(inplace=True)
-
     df = df[['Time', 'Activity']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
@@ -98,11 +88,6 @@ def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nuc
 
     df = filters.transactions_decayheat(evaler, senders, receivers, commodities,
                                       nucs)
-
-    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Time']
-    group_start = group_end + ['DecayHeat']
-    df = df[group_start].groupby(group_end).sum()
-    df.reset_index(inplace=True)
 
     df = df[['Time', 'DecayHeat']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
@@ -134,9 +119,7 @@ def inventories(evaler, facilities=(), nucs=()):
 
     df = filters.inventories(evaler, facilities, nucs)
 
-    group_end = ['Time']
-    group_start = group_end + ['Quantity']
-    df = df[group_start].groupby(group_end).sum()
+    df = df[['Time', 'Quantity']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
@@ -163,9 +146,7 @@ def inventories_activity(evaler, facilities=(), nucs=()):
         warnings.warn(wng_msg, UserWarning)
 
     df = filters.inventories_activity(evaler, facilities, nucs)
-    group_end = ['Time']
-    group_start = group_end + ['Activity']
-    df = df[group_start].groupby(group_end).sum()
+    df = df[['Time', 'Activity']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
@@ -192,9 +173,7 @@ def inventories_decayheat(evaler, facilities=(), nucs=()):
         warnings.warn(wng_msg, UserWarning)
 
     df = filters.inventories_decayheat(evaler, facilities, nucs)
-    group_end = ['Time']
-    group_start = group_end + ['DecayHeat']
-    df = df[group_start].groupby(group_end).sum()
+    df = df[['Time', 'DecayHeat']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
@@ -214,7 +193,7 @@ def get_power(evaler, facilities=()):
     """
 
     # Get inventory table
-    power = evaler.eval('TimeSeriesPower')
+    df = evaler.eval('TimeSeriesPower')
     agents = evaler.eval('AgentEntry')
 
     rdc_ = []  # because we want to get rid of the facility asap
@@ -224,15 +203,13 @@ def get_power(evaler, facilities=()):
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
-    power = tools.reduce(power, rdc_)
+    df = tools.reduce(df, rdc_)
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
-    power = tools.merge(power, base_col, agents, added_col)
+    df = tools.merge(df, base_col, agents, added_col)
 
-    group_end = ['Time']
-    group_start = group_end + ['Value']
-    df = power[group_start].groupby(group_end).sum()
+    df = df[['Time', 'Value']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
     time = evaler.eval('TimeList')
@@ -264,9 +241,7 @@ def get_deployment(evaler, facilities=()):
     # Adding a constant column to easily sum the amount of facilities build per
     # time step
     df = df.assign(Value=lambda x: 1)
-    group_end = ['EnterTime']
-    group_start = group_end + ['Value']
-    df = df[group_start].groupby(group_end).sum()
+    df = df[['EnterTime', 'Value']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
     df.rename(index=str, columns={'EnterTime': 'Time'}, inplace=True)
 
@@ -301,10 +276,7 @@ def get_retirement(evaler, facilities=()):
     # time step i
 
     df = df.assign(Value=lambda x: 1)
-    df['DecomTime'] = df['EnterTime'] + df['Lifetime']
-    group_end = ['DecomTime']
-    group_start = group_end + ['Value']
-    df = df[group_start].groupby(group_end).sum()
+    df = df[['DecomTime','Value']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
     df.rename(index=str, columns={'DecomTime': 'Time'}, inplace=True)
