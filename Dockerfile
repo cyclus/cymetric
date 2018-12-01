@@ -1,1 +1,0 @@
-docker/cymetric-ci/Dockerfile
