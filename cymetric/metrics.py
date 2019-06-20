@@ -408,6 +408,49 @@ def annual_electricity_generated_by_agent(elec):
 
 del _egdeps, _egschema
 
+# Usage
+_egdeps = [
+        ('Metadata', ('SimId', 'AgentId', 'keyword', 'Type'), 'Value'),
+        ('TimeList', ('SimId'), 'TimeStep'),
+        ('AgentEntry', ('SimId', 'AgentId', 'Prototype'), 'EnterTime'),
+        ('AgentEntry', ('SimId', 'AgentId', 'Prototype'), 'LifeTime'),
+        ]
+
+_egschema = [
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Time', ts.INT),
+    ('Keyword', ts.STRING),
+    ('Value', ts.DOUBLE)
+    ]
+
+@metric(name='Usage', depends=_egdeps, schema=_egschema)
+def usage_by_agent(series):
+    """
+    """
+    metadata = series[0].reset_index()
+    time = series[1].reset_index()
+    agent_in = series[2].reset_index()
+
+    decommission = metadata[ metadata['Type'] == "decommission" ]
+    deployment = metadata[ metadata['Type'] == "deployment" ]
+    timestep = metadata[ metadata['Type'] == "timestep" ]
+    throughput = metadata[ metadata['Type'] == "throughput" ]
+
+    # Deployement
+    # Filter  Prototype
+    deployment_agent = agent_in[agent_in['AgentId'].isin(deployment['AgentId'])]
+    deploy_usage = pd.DataFrame(data={'SimId': deployemnt_agent.SimId,
+                                     'AgentId': deployemnt_agent.AgentId,
+                                     'Time': deployemnt_agent.Enter
+
+    metadata = metadata.groupby(el_index).sum()
+    rtn = metadata.reset_index()
+    return rtn
+
+del _egdeps, _egschema
+
+
 #
 # Not a metric, not a root metric metrics
 #
