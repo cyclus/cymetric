@@ -400,7 +400,7 @@ def annual_electricity_generated_by_agent(elec):
                               'AgentId': elec.AgentId,
                               'Year': elec.Time.apply(lambda x: x//12),
                               'Energy': elec.Value.apply(lambda x: x/12)},
-			columns=['SimId', 'AgentId', 'Year', 'Energy'])
+            columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
@@ -409,12 +409,7 @@ def annual_electricity_generated_by_agent(elec):
 del _egdeps, _egschema
 
 # Usage
-_egdeps = [
-        ('Metadata', ('SimId', 'AgentId', 'keyword', 'Type'), 'Value'),
-        ('TimeList', ('SimId'), 'TimeStep'),
-        ('AgentEntry', ('SimId', 'AgentId', 'Prototype'), 'EnterTime'),
-        ('AgentEntry', ('SimId', 'AgentId', 'Prototype'), 'LifeTime'),
-        ]
+_egdeps = ['Metadata', 'TimeList', 'AgentEntry']
 
 _egschema = [
     ('SimId', ts.UUID),
