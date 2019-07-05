@@ -3,6 +3,23 @@ cymetric Change Log
 ===================
 
 .. current developments
+v1.5.3
+====================
+
+**Added:**
+* Capability to have either the commodity name and/or the mass quantity
+  transferred between 2 facilities in the flow graph arrows
+
+**Changed:**
+
+* Switching CI to circle-CI 2.0
+* Improved PandaDataframe filtering
+
+
+**Fixed:**
+
+* Improper input file for the nosetest
+
 
 v1.5.3
 ====================
