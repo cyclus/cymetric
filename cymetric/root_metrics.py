@@ -100,6 +100,8 @@ agentstate_agent_sourceinfo = root_metric(
 
 #toolkit-enabled tables
 time_series_power = root_metric(name='TimeSeriesPower')
+time_series_deployedisnt = root_metric(name='timeseriesdeployedinst')
+time_series_throughput = root_metric(name='timeseriesthroughput')
 time_series_enrichmentfeed = root_metric(name='TimeSeriesEnrichmentFeed')
 time_series_enrichmentswu = root_metric(name='TimeSeriesEnrichmentSWU')
 metadata = root_metric(name='Metadata')
