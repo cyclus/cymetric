@@ -420,27 +420,62 @@ _egschema = [
     ]
 
 @metric(name='Usage', depends=_egdeps, schema=_egschema)
-def usage_by_agent(series):
+def usage_by_agent(metadata, time, agents_entry):
     """
     """
-    metadata = series[0].reset_index()
-    time = series[1].reset_index()
-    agent_in = series[2].reset_index()
 
-    decommission = metadata[ metadata['Type'] == "decommission" ]
     deployment = metadata[ metadata['Type'] == "deployment" ]
+    decom = metadata[ metadata['Type'] == "decommission" ]
     timestep = metadata[ metadata['Type'] == "timestep" ]
     throughput = metadata[ metadata['Type'] == "throughput" ]
 
-    # Deployement
-    # Filter  Prototype
-    deployment_agent = agent_in[agent_in['AgentId'].isin(deployment['AgentId'])]
-    deploy_usage = pd.DataFrame(data={'SimId': deployemnt_agent.SimId,
-                                     'AgentId': deployemnt_agent.AgentId,
-                                     'Time': deployemnt_agent.Enter
 
-    metadata = metadata.groupby(el_index).sum()
-    rtn = metadata.reset_index()
+    # Deployement
+    dep_agent = agents_entry[agents_entry['AgentId'].isin(deployment['AgentId'])]
+    _tmp = pd.merge(deployment[['SimId', 'AgentId','Keyword', 'Value']], dep_agent, on=['SimId', 'AgentId'])
+    
+    
+    deployment_use = pd.DataFrame(data={'SimId': _tmp.SimId, 
+                                        'AgentId': _tmp.AgentId, 
+                                        'Time': _tmp.EnterTime, 
+                                        'Keyword': _tmp.Keyword, 
+                                        'Value':_tmp.Value.astype(float)}, 
+                                  columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
+    
+    
+    # Decommision
+    decom_agent = agents_entry[agents_entry['AgentId'].isin(decom['AgentId'])]
+    decom_agent['ExitTime'] = decom_agent['EnterTime'] + decom_agent['Lifetime']
+    _tmp = pd.merge(decom[['SimId', 'AgentId','Keyword', 'Value']], decom_agent, on=['SimId', 'AgentId'])
+    decom_use = pd.DataFrame(data={'SimId': _tmp.SimId, 
+                                   'AgentId': _tmp.AgentId, 
+                                   'Time': _tmp.ExitTime, 
+                                   'Keyword': _tmp.Keyword, 
+                                   'Value':_tmp.Value.astype(float)}, 
+                             columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
+    
+    # TimeStep
+    timestep_agent = agents_entry[agents_entry['AgentId'].isin(timestep['AgentId'])]
+    timestep_agent['ExitTime'] = timestep_agent['EnterTime'] + timestep_agent['Lifetime']
+    timestep_tmp = pd.DataFrame(data={'SimId': _tmp.SimId, 
+                                      'AgentId': _tmp.AgentId, 
+                                      'EnterTime': _tmp.EnterTime, 
+                                      'ExitTime': _tmp.ExitTime , 
+                                      'Keyword': _tmp.Keyword, 
+                                      'Value':_tmp.Value.astype(float)}, 
+                              columns=['SimId', 'AgentId', 'EnterTime', 'ExitTime', 'Keyword', 'Value']) 
+    time_step_data = []
+    for index, row  in timestep_tmp.iterrows():
+        for i in range(row['EnterTime'], row['ExitTime']):
+            time_step_data.append( (row['SimId'],
+                          row['AgentId'],
+                          i,
+                          row['Keyword'],
+                          row['Value']))
+    timestep_use = pd.DataFrame(time_step_data, columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
+   
+    rtn = pd.concat([deployment_use, decom_use, timestep_use], ignore_index=True)
+    
     return rtn
 
 del _egdeps, _egschema
