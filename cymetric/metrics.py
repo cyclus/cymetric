@@ -433,26 +433,26 @@ def usage_by_agent(metadata, time, agents_entry, power, SWU, throughput_ts):
     # Deployement
     dep_agent = agents_entry[agents_entry['AgentId'].isin(deployment['AgentId'])]
     _tmp = pd.merge(deployment[['SimId', 'AgentId','Keyword', 'Value']], dep_agent, on=['SimId', 'AgentId'])
-    
-    
-    deployment_use = pd.DataFrame(data={'SimId': _tmp.SimId, 
-                                        'AgentId': _tmp.AgentId, 
-                                        'Time': _tmp.EnterTime, 
-                                        'Keyword': _tmp.Keyword, 
-                                        'Value':_tmp.Value.astype(float)}, 
+
+
+    deployment_use = pd.DataFrame(data={'SimId': _tmp.SimId,
+                                        'AgentId': _tmp.AgentId,
+                                        'Time': _tmp.EnterTime,
+                                        'Keyword': _tmp.Keyword,
+                                        'Value':_tmp.Value.astype(float)},
                                   columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
-    rtn = deployment_use.copy() 
-    
+    rtn = deployment_use.copy()
+
     # Decommision
     decom_agent = agents_entry[agents_entry['AgentId'].isin(decom['AgentId'])]
     decom_agent = decom_agent.reset_index(drop=True)
     decom_agent['ExitTime'] = decom_agent['EnterTime'] + decom_agent['Lifetime']
     _tmp = pd.merge(decom[['SimId', 'AgentId','Keyword', 'Value']], decom_agent, on=['SimId', 'AgentId'])
-    decom_use = pd.DataFrame(data={'SimId': _tmp.SimId, 
-                                   'AgentId': _tmp.AgentId, 
-                                   'Time': _tmp.ExitTime, 
-                                   'Keyword': _tmp.Keyword, 
-                                   'Value':_tmp.Value.astype(float)}, 
+    decom_use = pd.DataFrame(data={'SimId': _tmp.SimId,
+                                   'AgentId': _tmp.AgentId,
+                                   'Time': _tmp.ExitTime,
+                                   'Keyword': _tmp.Keyword,
+                                   'Value':_tmp.Value.astype(float)},
                              columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
     rtn = pd.concat([rtn, decom_use], ignore_index=True)
 
@@ -460,13 +460,13 @@ def usage_by_agent(metadata, time, agents_entry, power, SWU, throughput_ts):
     timestep_agent = agents_entry[agents_entry['AgentId'].isin(timestep['AgentId'])]
     timestep_agent = timestep_agent.reset_index(drop=True)
     timestep_agent['ExitTime'] = timestep_agent['EnterTime'] + timestep_agent['Lifetime']
-    timestep_tmp = pd.DataFrame(data={'SimId': _tmp.SimId, 
-                                      'AgentId': _tmp.AgentId, 
-                                      'EnterTime': _tmp.EnterTime, 
-                                      'ExitTime': _tmp.ExitTime , 
-                                      'Keyword': _tmp.Keyword, 
-                                      'Value':_tmp.Value.astype(float)}, 
-                              columns=['SimId', 'AgentId', 'EnterTime', 'ExitTime', 'Keyword', 'Value']) 
+    timestep_tmp = pd.DataFrame(data={'SimId': _tmp.SimId,
+                                      'AgentId': _tmp.AgentId,
+                                      'EnterTime': _tmp.EnterTime,
+                                      'ExitTime': _tmp.ExitTime ,
+                                      'Keyword': _tmp.Keyword,
+                                      'Value':_tmp.Value.astype(float)},
+                              columns=['SimId', 'AgentId', 'EnterTime', 'ExitTime', 'Keyword', 'Value'])
     time_step_data = []
     for index, row  in timestep_tmp.iterrows():
         for i in range(row['EnterTime'], row['ExitTime']):
@@ -476,8 +476,8 @@ def usage_by_agent(metadata, time, agents_entry, power, SWU, throughput_ts):
                           row['Keyword'],
                           row['Value']))
     timestep_use = pd.DataFrame(time_step_data, columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
-    rtn = pd.concat([rtn, timestep_use], ignore_index=True) 
-    
+    rtn = pd.concat([rtn, timestep_use], ignore_index=True)
+
     def get_throughput_timeseries(throughput_df, throughput_meta):
         if throughput_df is not None:
             _tmp = pd.merge(throughput_meta[['SimId', 'AgentId','Keyword', 'Value']], throughput_df, on=['SimId', 'AgentId'])
@@ -487,7 +487,7 @@ def usage_by_agent(metadata, time, agents_entry, power, SWU, throughput_ts):
             return _tmp
         else:
             return pd.DataFrame()
-    
+
     rtn = pd.concat([rtn, get_throughput_timeseries(power, throughput_meta)], ignore_index=True)
     rtn = pd.concat([rtn, get_throughput_timeseries(SWU, throughput_meta)], ignore_index=True)
     rtn = pd.concat([rtn, get_throughput_timeseries(throughput_ts, throughput_meta)], ignore_index=True)
