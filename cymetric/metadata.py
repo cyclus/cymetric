@@ -73,13 +73,12 @@ def get_usage(evaler):
     timestep_use = pd.DataFrame(time_step_data, columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
     rtn = pd.concat([rtn, timestep_use], ignore_index=True)
 
-    worklabel.drop(columns=['AgentId'], inplace=True)
     worklabel.drop_duplicates(inplace=True)
     worktimeseries = []
     for index, row in worklabel.iterrows():
         if (row['AgentId'] in throughput_meta['AgentId']):
             work_name = "TimeSeries" + row['Value']
-            timeseries = myEval.eval(work_name)
+            timeseries = evaler.eval(work_name)
             if timeseries is not None:
                 worktimeseries.append(timeseries[timeseries['AgentId'] == row['AgentId'] ])
 
@@ -89,7 +88,7 @@ def get_usage(evaler):
             _tmp['Value_y'] = _tmp.Value_x.astype(float)*_tmp.Value_y
             _tmp.drop(columns=['Value_x'], inplace=True)
             _tmp.rename(columns={"Value_y": "Value"}, inplace=True)
-            return _tmp
+            return _tmp[['SimId', 'AgentId', 'Time', 'Keyword', 'Value']]
         else:
             return pd.DataFrame()
 
