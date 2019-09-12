@@ -478,19 +478,19 @@ def usage_by_agent(metadata, time, agents_entry, power, SWU, throughput_ts):
     timestep_use = pd.DataFrame(time_step_data, columns=['SimId', 'AgentId', 'Time', 'Keyword', 'Value'])
     rtn = pd.concat([rtn, timestep_use], ignore_index=True)
 
-    def get_throughput_timeseries(throughput_df, throughput_meta):
-        if throughput_df is not None:
-            _tmp = pd.merge(throughput_meta[['SimId', 'AgentId','Keyword', 'Value']], throughput_df, on=['SimId', 'AgentId'])
-            _tmp['Value_y'] = _tmp.Value_x.astype(float)*_tmp.Value_y
-            _tmp.drop(columns=['Value_x'], inplace=True)
-            _tmp.rename(columns={"Value_y": "Value"}, inplace=True)
-            return _tmp
-        else:
-            return pd.DataFrame()
-
-    rtn = pd.concat([rtn, get_throughput_timeseries(power, throughput_meta)], ignore_index=True)
-    rtn = pd.concat([rtn, get_throughput_timeseries(SWU, throughput_meta)], ignore_index=True)
-    rtn = pd.concat([rtn, get_throughput_timeseries(throughput_ts, throughput_meta)], ignore_index=True)
+#    def get_throughput_timeseries(throughput_df, throughput_meta):
+#        if throughput_df is not None:
+#            _tmp = pd.merge(throughput_meta[['SimId', 'AgentId','Keyword', 'Value']], throughput_df, on=['SimId', 'AgentId'])
+#            _tmp['Value_y'] = _tmp.Value_x.astype(float)*_tmp.Value_y
+#            _tmp.drop(columns=['Value_x'], inplace=True)
+#            _tmp.rename(columns={"Value_y": "Value"}, inplace=True)
+#            return _tmp
+#        else:
+#            return pd.DataFrame()
+#
+#    rtn = pd.concat([rtn, get_throughput_timeseries(power, throughput_meta)], ignore_index=True)
+#    rtn = pd.concat([rtn, get_throughput_timeseries(SWU, throughput_meta)], ignore_index=True)
+#    rtn = pd.concat([rtn, get_throughput_timeseries(throughput_ts, throughput_meta)], ignore_index=True)
 
 
     return rtn
