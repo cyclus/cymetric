@@ -392,7 +392,7 @@ def test_inventories(db, fname, backend):
     evaler = cym.Evaluator(db)
     cal = filters.inventories(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype',
-                'Time', 'InventoryName', 'NucId', 'Quantity']
+                'Time', 'InventoryName', 'NucId', 'Quantity', 'Units']
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     if not HAVE_PYNE:
@@ -409,7 +409,8 @@ def test_inventories(db, fname, backend):
         (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327)
     ], dtype=ensure_dt_bytes([
         ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
-        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8'),
+        ('Units', '0')
     ]))
     )
     assert_frame_equal(cal, refs)
@@ -433,7 +434,9 @@ def test_inventories(db, fname, backend):
         (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327)
     ], dtype=ensure_dt_bytes([
         ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
-        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')
+        ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8'),
+        ('Units', '0')
+
     ]))
     )
     assert_frame_equal(cal, refs)
