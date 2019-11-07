@@ -330,20 +330,20 @@ def test_monthly_electricity_generated_by_agent():
 	    (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 200),
 	    (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 400)
 	], dtype=ensure_dt_bytes([
-	        ('SimId', 'O'), ('AgentId', '<i8'), ('Year', '<i8'),
+	        ('SimId', 'O'), ('AgentId', '<i8'), ('Month', '<i8'),
     		('Energy', '<f8')]))
         )
     tsp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 3, 1200),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 2400),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 12, 1200),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 12, 2400),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 12, 4800),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 100),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 200),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 1, 100),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 200),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 1, 400),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
                 ('Value', '<f8')]))
         )
-    obs = metrics.annual_electricity_generated_by_agent.func(tsp)
+    obs = metrics.monthly_electricity_generated_by_agent.func(tsp)
     assert_frame_equal(exp, obs)
 
 
