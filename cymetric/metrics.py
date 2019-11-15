@@ -408,6 +408,32 @@ def annual_electricity_generated_by_agent(elec):
 
 del _egdeps, _egschema
 
+
+# Electricity Generated [MWe-month]
+_egdeps = ['TimeSeriesPower']
+
+_egschema = [
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Month', ts.INT),
+    ('Energy', ts.DOUBLE)
+    ]
+@metric(name='MonthlyElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
+def monthly_electricity_generated_by_agent(elec):
+    """Monthly Electricity Generated metric returns the total electricity
+    generated in MWe-month for each agent, calculated from the average monthly
+    power given in TimeSeriesPower.
+    """
+    elec = pd.DataFrame(data={'SimId': elec.SimId,
+                              'AgentId': elec.AgentId,
+                              'Month': elec.Time,
+                              'Energy': elec.Value},
+			columns=['SimId', 'AgentId', 'Month', 'Energy'])
+    el_index = ['SimId', 'AgentId', 'Month']
+    elec = elec.groupby(el_index).sum()
+    rtn = elec.reset_index()
+    return rtn
+
 #
 # Not a metric, not a root metric metrics
 #

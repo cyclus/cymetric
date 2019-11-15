@@ -36,6 +36,26 @@ def fco_electricity_generated(elec):
 del _egdeps, _egschema
 
 
+# Electricity Generated [GWe-month]
+_egdeps = ['MonthlyElectricityGeneratedByAgent']
+
+_egschema = [('Month', ts.INT), ('Energy', ts.DOUBLE)]
+
+@metric(name='FcoMonthlyElectricityGenerated', depends=_egdeps, schema=_egschema)
+def fco_monthly_electricity_generated(elec):
+    """FcoElectricityGenerated metric returns the electricity generated in GWe-month
+    for all agents in simulation.
+    """
+    elec = pd.DataFrame(data={'Month': elec.Month,
+                              'Energy': elec.Energy.apply(lambda x: x/1000)},
+                        columns=['Month', 'Energy'])
+    elec = elec.groupby('Month').sum()
+    rtn = elec.reset_index()
+    return rtn
+
+del _egdeps, _egschema
+
+
 # U Resources Mined [t]
 _udeps= ['Materials', 'Transactions']
 
