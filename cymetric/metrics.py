@@ -441,3 +441,58 @@ def timelist(info):
 
 del _tldeps, _tlschema
 
+# Quantity per GigaWattElectric in Inventory [kg/GWe]
+_invdeps = ['']
+
+_invschema = [
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Prototype', ts.STRING),
+    ('Time', ts.INT),
+    ('InventoryName', ts.STRING),
+    ('NucId', ts.INT),
+    ('Quantity', ts.DOUBLE)
+    ]
+
+@metric(name='', depends=_invdeps, schema=_invschema)
+def (inv):
+    """Returns quantity per GWe in the inventory table
+    """
+    inv_index = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName', 'NucId']
+    inv = tools.raw_to_series(expinv,
+                              ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName', 'NucId'],
+                              'Quantity')
+    inv = inv.groupby(level=inv_index).sum()
+    inv.name = 'Quantity'
+    rtn = inv.reset_index()
+    return rtn
+
+# Mass per GigaWattElectric in Transaction [kg/GWe]
+_transdeps = ['']
+
+_transschema = [
+    ('SimId', ts.UUID),
+    ('ResourceId', ts.INT),
+    ('NucId', ts.INT),
+    ('Mass', ts. INT),
+    ('ReceiverID', ts.INT),
+    ('ReceiverPrototype', ts. STRING)
+    ('SenderId', ts.INT),
+    ('SenderPrototype', ts. STRING)
+    ('TransactionId', ts.INT),
+    ('Commodity', ts.STRING),
+    ('Time', ts.INT),
+    ]
+
+@metric(name='', depends=_transdeps, schema=_transschema)
+def (mats, tranacts):
+    """Returns mass per GWe in the transaction table
+    """
+    trans_index = ['SimId', 'ResourceId', 'NucId', 'Mass',
+            'ReceiverID', 'SenderId', 'SenderPrototype', 'TransactionID', 'Commodity', 'Time']
+    trans = pd.merge(mats, tranacts, on=['SimId', 'ResourceId'], how='inner')
+    trans = trans.set_index(trans_index)
+    trans = trans.groupby(level=trans_index)['Mass'].sum()
+    trans.name = 'Quantity'
+    rtn = trans.reset_index()
+    return rtn
