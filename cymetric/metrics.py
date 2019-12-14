@@ -442,11 +442,11 @@ def timelist(info):
 del _tldeps, _tlschema
 
 # Quantity per GigaWattElectric in Inventory [kg/GWe]
-_invdeps = ['']
+_invdeps = ['ExplicitInventory','TimeSeriesPower']
 
 _invschema = [
     ('SimId', ts.UUID),
-    ('AgentId', ts.INT),
+    ('AgentId', ts.INT), 
     ('Prototype', ts.STRING),
     ('Time', ts.INT),
     ('InventoryName', ts.STRING),
@@ -454,45 +454,73 @@ _invschema = [
     ('Quantity', ts.DOUBLE)
     ]
 
-@metric(name='', depends=_invdeps, schema=_invschema)
-def (inv):
+@metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
+def inventory_quantity_per_gwe(expinv,power):
     """Returns quantity per GWe in the inventory table
     """
-    inv_index = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName', 'NucId']
-    inv = tools.raw_to_series(expinv,
-                              ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName', 'NucId'],
-                              'Quantity')
-    inv = inv.groupby(level=inv_index).sum()
-    inv.name = 'Quantity'
-    rtn = inv.reset_index()
-    return rtn
-
+    power = pd.DataFrame(data={'SimId': power.SimId,
+			      'AgentId': power.AgentId,
+                              'Time': power.Time,
+                              'Value': power.Value},
+			columns=['SimId','AgentID','Time', 'Value'])
+    power_index = ['SimId','Time']
+    power = power.groupby(power_index).sum()
+    df1 = power.reset_index()
+    inv = pd.DataFrame(data={'SimId': expinv.SimId,
+			     'AgentId': expinv.AgentId,
+			     'Time': expinv.Time, 
+		             'InventoryName': expinv.InventoryName,
+	 		     'NucId': expinv.NucId,
+                             'Quantity': expinv.Quantity},
+	             columns=['SimId','AgentId','Time','InventoryName','NucId','Quantity'])    
+    for x in range(len(inv)):
+        for y in range(len(df1)):
+            time = inv.Time[x]
+            if df1.Time[y]==time and df1.SimId[y]==inv.SimId[x]:
+                inv.Quantity[x] == inv.Quantity[x]//df1.Value[y]
+            else:
+                inv.Quantity[x] == "NaN"
+    return inv
+    
 # Mass per GigaWattElectric in Transaction [kg/GWe]
-_transdeps = ['']
+_transdeps = ['Transactions','TimeSeriesPower']
 
 _transschema = [
     ('SimId', ts.UUID),
     ('ResourceId', ts.INT),
     ('NucId', ts.INT),
-    ('Mass', ts. INT),
+    ('Mass', ts. DOUBLE),
     ('ReceiverID', ts.INT),
-    ('ReceiverPrototype', ts. STRING)
+    ('ReceiverPrototype', ts. STRING),
     ('SenderId', ts.INT),
-    ('SenderPrototype', ts. STRING)
+    ('SenderPrototype', ts. STRING),
     ('TransactionId', ts.INT),
     ('Commodity', ts.STRING),
-    ('Time', ts.INT),
+    ('Time', ts.INT)
     ]
 
-@metric(name='', depends=_transdeps, schema=_transschema)
-def (mats, tranacts):
+@metric(name='TransactionMassPerGWe', depends=_transdeps, schema=_transschema)
+def transaction_mass_per_gwe(trans,power):
     """Returns mass per GWe in the transaction table
     """
     trans_index = ['SimId', 'ResourceId', 'NucId', 'Mass',
             'ReceiverID', 'SenderId', 'SenderPrototype', 'TransactionID', 'Commodity', 'Time']
-    trans = pd.merge(mats, tranacts, on=['SimId', 'ResourceId'], how='inner')
+    trans = pd.merge(trans, power, on=['SimId', 'ResourceId'], how='inner')
     trans = trans.set_index(trans_index)
     trans = trans.groupby(level=trans_index)['Mass'].sum()
     trans.name = 'Quantity'
     rtn = trans.reset_index()
-    return rtn
+    return rtn 
+
+
+_xdeps = ['ExplicitInventory','TimeSeriesPower']
+
+_xschema = [
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT), 
+    ('Prototype', ts.STRING),
+    ('Time', ts.INT),
+    ('InventoryName', ts.STRING),
+    ('NucId', ts.INT),
+    ('Quantity', ts.DOUBLE)
+    ]
