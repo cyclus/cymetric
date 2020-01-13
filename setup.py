@@ -41,7 +41,7 @@ from glob import glob
 from distutils import core, dir_util
 
 
-VERSION = '1.5.3'
+VERSION = '1.5.5'
 IS_NT = os.name == 'nt'
 
 
