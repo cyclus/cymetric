@@ -3,6 +3,15 @@ cymetric Change Log
 ===================
 
 .. current developments
+v1.5.5
+====================
+
+**Added:**
+
+* Monthly electricity generated metric. One for returning electricity by one agent and another for all agents.
+* Added units parameter.
+
+
 v1.5.4
 ====================
 
