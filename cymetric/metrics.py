@@ -447,14 +447,13 @@ _invdeps = ['ExplicitInventory','TimeSeriesPower']
 _invschema = [
     ('SimId', ts.UUID),
     ('AgentId', ts.INT), 
-    ('Prototype', ts.STRING),
     ('Time', ts.INT),
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
     ]
 
-@metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
+@metric(name='trial', depends=_invdeps, schema=_invschema)
 def inventory_quantity_per_gwe(expinv,power):
     """Returns quantity per GWe in the inventory table
     """
@@ -477,50 +476,8 @@ def inventory_quantity_per_gwe(expinv,power):
         for y in range(len(df1)):
             time = inv.Time[x]
             if df1.Time[y]==time and df1.SimId[y]==inv.SimId[x]:
-                inv.Quantity[x] == inv.Quantity[x]//df1.Value[y]
+                inv.Quantity[x] == inv.Quantity[x]/df1.Value[y]
             else:
                 inv.Quantity[x] == "NaN"
     return inv
     
-# Mass per GigaWattElectric in Transaction [kg/GWe]
-_transdeps = ['Transactions','TimeSeriesPower']
-
-_transschema = [
-    ('SimId', ts.UUID),
-    ('ResourceId', ts.INT),
-    ('NucId', ts.INT),
-    ('Mass', ts. DOUBLE),
-    ('ReceiverID', ts.INT),
-    ('ReceiverPrototype', ts. STRING),
-    ('SenderId', ts.INT),
-    ('SenderPrototype', ts. STRING),
-    ('TransactionId', ts.INT),
-    ('Commodity', ts.STRING),
-    ('Time', ts.INT)
-    ]
-
-@metric(name='TransactionMassPerGWe', depends=_transdeps, schema=_transschema)
-def transaction_mass_per_gwe(trans,power):
-    """Returns mass per GWe in the transaction table
-    """
-    trans_index = ['SimId', 'ResourceId', 'NucId', 'Mass',
-            'ReceiverID', 'SenderId', 'SenderPrototype', 'TransactionID', 'Commodity', 'Time']
-    trans = pd.merge(trans, power, on=['SimId', 'ResourceId'], how='inner')
-    trans = trans.set_index(trans_index)
-    trans = trans.groupby(level=trans_index)['Mass'].sum()
-    trans.name = 'Quantity'
-    rtn = trans.reset_index()
-    return rtn 
-
-
-_xdeps = ['ExplicitInventory','TimeSeriesPower']
-
-_xschema = [
-    ('SimId', ts.UUID),
-    ('AgentId', ts.INT), 
-    ('Prototype', ts.STRING),
-    ('Time', ts.INT),
-    ('InventoryName', ts.STRING),
-    ('NucId', ts.INT),
-    ('Quantity', ts.DOUBLE)
-    ]
