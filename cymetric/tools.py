@@ -117,8 +117,8 @@ def add_missing_time_step(df, ref_time):
 
 def merge(df, base_col, add_df, add_col):
     """
-    Merge some additionnal columns fram an additionnal Pandas Data Frame
-    onother one and then remove the second base column (keeping SimID
+    Merge some additionnal columns from an additionnal Pandas Data Frame
+    another one and then remove the second base column (keeping SimID
     information).
 
     Parameters
