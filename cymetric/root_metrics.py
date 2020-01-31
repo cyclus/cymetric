@@ -9,6 +9,12 @@ def _genrootclass(name):
     """Creates a new root metric class."""
     class Cls(object):
         dependencies = ()
+        
+        @property
+        def registry(self):
+            """Defines registry for root metric if provided."""
+            if self._registry is not None:
+                return self._registry
 
         @property
         def schema(self):
@@ -38,7 +44,7 @@ def _genrootclass(name):
     return Cls
 
 
-def root_metric(obj=None, name=None, schema=None, *args, **kwargs):
+def root_metric(obj=None, name=None, schema=None, registry=None, *args, **kwargs):
     """Decorator that creates a root metric from a function or class."""
     if obj is not None:
         raise RuntimeError

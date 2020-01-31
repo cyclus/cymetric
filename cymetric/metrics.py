@@ -31,6 +31,7 @@ class Metric(object):
     """Metric class"""
     dependencies = NotImplemented
     schema = NotImplemented
+    registry = NotImplemented
 
     def __init__(self, db):
         self.db = db
@@ -40,7 +41,7 @@ class Metric(object):
         return self.__class__.__name__
 
 
-def _genmetricclass(f, name, depends, scheme):
+def _genmetricclass(f, name, depends, scheme, register):
     """Creates a new metric class with a given name, dependencies, and schema.
 
     Parameters
@@ -58,6 +59,7 @@ def _genmetricclass(f, name, depends, scheme):
     class Cls(Metric):
         dependencies = depends
         schema = scheme
+        registry = register
         func = staticmethod(f)
 
         __doc__ = inspect.getdoc(f)
@@ -400,7 +402,7 @@ def annual_electricity_generated_by_agent(elec):
                               'AgentId': elec.AgentId,
                               'Year': elec.Time.apply(lambda x: x//12),
                               'Energy': elec.Value.apply(lambda x: x/12)},
-			columns=['SimId', 'AgentId', 'Year', 'Energy'])
+                        columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
