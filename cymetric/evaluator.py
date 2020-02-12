@@ -16,7 +16,7 @@ def register_metric(cls):
     METRIC_REGISTRY[cls.__name__] = cls
     if cls.__name__ not in UNITS_REGISTRY and cls.registry is not None:
         UNITS_REGISTRY[cls.__name__] = cls.registry
-        build_normalisd_metric(cls)
+        build_normalised_metric(cls)
 
 class Evaluator(object):
     """An evaluation context for metrics."""
