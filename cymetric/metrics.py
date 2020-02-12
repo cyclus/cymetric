@@ -479,7 +479,7 @@ _invschema = [
     ('Quantity', ts.DOUBLE)
     ]
 
-@metric(name='trial', depends=_invdeps, schema=_invschema)
+@metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
 def inventory_quantity_per_gwe(expinv,power):
     """Returns quantity per GWe in the inventory table
     """
@@ -498,12 +498,8 @@ def inventory_quantity_per_gwe(expinv,power):
 	 		     'NucId': expinv.NucId,
                              'Quantity': expinv.Quantity},
 	             columns=['SimId','AgentId','Time','InventoryName','NucId','Quantity'])    
-    for x in range(len(inv)):
-        for y in range(len(df1)):
-            time = inv.Time[x]
-            if df1.Time[y]==time and df1.SimId[y]==inv.SimId[x]:
-                inv.Quantity[x] == inv.Quantity[x]/df1.Value[y]
-            else:
-                inv.Quantity[x] == "NaN"
+    inv=pd.merge(inv,df1, on=['SimId','Time'],how='left')
+    inv.Quantity = inv.Quantity/inv.Value
+    inv=inv.drop(['Value'],axis=1)
     return inv
     
