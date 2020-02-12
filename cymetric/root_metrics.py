@@ -9,7 +9,7 @@ def _genrootclass(name):
     """Creates a new root metric class."""
     class Cls(object):
         dependencies = ()
-        
+
         @property
         def registry(self):
             """Defines registry for root metric if provided."""
