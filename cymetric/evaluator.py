@@ -6,17 +6,18 @@ import pandas as pd
 from cyclus import lib
 
 from cymetric.tools import raw_to_series
-
+from cymetric import units
 
 METRIC_REGISTRY = {}
 UNITS_REGISTRY = {}
 
-def register_metric(cls):
+def register_metric(cls, registry = None):
     """Adds a metric to the registry."""
     METRIC_REGISTRY[cls.__name__] = cls
-    if cls.__name__ not in UNITS_REGISTRY and cls.registry is not None:
-        UNITS_REGISTRY[cls.__name__] = cls.registry
-        build_normalised_metric(cls)
+    if registry and registry != "NotImplemented":
+        print(registry)
+        UNITS_REGISTRY[cls.__name__] = registry
+        units.build_normalized_metric(cls)
 
 class Evaluator(object):
     """An evaluation context for metrics."""
@@ -87,30 +88,4 @@ def eval(metric, db, conds=None, write=True):
     return e.eval(str(metric), conds=conds)
 
 
-def build_normalisd_metric(cls):
-    _dsdeps = [cls.__name__]
-
-    _dsschema = build_normalized_schema(cls.schema)
-    norm_name = cls.__name__ + "_norm"
-    
-    @metric(name=norm_name, depends=_dsdeps, schema=_dsschema)
-    def normalization(raw_metric):
-        return rtn
-
-    del _dsdeps, _dsschema
-
-def build_normalized_schema(raw_cls):
-    # if not in the unit registery: nothing to do
-    if (raw_cls.__name__ not in UNITS_REGISTRY):
-        return raw_cls.schema
-    
-    # initialize the normed metric schema
-    norm_schema = raw_cls.schema
-    
-    # removing units columns form the new schema 
-    unit_registry = UNITS_REGISTRY[raw_cls.__name__]
-    for key in unit_registry:
-        norm_schema.pop(unit_registry[key][0], None)    
-    
-    return norm_schema
 
