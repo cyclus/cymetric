@@ -39,10 +39,7 @@ def _genrootclass(name, register):
             return self.db.query(self.name, conds=conds)
 
     Cls.__name__ = str(name)
-    if registry is not None:
-        register_metric(Cls, registry)
-    else:
-        register_metric(Cls)
+    register_metric(Cls)
     return Cls
 
 

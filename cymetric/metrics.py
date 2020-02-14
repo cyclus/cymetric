@@ -31,7 +31,7 @@ class Metric(object):
     """Metric class"""
     dependencies = NotImplemented
     schema = NotImplemented
-    registry = None
+    registry = NotImplemented
 
     def __init__(self, db):
         self.db = db
@@ -41,7 +41,7 @@ class Metric(object):
         return self.__class__.__name__
 
 
-def _genmetricclass(f, name, depends, scheme, registier):
+def _genmetricclass(f, name, depends, scheme, register):
     """Creates a new metric class with a given name, dependencies, and schema.
 
     Parameters
@@ -60,7 +60,7 @@ def _genmetricclass(f, name, depends, scheme, registier):
         dependencies = depends
         schema = scheme
         func = staticmethod(f)
-        regisry = register
+        registry = register
         __doc__ = inspect.getdoc(f)
         
         def shema(self):
@@ -80,10 +80,7 @@ def _genmetricclass(f, name, depends, scheme, registier):
             return f(*frames)
 
     Cls.__name__ = str(name)
-    if registry != NotImplemented:
-        register_metric(Cls, registry)
-    else:
-        register_metric(Cls)
+    register_metric(Cls)
 
     return Cls
 

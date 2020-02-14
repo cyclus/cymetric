@@ -6,16 +6,12 @@ try:
     from cymetric import schemas
     from cymetric import tools
     from cymetric import evaluator
-#    from cymetric.metrics import Metric, metric
-#    from cymetric.root_metrics import root_metric
 
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from . import schemas
     from . import tools
     from . import evaluator
-#    from .root_metrics import root_metric
-    from .metrics import Metric, metric
 
 import pint
 
@@ -34,7 +30,7 @@ class NormMetric(object):
     def name(self):
         return self.__class__.__name__
 
-def _gen_norm_metricclass(f, name, r_name, depends, scheme):
+def _gen_norm_metricclass(f, name, r_name, r_regitry, depends, scheme):
     """Creates a new metric class with a given name, dependencies, and schema.
 
     Parameters
@@ -54,6 +50,7 @@ def _gen_norm_metricclass(f, name, r_name, depends, scheme):
         schema = scheme
         func = staticmethod(f)
         raw_name = r_name
+        raw_unit_registry = r_regitry
         __doc__ = inspect.getdoc(f)
 
         def __init__(self, db):
@@ -67,7 +64,7 @@ def _gen_norm_metricclass(f, name, r_name, depends, scheme):
                 known_tables = self.db.tables()
             if self.name in known_tables:
                 return self.db.query(self.name, conds=conds)
-            return f(self.raw_name, *frames)
+            return f(self.raw_name, self.raw_unit_registry, *frames)
 
     Cls.__name__ = str(name)
     evaluator.register_metric(Cls)
@@ -75,11 +72,11 @@ def _gen_norm_metricclass(f, name, r_name, depends, scheme):
 
 
 
-def norm_metric(name=None, raw_name=NotImplemented, depends=NotImplemented, schema=NotImplemented):
+def norm_metric(name=None, raw_name=NotImplemented, raw_unit_registry=NotImplemented, depends=NotImplemented, schema=NotImplemented):
     """Decorator that creates metric class from a function or class."""
     def dec(f):
         clsname = name or f.__name__
-        return _gen_norm_metricclass(f=f, name=clsname, r_name=raw_name, scheme=schema, depends=depends)
+        return _gen_norm_metricclass(f=f, name=clsname, r_name=raw_name, r_regitry=raw_unit_registry, scheme=schema, depends=depends)
     return dec
              
 
@@ -114,13 +111,11 @@ def build_normalized_metric(raw_metric):
     _norm_schema = build_normalized_schema(raw_metric)
     _norm_name = "norm_" + raw_metric.__name__
     _raw_name = raw_metric.__name__
+    _raw_units_registry = raw_metric.registry
 
-    @norm_metric(name=_norm_name, raw_name=_raw_name , depends=_norm_deps, schema=_norm_schema)
-    def new_norm_metric(raw_name, raw):
-        if (raw_name not in evaluator.UNITS_REGISTRY):
-             return raw
+    @norm_metric(name=_norm_name, raw_name=_raw_name, raw_unit_registry=_raw_units_registry, depends=_norm_deps, schema=_norm_schema)
+    def new_norm_metric(unit_registry, raw_name, raw):
 
-        unit_registry = evaluator.UNITS_REGISTRY[raw_name]
         norm_pdf = raw.copy(deep=True)
         for unit in unit_registry:
             u_col_name = unit_registry[unit][0]

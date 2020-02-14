@@ -11,12 +11,11 @@ from cymetric import units
 METRIC_REGISTRY = {}
 UNITS_REGISTRY = {}
 
-def register_metric(cls, registry = None):
+def register_metric(cls):
     """Adds a metric to the registry."""
     METRIC_REGISTRY[cls.__name__] = cls
-    if registry and registry != "NotImplemented":
-        print(registry)
-        UNITS_REGISTRY[cls.__name__] = registry
+    if cls.registry and cls.registry is not NotImplemented:
+        print(cls.registry)
         units.build_normalized_metric(cls)
 
 class Evaluator(object):
