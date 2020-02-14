@@ -41,7 +41,7 @@ class Metric(object):
         return self.__class__.__name__
 
 
-def _genmetricclass(f, name, depends, scheme, registry):
+def _genmetricclass(f, name, depends, scheme, registier):
     """Creates a new metric class with a given name, dependencies, and schema.
 
     Parameters
@@ -60,7 +60,7 @@ def _genmetricclass(f, name, depends, scheme, registry):
         dependencies = depends
         schema = scheme
         func = staticmethod(f)
-
+        regisry = register
         __doc__ = inspect.getdoc(f)
         
         def shema(self):
@@ -88,11 +88,11 @@ def _genmetricclass(f, name, depends, scheme, registry):
     return Cls
 
 
-def metric(name=None, depends=NotImplemented, schema=NotImplemented, registery=NotImplemented):
+def metric(name=None, depends=NotImplemented, schema=NotImplemented,registry=NotImplemented):
     """Decorator that creates metric class from a function or class."""
     def dec(f):
         clsname = name or f.__name__
-        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends, registry=registery)
+        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends, register=registry)
     return dec
 
 
@@ -113,9 +113,9 @@ _matschema = [
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
     ]
-_matregistery = { "Mass": ["Units", "kg", ""]}
+_matregistry = { "Mass": ["Units", "kg", ""]}
 
-@metric(name='Materials', depends=_matdeps, schema=_matschema, registery= _matregistery)
+@metric(name='Materials', depends=_matdeps, schema=_matschema, registry=_matregistry)
 def materials(rsrcs, comps):
     """Materials metric returns the material mass (quantity of material in
     Resources times the massfrac in Compositions) indexed by the SimId, QualId,
