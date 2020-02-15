@@ -110,7 +110,7 @@ _matschema = [
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
     ]
-_matregistry = { "Mass": ["Units", "kg", ""]}
+_matregistry = { "Mass": ["Units", "kg"]}
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema, registry=_matregistry)
 def materials(rsrcs, comps):
