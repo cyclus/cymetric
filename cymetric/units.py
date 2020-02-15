@@ -83,19 +83,16 @@ def norm_metric(name=None, raw_name=NotImplemented, raw_unit_registry=NotImpleme
 def build_conversion_col(col):
     conversion_col = [ureg.parse_expression(
         x).to_root_units().magnitude for x in col]
-    return conversion_col
+    default_unit = ureg.parse_expression(col[0]).to_root_units().units
+    return conversion_col, default_unit
 
 
-def build_normalized_schema(raw_cls):
-    # if not in the unit registery: nothing to do
-    if (raw_cls.__name__ not in evaluator.UNITS_REGISTRY):
-        return raw_cls.schema
+def build_normalized_schema(raw_cls, unit_registry):
 
     # initialize the normed metric schema
     norm_schema = raw_cls.schema
 
     # removing units columns form the new schema
-    unit_registry = evaluator.UNITS_REGISTRY[raw_cls.__name__]
     print(norm_schema)
     for key in unit_registry:
         idx = norm_schema.index( (unit_registry[key][0], 4, None)) 
@@ -108,28 +105,31 @@ def build_normalized_metric(raw_metric):
 
     _norm_deps = [raw_metric.__name__]
 
-    _norm_schema = build_normalized_schema(raw_metric)
+    _norm_schema = build_normalized_schema(raw_metric, raw_metric.registry)
     _norm_name = "norm_" + raw_metric.__name__
     _raw_name = raw_metric.__name__
     _raw_units_registry = raw_metric.registry
 
     @norm_metric(name=_norm_name, raw_name=_raw_name, raw_unit_registry=_raw_units_registry, depends=_norm_deps, schema=_norm_schema)
-    def new_norm_metric(unit_registry, raw_name, raw):
+    def new_norm_metric(raw_name, unit_registry, raw):
 
         norm_pdf = raw.copy(deep=True)
         for unit in unit_registry:
             u_col_name = unit_registry[unit][0]
             u_def_unit = unit_registry[unit][1]
-            
+            def_unit = "" 
             # if a column for unit exist parse the colunm convert the value
             # drop the column
             if ( u_col_name != ""):
-                conv = build_conversion_col(raw[u_col_name]) 
+                conv, def_unit = build_conversion_col(raw[u_col_name]) 
                 norm_pdf[unit] *= conv
                 norm_pdf.drop([u_col_name], axis=1, inplace=True)
             else: # else use the default unit to convert it
                 conv = ureg.parse_expression(u_def_unit).to_root_units().magnitude
+                def_unit = ureg.parse_expression(u_def_unit).to_root_units().units
                 norm_pdf[unit] *= conv
+        print("defunit ", def_unit)
+        norm_pdf.rename(inplace=True, columns={unit : '{0} [{1:~P}]'.format(unit, def_unit)})
 
         return norm_pdf
 
