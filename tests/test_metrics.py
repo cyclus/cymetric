@@ -386,7 +386,7 @@ def test_inventory_quantity_per_gwe():
                 ('Value', '<f8')]))
         )
     inv = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 300),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 300),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 600),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'core', 922350000, 200),
         ], dtype=ensure_dt_bytes([
@@ -395,4 +395,3 @@ def test_inventory_quantity_per_gwe():
         )
     obs = metrics.inventory_quantity_per_gwe.func(inv, tsp)
     assert_frame_equal(exp, obs)
-
