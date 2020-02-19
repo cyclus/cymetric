@@ -467,43 +467,6 @@ def timelist(info):
 
 del _tldeps, _tlschema
 
-# Quantity per GigaWattElectric in Inventory [kg/GWe]
-_invdeps = ['ExplicitInventory','TimeSeriesPower']
-
-_invschema = [
-    ('SimId', ts.UUID),
-    ('AgentId', ts.INT), 
-    ('Time', ts.INT),
-    ('InventoryName', ts.STRING),
-    ('NucId', ts.INT),
-    ('Quantity', ts.DOUBLE)
-    ]
-
-@metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
-def inventory_quantity_per_gwe(expinv,power):
-    """Returns quantity per GWe in the inventory table
-    """
-    power = pd.DataFrame(data={'SimId': power.SimId,
-			      'AgentId': power.AgentId,
-                              'Time': power.Time,
-                              'Value': power.Value},
-			columns=['SimId','AgentID','Time', 'Value'])
-    power_index = ['SimId','Time']
-    power = power.groupby(power_index).sum()
-    df1 = power.reset_index()
-    inv = pd.DataFrame(data={'SimId': expinv.SimId,
-			     'AgentId': expinv.AgentId,
-			     'Time': expinv.Time, 
-		             'InventoryName': expinv.InventoryName,
-	 		     'NucId': expinv.NucId,
-                             'Quantity': expinv.Quantity},
-	             columns=['SimId','AgentId','Time','InventoryName','NucId','Quantity'])    
-    inv=pd.merge(inv,df1, on=['SimId','Time'],how='left')
-    inv.Quantity = inv.Quantity/inv.Value
-    inv=inv.drop(['Value'],axis=1)
-    return inv
-
-
 # Quantity per GigaWattElectric in TransactionQuantity [kg/GWe]
 _tranactsdeps = ['TransactionQuantity','TimeSeriesPower']
 
