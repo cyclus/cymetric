@@ -502,4 +502,50 @@ def inventory_quantity_per_gwe(expinv,power):
     inv.Quantity = inv.Quantity/inv.Value
     inv=inv.drop(['Value'],axis=1)
     return inv
+
+
+# Quantity per GigaWattElectric in TransactionQuantity [kg/GWe]
+_tranactsdeps = ['TransactionQuantity','TimeSeriesPower']
+
+_tranactsschema = [
+    ('SimId', ts.UUID),
+    ('TransactionId', ts.INT),
+    ('ResourceId', ts.INT),
+    ('ObjId', ts.INT),
+    ('Time', ts.INT),
+    ('SenderId', ts.INT),
+    ('ReceiverId', ts.INT),
+    ('Commodity', ts.STRING),
+    ('Units', ts.STRING),
+    ('Quantity', ts.DOUBLE)
+    ]
+
+@metric(name='TransactionQuantityPerGWe', depends=_tranactsdeps, schema=_tranactsschema)
+def transaction_quantity_per_gwe(tranacts,power):
+    """Returns quantity per GWe in the inventory table
+    """
+    power = pd.DataFrame(data={'SimId': power.SimId,
+			      'AgentId': power.AgentId,
+                              'Time': power.Time,
+                              'Value': power.Value},
+			columns=['SimId','AgentID','Time', 'Value'])
+    power_index = ['SimId','Time']
+    power = power.groupby(power_index).sum()
+    df1 = power.reset_index()
+    tranacts = pd.DataFrame(data={'SimId': tranacts.SimId,
+			     'TransactionId': tranacts.TransactionId,
+			     'ResourceId': tranacts.ResourceId,
+                             'ObjId': tranacts.ObjId,
+			     'Time': tranacts.TimeCreated,
+                             'SenderId': tranacts.SenderId, 
+			     'ReceiverId': tranacts.ReceiverId,
+		             'Commodity': tranacts.Commodity,
+	 		     'Units': tranacts.Units,
+                             'Quantity': tranacts.Quantity},
+	             columns=['SimId','TransactionId','ResourceId','ObjId','Time','SenderId','ReceiverId','Commodity','Units','Quantity'])
+    tranacts['Units'] = "kg/GWe"    
+    tranacts=pd.merge(tranacts,df1, on=['SimId','Time'],how='left')
+    tranacts.Quantity = tranacts.Quantity/tranacts.Value
+    tranacts=tranacts.drop(['Value'],axis=1)
+    return tranacts
     
