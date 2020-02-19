@@ -368,13 +368,8 @@ def test_timelist():
 def test_inventory_quantity_per_gwe():
     #exp is the expected output metrics
     exp = pd.DataFrame(np.array([
-<<<<<<< HEAD
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 1.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 2.0),
-=======
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 1.0),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 2.0),
->>>>>>> f6197ddf8e304df8e14218b23462ee239ee73c12
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'core', 922350000, 2.0),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
@@ -391,13 +386,8 @@ def test_inventory_quantity_per_gwe():
         )
     #inv is the ExplicitInventory metrics
     inv = pd.DataFrame(np.array([
-<<<<<<< HEAD
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 300),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 600),
-=======
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 300),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 600),
->>>>>>> f6197ddf8e304df8e14218b23462ee239ee73c12
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'core', 922350000, 200),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
@@ -405,9 +395,8 @@ def test_inventory_quantity_per_gwe():
         )
     obs = metrics.inventory_quantity_per_gwe.func(inv, tsp)
     assert_frame_equal(exp, obs)
-<<<<<<< HEAD
+
 
 if __name__ == "__main__":
     nose.runmodule()
-=======
->>>>>>> f6197ddf8e304df8e14218b23462ee239ee73c12
+
