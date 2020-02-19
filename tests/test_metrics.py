@@ -370,7 +370,7 @@ if __name__ == "__main__":
 
 def test_inventory_quantity_per_gwe():
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 1.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 1.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 2.0),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'core', 922350000, 2.0),
         ], dtype=ensure_dt_bytes([
