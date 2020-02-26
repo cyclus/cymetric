@@ -88,16 +88,15 @@ def build_conversion_col(col):
 
 
 def build_normalized_schema(raw_cls, unit_registry):
-
+    if raw_cls.schema is None:
+        return None
     # initialize the normed metric schema
     norm_schema = raw_cls.schema
-
-    # removing units columns form the new schema
     print(norm_schema)
+    # removing units columns form the new schema
     for key in unit_registry:
         idx = norm_schema.index( (unit_registry[key][0], 4, None)) 
         norm_schema.pop(idx)
-    print(norm_schema)
     return norm_schema
 
 
@@ -128,7 +127,6 @@ def build_normalized_metric(raw_metric):
                 conv = ureg.parse_expression(u_def_unit).to_root_units().magnitude
                 def_unit = ureg.parse_expression(u_def_unit).to_root_units().units
                 norm_pdf[unit] *= conv
-        print("defunit ", def_unit)
         norm_pdf.rename(inplace=True, columns={unit : '{0} [{1:~P}]'.format(unit, def_unit)})
 
         return norm_pdf

@@ -310,8 +310,9 @@ _transschema = [
     ('Units', ts.STRING),
     ('Quantity', ts.DOUBLE)
     ]
+_transregistry = { "Quantity": ["Units", "kg"]}
 
-@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
+@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema, registry=_transregistry)
 def transaction_quantity(mats, tranacts):
     """Transaction Quantity metric returns the quantity of each transaction throughout
     the simulation.
