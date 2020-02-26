@@ -393,7 +393,7 @@ def test_transaction_quantity_per_gwe():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 12, 30, 40, 'Spent Fuel', 'kg', 9),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'),
-                ('ObjId', '<i8'), ('Time', '<i8'), ('SenderId', '<i8'),
+                ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('SenderId', '<i8'),
                 ('ReceiverId', '<i8'), ('Commodity', 'O'), ('Units', 'O'),
                 ('Quantity', '<f8')]))
         )
