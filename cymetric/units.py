@@ -92,7 +92,6 @@ def build_normalized_schema(raw_cls, unit_registry):
         return None
     # initialize the normed metric schema
     norm_schema = raw_cls.schema
-    print(norm_schema)
     # removing units columns form the new schema
     for key in unit_registry:
         idx = norm_schema.index( (unit_registry[key][0], 4, None)) 
