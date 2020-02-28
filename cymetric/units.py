@@ -6,7 +6,6 @@ try:
     from cymetric import schemas
     from cymetric import tools
     from cymetric import evaluator
-
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from . import schemas
@@ -72,7 +71,7 @@ def _gen_norm_metricclass(f, name, r_name, r_regitry, depends, scheme):
 
 
 
-def norm_metric(name=None, raw_name=NotImplemented, raw_unit_registry=NotImplemented, depends=NotImplemented, schema=NotImplemented):
+def norm_raw_metric(name=None, raw_name=NotImplemented, raw_unit_registry=NotImplemented, depends=NotImplemented, schema=NotImplemented):
     """Decorator that creates metric class from a function or class."""
     def dec(f):
         clsname = name or f.__name__
@@ -92,7 +91,6 @@ def build_normalized_schema(raw_cls, unit_registry):
         return None
     # initialize the normed metric schema
     norm_schema = raw_cls.schema
-    print(norm_schema)
     # removing units columns form the new schema
     for key in unit_registry:
         idx = norm_schema.index( (unit_registry[key][0], 4, None)) 
@@ -100,17 +98,22 @@ def build_normalized_schema(raw_cls, unit_registry):
     return norm_schema
 
 
-def build_normalized_metric(raw_metric):
+def build_normalized_raw_metric(raw_metric):
 
-    _norm_deps = [raw_metric.__name__]
-
-    _norm_schema = build_normalized_schema(raw_metric, raw_metric.registry)
+    # Build raw normed metric
+    # name
     _norm_name = "norm_" + raw_metric.__name__
+    # deps
+    _norm_deps = [raw_metric.__name__]
+    # schema
+    _norm_schema = build_normalized_schema(raw_metric, raw_metric.registry)
+    
+    
     _raw_name = raw_metric.__name__
     _raw_units_registry = raw_metric.registry
 
-    @norm_metric(name=_norm_name, raw_name=_raw_name, raw_unit_registry=_raw_units_registry, depends=_norm_deps, schema=_norm_schema)
-    def new_norm_metric(raw_name, unit_registry, raw):
+    @norm_raw_metric(name=_norm_name, raw_name=_raw_name, raw_unit_registry=_raw_units_registry, depends=_norm_deps, schema=_norm_schema)
+    def raw_norm_metric(raw_name, unit_registry, raw):
 
         norm_pdf = raw.copy(deep=True)
         for unit in unit_registry:
@@ -130,7 +133,8 @@ def build_normalized_metric(raw_metric):
         norm_pdf.rename(inplace=True, columns={unit : '{0} [{1:~P}]'.format(unit, def_unit)})
 
         return norm_pdf
-
-    del _norm_deps, _norm_schema, _norm_name
+    
+    # clean your mess
+    del _norm_deps, _norm_schema, _norm_name, _raw_name, _raw_units_registry
 
 

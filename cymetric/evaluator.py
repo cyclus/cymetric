@@ -14,7 +14,7 @@ def register_metric(cls):
     """Adds a metric to the registry."""
     METRIC_REGISTRY[cls.__name__] = cls
     if cls.registry and cls.registry is not NotImplemented:
-        units.build_normalized_metric(cls)
+        units.build_normalized_raw_metric(cls)
 
 class Evaluator(object):
     """An evaluation context for metrics."""

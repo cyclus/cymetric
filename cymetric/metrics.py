@@ -40,7 +40,6 @@ class Metric(object):
     def name(self):
         return self.__class__.__name__
 
-
 def _genmetricclass(f, name, depends, scheme, register):
     """Creates a new metric class with a given name, dependencies, and schema.
 
@@ -60,7 +59,6 @@ def _genmetricclass(f, name, depends, scheme, register):
         dependencies = depends
         schema = scheme
         func = staticmethod(f)
-        registry = register
         __doc__ = inspect.getdoc(f)
         
         def shema(self):
@@ -77,8 +75,11 @@ def _genmetricclass(f, name, depends, scheme, register):
                 known_tables = self.db.tables()
             if self.name in known_tables:
                 return self.db.query(self.name, conds=conds)
-            return f(*frames)
-
+            return f(self.name, *frames)
+    
+    if register is not NotImplemented:
+        build_norm_metric(f, name, depends, scheme, register) 
+    
     Cls.__name__ = str(name)
     register_metric(Cls)
 
@@ -91,6 +92,23 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented,registry=Not
         clsname = name or f.__name__
         return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends, register=registry)
     return dec
+
+def build_norm_metric(f, name, depends, scheme, register):
+
+    _norm_name = "norm_" + name
+    _norm_schema = scheme 
+    _norm_deps = depends
+    for unit in register:
+        unit_col, deps  = register[unit]
+        
+
+    @metric(name=_norm_name, depends=_norm_deps, schema=_norm_schema)
+    def norm_metric(name, *frame):
+        return f(name, *frame)
+
+    del _norm_deps, _norm_schema, _norm_name
+
+
 
 
 #####################
@@ -110,19 +128,26 @@ _matschema = [
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
     ]
-_matregistry = { "Mass": ["Units", "kg"]}
+_matregistry = { "Mass": ["Units", "Resources"]}
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema, registry=_matregistry)
-def materials(rsrcs, comps):
+def materials(name, rsrcs, comps):
     """Materials metric returns the material mass (quantity of material in
     Resources times the massfrac in Compositions) indexed by the SimId, QualId,
     ResourceId, ObjId, TimeCreated, and NucId.
     """
+    index = ['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId', 'Units']
+    mass_col_name = "mass"
+    # some change in case of normalisation
+    if name[0:5] == "norm_":
+        index = ['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId']
+        
+        mass_col_name =  {unit : '{0} [{1:~P}]'.format(unit, def_unit)}
+    
     x = pd.merge(rsrcs, comps, on=['SimId', 'QualId'], how='inner')
-    x = x.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId','TimeCreated',
-                     'NucId', 'Units'])
+    x = x.set_index(index)
     y = x['Quantity'] * x['MassFrac']
-    y.name = 'Mass'
+    y.name = mass_col_name
     z = y.reset_index()
     return z
 

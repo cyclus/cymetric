@@ -73,8 +73,7 @@ _resource_shema = [
     ('Parent2', ts.INT)
     ]
 resources = root_metric(name='Resources', schema=_resource_shema, registry=_resour_registry)
-
-#del _resour_registry, _resource_shema
+del _resour_registry, _resource_shema
 #resources = root_metric(name='Resources')
 
 compositions = root_metric(name='Compositions')
