@@ -53,6 +53,7 @@ class Evaluator(object):
 
     def eval(self, metric, conds=None, normed=None):
         """Evalutes a metric with the given conditions."""
+        requested_metric = metric
         normed_name = "norm_" + metric
         if (normed == True or (normed is None and self.set_norm == True)) and normed_name in METRIC_REGISTRY:
             metric = normed_name
@@ -63,7 +64,8 @@ class Evaluator(object):
         m = self.get_metric(metric, normed)
         frames = []
         for dep in m.dependencies:
-            frame = self.eval(dep, conds=conds, normed=False)
+            #normed condition avoid inceptions
+            frame = self.eval(dep, conds=conds, normed=(dep!=requested_metric) )
             frames.append(frame)
         raw = m(frames=frames, conds=conds, known_tables=self.known_tables)
         if raw is None:

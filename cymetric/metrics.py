@@ -20,11 +20,13 @@ try:
     from cymetric import schemas
     from cymetric import tools
     from cymetric.evaluator import register_metric
+    from cymetric.units import ureg
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from . import schemas
     from . import tools
     from .evaluator import register_metric
+    from .units import ureg
 
 
 class Metric(object):
@@ -75,7 +77,7 @@ def _genmetricclass(f, name, depends, scheme, register):
                 known_tables = self.db.tables()
             if self.name in known_tables:
                 return self.db.query(self.name, conds=conds)
-            return f(self.name, *frames)
+            return f(*frames)
     
     if register is not NotImplemented:
         build_norm_metric(f, name, depends, scheme, register) 
@@ -100,11 +102,10 @@ def build_norm_metric(f, name, depends, scheme, register):
     _norm_deps = depends
     for unit in register:
         unit_col, deps  = register[unit]
-        
 
     @metric(name=_norm_name, depends=_norm_deps, schema=_norm_schema)
-    def norm_metric(name, *frame):
-        return f(name, *frame)
+    def norm_metric(*frame):
+        return f(norm=True, *frame)
 
     del _norm_deps, _norm_schema, _norm_name
 
@@ -131,22 +132,30 @@ _matschema = [
 _matregistry = { "Mass": ["Units", "Resources"]}
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema, registry=_matregistry)
-def materials(name, rsrcs, comps):
+def materials(rsrcs, comps, norm=False):
     """Materials metric returns the material mass (quantity of material in
     Resources times the massfrac in Compositions) indexed by the SimId, QualId,
     ResourceId, ObjId, TimeCreated, and NucId.
     """
     index = ['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId', 'Units']
     mass_col_name = "mass"
+    quantity_col_name = "Quantity"
     # some change in case of normalisation
-    if name[0:5] == "norm_":
+    if norm:
         index = ['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId']
-        
-        mass_col_name =  {unit : '{0} [{1:~P}]'.format(unit, def_unit)}
+        for col in rsrcs.columns:
+            col_orign = col[:-1].split('[')
+            #detect col with units Resources
+            if col_orign[0] == 'Quantity ':
+                # get col name from 
+                quantity_col_name = col 
+                # form new col name for Material metric
+                def_unit = ureg.parse_expression(col_orign[1]).to_root_units().units
+                mass_col_name =  '{0} [{1:~P}]'.format(col_orign[0], def_unit)
     
     x = pd.merge(rsrcs, comps, on=['SimId', 'QualId'], how='inner')
     x = x.set_index(index)
-    y = x['Quantity'] * x['MassFrac']
+    y = x[quantity_col_name] * x['MassFrac']
     y.name = mass_col_name
     z = y.reset_index()
     return z
