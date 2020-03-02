@@ -56,13 +56,14 @@ class Evaluator(object):
         normed_name = "norm_" + metric
         if (normed == True or (normed is None and self.set_norm == True)) and normed_name in METRIC_REGISTRY:
             metric = normed_name
-        
+
         rawkey = (metric, conds if conds is None else frozenset(conds))
         if rawkey in self.rawcache:
             return self.rawcache[rawkey]
         m = self.get_metric(metric, normed)
         frames = []
         for dep in m.dependencies:
+            # norm=False to avoid inception
             frame = self.eval(dep, conds=conds, normed=False)
             frames.append(frame)
         raw = m(frames=frames, conds=conds, known_tables=self.known_tables)
