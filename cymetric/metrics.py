@@ -485,7 +485,9 @@ _tranactsschema = [
 
 @metric(name='TransactionQuantityPerGWe', depends=_tranactsdeps, schema=_tranactsschema)
 def transaction_quantity_per_gwe(tranacts,power):
-    """Returns quantity per GWe in the inventory table
+    """Transaction Quantity per GWe metric returns the transaction quantity table with quantity
+    in units of kg/GWe, calculated by dividing the original quantity by the electricity generated
+    at the corresponding simulation and the specific time in TimeSeriesPower metric.
     """
     power = pd.DataFrame(data={'SimId': power.SimId,
 			      'AgentId': power.AgentId,
