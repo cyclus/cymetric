@@ -481,7 +481,9 @@ _invschema = [
 
 @metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
 def inventory_quantity_per_gwe(expinv,power):
-    """Returns quantity per GWe in the inventory table
+    """Inventory Quantity per GWe metric returns the explicit inventory table with quantity
+    in units of kg/GWe, calculated by dividing the original quantity by the electricity generated
+    at the corresponding simulation and the specific time in TimeSeriesPower metric.
     """
     power = pd.DataFrame(data={'SimId': power.SimId,
 			      'AgentId': power.AgentId,
