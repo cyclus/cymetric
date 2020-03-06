@@ -480,7 +480,7 @@ _invschema = [
     ('Quantity', ts.DOUBLE)
     ]
 @metric(name='InventoryQuantityPerTotalGWe', depends=_invdeps, schema=_invschema)
-def inventory_quantity_per_gwe(expinv,power):
+def inventory_quantity_per_total_gwe(expinv,power):
     """Inventory Quantity per GWe metric returns the explicit inventory table with quantity
     in units of kg/GWe, calculated by dividing the original quantity by the integration of total 
     electricity generated in TimeSeriesPower metric from time 0 to time of the simulation.
