@@ -5,6 +5,7 @@ import inspect
 
 import numpy as np
 import pandas as pd
+import scipy.integrate as integrate
 
 try:
     from pyne import data
@@ -467,27 +468,22 @@ def timelist(info):
 
 del _tldeps, _tlschema
 
-# Quantity per GigaWattElectric in TransactionQuantity [kg/GWe]
-_tranactsdeps = ['TransactionQuantity','TimeSeriesPower']
+# Quantity per GigaWattElectric (integration of total power) in Inventory [kg/GWe]
+_invdeps = ['ExplicitInventory','TimeSeriesPower']
 
-_tranactsschema = [
+_invschema = [
     ('SimId', ts.UUID),
-    ('TransactionId', ts.INT),
-    ('ResourceId', ts.INT),
-    ('ObjId', ts.INT),
+    ('AgentId', ts.INT),
     ('Time', ts.INT),
-    ('SenderId', ts.INT),
-    ('ReceiverId', ts.INT),
-    ('Commodity', ts.STRING),
-    ('Units', ts.STRING),
+    ('InventoryName', ts.STRING),
+    ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
     ]
-
-@metric(name='TransactionQuantityPerGWe', depends=_tranactsdeps, schema=_tranactsschema)
-def transaction_quantity_per_gwe(tranacts,power):
-    """Transaction Quantity per GWe metric returns the transaction quantity table with quantity
-    in units of kg/GWe, calculated by dividing the original quantity by the electricity generated
-    at the corresponding simulation and the specific time in TimeSeriesPower metric.
+@metric(name='InventoryQuantityPerTotalGWe', depends=_invdeps, schema=_invschema)
+def inventory_quantity_per_gwe(expinv,power):
+    """Inventory Quantity per GWe metric returns the explicit inventory table with quantity
+    in units of kg/GWe, calculated by dividing the original quantity by the integration of total 
+    electricity generated in TimeSeriesPower metric from time 0 to time of the simulation.
     """
     power = pd.DataFrame(data={'SimId': power.SimId,
 			      'AgentId': power.AgentId,
@@ -497,20 +493,20 @@ def transaction_quantity_per_gwe(tranacts,power):
     power_index = ['SimId','Time']
     power = power.groupby(power_index).sum()
     df1 = power.reset_index()
-    tranacts = pd.DataFrame(data={'SimId': tranacts.SimId,
-			     'TransactionId': tranacts.TransactionId,
-			     'ResourceId': tranacts.ResourceId,
-                             'ObjId': tranacts.ObjId,
-			     'Time': tranacts.TimeCreated,
-                             'SenderId': tranacts.SenderId, 
-			     'ReceiverId': tranacts.ReceiverId,
-		             'Commodity': tranacts.Commodity,
-	 		     'Units': tranacts.Units,
-                             'Quantity': tranacts.Quantity},
-	             columns=['SimId','TransactionId','ResourceId','ObjId','Time','SenderId','ReceiverId','Commodity','Units','Quantity'])
-    tranacts['Units'] = "kg/GWe"    
-    tranacts=pd.merge(tranacts,df1, on=['SimId','Time'],how='left')
-    tranacts.Quantity = tranacts.Quantity/tranacts.Value
-    tranacts=tranacts.drop(['Value'],axis=1)
-    return tranacts
-    
+    total_power = 0
+    for t in range(len(df1)):   
+        realpower = total_power + df1.Value[t]
+        total_power += realpower
+        integral = integrate.quad(lambda t:realpower*(t**0),0,df1.Time[t])
+        df1.Value[t] = integral[0]
+    inv = pd.DataFrame(data={'SimId': expinv.SimId,
+			     'AgentId': expinv.AgentId,
+			     'Time': expinv.Time,
+		             'InventoryName': expinv.InventoryName,
+	 		     'NucId': expinv.NucId,
+                             'Quantity': expinv.Quantity},
+	             columns=['SimId','AgentId','Time','InventoryName','NucId','Quantity'])
+    inv=pd.merge(inv,df1, on=['SimId','Time'],how='left')
+    inv.Quantity = inv.Quantity/inv.Value
+    inv=inv.drop(['Value'],axis=1)
+    return inv
