@@ -496,9 +496,8 @@ def inventory_quantity_per_total_gwe(expinv,power):
     total_power = 0
     for t in range(len(df1)):   
         realpower = total_power + df1.Value[t]
-        total_power += realpower
-        integral = integrate.quad(lambda t:realpower*(t**0),0,df1.Time[t])
-        df1.Value[t] = integral[0]
+        df1.Value[t] = realpower
+        total_power = realpower
     inv = pd.DataFrame(data={'SimId': expinv.SimId,
 			     'AgentId': expinv.AgentId,
 			     'Time': expinv.Time,

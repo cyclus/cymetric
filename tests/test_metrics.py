@@ -368,10 +368,10 @@ def test_timelist():
 def test_inventory_quantity_per_total_gwe():
     #exp is the expected output metrics
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 0.5),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'usedfuel', 922350000, 1.0),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'core', 922350000, 0.75),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'usedfuel', 922350000, 1.0)
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 1.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'usedfuel', 922350000, 2.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'core', 922350000, 1.5),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'usedfuel', 922350000, 0.5)
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
                 ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
@@ -390,8 +390,8 @@ def test_inventory_quantity_per_total_gwe():
     inv = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 300),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'usedfuel', 922350000, 600),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'core', 922350000, 900),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'usedfuel', 922350000, 1200)
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'core', 922350000, 1050),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'usedfuel', 922350000, 350)
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
                 ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
