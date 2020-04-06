@@ -20,17 +20,20 @@ try:
     from cymetric import schemas
     from cymetric import tools
     from cymetric.evaluator import register_metric
+    from cymetric.units import ureg
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from . import schemas
     from . import tools
     from .evaluator import register_metric
+    from .units import ureg
 
 
 class Metric(object):
     """Metric class"""
     dependencies = NotImplemented
     schema = NotImplemented
+    registry = NotImplemented
 
     def __init__(self, db):
         self.db = db
@@ -39,8 +42,7 @@ class Metric(object):
     def name(self):
         return self.__class__.__name__
 
-
-def _genmetricclass(f, name, depends, scheme):
+def _genmetricclass(f, name, depends, scheme, register):
     """Creates a new metric class with a given name, dependencies, and schema.
 
     Parameters
@@ -59,8 +61,10 @@ def _genmetricclass(f, name, depends, scheme):
         dependencies = depends
         schema = scheme
         func = staticmethod(f)
-
         __doc__ = inspect.getdoc(f)
+        
+        def shema(self):
+            return schema
 
         def __init__(self, db):
             """Constructor for metric object in database."""
@@ -74,18 +78,38 @@ def _genmetricclass(f, name, depends, scheme):
             if self.name in known_tables:
                 return self.db.query(self.name, conds=conds)
             return f(*frames)
-
+    
+    if register is not NotImplemented:
+        build_norm_metric(f, name, depends, scheme, register) 
+    
     Cls.__name__ = str(name)
     register_metric(Cls)
+
     return Cls
 
 
-def metric(name=None, depends=NotImplemented, schema=NotImplemented):
+def metric(name=None, depends=NotImplemented, schema=NotImplemented,registry=NotImplemented):
     """Decorator that creates metric class from a function or class."""
     def dec(f):
         clsname = name or f.__name__
-        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends)
+        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends, register=registry)
     return dec
+
+def build_norm_metric(f, name, depends, scheme, register):
+
+    _norm_name = "norm_" + name
+    _norm_schema = scheme 
+    _norm_deps = depends
+    for unit in register:
+        unit_col, deps  = register[unit]
+
+    @metric(name=_norm_name, depends=_norm_deps, schema=_norm_schema)
+    def norm_metric(*frame):
+        return f(norm=True, *frame)
+
+    del _norm_deps, _norm_schema, _norm_name
+
+
 
 
 #####################
@@ -105,18 +129,34 @@ _matschema = [
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
     ]
+_matregistry = { "Mass": ["Units", "Resources"]}
 
-@metric(name='Materials', depends=_matdeps, schema=_matschema)
-def materials(rsrcs, comps):
+@metric(name='Materials', depends=_matdeps, schema=_matschema, registry=_matregistry)
+def materials(rsrcs, comps, norm=False):
     """Materials metric returns the material mass (quantity of material in
     Resources times the massfrac in Compositions) indexed by the SimId, QualId,
     ResourceId, ObjId, TimeCreated, and NucId.
     """
+    index = ['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId', 'Units']
+    mass_col_name = "mass"
+    quantity_col_name = "Quantity"
+    # some change in case of normalisation
+    if norm:
+        index = ['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId']
+        for col in rsrcs.columns:
+            col_orign = col[:-1].split('[')
+            #detect col with units Resources
+            if col_orign[0] == 'Quantity ':
+                # get col name from 
+                quantity_col_name = col 
+                # form new col name for Material metric
+                def_unit = ureg.parse_expression(col_orign[1]).to_root_units().units
+                mass_col_name =  '{0} [{1:~P}]'.format(col_orign[0], def_unit)
+    
     x = pd.merge(rsrcs, comps, on=['SimId', 'QualId'], how='inner')
-    x = x.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId','TimeCreated',
-                     'NucId', 'Units'])
-    y = x['Quantity'] * x['MassFrac']
-    y.name = 'Mass'
+    x = x.set_index(index)
+    y = x[quantity_col_name] * x['MassFrac']
+    y.name = mass_col_name
     z = y.reset_index()
     return z
 
@@ -304,8 +344,9 @@ _transschema = [
     ('Units', ts.STRING),
     ('Quantity', ts.DOUBLE)
     ]
+_transregistry = { "Quantity": ["Units", "kg"]}
 
-@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
+@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema, registry=_transregistry)
 def transaction_quantity(mats, tranacts):
     """Transaction Quantity metric returns the quantity of each transaction throughout
     the simulation.
@@ -400,7 +441,7 @@ def annual_electricity_generated_by_agent(elec):
                               'AgentId': elec.AgentId,
                               'Year': elec.Time.apply(lambda x: x//12),
                               'Energy': elec.Value.apply(lambda x: x/12)},
-			columns=['SimId', 'AgentId', 'Year', 'Energy'])
+                        columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
