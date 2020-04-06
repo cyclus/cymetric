@@ -31,6 +31,7 @@ class Metric(object):
     """Metric class"""
     dependencies = NotImplemented
     schema = NotImplemented
+    registry = NotImplemented
 
     def __init__(self, db):
         self.db = db
@@ -40,7 +41,7 @@ class Metric(object):
         return self.__class__.__name__
 
 
-def _genmetricclass(f, name, depends, scheme):
+def _genmetricclass(f, name, depends, scheme, register):
     """Creates a new metric class with a given name, dependencies, and schema.
 
     Parameters
@@ -59,8 +60,11 @@ def _genmetricclass(f, name, depends, scheme):
         dependencies = depends
         schema = scheme
         func = staticmethod(f)
-
+        registry = register
         __doc__ = inspect.getdoc(f)
+        
+        def shema(self):
+            return schema
 
         def __init__(self, db):
             """Constructor for metric object in database."""
@@ -77,14 +81,15 @@ def _genmetricclass(f, name, depends, scheme):
 
     Cls.__name__ = str(name)
     register_metric(Cls)
+
     return Cls
 
 
-def metric(name=None, depends=NotImplemented, schema=NotImplemented):
+def metric(name=None, depends=NotImplemented, schema=NotImplemented,registry=NotImplemented):
     """Decorator that creates metric class from a function or class."""
     def dec(f):
         clsname = name or f.__name__
-        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends)
+        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends, register=registry)
     return dec
 
 
@@ -105,8 +110,9 @@ _matschema = [
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
     ]
+_matregistry = { "Mass": ["Units", "kg"]}
 
-@metric(name='Materials', depends=_matdeps, schema=_matschema)
+@metric(name='Materials', depends=_matdeps, schema=_matschema, registry=_matregistry)
 def materials(rsrcs, comps):
     """Materials metric returns the material mass (quantity of material in
     Resources times the massfrac in Compositions) indexed by the SimId, QualId,
@@ -304,8 +310,9 @@ _transschema = [
     ('Units', ts.STRING),
     ('Quantity', ts.DOUBLE)
     ]
+_transregistry = { "Quantity": ["Units", "kg"]}
 
-@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
+@metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema, registry=_transregistry)
 def transaction_quantity(mats, tranacts):
     """Transaction Quantity metric returns the quantity of each transaction throughout
     the simulation.
@@ -400,7 +407,7 @@ def annual_electricity_generated_by_agent(elec):
                               'AgentId': elec.AgentId,
                               'Year': elec.Time.apply(lambda x: x//12),
                               'Energy': elec.Value.apply(lambda x: x/12)},
-			columns=['SimId', 'AgentId', 'Year', 'Energy'])
+                        columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
