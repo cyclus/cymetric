@@ -7,10 +7,10 @@ from functools import wraps
 import nose
 from nose.tools import assert_equal, assert_less
 
-from cymetric import cyclus
 from cymetric import root_metrics
 
 from tools import setup, dbtest
+
 
 @dbtest
 def test_resources(db, fname, backend):
@@ -115,6 +115,22 @@ def test_snapshots(db, fname, backend):
     obs = r()
     assert_less(0, len(obs))
     assert_equal('Snapshots', r.name)
+
+
+@dbtest
+def test_inventories(db, fname, backend):
+    r = root_metrics.explicit_inventory(db=db)
+    obs = r()
+    assert_less(0, len(obs))
+    assert_equal('ExplicitInventory', r.name)
+
+
+@dbtest
+def test_inventories_compact(db, fname, backend):
+    r = root_metrics.explicit_inventory_compact(db=db)
+    obs = r()
+    assert_less(0, len(obs))
+    assert_equal('ExplicitInventoryCompact', r.name)
 
 
 @dbtest

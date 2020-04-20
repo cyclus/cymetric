@@ -1,3 +1,10 @@
+Both fodler contain a script to generate the proper Dockerfile require to
+generate the `stable` or the `latest` version. The `stable` version should be
+generated when built from the last release tag and is build against
+`cyclus/cycamore:stable` container. The `latest` verisonshould be build when
+merging on `master` branch and is build against `cyclus/cycamore:latest`.
+
+
 
 * ``cymetric-ci`` is the dockerfile used for running cymetric on a continuous
   integration service.  This dockerfile assumes that the current working
@@ -7,16 +14,5 @@
   dockerfile uses the base image ``cyclus/cycamore`` from the docker hub
   repository.
 
-* ``cymetric-deps`` builds all cymetric dependencies.  This is used as the
-  base image for other dockerfiles that build cymetric and should be updated
-  only occasionally as needed (i.e. whenever we do a new release of
-  cyclus+cycamore) and pushed up to the docker hub ``cyclus/cyclus-deps``
-  repository:
-
-  ```
-  cd cymetric-deps
-  docker build -t cyclus/cymetric-deps:X.X .
-  docker tag cyclus/cymetric-deps:X.X cyclus/cymetric:latest
-  docker push cyclus/cymetric-deps
-  ```
-
+* ``cymetric-deps`` builds all cymetric dependencies. This should be done at
+  each PR on each tag automatically.

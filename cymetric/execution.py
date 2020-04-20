@@ -15,8 +15,9 @@ import pandas as pd
 
 from cymetric.evaluator import Evaluator, METRIC_REGISTRY
 
+
 class ColumnProxy(object):
-    """A proxy object for column that returns condition 3-tuples from 
+    """A proxy object for column that returns condition 3-tuples from
     comparison operations.
     """
 
@@ -115,11 +116,11 @@ class MetricProxy(object):
         self.evaler = evaler
 
     def __getitem__(self, key):
-        """Evaluates if conditions are given for evaluation of metric and 
+        """Evaluates if conditions are given for evaluation of metric and
         formats them.
         """
         if has_no_conds(key):
-            conds = None 
+            conds = None
         elif isinstance(key, ColumnProxy):
             conds = key.conds
         elif isinstance(key, str_types):
@@ -135,8 +136,8 @@ class MetricProxy(object):
 
 
 class ExecutionContext(MutableMapping):
-    """An execution context for the command line or any other situation 
-    that involves the automatic injection of metric names, column names, 
+    """An execution context for the command line or any other situation
+    that involves the automatic injection of metric names, column names,
     etc.
     """
 
@@ -169,7 +170,7 @@ class ExecutionContext(MutableMapping):
     def __getitem__(self, key):
         """Retrieves metric from registry or column from root metrics."""
         if key in __builtins__:
-            raise KeyError 
+            raise KeyError
         elif key in METRIC_REGISTRY:
             self._ctx[key] = MetricProxy(key, self.evaler)
         elif key not in self._ctx:
@@ -208,6 +209,7 @@ class ExecutionContext(MutableMapping):
     def __del__(self):
         """Closes db, flushing remaining buffers."""
         self.evaler.db.flush()
+
 
 def exec_code(code, db, write=True):
     """Runs a code snipper in the context of a database."""

@@ -3,11 +3,13 @@
 from __future__ import unicode_literals, print_function
 
 import pandas as pd
+from cyclus import lib
 
-from cymetric import cyclus
 from cymetric.tools import raw_to_series
 
+
 METRIC_REGISTRY = {}
+
 
 def register_metric(cls):
     """Adds a metric to the registry."""
@@ -35,7 +37,7 @@ class Evaluator(object):
         self.metrics = {}
         self.rawcache = {}
         self.db = db
-        self.recorder = rec = cyclus.Recorder(inject_sim_id=False)
+        self.recorder = rec = lib.Recorder(inject_sim_id=False)
         rec.register_backend(db)
         self.known_tables = db.tables
 
@@ -51,12 +53,11 @@ class Evaluator(object):
         if rawkey in self.rawcache:
             return self.rawcache[rawkey]
         m = self.get_metric(metric)
-        series = []
+        frames = []
         for dep in m.dependencies:
-            d = self.eval(dep[0], conds=conds)
-            s = None if d is None else raw_to_series(d, dep[1], dep[2])
-            series.append(s)
-        raw = m(series=series, conds=conds, known_tables=self.known_tables)
+            frame = self.eval(dep, conds=conds)
+            frames.append(frame)
+        raw = m(frames=frames, conds=conds, known_tables=self.known_tables)
         if raw is None:
             return raw
         self.rawcache[rawkey] = raw
@@ -64,13 +65,13 @@ class Evaluator(object):
         if (m.name in self.known_tables) or (not self.write):
             return raw
         rec = self.recorder
-        rawd = raw.to_dict(outtype='list')
+        rawd = raw.to_dict(orient='list')
         for i in range(len(raw)):
             d = rec.new_datum(m.name)
             for field, dbtype, shape in m.schema:
                 fname = m.schema.byte_names[field]
                 val = rawd[str(field)][i]
-                d = d.add_val(fname, val, dbtype=dbtype, shape=shape)
+                d = d.add_val(fname, val, type=dbtype, shape=shape)
             d.record()
         self.known_tables.add(m.name)
         return raw
