@@ -245,13 +245,22 @@ _eischema = [('Agent_Prototype', ts.STRING), ('Agent_AgentId', ts.INT),
 def economic_info(series):
     """The EconomicInfo metric stores all economic data needed to calculate the economic metrics. These economic parameters are originally written in 'parameters.xml'.
     """
-    tuples = [('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Agent', 'ParentId'), ('Finance','ReturnOnDebt'), ('Finance','ReturnOnEquity'), ('Finance','TaxRate'), ('Finance','DiscountRate'), ('Capital', 'beforePeak'), ('Capital', 'afterPeak'), ('Capital', 'constructionDuration'), ('Capital', 'Deviation'), ('Capital', 'OvernightCost'), ('Decommissioning', 'Duration'), ('Decommissioning', 'OvernightCost'), ('OperationMaintenance', 'FixedCost'), ('OperationMaintenance', 'VariableCost'), ('OperationMaintenance', 'Deviation'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation'), ('Truncation', 'Begin'), ('Truncation', 'End')]
+    tuples = ['Agent_Prototype', 'Agent_AgentId', 'Agent_ParentId',
+            'Finance_ReturnOnDebt', 'Finance_ReturnOnEquity', 'Finance_TaxRate',
+            'Finance_DiscountRate', 'Captial_beforePeak', 'Captial_afterPeak',
+            'Captial_constructionDuration', 'Captial_Deviation',
+            'Captial_OvernightCost', 'Decommissioning_Duration',
+            'Decommissioning_OvernightCost', 'OperationMaintenance_FixedCost',
+            'OperationMaintenance_VariableCost',
+            'OperationMaintenance_Deviation', 'Fuel_Commodity',
+            'Fuel_SupplyCost', 'Fuel_WasteFee', 'Fuel_Deviation',
+            'Truncation_Begin', 'Truncation_End']
     index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
     rtn = pd.DataFrame(index=index)
     dfEntry = series[0].reset_index()
     agentIndex = dfEntry.reset_index().set_index('AgentId')['index']
     rtn = rtn.T
-    rtn['Agent_Prototype')] = dfEntry['Prototype']
+    rtn['Agent_Prototype'] = dfEntry['Prototype']
     rtn['Agent_AgentId'] = dfEntry['AgentId']
     rtn['Agent_ParentId'] = dfEntry['ParentId']
     parametersInput = 'parameters.xml'
