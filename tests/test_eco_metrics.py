@@ -234,7 +234,22 @@ def test_economic_info():
               ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, None, None, None, None, None, None, None, 0, 20),
               ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 'uox', 1, 0, 0, 0, 20)
               ], dtype=ensure_dt_bytes([
-                      (('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Agent', 'ParentId'), '<i8'), (('Finance','ReturnOnDebt'), '<f8'), (('Finance','ReturnOnEquity'), '<f8'), (('Finance','TaxRate'), '<f8'), (('Finance','DiscountRate'), '<f8'), (('Capital', 'beforePeak'), '<i8'), (('Capital', 'afterPeak'), '<i8'), (('Capital', 'constructionDuration'), '<i8'), (('Capital', 'Deviation'), '<f8'), (('Capital', 'OvernightCost'), '<f8'), (('Decommissioning', 'Duration'), '<i8'), (('Decommissioning', 'OvernightCost'), '<f8'), (('OperationMaintenance', 'FixedCost'), '<f8'), (('OperationMaintenance', 'VariableCost'), '<f8'), (('OperationMaintenance', 'Deviation'), '<f8'), (('Fuel', 'Commodity'), 'O'), (('Fuel', 'SupplyCost'), '<f8'), (('Fuel', 'WasteFee'), '<f8'), (('Fuel', 'Deviation'), '<f8'), (('Truncation', 'Begin'), '<i8'), (('Truncation', 'End'), '<i8')]))
+                      ('Agent_Prototype', 'O'), ('Agent_AgentId', '<i8'),
+                      ('Agent_ParentId', '<i8'), ('Finance_ReturnOnDebt',
+                          '<f8'), ('Finance_ReturnOnEquity', '<f8'),
+                      ('Finance_TaxRate', '<f8'), ('Finance_DiscountRate',
+                          '<f8'), ('Captial_beforePeak', '<i8'),
+                      ('Captial_afterPeak', '<i8'),
+                      ('Captial_constructionDuration', '<i8'),
+                      ('Captial_Deviation', '<f8'), ('Captial_OvernightCost',
+                          '<f8'), ('Decommissioning_Duration', '<i8'),
+                      ('Decommissioning_OvernightCost', '<f8'),
+                      ('OperationMaintenance_FixedCost', '<f8'),
+                      ('OperationMaintenance_VariableCost', '<f8'),
+                      ('OperationMaintenance_Deviation', '<f8'),
+                      ('Fuel_Commodity', 'O'), ('Fuel_SupplyCost', '<f8'),
+                      ('Fuel_WasteFee', '<f8'), ('Fuel_Deviation', '<f8'),
+                      ('Truncation_Begin', '<i8'), ('Truncation_End', '<i8')]))
               )
     s1 = entry.set_index(['AgentId', 'Prototype'])['ParentId']
     series = [s1]
