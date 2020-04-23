@@ -125,18 +125,23 @@ def test_fuel_cost():
                  'uox', 9)
                  ], dtype=ensure_dt_bytes([
                          ('SimId', 'O'), ('TransactionId', '<i8'),
-                         ('ReceiverId', '<i8'), ('SenderId', '<i8'),('ResourceId', '<i8'),
+                         ('ReceiverId', '<i8'), ('ResourceId', '<i8'),
                          ('Commodity', 'O'), ('Time', '<i8')]))
                  )
     ecoInfo = pd.DataFrame(np.array([
                  ('Reactor1', 13, 'uox', 1, 0, 0, 0.1)
                  ], dtype=ensure_dt_bytes([
-                         (('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Fuel', 'Commodity'), 'O'), (('Fuel', 'SupplyCost'), '<f8'), (('Fuel', 'WasteFee'), '<f8'), (('Fuel', 'Deviation'), '<f8'), (('Finance','DiscountRate'), '<f8')]))
+                         ('Agent_Prototype', 'O'), ('Agent_AgentId', '<i8'),
+                         ('Fuel_Commodity', 'O'), ('Fuel_SupplyCost', '<f8'),
+                         ('Fuel_WasteFee', '<f8'), ('Fuel_Deviation', '<f8'),
+                         ('Finance_DiscountRate', '<f8')]))
                  )
     s1 = resources.set_index(['SimId', 'ResourceId'])['Quantity']
     s2 = transactions.set_index(['SimId', 'TransactionId', 'ReceiverId',
        'ResourceId', 'Commodity'])['Time']
-    s3 = ecoInfo.set_index([('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation')])[('Finance','DiscountRate')]
+    s3 = ecoInfo.set_index(['Agent_Prototype', 'Agent_AgentId',
+        'Fuel_Commodity', 'Fuel_SupplyCost', 'Fuel_WasteFee',
+        'Fuel_Deviation', 'Finance_DiscountRate'])
     series = [s1, s2, s3]
     obs = eco_metrics.fuel_cost.func(series)
     assert_frame_equal(exp, obs)
