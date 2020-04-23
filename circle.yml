@@ -9,6 +9,7 @@ jobs:
         steps:
             # Ensure your image has git (required by git to clone via SSH) so that CircleCI can clone your repo
             - run: apt-get -qq update; apt-get -y install git openssh-client
+            - run: pip install matplotlib
             - checkout
             - run:
                 name: Build Cymetric
