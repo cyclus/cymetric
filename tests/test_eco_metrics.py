@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
-from cymetric import cyclus
 from cymetric import eco_metrics
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
