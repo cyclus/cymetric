@@ -9,7 +9,6 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 import math
 import os
-import matplotlib.pyplot as plt
 import warnings
 
 from cyclus import typesystem as ts
