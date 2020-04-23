@@ -28,8 +28,8 @@ def test_capital_cost():
         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 0.028035),
         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 0.0)
         ], dtype=ensure_dt_bytes([
-        		('SimId','O'), ('AgentId', '<i8'), ('Time','<i8'),
-        		('Payment', '<f8')]))
+                ('SimId','O'), ('AgentId', '<i8'), ('Time','<i8'),
+                ('Payment', '<f8')]))
         )
     power = pd.DataFrame(np.array([
           (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 1)
@@ -40,17 +40,17 @@ def test_capital_cost():
     entry = pd.DataFrame(np.array([
           (13, -1, ':cycamore:Reactor', 1)
           ], dtype=ensure_dt_bytes([('AgentId', '<i8'), ('ParentId', '<i8'),
-          		('Spec', 'O'), ('EnterTime', '<i8')]))
+                  ('Spec', 'O'), ('EnterTime', '<i8')]))
           )
     info = pd.DataFrame(np.array([
-    	 (2000, 1, 20)
-    	 ], dtype=ensure_dt_bytes([('InitialYear', '<i8'),
-    	 		 ('InitialMonth', '<i8'), ('Duration', '<i8')]))
-    	 )
+         (2000, 1, 20)
+         ], dtype=ensure_dt_bytes([('InitialYear', '<i8'),
+                  ('InitialMonth', '<i8'), ('Duration', '<i8')]))
+         )
     ecoInfo = pd.DataFrame(np.array([
-    	 ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
-    	 ], dtype=ensure_dt_bytes([(('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Capital', 'beforePeak'), '<i8'), (('Capital', 'afterPeak'), '<i8'), (('Capital', 'constructionDuration'), '<i8'), (('Capital', 'Deviation'), '<f8'), (('Capital', 'OvernightCost'), '<f8'), (('Finance','DiscountRate'), '<f8')]))
-    	 )
+         ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
+         ], dtype=ensure_dt_bytes([(('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Capital', 'beforePeak'), '<i8'), (('Capital', 'afterPeak'), '<i8'), (('Capital', 'constructionDuration'), '<i8'), (('Capital', 'Deviation'), '<f8'), (('Capital', 'OvernightCost'), '<f8'), (('Finance','DiscountRate'), '<f8')]))
+         )
     s1 = power.set_index(['SimId', 'AgentId', 'Value'])['Time']
     s2 = entry.set_index(['AgentId', 'ParentId', 'Spec'])['EnterTime']
     s3 = info.set_index(['InitialYear', 'InitialMonth'])['Duration']
@@ -95,7 +95,7 @@ def test_fuel_cost():
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 53, 1),
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 54, 1)
               ], dtype=ensure_dt_bytes([
-                      ('SimId', 'O'), ('ResourceId', '<i8'), ('Quantity', 
+                      ('SimId', 'O'), ('ResourceId', '<i8'), ('Quantity',
                       '<f8'),]))
               )
     transactions = pd.DataFrame(np.array([
@@ -119,16 +119,16 @@ def test_fuel_cost():
                  'uox', 9)
                  ], dtype=ensure_dt_bytes([
                          ('SimId', 'O'), ('TransactionId', '<i8'),
-                         ('ReceiverId', '<i8'), ('ResourceId', '<i8'), 
+                         ('ReceiverId', '<i8'), ('ResourceId', '<i8'),
                          ('Commodity', 'O'), ('Time', '<i8')]))
                  )
     ecoInfo = pd.DataFrame(np.array([
                  ('Reactor1', 13, 'uox', 1, 0, 0, 0.1)
-                 ], dtype=ensure_dt_bytes([     
+                 ], dtype=ensure_dt_bytes([
                          (('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Fuel', 'Commodity'), 'O'), (('Fuel', 'SupplyCost'), '<f8'), (('Fuel', 'WasteFee'), '<f8'), (('Fuel', 'Deviation'), '<f8'), (('Finance','DiscountRate'), '<f8')]))
                  )
     s1 = resources.set_index(['SimId', 'ResourceId'])['Quantity']
-    s2 = transactions.set_index(['SimId', 'TransactionId', 'ReceiverId', 
+    s2 = transactions.set_index(['SimId', 'TransactionId', 'ReceiverId',
        'ResourceId', 'Commodity'])['Time']
     s3 = ecoInfo.set_index([('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation')])[('Finance','DiscountRate')]
     series = [s1, s2, s3]
@@ -169,7 +169,7 @@ def test_decommissioning_cost():
     ecoInfo = pd.DataFrame(np.array([
               (13, 5, 1)
               ], dtype=ensure_dt_bytes([
-                      (('Agent', 'AgentId'), '<i8'), (('Decommissioning', 'Duration')), '<f8'), (('Decommissioning', 'OvernightCost'), '<f8')]))
+                      (('Agent', 'AgentId'), '<i8'), (('Decommissioning', 'Duration'), '<f8'), (('Decommissioning', 'OvernightCost'), '<f8')]))
               )
     s1 = power.set_index(['SimId', 'AgentId'])['Value']
     s2 = entry.set_index(['EnterTime', 'Lifetime', 'AgentId'])['Spec']
@@ -219,7 +219,7 @@ def test_operation_maintenance():
     series = [s1, s2]
     obs = eco_metrics.operation_maintenance.func(series)
     assert_frame_equal(exp, obs)
-    
+
 def test_economic_info():
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
@@ -249,97 +249,97 @@ def test_economic_info():
 """
 
 def test_annual_costs():
-	"""
-	"""
-	# Reactor / Institution level
-	assert_equal(eco_metrics.annual_costs('test_output.sqlite', 13).sum().sum(),
-				 eco_metrics.institution_annual_costs('test_output.sqlite', 9).sum().sum())
-	assert_equal(eco_metrics.annual_costs_present_value('test_output.sqlite', 13).sum().sum(),
-				 eco_metrics.institution_annual_costs_present_value(
-	'test_output.sqlite', 9).sum().sum())
-	# Region / Institution level
-	assert_equal(eco_metrics.region_annual_costs('test_output.sqlite', 8).sum().sum(),
-				eco_metrics.institution_annual_costs('test_output.sqlite', 9).sum().sum())
-	assert_equal(eco_metrics.region_annual_costs_present_value(
-	'test_output.sqlite', 8).sum().sum(),
-				 eco_metrics.institution_annual_costs_present_value(
-	'test_output.sqlite', 9).sum().sum())	
-	# Simulation / Reactor level
-	assert_equal(eco_metrics.region_annual_costs('test_output.sqlite', 8).sum().sum(),
-				eco_metrics.simulation_annual_costs('test_output.sqlite').sum().sum())
-	assert_equal(eco_metrics.region_annual_costs_present_value(
-	'test_output.sqlite', 8).sum().sum(),
-				 eco_metrics.simulation_annual_costs_present_value(
-	'test_output.sqlite').sum().sum())
+    """
+    """
+    # Reactor / Institution level
+    assert_equal(eco_metrics.annual_costs('test_output.sqlite', 13).sum().sum(),
+                 eco_metrics.institution_annual_costs('test_output.sqlite', 9).sum().sum())
+    assert_equal(eco_metrics.annual_costs_present_value('test_output.sqlite', 13).sum().sum(),
+                 eco_metrics.institution_annual_costs_present_value(
+    'test_output.sqlite', 9).sum().sum())
+    # Region / Institution level
+    assert_equal(eco_metrics.region_annual_costs('test_output.sqlite', 8).sum().sum(),
+                eco_metrics.institution_annual_costs('test_output.sqlite', 9).sum().sum())
+    assert_equal(eco_metrics.region_annual_costs_present_value(
+    'test_output.sqlite', 8).sum().sum(),
+                 eco_metrics.institution_annual_costs_present_value(
+    'test_output.sqlite', 9).sum().sum())
+    # Simulation / Reactor level
+    assert_equal(eco_metrics.region_annual_costs('test_output.sqlite', 8).sum().sum(),
+                eco_metrics.simulation_annual_costs('test_output.sqlite').sum().sum())
+    assert_equal(eco_metrics.region_annual_costs_present_value(
+    'test_output.sqlite', 8).sum().sum(),
+                 eco_metrics.simulation_annual_costs_present_value(
+    'test_output.sqlite').sum().sum())
 
 def test_lcoe():
-	"""
-	"""
-	# Reactor / Institution level
-	assert_equal(eco_metrics.lcoe('test_output.sqlite', 13),
-				 eco_metrics.institution_lcoe('test_output.sqlite', 9))
-	# Region / Institution level
-	assert_equal(eco_metrics.region_lcoe('test_output.sqlite', 8),
-				 eco_metrics.institution_lcoe('test_output.sqlite', 9))
-	# Simulation / Reactor level
-	assert_equal(eco_metrics.region_lcoe('test_output.sqlite', 8),
-				 eco_metrics.simulation_lcoe('test_output.sqlite'))
-				 
+    """
+    """
+    # Reactor / Institution level
+    assert_equal(eco_metrics.lcoe('test_output.sqlite', 13),
+                 eco_metrics.institution_lcoe('test_output.sqlite', 9))
+    # Region / Institution level
+    assert_equal(eco_metrics.region_lcoe('test_output.sqlite', 8),
+                 eco_metrics.institution_lcoe('test_output.sqlite', 9))
+    # Simulation / Reactor level
+    assert_equal(eco_metrics.region_lcoe('test_output.sqlite', 8),
+                 eco_metrics.simulation_lcoe('test_output.sqlite'))
+
 def test_average_lcoe():
-	"""
-	"""
-	# Reactor / Institution level
-	assert_equal(eco_metrics.average_lcoe('test_output.sqlite', 13),
-				 eco_metrics.institution_average_lcoe('test_output.sqlite', 9))
-	# Region / Institution level
-	assert_equal(eco_metrics.region_average_lcoe('test_output.sqlite', 8),
-				 eco_metrics.institution_average_lcoe('test_output.sqlite', 9))
-	# Simulation / Reactor level
-	assert_equal(eco_metrics.region_average_lcoe('test_output.sqlite', 8),
-				 eco_metrics.simulation_average_lcoe('test_output.sqlite'))
-				 
+    """
+    """
+    # Reactor / Institution level
+    assert_equal(eco_metrics.average_lcoe('test_output.sqlite', 13),
+                 eco_metrics.institution_average_lcoe('test_output.sqlite', 9))
+    # Region / Institution level
+    assert_equal(eco_metrics.region_average_lcoe('test_output.sqlite', 8),
+                 eco_metrics.institution_average_lcoe('test_output.sqlite', 9))
+    # Simulation / Reactor level
+    assert_equal(eco_metrics.region_average_lcoe('test_output.sqlite', 8),
+                 eco_metrics.simulation_average_lcoe('test_output.sqlite'))
+
 def test_benefit():
-	"""
-	"""
-	# Reactor / Institution level
-	assert_equal(eco_metrics.benefit('test_output.sqlite', 13),
-				 eco_metrics.institution_benefit('test_output.sqlite', 9))
-	# Region / Institution level
-	assert_equal(eco_metrics.region_benefit('test_output.sqlite', 8),
-				 eco_metrics.institution_benefit('test_output.sqlite', 9))
-	# Simulation / Reactor level
-	assert_equal(eco_metrics.region_benefit('test_output.sqlite', 8),
-				 eco_metrics.simulation_benefit('test_output.sqlite'))
-				 
+    """
+    """
+    # Reactor / Institution level
+    assert_equal(eco_metrics.benefit('test_output.sqlite', 13),
+                 eco_metrics.institution_benefit('test_output.sqlite', 9))
+    # Region / Institution level
+    assert_equal(eco_metrics.region_benefit('test_output.sqlite', 8),
+                 eco_metrics.institution_benefit('test_output.sqlite', 9))
+    # Simulation / Reactor level
+    assert_equal(eco_metrics.region_benefit('test_output.sqlite', 8),
+                 eco_metrics.simulation_benefit('test_output.sqlite'))
+
 def test_power_generated():
-	"""
-	"""
-	# Reactor / Institution level
-	assert_equal(eco_metrics.power_generated('test_output.sqlite', 13),
-				 eco_metrics.institution_power_generated('test_output.sqlite', 9))
-	# Region / Institution level
-	assert_equal(eco_metrics.region_power_generated('test_output.sqlite', 8),
-				 eco_metrics.institution_power_generated('test_output.sqlite', 9))
-	# Simulation / Reactor level
-	assert_equal(eco_metrics.region_power_generated('test_output.sqlite', 8),
-				 eco_metrics.simulation_power_generated('test_output.sqlite'))
+    """
+    """
+    # Reactor / Institution level
+    assert_equal(eco_metrics.power_generated('test_output.sqlite', 13),
+                 eco_metrics.institution_power_generated('test_output.sqlite', 9))
+    # Region / Institution level
+    assert_equal(eco_metrics.region_power_generated('test_output.sqlite', 8),
+                 eco_metrics.institution_power_generated('test_output.sqlite', 9))
+    # Simulation / Reactor level
+    assert_equal(eco_metrics.region_power_generated('test_output.sqlite', 8),
+                 eco_metrics.simulation_power_generated('test_output.sqlite'))
 
 def test_period_costs():
-	"""
-	"""
-	# Reactor level
-	assert_equal(eco_metrics.period_costs('test_output.sqlite', 13, 30).sum().sum(),
-				 eco_metrics.period_costs2('test_output.sqlite', 13, 30).sum().sum())
-	# Reactor / Institution level
-	assert_equal(eco_metrics.period_costs('test_output.sqlite', 13).sum().sum(),
-				eco_metrics.institution_period_costs('test_output.sqlite', 9).sum().sum())
-	# Region / Institution level
-	assert_equal(eco_metrics.region_period_costs('test_output.sqlite', 8).sum().sum(),
-				eco_metrics.institution_period_costs('test_output.sqlite', 9).sum().sum())
-	# Region / Simulation level
-	assert_equal(eco_metrics.region_period_costs('test_output.sqlite', 8).sum().sum(),
-				eco_metrics.simulation_period_costs('test_output.sqlite').sum().sum())
-				
+    """
+    """
+    # Reactor level
+    assert_equal(eco_metrics.period_costs('test_output.sqlite', 13, 30).sum().sum(),
+                 eco_metrics.period_costs2('test_output.sqlite', 13, 30).sum().sum())
+    # Reactor / Institution level
+    assert_equal(eco_metrics.period_costs('test_output.sqlite', 13).sum().sum(),
+                eco_metrics.institution_period_costs('test_output.sqlite', 9).sum().sum())
+    # Region / Institution level
+    assert_equal(eco_metrics.region_period_costs('test_output.sqlite', 8).sum().sum(),
+                eco_metrics.institution_period_costs('test_output.sqlite', 9).sum().sum())
+    # Region / Simulation level
+    assert_equal(eco_metrics.region_period_costs('test_output.sqlite', 8).sum().sum(),
+                eco_metrics.simulation_period_costs('test_output.sqlite').sum().sum())
+
 
 if __name__ == "__main__":
     nose.runmodule()
