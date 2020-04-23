@@ -125,7 +125,7 @@ def test_fuel_cost():
                  'uox', 9)
                  ], dtype=ensure_dt_bytes([
                          ('SimId', 'O'), ('TransactionId', '<i8'),
-                         ('ReceiverId', '<i8'), ('ResourceId', '<i8'),
+                         ('ReceiverId', '<i8'), ('SenderId', '<i8'), ('ResourceId', '<i8'),
                          ('Commodity', 'O'), ('Time', '<i8')]))
                  )
     ecoInfo = pd.DataFrame(np.array([
@@ -180,12 +180,13 @@ def test_decommissioning_cost():
     ecoInfo = pd.DataFrame(np.array([
               (13, 5, 1)
               ], dtype=ensure_dt_bytes([
-                      (('Agent', 'AgentId'), '<i8'), (('Decommissioning', 'Duration'), '<f8'), (('Decommissioning', 'OvernightCost'), '<f8')]))
+                      ('Agent_AgentId', '<i8'), ('Decommissioning_Duration',
+                          '<f8'), ('Decommissioning_OvernightCost', '<f8')]))
               )
     s1 = power.set_index(['SimId', 'AgentId'])['Value']
     s2 = entry.set_index(['EnterTime', 'Lifetime', 'AgentId'])['Spec']
     s3 = info.set_index(['SimId', 'InitialYear', 'InitialMonth'])['Duration']
-    s4 = ecoInfo.set_index([('Agent', 'AgentId'), ('Decommissioning', 'Duration')])[('Decommissioning', 'OvernightCost')]
+    s4 = ecoInfo.set_index(['Agent_AgentId', 'Decommissioning_Duration'])['Decommissioning_OvernightCost')]
     series = [s1, s2, s3, s4]
     obs = eco_metrics.decommissioning_cost.func(series)
     assert_frame_equal(exp, obs)
