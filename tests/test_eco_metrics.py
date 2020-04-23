@@ -212,7 +212,7 @@ def test_operation_maintenance():
     ecoInfo = pd.DataFrame(np.array([
               (13, 1, 1, 0)
               ], dtype=ensure_dt_bytes([
-                      (('Agent', 'AgentId'), '<i8'), (('OperationMaintenance', 'FixedCost')), '<f8'), (('OperationMaintenance', 'VariableCost'), '<f8'), (('OperationMaintenance', 'Deviation'), '<f8')]))
+                      (('Agent', 'AgentId'), '<i8'), (('OperationMaintenance', 'FixedCost'), '<f8'), (('OperationMaintenance', 'VariableCost'), '<f8'), (('OperationMaintenance', 'Deviation'), '<f8')]))
               )
     s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
     s2 = ecoInfo.set_index([('Agent', 'AgentId'), ('OperationMaintenance', 'FixedCost'), ('OperationMaintenance', 'VariableCost')])[ ('OperationMaintenance', 'Deviation')]
