@@ -12,27 +12,22 @@ import os
 import matplotlib.pyplot as plt
 import warnings
 
-from cymetric.tools import dbopen
-from cymetric.evaluator import Evaluator
-from cymetric.eco_tools import actualization_vector, isreactor
+from cyclus import typesystem as ts
+
 
 try:
     from cymetric.metrics import metric
-    from cymetric import cyclus
-    from cymetric import schemas
-    from cymetric import typesystem as ts
-    from cymetric import tools
+    from cymetric.tools import dbopen
+    from cymetric.evaluator import Evaluator
+    from cymetric.eco_tools import actualization_vector, isreactor, capital_shape
     from cymetric.evaluator import register_metric
-    from cymetric.eco_tools import capital_shape, isreactor
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from .metrics import metric
-    from . import cyclus
-    from . import schemas
-    from . import typesystem as ts
-    from . import tools
     from .evaluator import register_metric
-    from .eco_tools import capital_shape, isreactor
+    from .eco_tools import capital_shape, isreactor, actualization_vector, isreactor
+    from .tools import dbopen
+    from .evaluator import Evaluator
 
 xml_inputs = 'parameters.xml' # This xml file has to be built in the same direction as the sqlite output database. It contains the economic data needed to calculate the EconomicInfo metric
 
