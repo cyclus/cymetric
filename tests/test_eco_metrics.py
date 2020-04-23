@@ -48,7 +48,11 @@ def test_capital_cost():
          )
     ecoInfo = pd.DataFrame(np.array([
          ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
-         ], dtype=ensure_dt_bytes([(('Agent', 'Prototype'), 'O'), (('Agent', 'AgentId'), '<i8'), (('Capital', 'beforePeak'), '<i8'), (('Capital', 'afterPeak'), '<i8'), (('Capital', 'constructionDuration'), '<i8'), (('Capital', 'Deviation'), '<f8'), (('Capital', 'OvernightCost'), '<f8'), (('Finance','DiscountRate'), '<f8')]))
+         ], dtype=ensure_dt_bytes([('Agent_Prototype', 'O'), ('Agent_AgentId',
+             '<i8'), ('Captial_beforePeak', '<i8'),
+             ('Captial_afterPeak', '<i8'), ('Captial_constructionDuration', '<i8'),
+             ('Captial_Deviation', '<f8'), ('Captial_OvernightCost', '<f8'),
+             ('Finance_DiscountRate', '<f8')]))
          )
     s1 = power.set_index(['SimId', 'AgentId', 'Value'])['Time']
     s2 = entry.set_index(['AgentId', 'ParentId', 'Spec'])['EnterTime']
