@@ -60,7 +60,7 @@ def test_capital_cost():
     s4 = ecoInfo.set_index(['Agent_Prototype', 'Agent_AgentId',
         'Captial_beforePeak', 'Captial_afterPeak',
         'Captial_constructionDuration', 'Captial_Deviation',
-        'Captial_OvernightCost'), 'Finance_DiscountRate'])
+        'Captial_OvernightCost', 'Finance_DiscountRate'])
     series = [s1, s2, s3, s4]
     obs = eco_metrics.capital_cost.func(series)
     assert_frame_equal(exp, obs)
