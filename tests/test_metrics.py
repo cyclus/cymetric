@@ -372,7 +372,7 @@ def test_cumulative_timeseriespower():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 700)
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'),  ('Time', '<i8'), ('Value', '<f8')]))
-        )    
+        )
     #tsp is the TimeSeriesPower metrics
     tsp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 100),
@@ -404,7 +404,7 @@ def test_inventory_quantity_per_cumulative_power():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 700)
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'),  ('Time', '<i8'), ('Value', '<f8')]))
-        )    
+        )
     #inv is the ExplicitInventory metrics
     inv = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 300),
@@ -417,6 +417,41 @@ def test_inventory_quantity_per_cumulative_power():
         )
     obs = metrics.inventory_quantity_per_cumulative_power.func(inv, ctsp)
     assert_frame_equal(exp, obs)
+
+def test_transaction_quantity_per_cumulative_power():
+   #exp is the expected output metrics
+    exp = pd.DataFrame(np.array([
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 3, 2, 10, 20, 'LWR Fuel', 'kg/GWe', 0.5),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 2, 20, 30, 'FR Fuel', 'kg/GWe', 3.0),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, 'Spent Fuel', 'kg/GWe', 2.5),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, LWR Fuel', 'kg', 2.0),
+       ], dtype=ensure_dt_bytes([
+               ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'),
+               ('ObjId', '<i8'), ('Time', '<i8'), ('SenderId', '<i8'),
+               ('ReceiverId', '<i8'), ('Commodity', 'O'), ('Units', 'O'),
+               ('Quantity', '<f8')]))
+       )
+   #ctsp is the CumulativeTimeSeriesPower metrics
+   ctsp = pd.DataFrame(np.array([
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 300),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 700)
+       ], dtype=ensure_dt_bytes([
+               ('SimId', 'O'), ('Time', '<i8'), ('Value', '<f8')]))
+       )
+   #tranacts is the TransactionQuantity metrics
+   tranacts = pd.DataFrame(np.array([
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 3, 2, 10, 20, 'LWR Fuel', 'kg', 150),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 2, 20, 30, 'FR Fuel', 'kg', 900),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, 'Spent Fuel', 'kg', 1750),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, LWR Fuel', 'kg', 1400),
+       ], dtype=ensure_dt_bytes([
+               ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'),
+               ('ObjId', '<i8'), ('TimeCreated', '<i8'), ('SenderId', '<i8'),
+               ('ReceiverId', '<i8'), ('Commodity', 'O'), ('Units', 'O'),
+               ('Quantity', '<f8')]))
+       )
+   obs = metrics.transaction_quantity_per_cumulative_power.func(tranacts, ctsp)
+   assert_frame_equal(exp, obs)
 
 if __name__ == "__main__":
     nose.runmodule()
