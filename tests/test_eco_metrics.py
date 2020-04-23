@@ -125,7 +125,7 @@ def test_fuel_cost():
                  'uox', 9)
                  ], dtype=ensure_dt_bytes([
                          ('SimId', 'O'), ('TransactionId', '<i8'),
-                         ('ReceiverId', '<i8'), ('ResourceId', '<i8'),
+                         ('ReceiverId', '<i8'), ('SenderId', '<i8'),('ResourceId', '<i8'),
                          ('Commodity', 'O'), ('Time', '<i8')]))
                  )
     ecoInfo = pd.DataFrame(np.array([
