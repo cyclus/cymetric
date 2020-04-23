@@ -14,7 +14,7 @@ import warnings
 
 from cymetric.tools import dbopen
 from cymetric.evaluator import Evaluator
-from cymetric.eco_inputs import actualization_vector, isreactor
+from cymetric.eco_tools import actualization_vector, isreactor
 
 try:
     from cymetric.metrics import metric
