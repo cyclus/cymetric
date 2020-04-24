@@ -246,10 +246,11 @@ def test_economic_info():
              ('Payment','<f8')]))
         )
     entry = pd.DataFrame(np.array([
-              ('Region1', 8, -1, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, None, None, None, None, None, None, None, None, 0, 20),
-              ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, None, None, None, None, None, None, None, 0, 20),
-              ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, None, None, None, None, None, None, None, 0, 20),
-              ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 'uox', 1, 0, 0, 0, 20)
+              ('Region1', 8, -1, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, None, None,
+                  None, None, None, None, None, None, 0, 0, 0, 0, 20),
+              ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, None, None, None, None, None, None, None, 0, 0, 0, 0, 20),
+              ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, None, None, None, None, None, None, None, 0, 0, 0, 0, 20),
+              ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 'uox', 1, 0, 0, 0, 0, 0, 0, 20)
               ], dtype=ensure_dt_bytes([
                       ('Agent_Prototype', 'O'), ('Agent_AgentId', '<i8'),
                       ('Agent_ParentId', '<i8'), ('Finance_ReturnOnDebt',
