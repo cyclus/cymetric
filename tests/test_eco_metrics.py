@@ -224,10 +224,14 @@ def test_operation_maintenance():
     ecoInfo = pd.DataFrame(np.array([
               (13, 1, 1, 0)
               ], dtype=ensure_dt_bytes([
-                      (('Agent', 'AgentId'), '<i8'), (('OperationMaintenance', 'FixedCost'), '<f8'), (('OperationMaintenance', 'VariableCost'), '<f8'), (('OperationMaintenance', 'Deviation'), '<f8')]))
+                      ('Agent_AgentId', '<i8'),
+                      ('OperationMaintenance_FixedCost', '<f8'),
+                      ('OperationMaintenance_VariableCost', '<f8'),
+                      ('OperationMaintenance_Deviation', '<f8')]))
               )
     s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
-    s2 = ecoInfo.set_index([('Agent', 'AgentId'), ('OperationMaintenance', 'FixedCost'), ('OperationMaintenance', 'VariableCost')])[ ('OperationMaintenance', 'Deviation')]
+    s2 = ecoInfo.set_index(['Agent_AgentId', 'OperationMaintenance_FixedCost',
+        'OperationMaintenance_VariableCost'])[ 'OperationMaintenance_Deviation']
     series = [s1, s2]
     obs = eco_metrics.operation_maintenance.func(series)
     assert_frame_equal(exp, obs)
