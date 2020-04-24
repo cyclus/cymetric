@@ -186,7 +186,7 @@ def test_decommissioning_cost():
     s1 = power.set_index(['SimId', 'AgentId'])['Value']
     s2 = entry.set_index(['EnterTime', 'Lifetime', 'AgentId'])['Spec']
     s3 = info.set_index(['SimId', 'InitialYear', 'InitialMonth'])['Duration']
-    s4 = ecoInfo.set_index(['Agent_AgentId', 'Decommissioning_Duration'])['Decommissioning_OvernightCost')]
+    s4 = ecoInfo.set_index(['Agent_AgentId', 'Decommissioning_Duration'])['Decommissioning_OvernightCost']
     series = [s1, s2, s3, s4]
     obs = eco_metrics.decommissioning_cost.func(series)
     assert_frame_equal(exp, obs)
