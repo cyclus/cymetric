@@ -269,7 +269,7 @@ def test_economic_info():
                       ('Fuel_WasteFee', '<f8'), ('Fuel_Deviation', '<f8'),
                       ('Truncation_Begin', '<i8'), ('Truncation_End', '<i8')]))
               )
-    s1 = entry.set_index(['AgentId', 'Prototype'])['ParentId']
+    s1 = entry.set_index(['Agent_AgentId', 'Agent_Prototype'])['Agent_ParentId']
     series = [s1]
     obs = eco_metrics.operation_maintenance.func(series)
     assert_frame_equal(exp, obs)
