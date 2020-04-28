@@ -48,22 +48,14 @@ def test_capital_cost():
          )
     ecoInfo = pd.DataFrame(np.array([
          ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
-         ], dtype=ensure_dt_bytes([('Agent_Prototype', 'O'), ('Agent_AgentId',
-             '<i8'), ('Captial_beforePeak', '<i8'),
-             ('Captial_afterPeak', '<i8'), ('Captial_constructionDuration', '<i8'),
-             ('Captial_Deviation', '<f8'), ('Captial_OvernightCost', '<f8'),
+         ], dtype=ensure_dt_bytes([('Prototype', 'O'), ('AgentId',
+             '<i8'), ('Capital_beforePeak', '<i8'),
+             ('Capital_afterPeak', '<i8'), ('Capital_constructionDuration', '<i8'),
+             ('Capital_Deviation', '<f8'), ('Capital_OvernightCost', '<f8'),
              ('Finance_DiscountRate', '<f8')]))
          )
-    s1 = power.set_index(['SimId', 'AgentId', 'Value'])['Time']
-    s2 = entry.set_index(['AgentId', 'ParentId', 'Spec'])['EnterTime']
-    s3 = info.set_index(['InitialYear', 'InitialMonth'])['Duration']
-    s4 = ecoInfo.set_index(['Agent_Prototype', 'Agent_AgentId',
-        'Captial_beforePeak', 'Captial_afterPeak',
-        'Captial_constructionDuration', 'Captial_Deviation',
-        'Captial_OvernightCost', 'Finance_DiscountRate'])
-    series = [s1, s2, s3, s4]
-    obs = eco_metrics.capital_cost.func(series)
-    assert_frame_equal(exp, obs)
+    obs = eco_metrics.capital_cost.func(power, entry, info, ecoInfo)
+    assert_frame_equal(exp.drop(['SimId'], axis=1), obs.drop(['SimId'], axis=1))
 
 
 def test_fuel_cost():
@@ -224,16 +216,14 @@ def test_operation_maintenance():
     ecoInfo = pd.DataFrame(np.array([
               (13, 1, 1, 0)
               ], dtype=ensure_dt_bytes([
-                      ('Agent_AgentId', '<i8'),
-                      ('OperationMaintenance_FixedCost', '<f8'),
-                      ('OperationMaintenance_VariableCost', '<f8'),
-                      ('OperationMaintenance_Deviation', '<f8')]))
+                      ('AgentId', '<i8'),
+                      ('FixedCost', '<f8'),
+                      ('VariableCost', '<f8'),
+                      ('Deviation', '<f8')]))
               )
-    s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
-    s2 = ecoInfo.set_index(['Agent_AgentId', 'OperationMaintenance_FixedCost',
-        'OperationMaintenance_VariableCost'])[ 'OperationMaintenance_Deviation']
-    series = [s1, s2]
-    obs = eco_metrics.operation_maintenance.func(series)
+    #s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
+    #s2 = ecoInfo.set_index(['AgentId', 'FixedCost', 'VariableCost'])[ 'Deviation']
+    obs = eco_metrics.operation_maintenance.func(power, ecoInfo)
     assert_frame_equal(exp, obs)
 
 def test_economic_info():
@@ -250,7 +240,8 @@ def test_economic_info():
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
               ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
               ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
-              ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 0, 0, 'uox', 1, 0, 0, 0, 0, 20)
+              ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 0,
+                  0, 0, 'uox', 1, 0, 0, 0, 20)
               ], dtype=ensure_dt_bytes([
                       ('Agent_Prototype', 'O'), ('Agent_AgentId', '<i8'),
                       ('Agent_ParentId', '<i8'), ('Finance_ReturnOnDebt',
@@ -321,7 +312,7 @@ def test_average_lcoe():
     """
     """
     # Reactor / Institution level
-    assert_equal(eco_metrics.average_lcoe('test_output.sqlite', 13),
+    assert_equal(eco_metrics.lcoe('test_output.sqlite', 13),
                  eco_metrics.institution_average_lcoe('test_output.sqlite', 9))
     # Region / Institution level
     assert_equal(eco_metrics.region_average_lcoe('test_output.sqlite', 8),
