@@ -16,7 +16,7 @@ from cyclus import typesystem as ts
 
 try:
     from cymetric.metrics import metric
-    from cymetric.tools import dbopen
+    from cymetric.tools import dbopen, merge
     from cymetric.evaluator import Evaluator
     from cymetric.eco_tools import actualization_vector, isreactor, capital_shape
     from cymetric.evaluator import register_metric
@@ -25,7 +25,7 @@ except ImportError:
     from .metrics import metric
     from .evaluator import register_metric
     from .eco_tools import capital_shape, isreactor, actualization_vector, isreactor
-    from .tools import dbopen
+    from .tools import dbopen, merge
     from .evaluator import Evaluator
 
 xml_inputs = 'parameters.xml' # This xml file has to be built in the same direction as the sqlite output database. It contains the economic data needed to calculate the EconomicInfo metric
@@ -46,6 +46,7 @@ _ccschema = [
 def capital_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
     """The CapitalCost metric gives the cash flows at each time step corresponding to the reactors construction costs.
     """
+
     simDuration = dfInfo['Duration'].iloc[0]
     dfEntry = pd.DataFrame([dfEntry.EnterTime, dfEntry.AgentId]).transpose()
     #dfEntry = dfEntry.set_index(['AgentId'])
@@ -88,54 +89,42 @@ def capital_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
 del _ccdeps, _ccschema
 
 
-_fcdeps = [('Resources', ('SimId', 'ResourceId'), 'Quantity'), ('Transactions',
-        ('SimId', 'TransactionId', 'ReceiverId', 'ResourceId', 'Commodity'), 
-        'Time'), ('EconomicInfo', (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation')), ('Finance','DiscountRate'))]
+_fcdeps = ['Resources', 'Transactions', 'EconomicInfo']
 
-_fcschema = [('SimId', ts.UUID), ('TransactionId', ts.INT), ('AgentId', 
-          ts.INT), ('Commodity', ts.STRING), ('Payment', ts.DOUBLE), ('Time', 
-          ts.INT)]
+_fcschema = [
+    ('SimId', ts.UUID),
+    ('TransactionId', ts.INT),
+    ('AgentId', ts.INT),
+    ('Commodity', ts.STRING),
+    ('Payment', ts.DOUBLE),
+    ('Time', ts.INT)]
 
 @metric(name='FuelCost', depends=_fcdeps, schema=_fcschema)
-def fuel_cost(series):
+def fuel_cost(dfResources, dfTransactions, dfEcoInfo):
     """The FuelCost metric gives the cash flows at each time step corresponding to the reactors fuel costs. It also contains the waste fee.
     """
-    dfResources = series[0].reset_index().set_index(['ResourceId'])
-    dfTransactions = series[1].reset_index().set_index(['ResourceId'])
-    dfEcoInfo = series[2].reset_index()
-    tuples = (('Agent', 'Prototype'), ('Agent', 'AgentId'), ('Fuel', 'Commodity'), ('Fuel', 'SupplyCost'), ('Fuel', 'WasteFee'), ('Fuel', 'Deviation'), ('Finance','DiscountRate'))
-    index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
-    dfEcoInfo.columns = index
-    dfEcoInfo = dfEcoInfo.set_index(('Agent', 'AgentId'))
-    dfTransactions['Quantity'] = dfResources.loc[:, 'Quantity']
-    dfTransactions['Payment'] = pd.Series()
-    dfTransactions.loc[:, 'Payment'] = dfTransactions.loc[:, 'Payment'].fillna(0)
-    dfTransactions['Tmp'] = pd.Series()
-    for agentId in dfEcoInfo.index:
-        tmpTrans = dfTransactions[dfTransactions.ReceiverId==agentId]
-        if isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], str):
-            commod = dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]
-            deviation = dfEcoInfo.loc[agentId, ('Fuel', 'Deviation')]
-            tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
-            deviation = deviation * np.random.randn(1)
-            price = deviation + dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')] + dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'WasteFee')]
-            dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price
-        elif isinstance(dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')], pd.Series):
-            for commod in dfEcoInfo.loc[agentId, ('Fuel', 'Commodity')]:
-                deviation = dfEcoInfo.loc[id, ('Fuel', 'Deviation')]
-                deviation = deviation * np.random.randn(1)
-                price = deviation + dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'SupplyCost')] + dfEcoInfo[dfEcoInfo[('Fuel', 'Commodity')]==commod].loc[agentId, ('Fuel', 'WasteFee')]
-                tmpTrans2 = tmpTrans[tmpTrans.Commodity==commod]
-                dfTransactions.loc[:, 'Tmp'] = tmpTrans2.loc[:, 'Quantity'] * price        
-        dfTransactions.loc[:, 'Payment'] += dfTransactions.loc[:, 'Tmp'].fillna(0)
-    del dfTransactions['Quantity']
-    del dfTransactions['Tmp']
-    rtn = dfTransactions.reset_index()
-    subset = rtn.columns.tolist()
-    subset = subset[1:5]+subset[6:]+subset[5:6]
-    rtn = rtn[subset]
-    rtn.columns = ['SimId', 'TransactionId', 'AgentId', 'Commodity', 'Payment', 'Time']
-    return rtn
+
+    # Unsure if it is about Sender or Receiver implementation here and test are not in agreement, taking receiver (using implementation as ref)
+    rtn = dfTransactions.rename(columns={'ReceiverId': 'AgentId'})
+
+    # add quantity to Transaction
+    base_col = ['SimId', 'ResourceId']
+    added_col = base_col + ['Quantity']
+    rtn = merge(rtn, base_col, dfResources, added_col)
+
+    # Merge Eco with Transaction per ReceiverId and commodity
+    base_col = ['AgentId', 'Commodity']
+    # , 'Finance_DiscountRate']
+    added_col = base_col + ['Fuel_SupplyCost',
+                            'Fuel_WasteFee', 'Fuel_Deviation']
+    rtn = merge(rtn, base_col, dfEcoInfo, added_col)
+
+    for index, row in rtn.iterrows():
+        rtn.at[index, 'Fuel_Deviation'] *= np.random.randn(1)
+    rtn['Payment'] = rtn['Quantity'] * \
+        (rtn['Fuel_Deviation'] + rtn['Fuel_SupplyCost'] + rtn['Fuel_WasteFee'])
+    return trn[['SimId', 'TransactionId', 'AgentId', 'Commodity', 'Payment', 'Time']]
+
 
 del _fcdeps, _fcschema
 
