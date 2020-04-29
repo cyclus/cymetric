@@ -140,39 +140,42 @@ def test_decommissioning_cost():
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.2, 15),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.0, 16)
         ], dtype=ensure_dt_bytes([
-             ('SimId','O'), ('AgentId', '<i8'), ('Payment','<f8'),
-             ('Time', '<i8')]))
+                      ('SimId','O'), 
+                      ('AgentId', '<i8'), 
+                      ('Payment','<f8'),
+                      ('Time', '<i8')]))
         )
     power = pd.DataFrame(np.array([
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1)
                  ], dtype=ensure_dt_bytes([
-                         ('SimId', 'O'), ('AgentId', '<i8'),
-                         ('Value', '<f8')]))
+                      ('SimId', 'O'), 
+                      ('AgentId', '<i8'),
+                      ('Value', '<f8')]))
                  )
     entry = pd.DataFrame(np.array([
                  (1, 10, 13, ':cycamore:Reactor')
                  ], dtype=ensure_dt_bytes([
-                         ('EnterTime', '<i8'), ('Lifetime', '<i8'),
-                         ('AgentId', '<i8'), ('Spec', 'O')]))
+                      ('EnterTime', '<i8'), 
+                      ('Lifetime', '<i8'),
+                      ('AgentId', '<i8'), 
+                      ('Spec', 'O')]))
                  )
     info = pd.DataFrame(np.array([
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 2000, 1, 20)
               ], dtype=ensure_dt_bytes([
-                      ('SimId', 'O'), ('InitialYear', '<i8'),
-                      ('InitialMonth', '<i8'),('Duration', '<i8')]))
+                      ('SimId', 'O'), 
+                      ('InitialYear', '<i8'),
+                      ('InitialMonth', '<i8'),
+                      ('Duration', '<i8')]))
               )
     ecoInfo = pd.DataFrame(np.array([
               (13, 5, 1)
               ], dtype=ensure_dt_bytes([
-                      ('Agent_AgentId', '<i8'), ('Decommissioning_Duration',
-                          '<f8'), ('Decommissioning_OvernightCost', '<f8')]))
+                      ('AgentId', '<i8'), 
+                      ('Decommissioning_Duration','<f8'), 
+                      ('Decommissioning_OvernightCost', '<f8')]))
               )
-    s1 = power.set_index(['SimId', 'AgentId'])['Value']
-    s2 = entry.set_index(['EnterTime', 'Lifetime', 'AgentId'])['Spec']
-    s3 = info.set_index(['SimId', 'InitialYear', 'InitialMonth'])['Duration']
-    s4 = ecoInfo.set_index(['Agent_AgentId', 'Decommissioning_Duration'])['Decommissioning_OvernightCost']
-    series = [s1, s2, s3, s4]
-    obs = eco_metrics.decommissioning_cost.func(series)
+    obs = eco_metrics.decommissioning_cost.func(power, entry, info, ecoInfo)
     assert_frame_equal(exp, obs)
 
 

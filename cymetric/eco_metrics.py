@@ -129,50 +129,53 @@ def fuel_cost(dfResources, dfTransactions, dfEcoInfo):
 del _fcdeps, _fcschema
 
 
-_dcdeps = [ ('TimeSeriesPower', ('SimId', 'AgentId'), 'Value'),
-            ('AgentEntry', ('EnterTime', 'Lifetime', 'AgentId'), 'Spec'),
-            ('Info', ('InitialYear', 'InitialMonth'), 'Duration'), ('EconomicInfo', (('Agent', 'AgentId'), ('Decommissioning', 'Duration')), ('Decommissioning', 'OvernightCost'))]
+_dcdeps = ['TimeSeriesPower', 'AgentEntry', 'Info', 'EconomicInfo']
 
-_dcschema = [('SimId', ts.UUID), ('AgentId', ts.INT), ('Payment',
-          ts.DOUBLE), ('Time', ts.INT)]
+_dcschema = [
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Payment', ts.DOUBLE),
+    ('Time', ts.INT)]
+
 
 @metric(name='DecommissioningCost', depends=_dcdeps, schema=_dcschema)
-def decommissioning_cost(series):
+def decommissioning_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
     """The Decommissioning cost metric gives the cash flows at each time step corresponding to the reactors decommissioning.
     """
-    if series[0].empty:
-        return pd.DataFrame()
-    dfPower = series[0].reset_index()
-    dfPower = dfPower[dfPower['Value'].apply(lambda x: x > 0)]
-    dfEntry = series[1].reset_index()
-    dfInfo = series[2].reset_index()
-    dfEcoInfo = series[3].reset_index()
-    tuples = (('Agent', 'AgentId'), ('Decommissioning', 'Duration'), ('Decommissioning', 'OvernightCost'))
-    index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
-    dfEcoInfo.columns = index
-    dfEcoInfo = dfEcoInfo.set_index(('Agent', 'AgentId'))
-    simDuration = dfInfo['Duration'].iloc[0]
+
+    out = ['SimId', 'AgentId', 'Payment', 'Time']
+    power = ['SimId', 'AgentId', 'Value']
+    entry = ['EnterTime', 'Lifetime', 'AgentId', 'Spec']
+    info = ['SimId', 'InitialYear', 'InitialMonth', 'Duration']
+    eco = ['AgentId', 'Decommissioning_Duration',
+           'Decommissioning_OvernightCost']
+
+    base_col = ['AgentId']
+    added_col = base_col + ['Value']
+    dfEcoInfo = pd.merge(dfPower[added_col], dfEcoInfo, on=base_col)
+    dfEcoInfo.rename(columns={'Value': 'PowerCapacity'}, inplace=True)
     dfEntry = dfEntry[dfEntry['Lifetime'].apply(lambda x: x > 0)]
-    dfEntry = dfEntry[(dfEntry['EnterTime'] + dfEntry['Lifetime']).apply(lambda x: x < simDuration)] # only reactors that will be decommissioned
-    reactorsId = dfEntry[dfEntry['Spec'].apply(lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
+    reactorsId = dfEntry[dfEntry['Spec'].apply(
+        lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
+    print(reactorsId)
     rtn = pd.DataFrame()
     for id in reactorsId:
-        tmp = dfEcoInfo.loc[id].copy()
-        if isinstance(tmp,pd.DataFrame):
-            tmp = tmp.iloc[0]
-        duration = int(tmp.loc[('Decommissioning', 'Duration')])
-        overnightCost = tmp.loc[('Decommissioning', 'OvernightCost')]
-        cashFlowShape = capital_shape(duration - duration // 2, duration // 2)
-        powerCapacity = dfPower[dfPower.AgentId==id]['Value'].iloc[0]
-        cashFlow = cashFlowShape * powerCapacity * overnightCost
-        entryTime = dfEntry[dfEntry.AgentId==id]['EnterTime'].iloc[0]
-        lifetime = dfEntry[dfEntry.AgentId==id]['Lifetime'].iloc[0]
-        rtn = pd.concat([rtn,pd.DataFrame({'AgentId': id, 'Time': list(range(lifetime + entryTime, lifetime + entryTime + duration + 1)), 'Payment': cashFlow})], ignore_index=True)
-    rtn['SimId'] = dfPower['SimId'].iloc[0]
-    subset = rtn.columns.tolist()
-    subset = subset[-1:]+subset[:-1]
-    rtn = rtn[subset]
-    return rtn[rtn['Time'].apply(lambda x: x >= 0 and x < simDuration)]
+        tmp = dfEcoInfo[dfEntry['AgentId'] == id]
+        if(len(tmp) == 1):
+            duration = int(tmp.at[0, 'Decommissioning_Duration'])
+            print(duration)
+            overnightCost = tmp.at[0, 'Decommissioning_OvernightCost']
+            cashFlowShape = capital_shape(
+                duration - duration // 2, duration // 2)
+            powerCapacity = tmp.at[0, 'PowerCapacity']
+            cashFlow = cashFlowShape * powerCapacity * overnightCost
+            entryTime = dfEntry[dfEntry.AgentId == id]['EnterTime'][0]
+            lifetime = dfEntry[dfEntry.AgentId == id]['Lifetime'][0]
+            rtn = pd.concat([rtn, pd.DataFrame({'AgentId': id, 'Time': list(range(
+                lifetime + entryTime, lifetime + entryTime + duration + 1)), 'Payment': cashFlow})], ignore_index=True)
+    rtn['SimId'] = dfPower['SimId'][0]
+    return rtn[['SimId', 'AgentId', 'Payment', 'Time']]
+
 
 del _dcdeps, _dcschema
 
