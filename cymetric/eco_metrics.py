@@ -1,4 +1,4 @@
-##### economic metrics for nuclear power plants #####
+# economic metrics for nuclear power plants #####
 
 from __future__ import print_function, unicode_literals
 
@@ -18,19 +18,26 @@ try:
     from cymetric.metrics import metric
     from cymetric.tools import dbopen, merge
     from cymetric.evaluator import Evaluator
-    from cymetric.eco_tools import actualization_vector, isreactor, capital_shape
+    from cymetric.eco_tools import actualization_vector, isreactor, \
+        capital_shape
     from cymetric.evaluator import register_metric
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from .metrics import metric
     from .evaluator import register_metric
-    from .eco_tools import capital_shape, isreactor, actualization_vector, isreactor
+    from .eco_tools import capital_shape, isreactor, actualization_vector, \
+        isreactor
     from .tools import dbopen, merge
     from .evaluator import Evaluator
 
-xml_inputs = 'parameters.xml' # This xml file has to be built in the same direction as the sqlite output database. It contains the economic data needed to calculate the EconomicInfo metric
 
-## The actual metrics ##
+# This xml file has to be built in the same direction as the sqlite output
+# database. It contains the economic data needed to calculate the EconomicInfo
+# metric
+xml_inputs = 'parameters.xml'
+
+
+# The actual metrics ##
 
 
 _ccdeps = ['TimeSeriesPower', 'AgentEntry', 'Info', 'EconomicInfo']
@@ -44,12 +51,12 @@ _ccschema = [
 
 @metric(name='CapitalCost', depends=_ccdeps, schema=_ccschema)
 def capital_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
-    """The CapitalCost metric gives the cash flows at each time step corresponding to the reactors construction costs.
+    """The CapitalCost metric gives the cash flows at each time step
+    corresponding to the reactors construction costs.
     """
 
     simDuration = dfInfo['Duration'].iloc[0]
     dfEntry = pd.DataFrame([dfEntry.EnterTime, dfEntry.AgentId]).transpose()
-    #dfEntry = dfEntry.set_index(['AgentId'])
     rtn = pd.DataFrame()
     for index, eco_row in dfEcoInfo.iterrows():
         id = eco_row['AgentId']
@@ -70,12 +77,18 @@ def capital_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
             discountRate = eco_row['Finance_DiscountRate']
             cashFlow = np.around(
                 cashFlowShape * overnightCost * powerCapacity, 4)
-            cashFlow *= ((1 + discountRate) ** math.ceil((beforePeak + afterPeak) / 12) -
-                         1) / (discountRate * math.ceil((beforePeak + afterPeak) / 12))
+            cashFlow *= ((1 + discountRate)
+                         ** math.ceil((beforePeak + afterPeak) / 12) -
+                         1) / (discountRate
+                               * math.ceil((beforePeak + afterPeak) / 12))
 
             tmp = pd.DataFrame(data={'AgentId': id,
-                                     'Time': pd.Series(list(range(beforePeak + afterPeak + 1)))
-                                     + entry_time - constructionDuration,
+                                     'Time': pd.Series(
+                                                list(range(beforePeak
+                                                           + afterPeak
+                                                           + 1)))
+                                             + entry_time
+                                             - constructionDuration,
                                      'Payment': cashFlow},
                                columns=['AgentId', 'Time', 'Payment'])
             rtn = pd.concat([rtn, tmp], ignore_index=False)
@@ -99,12 +112,15 @@ _fcschema = [
     ('Payment', ts.DOUBLE),
     ('Time', ts.INT)]
 
+
 @metric(name='FuelCost', depends=_fcdeps, schema=_fcschema)
 def fuel_cost(dfResources, dfTransactions, dfEcoInfo):
-    """The FuelCost metric gives the cash flows at each time step corresponding to the reactors fuel costs. It also contains the waste fee.
+    """The FuelCost metric gives the cash flows at each time step corresponding
+    to the reactors fuel costs. It also contains the waste fee.
     """
 
-    # Unsure if it is about Sender or Receiver implementation here and test are not in agreement, taking receiver (using implementation as ref)
+# Unsure if it is about Sender or Receiver implementation here and test are not
+# in agreement, taking receiver (using implementation as ref)
     rtn = dfTransactions.rename(columns={'ReceiverId': 'AgentId'})
 
     # add quantity to Transaction
@@ -123,7 +139,13 @@ def fuel_cost(dfResources, dfTransactions, dfEcoInfo):
         rtn.at[index, 'Fuel_Deviation'] *= np.random.randn(1)
     rtn['Payment'] = rtn['Quantity'] * \
         (rtn['Fuel_Deviation'] + rtn['Fuel_SupplyCost'] + rtn['Fuel_WasteFee'])
-    return trn[['SimId', 'TransactionId', 'AgentId', 'Commodity', 'Payment', 'Time']]
+    rtn = rtn[['SimId',
+               'TransactionId',
+               'AgentId',
+               'Commodity',
+               'Payment',
+               'Time']]
+    return rtn
 
 
 del _fcdeps, _fcschema
@@ -140,15 +162,9 @@ _dcschema = [
 
 @metric(name='DecommissioningCost', depends=_dcdeps, schema=_dcschema)
 def decommissioning_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
-    """The Decommissioning cost metric gives the cash flows at each time step corresponding to the reactors decommissioning.
+    """The Decommissioning cost metric gives the cash flows at each time step
+    corresponding to the reactors decommissioning.
     """
-
-    out = ['SimId', 'AgentId', 'Payment', 'Time']
-    power = ['SimId', 'AgentId', 'Value']
-    entry = ['EnterTime', 'Lifetime', 'AgentId', 'Spec']
-    info = ['SimId', 'InitialYear', 'InitialMonth', 'Duration']
-    eco = ['AgentId', 'Decommissioning_Duration',
-           'Decommissioning_OvernightCost']
 
     base_col = ['AgentId']
     added_col = base_col + ['Value']
@@ -171,8 +187,12 @@ def decommissioning_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
             cashFlow = cashFlowShape * powerCapacity * overnightCost
             entryTime = dfEntry[dfEntry.AgentId == id]['EnterTime'][0]
             lifetime = dfEntry[dfEntry.AgentId == id]['Lifetime'][0]
-            rtn = pd.concat([rtn, pd.DataFrame({'AgentId': id, 'Time': list(range(
-                lifetime + entryTime, lifetime + entryTime + duration + 1)), 'Payment': cashFlow})], ignore_index=True)
+            time_pdf = pd.DataFrame({'AgentId': id,
+                                     'Time': list(range(lifetime + entryTime,
+                                                        lifetime + entryTime
+                                                        + duration + 1)),
+                                     'Payment': cashFlow})
+            rtn = pd.concat([rtn, time_pdf], ignore_index=True)
     rtn['SimId'] = dfPower['SimId'][0]
     return rtn[['SimId', 'AgentId', 'Payment', 'Time']]
 
@@ -182,20 +202,36 @@ del _dcdeps, _dcschema
 
 _omdeps = ['TimeSeriesPower', 'EconomicInfo']
 
-_omschema = [('SimId', ts.UUID), ('AgentId', ts.INT), ('Time', ts.INT), 
-          ('Payment', ts.DOUBLE)]
+_omschema = [('SimId', ts.UUID),
+             ('AgentId', ts.INT),
+             ('Time', ts.INT),
+             ('Payment', ts.DOUBLE)]
+
 
 @metric(name='OperationMaintenance', depends=_omdeps, schema=_omschema)
 def operation_maintenance(s1, s2):
-    """The OperationMaintenance metric gives the cash flows at each time step corresponding to the reactor operations and maintenance costs.
+    """The OperationMaintenance metric gives the cash flows at each time step
+    corresponding to the reactor operations and maintenance costs.
     """
-    rtn = s1
-    dfEcoInfo = s2
-    index = ['AgentId', 'FixedCost',
-            'VariableCost',
-            'Deviation']
-    #index = pd.MultiIndex.from_tuples(tuples)
-    #dfEcoInfo.columns = index
+    exp = ['SimId', 'AgentId', 'Time', 'Payment']
+    power = ['SimId', 'AgentId', 'Time', 'Value']
+    ecoInfo = ['AgentId', 'FixedCost', 'VariableCost', 'Operation_Deviation']
+    rtn = dfEcoInfo
+    for index, row in rtn.iterrows():
+        rtn.at[index, 'Operation_Deviation'] *= np.random.randn(1)
+    rtn['FixedCost'] *= rtn['Operation_Deviation']
+    rtn['VariableCost'] *= rtn['Operation_Deviation']
+
+    base_col = ['AgentId']
+    added_col = base_col + ['Value']
+    dfEcoInfo = pd.merge(dfPower[added_col], dfEcoInfo, on=base_col)
+    dfEcoInfo['Value'] *= 8760 / 12
+    rtn['Payment'] = rtn['Value'] 
+    rtn['Payment'] = rtn['Quantity'] * \
+        (rtn['Fuel_Deviation'] + rtn['Fuel_SupplyCost'] + rtn['Fuel_WasteFee'])
+    
+
+
     dfEcoInfo = dfEcoInfo.set_index('AgentId')
     print(rtn) 
     print(dfEcoInfo)
@@ -206,14 +242,6 @@ def operation_maintenance(s1, s2):
         if isreactor(rtn, id):
             powerGenerated = rtn[rtn.AgentId==id].loc[:,'Value']
             powerCapacity = max(powerGenerated)
-            powerGenerated *= 8760 / 12
-            tmp = dfEcoInfo.loc[id].copy()
-            if isinstance(tmp,pd.DataFrame):
-                tmp = tmp.iloc[0]
-            deviation = tmp.loc['Deviation']
-            deviation *= np.random.randn(1)
-            fixedOM = tmp.loc['FixedCost'] + deviation
-            variableOM = tmp.loc['VariableCost'] + deviation
             rtn['tmp'] = powerGenerated * variableOM + powerCapacity * fixedOM
             rtn.loc[:, 'Payment'] += rtn.loc[:, 'tmp'].fillna(0)
     rtn = rtn.reset_index()

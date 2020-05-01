@@ -26,36 +26,40 @@ def test_capital_cost():
         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 4, 0.055965),
         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 0.028035),
         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 0.0)
-        ], dtype=ensure_dt_bytes([
-                ('SimId','O'), ('AgentId', '<i8'), ('Time','<i8'),
-                ('Payment', '<f8')]))
-        )
+    ], dtype=ensure_dt_bytes([
+        ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
+        ('Payment', '<f8')]))
+    )
     power = pd.DataFrame(np.array([
-          (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 1)
-          ], dtype=ensure_dt_bytes([
-                  ('SimId', 'O'), ('AgentId', '<i8'), ('Value', '<f8'),
-                  ('Time', '<i8')]))
-          )
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 1)
+    ], dtype=ensure_dt_bytes([
+        ('SimId', 'O'), ('AgentId', '<i8'), ('Value', '<f8'),
+        ('Time', '<i8')]))
+    )
     entry = pd.DataFrame(np.array([
-          (13, -1, ':cycamore:Reactor', 1)
-          ], dtype=ensure_dt_bytes([('AgentId', '<i8'), ('ParentId', '<i8'),
-                  ('Spec', 'O'), ('EnterTime', '<i8')]))
-          )
+        (13, -1, ':cycamore:Reactor', 1)
+    ], dtype=ensure_dt_bytes([('AgentId', '<i8'), ('ParentId', '<i8'),
+                              ('Spec', 'O'), ('EnterTime', '<i8')]))
+    )
     info = pd.DataFrame(np.array([
-         (2000, 1, 20)
-         ], dtype=ensure_dt_bytes([('InitialYear', '<i8'),
-                  ('InitialMonth', '<i8'), ('Duration', '<i8')]))
-         )
+        (2000, 1, 20)
+    ], dtype=ensure_dt_bytes([('InitialYear', '<i8'),
+                              ('InitialMonth', '<i8'), ('Duration', '<i8')]))
+    )
     ecoInfo = pd.DataFrame(np.array([
-         ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
-         ], dtype=ensure_dt_bytes([('Prototype', 'O'), ('AgentId',
-             '<i8'), ('Capital_beforePeak', '<i8'),
-             ('Capital_afterPeak', '<i8'), ('Capital_constructionDuration', '<i8'),
-             ('Capital_Deviation', '<f8'), ('Capital_OvernightCost', '<f8'),
-             ('Finance_DiscountRate', '<f8')]))
-         )
+        ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
+    ], dtype=ensure_dt_bytes([('Prototype', 'O'),
+                              ('AgentId', '<i8'),
+                              ('Capital_beforePeak', '<i8'),
+                              ('Capital_afterPeak', '<i8'),
+                              ('Capital_constructionDuration', '<i8'),
+                              ('Capital_Deviation', '<f8'),
+                              ('Capital_OvernightCost', '<f8'),
+                              ('Finance_DiscountRate', '<f8')]))
+    )
     obs = eco_metrics.capital_cost.func(power, entry, info, ecoInfo)
-    assert_frame_equal(exp.drop(['SimId'], axis=1), obs.drop(['SimId'], axis=1))
+    assert_frame_equal(exp.drop(['SimId'], axis=1),
+                       obs.drop(['SimId'], axis=1))
 
 
 def test_fuel_cost():
@@ -69,9 +73,12 @@ def test_fuel_cost():
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 6, 12, 'uox', 1, 7),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 7, 12, 'uox', 1, 8),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 12, 'uox', 1, 9)
-        ], dtype=ensure_dt_bytes([
-             ('SimId','O'), ('TransactionId', '<i8'), ('AgentId','<i8'),
-             ('Commodity', 'O'), ('Payment', '<f8'), ('Time', '<i8')]))
+        ], dtype=ensure_dt_bytes([('SimId', 'O'),
+                                  ('TransactionId', '<i8'),
+                                  ('AgentId', '<i8'),
+                                  ('Commodity', 'O'),
+                                  ('Payment', '<f8'),
+                                  ('Time', '<i8')]))
         )
     resources = pd.DataFrame(np.array([
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 5, 1),
@@ -92,32 +99,36 @@ def test_fuel_cost():
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 48, 1),
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 53, 1),
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 54, 1)
-              ], dtype=ensure_dt_bytes([
-                      ('SimId', 'O'), ('ResourceId', '<i8'), ('Quantity', '<f8'),]))
+              ], dtype=ensure_dt_bytes([('SimId', 'O'),
+                                        ('ResourceId', '<i8'),
+                                        ('Quantity', '<f8')]))
               )
     transactions = pd.DataFrame(np.array([
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 0, 12, 13, 5,
-                 'uox', 1),
+                  'uox', 1),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 1, 12, 13, 11,
-                 'uox', 2),
+                  'uox', 2),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 2, 12, 13, 17,
-                 'uox', 3),
+                  'uox', 3),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 3, 12, 13, 23,
-                 'uox', 4),
+                  'uox', 4),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 4, 12, 13, 29,
-                 'uox', 5),
+                  'uox', 5),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 5, 12, 13, 35,
-                 'uox', 6),
+                  'uox', 6),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 6, 12, 13, 41,
-                 'uox', 7),
+                  'uox', 7),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 7, 12, 13, 47,
-                 'uox', 8),
+                  'uox', 8),
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 12, 13, 53,
-                 'uox', 9)
-                 ], dtype=ensure_dt_bytes([
-                         ('SimId', 'O'), ('TransactionId', '<i8'),
-                         ('ReceiverId', '<i8'), ('SenderId', '<i8'), ('ResourceId', '<i8'),
-                         ('Commodity', 'O'), ('Time', '<i8')]))
+                  'uox', 9)
+                 ], dtype=ensure_dt_bytes([('SimId', 'O'),
+                                           ('TransactionId', '<i8'),
+                                           ('ReceiverId', '<i8'),
+                                           ('SenderId', '<i8'),
+                                           ('ResourceId', '<i8'),
+                                           ('Commodity', 'O'),
+                                           ('Time', '<i8')]))
                  )
     ecoInfo = pd.DataFrame(np.array([
                  ('Reactor1', 12, 'uox', 1, 0, 0, 0.1)
@@ -127,7 +138,7 @@ def test_fuel_cost():
                          ('Fuel_WasteFee', '<f8'), ('Fuel_Deviation', '<f8'),
                          ('Finance_DiscountRate', '<f8')]))
                  )
-    obs = eco_metrics.fuel_cost.func(resources, transactions, ecoInfo )
+    obs = eco_metrics.fuel_cost.func(resources, transactions, ecoInfo)
     assert_frame_equal(exp, obs)
 
 
@@ -140,30 +151,30 @@ def test_decommissioning_cost():
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.2, 15),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.0, 16)
         ], dtype=ensure_dt_bytes([
-                      ('SimId','O'), 
-                      ('AgentId', '<i8'), 
-                      ('Payment','<f8'),
+                      ('SimId', 'O'),
+                      ('AgentId', '<i8'),
+                      ('Payment', '<f8'),
                       ('Time', '<i8')]))
         )
     power = pd.DataFrame(np.array([
                  (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1)
                  ], dtype=ensure_dt_bytes([
-                      ('SimId', 'O'), 
+                      ('SimId', 'O'),
                       ('AgentId', '<i8'),
                       ('Value', '<f8')]))
                  )
     entry = pd.DataFrame(np.array([
                  (1, 10, 13, ':cycamore:Reactor')
                  ], dtype=ensure_dt_bytes([
-                      ('EnterTime', '<i8'), 
+                      ('EnterTime', '<i8'),
                       ('Lifetime', '<i8'),
-                      ('AgentId', '<i8'), 
+                      ('AgentId', '<i8'),
                       ('Spec', 'O')]))
                  )
     info = pd.DataFrame(np.array([
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 2000, 1, 20)
               ], dtype=ensure_dt_bytes([
-                      ('SimId', 'O'), 
+                      ('SimId', 'O'),
                       ('InitialYear', '<i8'),
                       ('InitialMonth', '<i8'),
                       ('Duration', '<i8')]))
@@ -171,8 +182,8 @@ def test_decommissioning_cost():
     ecoInfo = pd.DataFrame(np.array([
               (13, 5, 1)
               ], dtype=ensure_dt_bytes([
-                      ('AgentId', '<i8'), 
-                      ('Decommissioning_Duration','<f8'), 
+                      ('AgentId', '<i8'),
+                      ('Decommissioning_Duration', '<f8'),
                       ('Decommissioning_OvernightCost', '<f8')]))
               )
     obs = eco_metrics.decommissioning_cost.func(power, entry, info, ecoInfo)
@@ -190,9 +201,10 @@ def test_operation_maintenance():
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 731),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 731),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 731)
-        ], dtype=ensure_dt_bytes([
-             ('SimId','O'), ('AgentId', '<i8'), ('Time', '<i8'),
-             ('Payment','<f8')]))
+        ], dtype=ensure_dt_bytes([('SimId', 'O'),
+                                  ('AgentId', '<i8'),
+                                  ('Time', '<i8'),
+                                  ('Payment', '<f8')]))
         )
     power = pd.DataFrame(np.array([
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 1),
@@ -204,9 +216,10 @@ def test_operation_maintenance():
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 1),
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 1),
               (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 1)
-              ], dtype=ensure_dt_bytes([
-                      ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
-                      ('Value', '<f8')]))
+              ], dtype=ensure_dt_bytes([('SimId', 'O'),
+                                        ('AgentId', '<i8'),
+                                        ('Time', '<i8'),
+                                        ('Value', '<f8')]))
               )
     ecoInfo = pd.DataFrame(np.array([
               (13, 1, 1, 0)
@@ -216,55 +229,65 @@ def test_operation_maintenance():
                       ('VariableCost', '<f8'),
                       ('Deviation', '<f8')]))
               )
-    #s1 = power.set_index(['SimId', 'AgentId', 'Time'])['Value']
-    #s2 = ecoInfo.set_index(['AgentId', 'FixedCost', 'VariableCost'])[ 'Deviation']
     obs = eco_metrics.operation_maintenance.func(power, ecoInfo)
     assert_frame_equal(exp, obs)
+
 
 def test_economic_info():
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 25436.85),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 43800.0)
-        ], dtype=ensure_dt_bytes([
-             ('SimId','O'), ('AgentId', '<i8'), ('Time', '<i8'),
-             ('Payment','<f8')]))
-        )
+    ], dtype=ensure_dt_bytes([
+        ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
+        ('Payment', '<f8')]))
+    )
     entry = pd.DataFrame(np.array([
-              ('Region1', 8, -1, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 0, 0,
-                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
-              ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
-              ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
-              ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 0,
-                  0, 0, 'uox', 1, 0, 0, 0, 20)
-              ], dtype=ensure_dt_bytes([
-                      ('Agent_Prototype', 'O'), ('Agent_AgentId', '<i8'),
-                      ('Agent_ParentId', '<i8'), ('Finance_ReturnOnDebt',
-                          '<f8'), ('Finance_ReturnOnEquity', '<f8'),
-                      ('Finance_TaxRate', '<f8'), ('Finance_DiscountRate',
-                          '<f8'), ('Captial_beforePeak', '<i8'),
-                      ('Captial_afterPeak', '<i8'),
-                      ('Captial_constructionDuration', '<i8'),
-                      ('Captial_Deviation', '<f8'), ('Captial_OvernightCost',
-                          '<f8'), ('Decommissioning_Duration', '<i8'),
-                      ('Decommissioning_OvernightCost', '<f8'),
-                      ('OperationMaintenance_FixedCost', '<f8'),
-                      ('OperationMaintenance_VariableCost', '<f8'),
-                      ('OperationMaintenance_Deviation', '<f8'),
-                      ('Fuel_Commodity', 'O'), ('Fuel_SupplyCost', '<f8'),
-                      ('Fuel_WasteFee', '<f8'), ('Fuel_Deviation', '<f8'),
-                      ('Truncation_Begin', '<i8'), ('Truncation_End', '<i8')]))
-              )
-    s1 = entry.set_index(['Agent_AgentId', 'Agent_Prototype'])['Agent_ParentId']
+        ('Region1', 8, -1, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
+        ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10,
+         5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
+        ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5,
+         10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
+        ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 0,
+         0, 0, 'uox', 1, 0, 0, 0, 20)
+    ], dtype=ensure_dt_bytes([('Agent_Prototype', 'O'),
+                              ('Agent_AgentId', '<i8'),
+                              ('Agent_ParentId', '<i8'),
+                              ('Finance_ReturnOnDebt', '<f8'),
+                              ('Finance_ReturnOnEquity', '<f8'),
+                              ('Finance_TaxRate', '<f8'),
+                              ('Finance_DiscountRate', '<f8'),
+                              ('Captial_beforePeak', '<i8'),
+                              ('Captial_afterPeak', '<i8'),
+                              ('Captial_constructionDuration', '<i8'),
+                              ('Captial_Deviation', '<f8'),
+                              ('Captial_OvernightCost', '<f8'),
+                              ('Decommissioning_Duration', '<i8'),
+                              ('Decommissioning_OvernightCost', '<f8'),
+                              ('OperationMaintenance_FixedCost', '<f8'),
+                              ('OperationMaintenance_VariableCost', '<f8'),
+                              ('OperationMaintenance_Deviation', '<f8'),
+                              ('Fuel_Commodity', 'O'),
+                              ('Fuel_SupplyCost', '<f8'),
+                              ('Fuel_WasteFee', '<f8'),
+                              ('Fuel_Deviation', '<f8'),
+                              ('Truncation_Begin', '<i8'),
+                              ('Truncation_End', '<i8')]))
+    )
+    s1 = entry.set_index(['Agent_AgentId', 'Agent_Prototype'])[
+        'Agent_ParentId']
     series = [s1]
     obs = eco_metrics.operation_maintenance.func(series)
     assert_frame_equal(exp, obs)
 
 
-##### Tests of the functions derived from the 5 basic economic metrics #####
-
-"""test_eco_metrics is supposed to test all side features whereas test_eco_metrics test the calculations of the metrics in a more conventional way (calculating one obs and comparing to an exp)
+# Tests of the functions derived from the 5 basic economic metrics #####
+"""test_eco_metrics is supposed to test all side features whereas
+test_eco_metrics test the calculations of the metrics in a more conventional
+way (calculating one obs and comparing to an exp)
 """
+
 
 def test_annual_costs():
     """
