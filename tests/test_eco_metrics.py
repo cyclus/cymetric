@@ -192,15 +192,15 @@ def test_decommissioning_cost():
 
 def test_operation_maintenance():
     exp = pd.DataFrame(np.array([
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 731),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 731)
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 1095),
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 1095)
         ], dtype=ensure_dt_bytes([('SimId', 'O'),
                                   ('AgentId', '<i8'),
                                   ('Time', '<i8'),
@@ -222,14 +222,16 @@ def test_operation_maintenance():
                                         ('Value', '<f8')]))
               )
     ecoInfo = pd.DataFrame(np.array([
-              (13, 1, 1, 0)
+              (13, 0.5, 1, 0)
               ], dtype=ensure_dt_bytes([
                       ('AgentId', '<i8'),
                       ('FixedCost', '<f8'),
                       ('VariableCost', '<f8'),
-                      ('Deviation', '<f8')]))
+                      ('Operation_Deviation', '<f8')]))
               )
     obs = eco_metrics.operation_maintenance.func(power, ecoInfo)
+    print(obs)
+    print(exp)
     assert_frame_equal(exp, obs)
 
 

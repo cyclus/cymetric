@@ -209,7 +209,7 @@ _omschema = [('SimId', ts.UUID),
 
 
 @metric(name='OperationMaintenance', depends=_omdeps, schema=_omschema)
-def operation_maintenance(s1, s2):
+def operation_maintenance(dfPower, dfEcoInfo):
     """The OperationMaintenance metric gives the cash flows at each time step
     corresponding to the reactor operations and maintenance costs.
     """
@@ -219,69 +219,78 @@ def operation_maintenance(s1, s2):
     rtn = dfEcoInfo
     for index, row in rtn.iterrows():
         rtn.at[index, 'Operation_Deviation'] *= np.random.randn(1)
-    rtn['FixedCost'] *= rtn['Operation_Deviation']
-    rtn['VariableCost'] *= rtn['Operation_Deviation']
+    rtn['FixedCost'] += rtn['Operation_Deviation']
+    rtn['VariableCost'] += rtn['Operation_Deviation']
 
     base_col = ['AgentId']
-    added_col = base_col + ['Value']
-    dfEcoInfo = pd.merge(dfPower[added_col], dfEcoInfo, on=base_col)
-    dfEcoInfo['Value'] *= 8760 / 12
-    rtn['Payment'] = rtn['Value'] 
-    rtn['Payment'] = rtn['Quantity'] * \
-        (rtn['Fuel_Deviation'] + rtn['Fuel_SupplyCost'] + rtn['Fuel_WasteFee'])
-    
+    added_col = base_col + ['SimId', 'Time', 'Value']
+    rtn = pd.merge(dfPower[added_col], rtn, on=base_col)
+    rtn['Value'] *= 8760 / 12
+    rtn['Payment'] = (rtn['Value'] * rtn['VariableCost'] +
+                      max(rtn['Value'])*rtn['FixedCost'])
 
+    return rtn[['SimId', 'AgentId', 'Time', 'Payment']]
 
-    dfEcoInfo = dfEcoInfo.set_index('AgentId')
-    print(rtn) 
-    print(dfEcoInfo)
-    dfEcoInfo = dfEcoInfo
-    rtn['Payment'] = 0
-    rtn['tmp'] = 0
-    for id in dfEcoInfo.index:
-        if isreactor(rtn, id):
-            powerGenerated = rtn[rtn.AgentId==id].loc[:,'Value']
-            powerCapacity = max(powerGenerated)
-            rtn['tmp'] = powerGenerated * variableOM + powerCapacity * fixedOM
-            rtn.loc[:, 'Payment'] += rtn.loc[:, 'tmp'].fillna(0)
-    rtn = rtn.reset_index()
-    del rtn['Value'], rtn['index'], rtn['tmp']
-    return rtn
 
 del _omdeps, _omschema
 
 
-_eideps = [('AgentEntry', ('AgentId', 'Prototype'), 'ParentId')]
+_eideps = ['AgentEntry', 'ParentId']
 
-_eischema = [('Agent_Prototype', ts.STRING), ('Agent_AgentId', ts.INT),
-        ('Agent_ParentId', ts.INT), ('Finance_ReturnOnDebt', ts.DOUBLE),
-        ('Finance_ReturnOnEquity', ts.DOUBLE), ('Finance_TaxRate', ts.DOUBLE),
-        ('Finance_DiscountRate', ts.DOUBLE), ('Capital_beforePeak', ts.INT),
-        ('Capital_afterPeak', ts.INT), ('Capital_constructionDuration', ts.INT),
-        ('Capital_Deviation', ts.DOUBLE), ('Capital_OvernightCost', ts.DOUBLE),
-        ('Decommissioning_Duration', ts.INT), 
-        ('Decommissioning_OvernightCost', ts.DOUBLE), 
-        ('OperationMaintenance_FixedCost', ts.DOUBLE),
-        ('OperationMaintenance_VariableCost', ts.DOUBLE),
-        ('OperationMaintenance_Deviation', ts.DOUBLE), 
-        ('FuelCommodity', ts.STRING), ('Fuel_SupplyCost', ts.DOUBLE), 
-        ('Fuel_WasteFee', ts.DOUBLE), ('Fuel_Deviation', ts.DOUBLE), 
-        ('Truncation_Begin', ts.INT), ('Truncation_End', ts.INT)]
-        
+_eischema = [('Agent_Prototype', ts.STRING),
+             ('Agent_AgentId', ts.INT),
+             ('Agent_ParentId', ts.INT),
+             ('Finance_ReturnOnDebt', ts.DOUBLE),
+             ('Finance_ReturnOnEquity', ts.DOUBLE),
+             ('Finance_TaxRate', ts.DOUBLE),
+             ('Finance_DiscountRate', ts.DOUBLE),
+             ('Capital_beforePeak', ts.INT),
+             ('Capital_afterPeak', ts.INT),
+             ('Capital_constructionDuration', ts.INT),
+             ('Capital_Deviation', ts.DOUBLE),
+             ('Capital_OvernightCost', ts.DOUBLE),
+             ('Decommissioning_Duration', ts.INT),
+             ('Decommissioning_OvernightCost', ts.DOUBLE),
+             ('OperationMaintenance_FixedCost', ts.DOUBLE),
+             ('OperationMaintenance_VariableCost', ts.DOUBLE),
+             ('OperationMaintenance_Deviation', ts.DOUBLE),
+             ('FuelCommodity', ts.STRING),
+             ('Fuel_SupplyCost', ts.DOUBLE),
+             ('Fuel_WasteFee', ts.DOUBLE),
+             ('Fuel_Deviation', ts.DOUBLE),
+             ('Truncation_Begin', ts.INT),
+             ('Truncation_End', ts.INT)]
+
+
 @metric(name='EconomicInfo', depends=_eideps, schema=_eischema)
 def economic_info(series):
-    """The EconomicInfo metric stores all economic data needed to calculate the economic metrics. These economic parameters are originally written in 'parameters.xml'.
+    """The EconomicInfo metric stores all economic data needed to calculate the
+    economic metrics. These economic parameters are originally written in
+    'parameters.xml'.
     """
-    tuples = ['Agent_Prototype', 'Agent_AgentId', 'Agent_ParentId',
-            'Finance_ReturnOnDebt', 'Finance_ReturnOnEquity', 'Finance_TaxRate',
-            'Finance_DiscountRate', 'Captial_beforePeak', 'Captial_afterPeak',
-            'Captial_constructionDuration', 'Captial_Deviation',
-            'Captial_OvernightCost', 'Decommissioning_Duration',
-            'Decommissioning_OvernightCost', 'OperationMaintenance_FixedCost',
-            'OperationMaintenance_VariableCost',
-            'OperationMaintenance_Deviation', 'Fuel_Commodity',
-            'Fuel_SupplyCost', 'Fuel_WasteFee', 'Fuel_Deviation',
-            'Truncation_Begin', 'Truncation_End']
+    tuples = ['Agent_Prototype',
+              'Agent_AgentId',
+              'Agent_ParentId',
+              'Finance_ReturnOnDebt',
+              'Finance_ReturnOnEquity',
+              'Finance_TaxRate',
+              'Finance_DiscountRate',
+              'Captial_beforePeak',
+              'Captial_afterPeak',
+              'Captial_constructionDuration',
+              'Captial_Deviation',
+              'Captial_OvernightCost',
+              'Decommissioning_Duration',
+              'Decommissioning_OvernightCost',
+              'OperationMaintenance_FixedCost',
+              'OperationMaintenance_VariableCost',
+              'OperationMaintenance_Deviation',
+              'Fuel_Commodity',
+              'Fuel_SupplyCost',
+              'Fuel_WasteFee',
+              'Fuel_Deviation',
+              'Truncation_Begin',
+              'Truncation_End']
     index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
     rtn = pd.DataFrame(index=index)
     dfEntry = series[0].reset_index()
@@ -303,24 +312,24 @@ def economic_info(series):
         rtn.loc[:, 'Finance_ReturnOnEquity'] = float(finance.find('return_on_equity').text)
         rtn.loc[:, 'Finance_DiscountRate'] = float(finance.find('discount_rate').text)
     capital = root.find('capital')
-    if not capital == None:
+    if capital != None:
         rtn.loc[:, 'Capital_beforePeak'] = int(capital.find('beforePeak').text)
         rtn.loc[:, 'Capital_afterPeak'] = int(capital.find('afterPeak').text)
         rtn.loc[:, 'Capital_constructionDuration'] = int(capital.find('constructionDuration').text)
         rtn.loc[:, 'Capital_Deviation'] = float(capital.find('deviation').text)
         rtn.loc[:, 'Capital_OvernightCost'] = float(capital.find('overnight_cost').text)
     decommissioning = root.find('decommissioning')
-    if not decommissioning == None:
+    if decommissioning != None:
         rtn.loc[:, 'Decommissioning_Duration'] = int(decommissioning.find('duration').text)
         rtn.loc[:, 'Decommissioning_OvernightCost'] = float(decommissioning.find('overnight_cost').text)
     operation_maintenance = root.find('operation_maintenance')
-    if not operation_maintenance == None:
+    if operation_maintenance != None:
         rtn.loc[:, 'OperationMaintenance_FixedCost'] = float(operation_maintenance.find('fixed').text)
         rtn.loc[:, 'OperationMaintenance_VariableCost'] = float(operation_maintenance.find('variable').text)
         rtn.loc[:, 'OperationMaintenance_Deviation'] = float(operation_maintenance.find('deviation').text)
     fuel = root.find('fuel')
     indexCopy = rtn.index.copy()
-    if not fuel == None:
+    if fuel != None:
         for type in fuel.findall('type'):
             supply = float(type.find('supply_cost').text)
             waste = float(type.find('waste_fee').text)
@@ -342,7 +351,7 @@ def economic_info(series):
     for region in root.findall('region'):
         idRegion = int(region.find('id').text)
         finance = region.find('finance')
-        if not finance == None:
+        if finance != None:
             returnOnDebt = float(finance.find('return_on_debt').text)
             returnOnEquity = float(finance.find('return_on_equity').text)
             taxRate = float(finance.find('tax_rate').text)
@@ -636,19 +645,16 @@ def economic_info(series):
                         rtn.loc[agentIndex[idFacility], 'Decommissioning_Duration'] = int(decommissioning.find('duration').text)
                         rtn.loc[agentIndex[idFacility], 'Decommissioning_OvernightCost'] = float(decommissioning.find('overnight_cost').text)
     return rtn
-    
-del _eideps, _eischema
 
+
+del _eideps, _eischema
 
 
 """The functions below aim at calculating more complex metrics than the simple cash flows corresponding to the construction, fuel, O&M and decommissioning costs. The metrics can be calculated at an agent, institution, region or simulation level.
 """
-
-        
 #######################################
 # Metrics derived from the cash flows #
 #######################################
-
 
 
 # Reactor level
