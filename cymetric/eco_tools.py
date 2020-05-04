@@ -102,14 +102,15 @@ def capital_shape(beforePeak=48, afterPeak=48):
     """
     if (not isinstance(beforePeak, int)) or (not isinstance(afterPeak, int)):
         raise Exception("input parameters must be integers")
-    step1 = pd.Series(list(range(beforePeak))).apply(
-        lambda x: 2/(beforePeak*(beforePeak+afterPeak))*x)
-    step2 = pd.Series(
-                list(range(beforePeak, beforePeak + afterPeak + 1))).apply(
-                            lambda x: -2 / afterPeak * (beforePeak + afterPeak)
-                                                     * (x
-                                                        - beforePeak
-                                                        + afterPeak))
+    step1 = pd.Series(list(range(beforePeak)))
+    step1 = step1.apply(lambda x:
+                        2 * x / (beforePeak * (beforePeak + afterPeak)))
+
+    step2 = pd.Series(list(range(beforePeak, beforePeak + afterPeak + 1)))
+    step2 = step2.apply(lambda x:
+                        -2 / (afterPeak * (beforePeak + afterPeak))
+                        * (x - beforePeak - afterPeak))
+
     return pd.concat([step1, step2]).reset_index()[0]
 
 

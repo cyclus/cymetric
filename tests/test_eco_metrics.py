@@ -235,6 +235,7 @@ def test_operation_maintenance():
     assert_frame_equal(exp, obs)
 
 
+# something is missing to be able to match the exp DataFrame....
 def test_economic_info():
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
@@ -253,9 +254,9 @@ def test_economic_info():
          10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
         ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 0,
          0, 0, 'uox', 1, 0, 0, 0, 20)
-    ], dtype=ensure_dt_bytes([('Agent_Prototype', 'O'),
-                              ('Agent_AgentId', '<i8'),
-                              ('Agent_ParentId', '<i8'),
+    ], dtype=ensure_dt_bytes([('Prototype', 'O'),
+                              ('AgentId', '<i8'),
+                              ('ParentId', '<i8'),
                               ('Finance_ReturnOnDebt', '<f8'),
                               ('Finance_ReturnOnEquity', '<f8'),
                               ('Finance_TaxRate', '<f8'),
@@ -267,9 +268,9 @@ def test_economic_info():
                               ('Captial_OvernightCost', '<f8'),
                               ('Decommissioning_Duration', '<i8'),
                               ('Decommissioning_OvernightCost', '<f8'),
-                              ('OperationMaintenance_FixedCost', '<f8'),
-                              ('OperationMaintenance_VariableCost', '<f8'),
-                              ('OperationMaintenance_Deviation', '<f8'),
+                              ('FixedCost', '<f8'),
+                              ('VariableCost', '<f8'),
+                              ('Operation_Deviation', '<f8'),
                               ('Fuel_Commodity', 'O'),
                               ('Fuel_SupplyCost', '<f8'),
                               ('Fuel_WasteFee', '<f8'),
@@ -277,10 +278,27 @@ def test_economic_info():
                               ('Truncation_Begin', '<i8'),
                               ('Truncation_End', '<i8')]))
     )
-    s1 = entry.set_index(['Agent_AgentId', 'Agent_Prototype'])[
-        'Agent_ParentId']
-    series = [s1]
-    obs = eco_metrics.operation_maintenance.func(series)
+    print(entry)
+
+# this has been added but we are missing the info about the archetype "5".
+    power = pd.DataFrame(np.array([
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 1),
+              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 1)
+              ], dtype=ensure_dt_bytes([('SimId', 'O'),
+                                        ('AgentId', '<i8'),
+                                        ('Time', '<i8'),
+                                        ('Value', '<f8')]))
+              )
+    obs = eco_metrics.operation_maintenance.func(power, entry)
+    print(obs)
+    print(exp)
     assert_frame_equal(exp, obs)
 
 
