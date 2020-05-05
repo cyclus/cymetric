@@ -421,7 +421,7 @@ def test_cumulative_timeseriespower():
 
 def test_transaction_quantity_per_cumulative_power():
    #exp is the expected output metrics
-    exp = pd.DataFrame(np.array([
+   exp = pd.DataFrame(np.array([
        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 3, 2, 10, 20, 'LWR Fuel', 'kg/GWe', 0.5),
        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 2, 20, 30, 'FR Fuel', 'kg/GWe', 3.0),
        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, 'Spent Fuel', 'kg/GWe', 2.5),
