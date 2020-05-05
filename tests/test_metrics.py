@@ -425,7 +425,7 @@ def test_transaction_quantity_per_cumulative_power():
        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 3, 2, 10, 20, 'LWR Fuel', 'kg/GWe', 0.5),
        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 2, 20, 30, 'FR Fuel', 'kg/GWe', 3.0),
        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, 'Spent Fuel', 'kg/GWe', 2.5),
-       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, 'LWR Fuel', 'kg', 2.0),
+       (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 3, 30, 40, 'LWR Fuel', 'kg/GWe', 2.0),
        ], dtype=ensure_dt_bytes([
                ('SimId', 'O'), ('TransactionId', '<i8'), ('ResourceId', '<i8'),
                ('ObjId', '<i8'), ('Time', '<i8'), ('SenderId', '<i8'),
