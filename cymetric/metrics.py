@@ -504,8 +504,6 @@ def inventory_quantity_per_gwe(expinv,power):
     inv.Quantity = inv.Quantity/inv.Value
     inv=inv.drop(['Value'],axis=1)
     return inv
-
-
 # Cumulative power from time 0 to time t in TimeSeriesPower metric
 _cumpdeps = ['TimeSeriesPower']
 _cumpschema = [
