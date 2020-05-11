@@ -396,6 +396,59 @@ def test_inventory_quantity_per_gwe():
     obs = metrics.inventory_quantity_per_gwe.func(inv, tsp)
     assert_frame_equal(exp, obs)
 
+	
+def test_cumulative_timeseriespower():
+    #exp is the expected output metrics
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 300),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 700)
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'),  ('Time', '<i8'), ('Value', '<f8')]))
+        )    
+    #tsp is the TimeSeriesPower metrics
+    tsp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 100),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 2, 200),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 3, 300),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 100),
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
+                ('Value', '<f8')]))
+        )
+    obs = metrics.cumulative_timeseriespower.func(tsp)
+    assert_frame_equal(exp, obs)
+
+
+def test_inventory_quantity_per_cumulative_power():
+    #exp is the expected output metrics
+    exp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 1.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'usedfuel', 922350000, 2.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'core', 922350000, 1.5),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'usedfuel', 922350000, 0.5)
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
+                ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
+        )
+    #ctsp is the CumulativeTimeSeriesPower metrics
+    ctsp = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 300),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 700)
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'),  ('Time', '<i8'), ('Value', '<f8')]))
+        )    
+    #inv is the ExplicitInventory metrics
+    inv = pd.DataFrame(np.array([
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'core', 922350000, 300),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 2, 'usedfuel', 922350000, 600),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'core', 922350000, 1050),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 'usedfuel', 922350000, 350)
+        ], dtype=ensure_dt_bytes([
+                ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
+                ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8')]))
+        )
+    obs = metrics.inventory_quantity_per_cumulative_power.func(inv, ctsp)
+    assert_frame_equal(exp, obs)
 
 if __name__ == "__main__":
     nose.runmodule()
