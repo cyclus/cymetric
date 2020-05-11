@@ -523,18 +523,17 @@ _tranactsschema = [
 
 
 @metric(name='TransactionQuantityPerGWe', depends=_tranactsdeps, schema=_tranactsschema)
-def transaction_quantity_per_gwe(tranacts,power):
+def transaction_quantity_per_gwe(tranacts, power):
     """Transaction Quantity per GWe metric returns the transaction quantity table with quantity
     in units of kg/GWe, calculated by dividing the original quantity by the electricity generated
     at the corresponding simulation and the specific time in TimeSeriesPower metric.
     """
     power = pd.DataFrame(data={'SimId': power.SimId,
-			      'AgentId': power.AgentId,
-                              'Time': power.Time,
-                              'Value': power.Value},
+                               'AgentId': power.AgentId,
+                               'Time': power.Time,
+                               'Value': power.Value},
 			columns=['SimId','AgentID','Time', 'Value'])
-    power_index = ['SimId','Time']
-    power = power.groupby(power_index).sum()
+    power = power.groupby(['SimId','Time']).sum()
     df1 = power.reset_index()
     tranacts = pd.DataFrame(data={'SimId': tranacts.SimId,
 			     'TransactionId': tranacts.TransactionId,
@@ -546,10 +545,11 @@ def transaction_quantity_per_gwe(tranacts,power):
 		             'Commodity': tranacts.Commodity,
 	 		     'Units': tranacts.Units,
                              'Quantity': tranacts.Quantity},
-	             columns=['SimId','TransactionId','ResourceId','ObjId','Time','SenderId','ReceiverId','Commodity','Units','Quantity'])
+	             columns=['SimId','TransactionId','ResourceId','ObjId','Time','SenderId',
+                              'ReceiverId','Commodity','Units','Quantity'])
     tranacts['Units'] = "kg/GWe"    
     tranacts=pd.merge(tranacts,df1, on=['SimId','Time'],how='left')
     tranacts.Quantity = tranacts.Quantity/tranacts.Value
-    tranacts=tranacts.drop(['Value'],axis=1)
-    return tranacts
+    return tranacts[['SimId','TransactionId','ResourceId','ObjId','Time',
+                     'SenderId','ReceiverId','Commodity','Units','Quantity']]
     
