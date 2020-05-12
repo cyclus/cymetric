@@ -467,6 +467,7 @@ def timelist(info):
 
 del _tldeps, _tlschema
 
+
 # Quantity per GigaWattElectric in Inventory [kg/GWe]
 _invdeps = ['ExplicitInventory','TimeSeriesPower']
 
@@ -504,7 +505,8 @@ def inventory_quantity_per_gwe(expinv,power):
     inv.Quantity = inv.Quantity/inv.Value
     inv=inv.drop(['Value'],axis=1)
     return inv
-  
+
+
 # Quantity per GigaWattElectric in TransactionQuantity [kg/GWe]
 _tranactsdeps = ['TransactionQuantity','TimeSeriesPower']
 
@@ -524,12 +526,15 @@ _tranactsschema = [
 
 @metric(name='TransactionQuantityPerGWe', depends=_tranactsdeps, schema=_tranactsschema)
 def transaction_quantity_per_gwe(tranacts, power):
-    """Transaction Quantity per GWe metric returns the transaction quantity table with quantity
-    in units of kg/GWe, calculated by dividing the original quantity by the electricity generated
-    at the corresponding simulation and the specific time in TimeSeriesPower metric.
+    """Transaction Quantity per GWe metric returns the transaction quantity table 
+    with quantity in units of kg/GWe, calculated by dividing the original quantity 
+    by the electricity generated at the corresponding simulation and the specific 
+    time in TimeSeriesPower metric.
     """
     power = power.groupby(['SimId','Time']).sum()
     df1 = power.reset_index()
+    tranacts_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId', 'Time',
+                      'SenderId', 'ReceiverId', 'Commodity', 'Units', 'Quantity']
     tranacts = pd.DataFrame(data={'SimId': tranacts.SimId,
                                   'TransactionId': tranacts.TransactionId,
                                   'ResourceId': tranacts.ResourceId,
@@ -540,11 +545,9 @@ def transaction_quantity_per_gwe(tranacts, power):
                                   'Commodity': tranacts.Commodity,
                                   'Units': tranacts.Units,
                                   'Quantity': tranacts.Quantity},
-                            columns=['SimId','TransactionId','ResourceId','ObjId','Time',
-                                     'SenderId','ReceiverId','Commodity','Units','Quantity'])
+                            columns= tranacts_index)
     tranacts['Units'] = "kg/GWe"    
     tranacts=pd.merge(tranacts,df1, on=['SimId','Time'],how='left')
     tranacts.Quantity = tranacts.Quantity/tranacts.Value
-    return tranacts[['SimId','TransactionId','ResourceId','ObjId','Time',
-                     'SenderId','ReceiverId','Commodity','Units','Quantity']]
+    return tranacts[tranacts_index]
     
