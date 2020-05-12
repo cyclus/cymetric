@@ -535,18 +535,9 @@ def transaction_quantity_per_gwe(tranacts, power):
     df1 = power.reset_index()
     tranacts_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId', 'Time',
                       'SenderId', 'ReceiverId', 'Commodity', 'Units', 'Quantity']
-    tranacts = pd.DataFrame(data={'SimId': tranacts.SimId,
-                                  'TransactionId': tranacts.TransactionId,
-                                  'ResourceId': tranacts.ResourceId,
-                                  'ObjId': tranacts.ObjId,
-                                  'Time': tranacts.TimeCreated,
-                                  'SenderId': tranacts.SenderId,
-                                  'ReceiverId': tranacts.ReceiverId,
-                                  'Commodity': tranacts.Commodity,
-                                  'Units': tranacts.Units,
-                                  'Quantity': tranacts.Quantity},
+    tranacts = pd.DataFrame(data={Time': tranacts.TimeCreated},
                             columns= tranacts_index)
-    tranacts['Units'] = "kg/GWe"    
+    tranacts['Units'] = tranacts['Units']"/GWe"    
     tranacts=pd.merge(tranacts,df1, on=['SimId','Time'],how='left')
     tranacts.Quantity = tranacts.Quantity/tranacts.Value
     return tranacts[tranacts_index]
