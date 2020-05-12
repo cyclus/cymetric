@@ -410,9 +410,12 @@ def test_inventory_quantity_per_gwe():
 def test_transaction_quantity_per_gwe():
     # exp is the expected output metrics
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 7, 3, 3,  10, 20, 'LWR Fuel', 'kg/GWe', 0.82),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 3,  20, 30, 'FR Fuel', 'kg/GWe', 0.61),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 12, 30, 40, 'Spent Fuel', 'kg/GWe', 0.09),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+         1, 7, 3, 3,  10, 20, 'LWR Fuel', 'kg/MWe', 0.82),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+         2, 8, 4, 3,  20, 30, 'FR Fuel', 'kg/MWe', 0.61),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+         3, 9, 5, 12, 30, 40, 'Spent Fuel', 'kg/MWe', 0.09),
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'), 
                 ('TransactionId', '<i8'), 
