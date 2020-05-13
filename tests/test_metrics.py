@@ -368,15 +368,18 @@ def test_timelist():
 def test_inventory_quantity_per_gwe():
     # exp is the expected output metrics
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'core', 922350000, 1.0),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 2.0),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'core', 922350000, 2.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+         1, 0, 'core', 922350000, 1.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+         1, 0, 'usedfuel', 922350000, 2.0),
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+         2, 1, 'core', 922350000, 2.0),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), 
-                ('AgentId', '<i8'), 
-                ('Time', '<i8'),
-                ('InventoryName', 'O'), 
-                ('NucId', '<i8'), 
+                ('SimId', 'O'),
+                ('AgentId', '<i8'),
+                ('Time', '<i8').
+                ('InventoryName', 'O'),
+                ('NucId', '<i8'),
                 ('Quantity', '<f8')]))
         )
     # tsp is the TimeSeriesPower metrics
@@ -385,8 +388,8 @@ def test_inventory_quantity_per_gwe():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 0, 200),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 1, 100),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), 
-                ('AgentId', '<i8'), 
+                ('SimId', 'O'),
+                ('AgentId', '<i8'),
                 ('Time', '<i8'),
                 ('Value', '<f8')]))
         )
@@ -396,35 +399,35 @@ def test_inventory_quantity_per_gwe():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 0, 'usedfuel', 922350000, 600),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 1, 'core', 922350000, 200),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), 
-                ('AgentId', '<i8'), 
+                ('SimId', 'O'),
+                ('AgentId', '<i8'),
                 ('Time', '<i8'),
-                ('InventoryName', 'O'), 
-                ('NucId', '<i8'), 
+                ('InventoryName', 'O'),
+                ('NucId', '<i8'),
                 ('Quantity', '<f8')]))
         )
     obs = metrics.inventory_quantity_per_gwe.func(inv, tsp)
     assert_frame_equal(exp, obs)
 
-	
+
 def test_transaction_quantity_per_gwe():
     # exp is the expected output metrics
     exp = pd.DataFrame(np.array([
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'),
          1, 7, 3, 3,  10, 20, 'LWR Fuel', 'kg/MWe', 0.82),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'),
          2, 8, 4, 3,  20, 30, 'FR Fuel', 'kg/MWe', 0.61),
-        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 
+        (UUID('f22f2281-2464-420a-8325-37320fd418f8'),
          3, 9, 5, 12, 30, 40, 'Spent Fuel', 'kg/MWe', 0.09),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), 
-                ('TransactionId', '<i8'), 
+                ('SimId', 'O'),
+                ('TransactionId', '<i8'),
                 ('ResourceId', '<i8'),
-                ('ObjId', '<i8'), 
-                ('Time', '<i8'), 
+                ('ObjId', '<i8'),
+                ('Time', '<i8'),
                 ('SenderId', '<i8'),
                 ('ReceiverId', '<i8'), 
-                ('Commodity', 'O'), 
+                ('Commodity', 'O'),
                 ('Units', 'O'),
                 ('Quantity', '<f8')]))
         )
@@ -434,8 +437,8 @@ def test_transaction_quantity_per_gwe():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 3, 275),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 1, 12, 100),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), 
-                ('AgentId', '<i8'), 
+                ('SimId', 'O'),
+                ('AgentId', '<i8'),
                 ('Time', '<i8'),
                 ('Value', '<f8')]))
         )
@@ -445,19 +448,20 @@ def test_transaction_quantity_per_gwe():
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 2, 8, 4, 3,  20, 30, 'FR Fuel', 'kg', 305),
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 3, 9, 5, 12, 30, 40, 'Spent Fuel', 'kg', 9),
         ], dtype=ensure_dt_bytes([
-                ('SimId', 'O'), 
-                ('TransactionId', '<i8'), 
+                ('SimId', 'O'),
+                ('TransactionId', '<i8'),
                 ('ResourceId', '<i8'),
-                ('ObjId', '<i8'), 
-                ('TimeCreated', '<i8'), 
+                ('ObjId', '<i8'),
+                ('TimeCreated', '<i8'),
                 ('SenderId', '<i8'),
-                ('ReceiverId', '<i8'), 
-                ('Commodity', 'O'), 
+                ('ReceiverId', '<i8'),
+                ('Commodity', 'O'),
                 ('Units', 'O'),
                 ('Quantity', '<f8')]))
         )
     obs = metrics.transaction_quantity_per_gwe.func(tranacts, tsp)
     assert_frame_equal(exp, obs)
+
 
 if __name__ == "__main__":
     nose.runmodule()
