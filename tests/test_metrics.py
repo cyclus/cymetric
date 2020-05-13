@@ -377,7 +377,7 @@ def test_inventory_quantity_per_gwe():
         ], dtype=ensure_dt_bytes([
                 ('SimId', 'O'),
                 ('AgentId', '<i8'),
-                ('Time', '<i8').
+                ('Time', '<i8'),
                 ('InventoryName', 'O'),
                 ('NucId', '<i8'),
                 ('Quantity', '<f8')]))
