@@ -537,7 +537,7 @@ def transaction_quantity_per_gwe(tranacts, power):
     tranacts_index = ['SimId', 'TransactionId', 'ResourceId', 
                       'ObjId', 'Time','SenderId', 'ReceiverId', 
                       'Commodity', 'Units', 'Quantity']
-    tranacts = tranacts.rename(columns = {'TimeCreated' : 'Time'}
+    tranacts = tranacts.rename(columns = {'TimeCreated' : 'Time'})
     tranacts['Units'] = tranacts['Units'] + "/MWe" 
     tranacts=pd.merge(tranacts,df1, on=['SimId', 'Time'],how='left')
     tranacts.Quantity = tranacts.Quantity/tranacts.Value
