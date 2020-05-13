@@ -524,20 +524,22 @@ _tranactsschema = [
     ]
 
 
-@metric(name='TransactionQuantityPerGWe', depends=_tranactsdeps, schema=_tranactsschema)
+@metric(name='TransactionQuantityPerGWe', 
+        depends=_tranactsdeps, schema=_tranactsschema)
 def transaction_quantity_per_gwe(tranacts, power):
-    """Transaction Quantity per GWe metric returns the transaction quantity table 
-    with quantity in units of kg/GWe, calculated by dividing the original quantity 
-    by the electricity generated at the corresponding simulation and the specific 
-    time in TimeSeriesPower metric.
+    """Transaction Quantity per GWe metric returns the transaction quantity 
+    table with quantity in units of kg/GWe, calculated by dividing the 
+    original quantity by the electricity generated at the corresponding 
+    simulation and the specific time in TimeSeriesPower metric.
     """
-    power = power.groupby(['SimId','Time']).sum()
+    power = power.groupby(['SimId', 'Time']).sum()
     df1 = power.reset_index()
-    tranacts_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId', 'Time',
-                      'SenderId', 'ReceiverId', 'Commodity', 'Units', 'Quantity']
-    tranacts['Time']= tranacts.TimeCreated
-    tranacts['Units'] = tranacts['Units'] + "/MWe"    
-    tranacts=pd.merge(tranacts,df1, on=['SimId','Time'],how='left')
+    tranacts_index = ['SimId', 'TransactionId', 'ResourceId', 
+                      'ObjId', 'Time','SenderId', 'ReceiverId', 
+                      'Commodity', 'Units', 'Quantity']
+    tranacts = tranacts.rename(columns = {'TimeCreated' : 'Time'}
+    tranacts['Units'] = tranacts['Units'] + "/MWe" 
+    tranacts=pd.merge(tranacts,df1, on=['SimId', 'Time'],how='left')
     tranacts.Quantity = tranacts.Quantity/tranacts.Value
     return tranacts[tranacts_index]
     
