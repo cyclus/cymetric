@@ -39,6 +39,18 @@
 			</prototype>
 		</institution>
 	</region>
+    <fuel>
+        <type name="uox">
+            <supply_cost>1</supply_cost>
+            <waste_fee>0</waste_fee>
+            <deviation>0</deviation>
+        </type>
+        <type name="mox">
+            <supply_cost>2</supply_cost>
+            <waste_fee>0</waste_fee>
+            <deviation>0</deviation>
+        </type>
+    </fuel>
 	
 	<finance>
 		<discount_rate>0.1</discount_rate>
