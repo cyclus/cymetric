@@ -310,7 +310,7 @@ way (calculating one obs and comparing to an exp)
 
 
 def test_xml_parsing():
-    eco_info = eco_tools.eco_input_data("tests/parameters.xml")
+    eco_info = eco_tools.eco_input_data("tests/parameters.yml")
 
 
 def test_annual_costs():

@@ -7,7 +7,7 @@ metrics calculations. All prices are 2015 $
 
 import pandas as pd
 import numpy as np
-import xml.etree.ElementTree as ET
+import yaml
 import math
 
 
@@ -20,45 +20,12 @@ class eco_input_data():
     def __init__(self, filename):
         self.load_economic_info(filename)
 
-    def unload_group(self, xml_group):
-        group_dict = {}
-        if xml_group is not None:
-            for child in xml_group:
-                group_dict[child.tag] = float(child.text)
-        return group_dict
-
-
-    def get_dict_per_key(self, tree, key):
-        xml_group = tree.find(key)
-        return self.unload_group(xml_group)
-    
-    def get_fuels(self, tree):
-        xml_group = tree.find('fuel')
-        fuels = {}
-        if xml_group is not None:
-            for xml_subgroup in xml_group.findall('type'):
-                fuels[xml_subgroup.attrib["name"]] = self.unload_group(xml_subgroup)
-        return fuels
 
     def load_economic_info(self, eco_input):
-        tree = ET.parse(eco_input)
-        root = tree.getroot()
-
-        # start and end of economics consideration
-        self.periode = self.get_dict_per_key(root, "truncation")
-
-        # Economic golbal paramter
-        self.finance = self.get_dict_per_key(root, "finance")
-        self.capital = self.get_dict_per_key(root, "capital")
-        self.decommission = self.get_dict_per_key(root, "decommissioning")
-        self.operation = self.get_dict_per_key(root, "operation_maintenance")
-        self.fuels = self.get_fuels(root)
-        print(self.periode)
-        print(self.finance)
-        print(self.capital)
-        print(self.decommission)
-        print(self.operation)
-        print(self.fuels)
+        stream = open(eco_input)
+        data = yaml.load(stream, Loader=yaml.FullLoader)
+        self.dict = data
+        print("mydict", self.dict)
 
 
 def load_economic_info(eco_input):
