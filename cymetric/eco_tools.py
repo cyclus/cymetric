@@ -10,22 +10,80 @@ import numpy as np
 import yaml
 import math
 
+eco_props_agents = ["capital",
+                    "operation_maintenance",
+                    "decomission",
+                    "fuels"]
+eco_props_region = ["finance"] + eco_props_agents
+eco_properties = ["periode"] + eco_props_region
 
-class eco_input_data(): 
+
+class eco_input_data():
     """The EconomicInfo metric stores all economic data needed to calculate the
     economic metrics. These economic parameters are originally written in
     'parameters.xml'.
     """
-    
+
     def __init__(self, filename):
         self.load_economic_info(filename)
-
 
     def load_economic_info(self, eco_input):
         stream = open(eco_input)
         data = yaml.load(stream, Loader=yaml.FullLoader)
         self.dict = data
-        print("mydict", self.dict)
+
+    def get_filiation(self, name, dfEntry):
+        filiation = []
+        filiation.append(name)
+        parent_id = dfEntry[dfEntry["Prototype"] == name]["ParentId"][0]
+
+        while parent_id != -1:
+            # get the parent
+            parent_entry = dfEntry[dfEntry["AgentId"] == parent_id]
+            parent_name = parent_entry.iloc[0]["Prototype"]
+            filiation.append(parent_name)
+            # get the parent of the parent
+            parent_id = parent_entry.iloc[0]["ParentId"]
+        return list(reversed(filiation))
+
+    def update_prop(self, proto, traveling_dict, key, properties, prop_list):
+        updated = False
+        if key in traveling_dict:
+            for agent in traveling_dict[key]:
+                if agent["prototype"] == proto:
+                    traveling_dict = agent
+                    updated = True
+                    for prop in prop_list:
+                        if prop in traveling_dict:
+                            properties[prop] = traveling_dict[prop]
+        return updated, traveling_dict
+
+    def get_prototype_eco(self, name, filiation):
+        proto_eco = {}
+        traveling_dict = self.dict["eco_model"]
+        for prop in eco_properties:
+            if prop in traveling_dict:
+                proto_eco[prop] = traveling_dict[prop]
+
+        for proto in filiation:
+            updated = False
+            status, traveling_dict = self.update_prop(proto, traveling_dict,
+                                                      "region", proto_eco,
+                                                      eco_props_region)
+            if not updated:
+                status, traveling_dict = self.update_prop(proto,
+                                                          traveling_dict,
+                                                          "institution",
+                                                          proto_eco,
+                                                          eco_props_agents)
+            if not updated:
+                status, traveling_dict = self.update_prop(proto,
+                                                          traveling_dict,
+                                                          "facility",
+                                                          proto_eco,
+                                                          eco_props_agents)
+
+        return proto_eco
 
 
 def load_economic_info(eco_input):

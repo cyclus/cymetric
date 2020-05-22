@@ -38,11 +38,11 @@ eco_model:
       deviation: 0
 
   region:
-    - prototype: myRegion
+    - prototype: MyReg
 
       finance:
         discount_rate: 0.1
-        tax_rate: 0.1
+        tax_rate: 0.2
         return_on_debt: 0.1
         return_on_equity: 0.1
 
@@ -54,8 +54,8 @@ eco_model:
         overnight_cost: 1
 
       operation_maintenance:
-        fixed: 1
-        variable: 1
+        fixed: 3
+        variable: 2
         deviation: 0
 
       fuels:
@@ -65,12 +65,12 @@ eco_model:
           deviation: 0
 
       institution:
-        - prototype: myInstitution
+        - prototype: MyInst
 
           capital:
             deviation: 0
             beforePeak: 10
-            afterPeak: 5
+            afterPeak: 75
             constructionDuration: 10
             overnight_cost: 1
 
@@ -79,6 +79,16 @@ eco_model:
               supply_cost: 2.5
               waste_fee: 0
               deviation: 0
+
+          institution:
+            - prototype: Reactor1
+
+              fuels:
+                - name: uox
+                  supply_cost: 10.5
+                  waste_fee: 0
+                  deviation: 0
+
 
 
 

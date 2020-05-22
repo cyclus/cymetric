@@ -311,7 +311,21 @@ way (calculating one obs and comparing to an exp)
 
 def test_xml_parsing():
     eco_info = eco_tools.eco_input_data("tests/parameters.yml")
+    entry = pd.DataFrame(np.array([
+                 (1, 10,  2, 13, ':cycamore:Reactor', 'Reactor1'),
+                 (1, 10,  1,  2, 'SingleInstitution', 'MyInst'),
+                 (1, 10, -1,  1, 'SingleRegion',      'MyReg')
+                 ], dtype=ensure_dt_bytes([
+                      ('EnterTime', '<i8'),
+                      ('Lifetime', '<i8'),
+                      ('ParentId', '<i8'),
+                      ('AgentId', '<i8'),
+                      ('Spec', 'O'),
+                      ('Prototype', 'O')])))
+    filiation = eco_info.get_filiation("Reactor1", entry)
 
+    print(filiation)
+    print(eco_info.get_prototype_eco("Reactor1", filiation))
 
 def test_annual_costs():
     """
