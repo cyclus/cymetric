@@ -480,7 +480,8 @@ _invschema = [
 ]
 
 
-@metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
+@metric(name='InventoryQuantityPerElectricPower', depends=_invdeps,
+        schema=_invschema)
 def inventory_quantity_per_gwe(inv, power):
     """Inventory Quantity per GWe metric returns the explicit inventory table
     with quantity in units of kg/GWe, calculated by dividing the original
