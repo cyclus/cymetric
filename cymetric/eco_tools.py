@@ -93,7 +93,7 @@ class eco_input_data():
                 if prop in region_dict:
                     proto_eco[prop] = region_dict[prop]
             print(region_eco)
-            region_raw = pd.DataFrame.from_dict(region_eco)
+            region_raw = build_eco_row(region_eco)
             print(region_raw)
 
         return proto_eco
@@ -101,7 +101,31 @@ class eco_input_data():
 
 def build_eco_row(proto_dict):
     row_col = finance_col + capital_col + operation_col + fuel_col
-    df = df.DataFrame(columns=row_col)
+    df = pd.DataFrame(columns=row_col)
+    for fuel_type in proto_dict["fuels"]:
+        print(fuel_type)
+        print(proto_dict["finance"]["discount_rate"])
+        a_row = pd.Series([
+                    float(proto_dict["finance"]["discount_rate"]),
+                    float(proto_dict["finance"]["tax_rate"]),
+                    float(proto_dict["finance"]["return_on_debt"]),
+                    float(proto_dict["finance"]["return_on_equity"]),
+                    float(proto_dict["capital"]["beforePeak"]),
+                    float(proto_dict["capital"]["afterPeak"]),
+                    float(proto_dict["capital"]["constructionDuration"]),
+                    float(proto_dict["capital"]["overnight_cost"]),
+                    float(proto_dict["capital"]["deviation"]),
+                    float(proto_dict["operation_maintenance"]["fixed"]),
+                    float(proto_dict["operation_maintenance"]["variable"]),
+                    float(proto_dict["operation_maintenance"]["deviation"]),
+                    fuel_type["name"],
+                    float(fuel_type["supply_cost"]),
+                    float(fuel_type["waste_fee"]),
+                    float(fuel_type["deviation"])
+                    ])
+        row_df = pd.DataFrame([a_row], columns=row_col)
+        df = pd.concat([row_df, df], ignore_index=True)
+    return df
 
 
 
