@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import yaml
 import math
+from cymetric.tools import ensure_dt_bytes
 
 eco_props_agents = ["capital",
                     "operation_maintenance",
@@ -98,14 +99,21 @@ class eco_input_data():
 
         return proto_eco
 
+finance_col = ["discount_rate", "tax_rate", "return_on_debt",
+               "return_on_equity"]
+capital_col = ["beforePeak", "afterPeak", "constructionDuration",
+               "overnight_cost", "capital_dev"]
+operation_col = ["fixed", "variable", "operation_dev"]
+fuel_col = ["name", "supply_cost", "waste_fee", "fuel_dev"]
 
 def build_eco_row(proto_dict):
     row_col = finance_col + capital_col + operation_col + fuel_col
+    print(row_col)
     df = pd.DataFrame(columns=row_col)
+    
+
     for fuel_type in proto_dict["fuels"]:
-        print(fuel_type)
-        print(proto_dict["finance"]["discount_rate"])
-        a_row = pd.Series([
+        a_row = pd.DataFrame(np.array([(
                     float(proto_dict["finance"]["discount_rate"]),
                     float(proto_dict["finance"]["tax_rate"]),
                     float(proto_dict["finance"]["return_on_debt"]),
@@ -121,12 +129,29 @@ def build_eco_row(proto_dict):
                     fuel_type["name"],
                     float(fuel_type["supply_cost"]),
                     float(fuel_type["waste_fee"]),
-                    float(fuel_type["deviation"])
-                    ])
-        row_df = pd.DataFrame([a_row], columns=row_col)
-        df = pd.concat([row_df, df], ignore_index=True)
+                    float(fuel_type["deviation"]))
+                    ],
+                    dtype=ensure_dt_bytes([
+                         ('discount_rate', '<f8'),
+                         ('tax_rate', '<f8'),
+                         ('return_on_debt', '<f8'),
+                         ('return_on_equity', '<f8'),
+                         ('beforePeak', '<f8'),
+                         ('afterPeak', '<f8'),
+                         ('constructionDuration', '<f8'),
+                         ('overnight_cost', '<f8'),
+                         ('operation_dev', '<f8'),
+                         ('fixed', '<f8'),
+                         ('variable', '<f8'),
+                         ('capital_dev', '<f8'),
+                         ('name', 'O'),
+                         ('supply_cost', '<f8'),
+                         ('waste_fee', '<f8'),
+                         ('fuel_dev', '<f8')
+                         ])))
+        print(a_row)
+        df = pd.concat([a_row, df], ignore_index=True)
     return df
-
 
 
 def get_filiation_per_name(name, dfEntry):
