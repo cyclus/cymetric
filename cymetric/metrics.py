@@ -492,14 +492,14 @@ def inventory_quantity_per_gwe(inv, power):
     base_index = ['SimId', 'Time']
 
     # preping the power table to get 1 power per time
-    power.drop(["AgentId"], axis=1, inplace=True)
+    power = power.drop(["AgentId"], axis=1)
     power = power.groupby(base_index).sum()
-    power.reset_index(inplace=True)
+    power = power.reset_index()
 
     # normalisation of the inv per power
     inv = pd.merge(inv, power, on=base_index, how='left')
     inv.Quantity = inv.Quantity/inv.Value
-    inv.drop(['Value'], axis=1, inplace=True)
+    inv = inv.drop(['Value'], axis=1)
 
     return inv
 
