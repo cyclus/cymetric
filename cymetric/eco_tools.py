@@ -17,6 +17,13 @@ eco_props_agents = ["capital",
 eco_props_region = ["finance"] + eco_props_agents
 eco_properties = ["periode"] + eco_props_region
 
+finance_col = ["discount_rate", "tax_rate", "return_on_debt",
+               "return_on_equity"]
+capital_col = ["beforePeak", "afterPeak", "constructionDuration",
+               "overnight_cost", "capital_dev"]
+operation_col = ["fixed", "variable", "operation_dev"]
+fuel_col = ["name", "supply_cost", "waste_fee", "fuel_dev"]
+
 
 class eco_input_data():
     """The EconomicInfo metric stores all economic data needed to calculate the
@@ -71,6 +78,32 @@ class eco_input_data():
 
         return proto_eco
 
+    def get_prototypes_eco(self):
+        proto_eco = {}
+        model_dict = self.dict["eco_model"]
+
+        for prop in eco_properties:
+            if prop in model_dict:
+                proto_eco[prop] = model_dict[prop]
+
+        for region_dict in model_dict["region"]:
+            region_eco = proto_eco
+            region_eco["prototype"] = region_dict["prototype"]
+            for prop in eco_properties:
+                if prop in region_dict:
+                    proto_eco[prop] = region_dict[prop]
+            print(region_eco)
+            region_raw = pd.DataFrame.from_dict(region_eco)
+            print(region_raw)
+
+        return proto_eco
+
+
+def build_eco_row(proto_dict):
+    row_col = finance_col + capital_col + operation_col + fuel_col
+    df = df.DataFrame(columns=row_col)
+
+
 
 def get_filiation_per_name(name, dfEntry):
     filiation = []
@@ -91,9 +124,11 @@ def get_filiation_per_id(id, dfEntry):
     name = dfEntry[dfEntry["AgentId"] == id]["Prototype"][0]
     return get_filiation_per_name(name, dfEntry)
 
+
 ####################
 # Mining & Milling #
 ####################
+
 
 def isuraniumsource(dfEntry, id):
     """

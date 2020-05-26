@@ -127,6 +127,9 @@ def fuel_cost(dfResources, dfTransactions, dfEcoInfo):
 # Unsure if it is about Sender or Receiver implementation here and test are not
 # in agreement, taking receiver (using implementation as ref)
     rtn = dfTransactions.rename(columns={'ReceiverId': 'AgentId'})
+    
+    agents_eco_prop = eco_data.get_prototypes_eco()
+
 
     # add quantity to Transaction
     base_col = ['SimId', 'ResourceId']

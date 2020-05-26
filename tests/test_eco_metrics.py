@@ -131,6 +131,7 @@ def test_fuel_cost():
                          ('Fuel_WasteFee', '<f8'), ('Fuel_Deviation', '<f8'),
                          ('Finance_DiscountRate', '<f8')]))
                  )
+    eco_metrics.eco_data = eco_tools.eco_input_data("tests/parameters.yml")
     obs = eco_metrics.fuel_cost.func(resources, transactions, ecoInfo)
     assert_frame_equal(exp, obs)
 
