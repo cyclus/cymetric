@@ -12,7 +12,7 @@ import math
 
 eco_props_agents = ["capital",
                     "operation_maintenance",
-                    "decomission",
+                    "decommission",
                     "fuels"]
 eco_props_region = ["finance"] + eco_props_agents
 eco_properties = ["periode"] + eco_props_region
@@ -32,20 +32,6 @@ class eco_input_data():
         data = yaml.load(stream, Loader=yaml.FullLoader)
         self.dict = data
 
-    def get_filiation(self, name, dfEntry):
-        filiation = []
-        filiation.append(name)
-        parent_id = dfEntry[dfEntry["Prototype"] == name]["ParentId"][0]
-
-        while parent_id != -1:
-            # get the parent
-            parent_entry = dfEntry[dfEntry["AgentId"] == parent_id]
-            parent_name = parent_entry.iloc[0]["Prototype"]
-            filiation.append(parent_name)
-            # get the parent of the parent
-            parent_id = parent_entry.iloc[0]["ParentId"]
-        return list(reversed(filiation))
-
     def update_prop(self, proto, traveling_dict, key, properties, prop_list):
         updated = False
         if key in traveling_dict:
@@ -58,7 +44,7 @@ class eco_input_data():
                             properties[prop] = traveling_dict[prop]
         return updated, traveling_dict
 
-    def get_prototype_eco(self, name, filiation):
+    def get_prototype_eco(self, filiation):
         proto_eco = {}
         traveling_dict = self.dict["eco_model"]
         for prop in eco_properties:
@@ -86,350 +72,24 @@ class eco_input_data():
         return proto_eco
 
 
-def load_economic_info(eco_input):
-    tuples = ['Prototype',
-              'AgentId',
-              'ReturnOnDebt',
-              'ReturnOnEquity',
-              'TaxRate',
-              'DiscountRate',
-              'beforePeak',
-              'afterPeak',
-              'constructionDuration',
-              'Captial_Deviation',
-              'OvernightCost',
-              'Duration',
-              'OvernightCost',
-              'FixedCost',
-              'VariableCost',
-              'OperationMaintenance_Deviation',
-              'Commodity',
-              'SupplyCost',
-              'WasteFee',
-              'Fuel_Deviation',
-              'Begin',
-              'End']
-    #rtn = pd.DataFrame(index=tuples)
-    #agentIndex = dfEntry.reset_index().set_index('AgentId')['index']
-    #rtn = rtn.T
-    #rtn['Agent_Prototype'] = dfEntry['Prototype']
-    #rtn['Agent_AgentId'] = dfEntry['AgentId']
-    #rtn['Agent_ParentId'] = dfEntry['ParentId']
-    #parametersInput = 'tests/parameters.xml'
-    #for child in root:
-    #    print(child.tag, child.attrib)
-    #
-    #def add_finance(rtn, root):
+def get_filiation_per_name(name, dfEntry):
+    filiation = []
+    filiation.append(name)
+    parent_id = dfEntry[dfEntry["Prototype"] == name]["ParentId"][0]
+
+    while parent_id != -1:
+        # get the parent
+        parent_entry = dfEntry[dfEntry["AgentId"] == parent_id]
+        parent_name = parent_entry.iloc[0]["Prototype"]
+        filiation.append(parent_name)
+        # get the parent of the parent
+        parent_id = parent_entry.iloc[0]["ParentId"]
+    return list(reversed(filiation))
 
 
-    #def add_capital(rtn, root):
-    #def add_decommisioning(rtn, root):
-
-    #def add_operation_maintenance(rtn, root):
-
-    #def add_fuel(rtn, root):
-    #
-    #add_finance(rtn, root)
-
-
-    # for region in root.findall('region'):
-    #    idRegion = int(region.find('id').text)
-    #    finance = region.find('finance')
-    #    if finance is not None:
-    #        returnOnDebt = float(finance.find('return_on_debt').text)
-    #        returnOnEquity = float(finance.find('return_on_equity').text)
-    #        taxRate = float(finance.find('tax_rate').text)
-    #        discountRate = float(finance.find('discount_rate').text)
-    #        rtn.loc[agentIndex[idRegion], 'Finance_TaxRate'] = taxRate
-    #        rtn.loc[agentIndex[idRegion], 'Finance_ReturnOnDebt'] = returnOnDebt
-    #        rtn.loc[agentIndex[idRegion], 'Finance_ReturnOnEquity'] = returnOnEquity
-    #        rtn.loc[gent_index[idRegion], 'Finance_DiscountRate'] = discountRate
-    #        for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
-    #            rtn.loc[agentIndex[idInstitution], 'Finance_TaxRate'] = taxRate
-    #            rtn.loc[agentIndex[idInstitution], 'Finance_ReturnOnDebt'] = returnOnDebt
-    #            rtn.loc[agentIndex[idInstitution], 'Finance_ReturnOnEquity'] = returnOnEquity
-    #            rtn.loc[gent_index[idInstitution], 'Finance_DiscountRate'] = discountRate
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'Finance_TaxRate'] = taxRate
-    #                rtn.loc[agentIndex[idFacility], 'Finance_ReturnOnDebt'] = returnOnDebt
-    #                rtn.loc[agentIndex[idFacility], 'Finance_ReturnOnEquity'] = returnOnEquity
-    #                rtn.loc[gent_index[idFacility], 'Finance_DiscountRate'] = discountRate
-    #    capital = region.find('capital')
-    #    if capital is not None:
-    #        beforePeak = int(capital.find('beforePeak').text)
-    #        afterPeak = int(capital.find('afterPeak').text)
-    #        constructionDuration = int(capital.find('constructionDuration').text)
-    #        deviation = float(capital.find('deviation').text)
-    #        overnightCost = float(capital.find('overnight_cost').text)
-    #        rtn.loc[agentIndex[idRegion], 'Captial_beforePeak'] = beforePeak
-    #        rtn.loc[agentIndex[idRegion], 'Captial_afterPeak'] = afterPeak
-    #        rtn.loc[agentIndex[idRegion], 'Captial_constructionDuration'] = constructionDuration
-    #        rtn.loc[agentIndex[idRegion], 'Captial_Deviation'] = deviation
-    #        rtn.loc[agentIndex[idRegion], 'Captial_OvernightCost'] = overnightCost
-    #        for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_beforePeak'] = beforePeak
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_afterPeak'] = afterPeak
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_constructionDuration'] = constructionDuration
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_Deviation'] = deviation
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_OvernightCost'] = overnightCost
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'Captial_beforePeak'] = beforePeak
-    #                rtn.loc[agentIndex[idFacility], 'Captial_afterPeak'] = afterPeak
-    #                rtn.loc[agentIndex[idFacility], 'Captial_constructionDuration'] = constructionDuration
-    #                rtn.loc[agentIndex[idFacility], 'Captial_Deviation'] = deviation
-    #                rtn.loc[agentIndex[idFacility], 'Captial_OvernightCost'] = overnightCost
-    #    decommissioning = region.find('decommissioning')
-    #    if decommissioning is not None:
-    #        duration = int(decommissioning.find('duration').text)
-    #        overnightCost = float(decommissioning.find('overnight_cost').text)
-    #        rtn.loc[agentIndex[idRegion], 'Decommissioning_Duration'] = duration
-    #        rtn.loc[agentIndex[idRegion], 'Decommissioning_OvernightCost'] = overnightCost
-    #        for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
-    #            rtn.loc[agentIndex[idInstitution], 'Decommissioning_Duration'] = duration
-    #            rtn.loc[agentIndex[idInstitution], 'Decommissioning_OvernightCost'] = overnightCost
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'Decommissioning_Duration'] = duration
-    #                rtn.loc[agentIndex[idFacility], 'Decommissioning_OvernightCost'] = overnightCost
-    #    operation_maintenance = region.find('operation_maintenance')
-    #    if operation_maintenance is not None:
-    #        fixed = float(operation_maintenance.find('fixed').text)
-    #        variable = float(operation_maintenance.find('variable').text)
-    #        deviation = float(operation_maintenance.find('deviation').text)
-    #        rtn.loc[agentIndex[idRegion], 'OperationMaintenance_FixedCost'] = fixed
-    #        rtn.loc[agentIndex[idRegion], 'OperationMaintenance_VariableCost'] = variable
-    #        rtn.loc[agentIndex[idRegion], 'OperationMaintenance_Deviation'] = deviation
-    #        for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
-    #            rtn.loc[agentIndex[idInstitution], 'OperationMaintenance_FixedCost'] = fixed
-    #            rtn.loc[agentIndex[idInstitution], 'OperationMaintenance_VariableCost'] = variable
-    #            rtn.loc[agentIndex[idInstitution], 'OperationMaintenance_Deviation'] = deviation
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'OperationMaintenance_FixedCost'] = fixed
-    #                rtn.loc[agentIndex[idFacility], 'OperationMaintenance_VariableCost'] = variable
-    #                rtn.loc[agentIndex[idFacility], 'OperationMaintenance_Deviation'] = deviation
-    #    fuel = region.find('fuel')
-    #    if fuel is not None:
-    #        for type in fuel.findall('type'):
-    #            supply = float(type.find('supply_cost').text)
-    #            waste = float(type.find('waste_fee').text)
-    #            name = type.find('name').text
-    #            deviation = float(type.find('deviation').text)
-    #            if np.isnan(rtn.loc[agentIndex[idRegion], 'Fuel_SupplyCost']):
-    #                rtn.loc[agentIndex[idRegion], 'Fuel_Commodity'] = name
-    #                rtn.loc[agentIndex[idRegion], 'Fuel_SupplyCost'] = supply
-    #                rtn.loc[agentIndex[idRegion], 'Fuel_WasteFee'] = waste
-    #                rtn.loc[agentIndex[idRegion], 'Fuel_Deviation'] = deviation
-    #            else:
-    #                indice = rtn.index.size
-    #                rtn.loc[indice] = rtn.loc[agentIndex[idRegion]]
-    #                rtn.loc[indice, 'Fuel_Commodity'] = name
-    #                rtn.loc[indice, 'Fuel_SupplyCost'] = supply
-    #                rtn.loc[indice, 'Fuel_WasteFee'] = waste
-    #                rtn.loc[indice, 'Fuel_Deviation'] = deviation
-    #        for idInstitution in dfEntry[dfEntry.ParentId==idRegion]['AgentId'].tolist():
-    #            if np.isnan(rtn.loc[agentIndex[idInstitution], 'Fuel_SupplyCost']):
-    #                rtn.loc[agentIndex[idInstitution], 'Fuel_Commodity'] = name
-    #                rtn.loc[agentIndex[idInstitution], 'Fuel_SupplyCost'] = supply
-    #                rtn.loc[agentIndex[idInstitution], 'Fuel_WasteFee'] = waste
-    #                rtn.loc[agentIndex[idInstitution], 'Fuel_Deviation'] = deviation
-    #            else:
-    #                indice = rtn.index.size
-    #                rtn.loc[indice] = rtn.loc[agentIndex[idInstitution]]
-    #                rtn.loc[indice, 'Fuel_Commodity'] = name
-    #                rtn.loc[indice, 'Fuel_SupplyCost'] = supply
-    #                rtn.loc[indice, 'Fuel_WasteFee'] = waste
-    #                rtn.loc[indice, 'Fuel_Deviation'] = deviation
-    #        for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #            if np.isnan(rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost']):
-    #                rtn.loc[agentIndex[idFacility], 'Fuel_Commodity'] = name
-    #                rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost'] = supply
-    #                rtn.loc[agentIndex[idFacility], 'Fuel_WasteFee'] = waste
-    #                rtn.loc[agentIndex[idFacility], 'Fuel_Deviation'] = deviation
-    #            else:
-    #                indice = rtn.index.size
-    #                rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
-    #                rtn.loc[indice, 'Fuel_Commodity'] = name
-    #                rtn.loc[indice, 'Fuel_SupplyCost'] = supply
-    #                rtn.loc[indice, 'Fuel_WasteFee'] = waste
-    #                rtn.loc[indice, 'Fuel_Deviation'] = deviation
-    #    for institution in region.findall('institution'):
-    #        idInstitution = int(institution.find('id').text)
-    #        finance = institution.find('finance')
-    #        if finance is not None:
-    #            returnOnDebt = float(finance.find('return_on_debt').text)
-    #            returnOnEquity = float(finance.find('return_on_equity').text)
-    #            taxRate = float(finance.find('tax_rate').text)
-    #            discountRate = float(finance.find('discount_rate').text)
-    #            rtn.loc[agentIndex[idInstitution], 'Finance_TaxRate'] = taxRate
-    #            rtn.loc[agentIndex[idInstitution], 'Finance_ReturnOnDebt'] = returnOnDebt
-    #            rtn.loc[agentIndex[idInstitution],'Finance_ReturnOnEquity'] = returnOnEquity
-    #            rtn.loc[gent_index[idInstitution], 'Finance_DiscountRate'] = discountRate
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'Finance_TaxRate'] = taxRate
-    #                rtn.loc[agentIndex[idFacility], 'Finance_ReturnOnDebt'] = returnOnDebt
-    #                rtn.loc[agentIndex[idFacility], 'Finance_ReturnOnEquity'] = returnOnEquity
-    #                rtn.loc[gent_index[idFacility], 'Finance_DiscountRate'] = discountRate
-    #        capital = institution.find('capital')
-    #        if capital is not None:
-    #            beforePeak = int(capital.find('beforePeak').text)
-    #            afterPeak = int(capital.find('afterPeak').text)
-    #            constructionDuration = int(capital.find('constructionDuration').text)
-    #            deviation = float(capital.find('deviation').text)
-    #            overnightCost = float(capital.find('overnight_cost').text)
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_beforePeak'] = beforePeak
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_afterPeak'] = afterPeak
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_constructionDuration'] = constructionDuration
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_Deviation'] = deviation
-    #            rtn.loc[agentIndex[idInstitution], 'Captial_OvernightCost'] = overnightCost
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'Captial_beforePeak'] = beforePeak
-    #                rtn.loc[agentIndex[idFacility], 'Captial_constructionDuration'] = constructionDuration
-    #                rtn.loc[agentIndex[idFacility], 'Captial_Deviation'] = deviation
-    #                rtn.loc[agentIndex[idFacility], 'Captial_OvernightCost'] = overnightCost
-    #        decommissioning = institution.find('decommissioning')
-    #        if decommissioning is not None:
-    #            duration = int(decommissioning.find('duration').text)
-    #            overnightCost = float(decommissioning.find('overnight_cost').text)
-    #            rtn.loc[agentIndex[idInstitution], 'Decommissioning_Duration'] = duration
-    #            rtn.loc[agentIndex[idInstitution], 'Decommissioning_OvernightCost'] = overnightCost
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'Decommissioning_Duration'] = duration
-    #                rtn.loc[agentIndex[idFacility], 'Decommissioning_OvernightCost'] = overnightCost
-    #        operation_maintenance = institution.find('operation_maintenance')
-    #        if operation_maintenance is not None:
-    #            fixed = float(operation_maintenance.find('fixed').text)
-    #            variable = float(operation_maintenance.find('variable').text)
-    #            deviation = float(operation_maintenance.find('deviation').text)
-    #            rtn.loc[agentIndex[idInstitution], 'OperationMaintenance_FixedCost'] = fixed
-    #            rtn.loc[agentIndex[idInstitution], 'OperationMaintenance_VariableCost'] = variable
-    #            rtn.loc[agentIndex[idInstitution], 'OperationMaintenance_Deviation'] = deviation
-    #            for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                rtn.loc[agentIndex[idFacility], 'OperationMaintenance_FixedCost'] = fixed
-    #                rtn.loc[agentIndex[idFacility], 'OperationMaintenance_VariableCost'] = variable
-    #                rtn.loc[agentIndex[idFacility], 'OperationMaintenance_Deviation'] = deviation
-    #        fuel = institution.find('fuel')
-    #        if fuel is not None:
-    #            for type in fuel.findall('type'):
-    #                supply = float(type.find('supply_cost').text)
-    #                waste = float(type.find('waste_fee').text)
-    #                name = type.find('name').text
-    #                deviation = float(type.find('deviation').text)
-    #                if np.isnan(rtn.loc[agentIndex[idInstitution], 'Fuel_SupplyCost']):
-    #                    rtn.loc[agentIndex[idInstitution], 'Fuel_Commodity'] = name
-    #                    rtn.loc[agentIndex[idInstitution], 'Fuel_SupplyCost'] = supply
-    #                    rtn.loc[agentIndex[idInstitution], 'Fuel_WasteFee'] = waste
-    #                    rtn.loc[agentIndex[idInstitution], 'Fuel_Deviation'] = deviation
-    #                else:
-    #                    indice = rtn.index.size
-    #                    rtn.loc[indice] = rtn.loc[agentIndex[idInstitution]]
-    #                    rtn.loc[indice, 'Fuel_Commodity'] = name
-    #                    rtn.loc[indice, 'Fuel_SupplyCost'] = supply
-    #                    rtn.loc[indice, 'Fuel_WasteFee'] = waste
-    #                    rtn.loc[indice, 'Fuel_Deviation'] = deviation
-    #                for idFacility in dfEntry[dfEntry.ParentId==idInstitution]['AgentId'].tolist():
-    #                    if np.isnan(rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost']):
-    #                        rtn.loc[agentIndex[idFacility], 'Fuel_Commodity'] = name
-    #                        rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost'] = supply
-    #                        rtn.loc[agentIndex[idFacility], 'Fuel_WasteFee'] = waste
-    #                        rtn.loc[agentIndex[idFacility], 'Fuel_Deviation'] = deviation
-    #                    else:
-    #                        indice = rtn.index.size
-    #                        rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
-    #                        rtn.loc[indice, 'Fuel_Commodity'] = name
-    #                        rtn.loc[indice, 'Fuel_SupplyCost'] = supply
-    #                        rtn.loc[indice, 'Fuel_WasteFee'] = waste
-    #                        rtn.loc[indice, 'Fuel_Deviation'] = deviation
-    #        for prototype in institution.findall('prototype'):
-    #            name = prototype.find('name').text
-    #            tmp = dfEntry[dfEntry.ParentId==idInstitution]
-    #            facilityIdList = tmp[tmp.Prototype==name].loc[:,'AgentId'].tolist()
-    #            capital = prototype.find('capital')
-    #            if capital is not None:
-    #                beforePeak = int(capital.find('beforePeak').text)
-    #                afterPeak = int(capital.find('afterPeak').text)
-    #                constructionDuration = int(capital.find('constructionDuration').text)
-    #                deviation = float(capital.find('deviation').text)
-    #                overnight = float(capital.find('overnight_cost').text)
-    #                for idFacility in facilityIdList:
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_beforePeak'] = beforePeak
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_afterPeak'] = afterPeak
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_constructionDuration'] = constructionDuration
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_Deviation'] = deviation
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_OvernightCost'] = overnight
-    #            operation_maintenance = prototype.find('operation_maintenance')
-    #            if operation_maintenance is not None:
-    #                fixed = float(operation_maintenance.find('fixed').text)
-    #                variable = float(operation_maintenance.find('variable').text)
-    #                deviation = float(operation_maintenance.find('deviation').text)
-    #                for idFacility in facilityIdList:
-    #                    rtn.loc[agentIndex[idFacility], 'OperationMaintenance_FixedCost'] = fixed
-    #                    rtn.loc[agentIndex[idFacility], 'OperationMaintenance_VariableCost'] = variable
-    #                    rtn.loc[agentIndex[idFacility], 'OperationMaintenance_Deviation'] = deviation
-    #            fuel = prototype.find('fuel')
-    #            if fuel is not None:
-    #                for type in fuel.findall('type'):
-    #                    supply = float(type.find('supply_cost').text)
-    #                    waste = float(type.find('waste_fee').text)
-    #                    name = type.find('name').text
-    #                    deviation = float(type.find('deviation').text)
-    #                    for idFacility in facilityIdList:
-    #                        if np.isnan(rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost']):
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_Commodity'] = name
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost'] = supply
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_WasteFee'] = waste
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_Deviation'] = deviation
-    #                        else:
-    #                            indice = rtn.index.size
-    #                            rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
-    #                            rtn.loc[indice, 'Fuel_Commodity'] = name
-    #                            rtn.loc[indice, 'Fuel_SupplyCost'] = supply
-    #                            rtn.loc[indice, 'Fuel_WasteFee'] = waste
-    #                            rtn.loc[indice, 'Fuel_Deviation'] = deviation
-    #            decommissioning = prototype.find('decommissioning')
-    #            if decommissioning is not None:
-    #                duration = int(decommissioning.find('duration').text)
-    #                overnight = float(decommissioning.find('overnight_cost').text)
-    #                for idFacility in facilityIdList:
-    #                    rtn.loc[agentIndex[idFacility], 'Decommissioning_Duration'] = duration
-    #                    rtn.loc[agentIndex[idFacility], 'Decommissioning_OvernightCost'] = overnight
-    #            for facility in prototype.findall('facility'):
-    #                idFacility = int(facility.find('id').text)
-    #                capital = facility.find('capital')
-    #                if capital is not None:
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_beforePeak'] = int(capital.find('beforePeak').text)
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_afterPeak'] = int(capital.find('afterPeak').text)
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_constructionDuration'] = int(capital.find('constructionDuration').text)
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_Deviation'] = float(capital.find('deviation').text)
-    #                    rtn.loc[agentIndex[idFacility], 'Captial_OvernightCost'] = float(capital.find('overnight_cost').text)
-    #                operation_maintenance = facility.find('operation_maintenance')
-    #                if operation_maintenance is not None:
-    #                    rtn.loc[agentIndex[idFacility], 'OperationMaintenance_FixedCost'] = float(operation_maintenance.find('fixed').text)
-    #                    rtn.loc[agentIndex[idFacility], 'OperationMaintenance_VariableCost'] = float(operation_maintenance.find('variable').text)
-    #                    rtn.loc[agentIndex[idFacility], 'OperationMaintenance_Deviation'] = float(operation_maintenance.find('deviation').text)
-    #                fuel = facility.find('fuel')
-    #                if fuel is not None:
-    #                    for type in fuel.findall('type'):
-    #                        supply = float(type.find('supply_cost').text)
-    #                        waste = float(type.find('waste_fee').text)
-    #                        name = type.find('name').text
-    #                        deviation = float(type.find('deviation').text)
-    #                        if np.isnan(rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost']):
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_Commodity'] = name
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_SupplyCost'] = supply
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_WasteFee'] = waste
-    #                            rtn.loc[agentIndex[idFacility], 'Fuel_Deviation'] = deviation
-    #                        else:
-    #                            indice = rtn.index.size
-    #                            rtn.loc[indice] = rtn.loc[agentIndex[idFacility]]
-    #                            rtn.loc[indice, 'Fuel_Commodity'] = name
-    #                            rtn.loc[indice, 'Fuel_SupplyCost'] = supply
-    #                            rtn.loc[indice, 'Fuel_WasteFee'] = waste
-    #                            rtn.loc[indice, 'Fuel_Deviation'] = deviation
-    #                decommissioning = facility.find('decommissioning')
-    #                if decommissioning is not None:
-    #                    rtn.loc[agentIndex[idFacility], 'Decommissioning_Duration'] = int(decommissioning.find('duration').text)
-    #                    rtn.loc[agentIndex[idFacility], 'Decommissioning_OvernightCost'] = float(decommissioning.find('overnight_cost').text)
-    #return rtn
-
+def get_filiation_per_id(id, dfEntry):
+    name = dfEntry[dfEntry["AgentId"] == id]["Prototype"][0]
+    return get_filiation_per_name(name, dfEntry)
 
 ####################
 # Mining & Milling #

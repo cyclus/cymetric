@@ -68,10 +68,10 @@ eco_model:
         - prototype: MyInst
 
           capital:
-            deviation: 0
             beforePeak: 10
-            afterPeak: 75
+            afterPeak: 5
             constructionDuration: 10
+            deviation: 0
             overnight_cost: 1
 
           fuels:

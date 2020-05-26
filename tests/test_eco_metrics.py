@@ -37,27 +37,20 @@ def test_capital_cost():
         ('Time', '<i8')]))
     )
     entry = pd.DataFrame(np.array([
-        (13, -1, ':cycamore:Reactor', 1)
-    ], dtype=ensure_dt_bytes([('AgentId', '<i8'), ('ParentId', '<i8'),
-                              ('Spec', 'O'), ('EnterTime', '<i8')]))
+        (13, -1, ':cycamore:Reactor', 1, 'Reactor1')
+    ], dtype=ensure_dt_bytes([('AgentId', '<i8'),
+                              ('ParentId', '<i8'),
+                              ('Spec', 'O'),
+                              ('EnterTime', '<i8'),
+                              ('Prototype', 'O')]))
     )
     info = pd.DataFrame(np.array([
         (2000, 1, 20)
     ], dtype=ensure_dt_bytes([('InitialYear', '<i8'),
                               ('InitialMonth', '<i8'), ('Duration', '<i8')]))
     )
-    ecoInfo = pd.DataFrame(np.array([
-        ('Reactor1', 13, 10, 5, 10, 0, 1, 0.1)
-    ], dtype=ensure_dt_bytes([('Prototype', 'O'),
-                              ('AgentId', '<i8'),
-                              ('Capital_beforePeak', '<i8'),
-                              ('Capital_afterPeak', '<i8'),
-                              ('Capital_constructionDuration', '<i8'),
-                              ('Capital_Deviation', '<f8'),
-                              ('Capital_OvernightCost', '<f8'),
-                              ('Finance_DiscountRate', '<f8')]))
-    )
-    obs = eco_metrics.capital_cost.func(power, entry, info, ecoInfo)
+    eco_metrics.eco_data = eco_tools.eco_input_data("tests/parameters.yml")
+    obs = eco_metrics.capital_cost.func(power, entry, info)
     assert_frame_equal(exp.drop(['SimId'], axis=1),
                        obs.drop(['SimId'], axis=1))
 

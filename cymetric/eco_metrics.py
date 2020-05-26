@@ -19,14 +19,14 @@ try:
     from cymetric.tools import dbopen, merge
     from cymetric.evaluator import Evaluator
     from cymetric.eco_tools import actualization_vector, isreactor, \
-        capital_shape
+        capital_shape, get_filiation_per_id, eco_input_data
     from cymetric.evaluator import register_metric
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from .metrics import metric
     from .evaluator import register_metric
     from .eco_tools import capital_shape, isreactor, actualization_vector, \
-        isreactor
+        isreactor, get_filiation_per_id, eco_input_data
     from .tools import dbopen, merge
     from .evaluator import Evaluator
 
@@ -38,9 +38,10 @@ xml_inputs = 'parameters.xml'
 
 
 # The actual metrics ##
+eco_data = None
 
 
-_ccdeps = ['TimeSeriesPower', 'AgentEntry', 'Info', 'EconomicInfo']
+_ccdeps = ['TimeSeriesPower', 'AgentEntry', 'Info']
 
 _ccschema = [
     ('SimId', ts.UUID),
@@ -50,50 +51,52 @@ _ccschema = [
 
 
 @metric(name='CapitalCost', depends=_ccdeps, schema=_ccschema)
-def capital_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
+def capital_cost(dfPower, dfEntry, dfInfo):
     """The CapitalCost metric gives the cash flows at each time step
     corresponding to the reactors construction costs.
     """
+    if eco_data is None:
+        print("Warning! No economical data, please load one!")
+        return None
 
     simDuration = dfInfo['Duration'].iloc[0]
-    dfEntry = pd.DataFrame([dfEntry.EnterTime, dfEntry.AgentId]).transpose()
     rtn = pd.DataFrame()
-    print(dfEcoInfo)
-    for index, eco_row in dfEcoInfo.iterrows():
-        id = eco_row['AgentId']
-        print(id)
-        if isreactor(dfPower, id):
-            deviation = eco_row['Capital_Deviation'] * np.random.randn(1)
-            deviation = int(np.around(deviation))
+    for index, power_row in dfPower.iterrows():
+        agent_id = power_row['AgentId']
+        filiation = get_filiation_per_id(agent_id, dfEntry)
+        agent_eco_prop = eco_data.get_prototype_eco(filiation)
 
-            beforePeak = int(eco_row['Capital_beforePeak'] + deviation)
-            afterPeak = int(eco_row['Capital_afterPeak'])
-            cashFlowShape = capital_shape(beforePeak, afterPeak)
+        deviation = float(agent_eco_prop["capital"]["deviation"])
+        deviation *= np.random.randn(1)
+        deviation = int(np.around(deviation))
 
-            constructionDuration = int(eco_row['Capital_constructionDuration']
-                                       + deviation)
+        beforePeak = int(agent_eco_prop["capital"]["beforePeak"]) + deviation
+        afterPeak = int(agent_eco_prop["capital"]["afterPeak"])
+        cashFlowShape = capital_shape(beforePeak, afterPeak)
 
-            powerCapacity = max(dfPower[dfPower.AgentId == id]['Value'])
-            overnightCost = eco_row['Capital_OvernightCost']
-            cashFlow = np.around(cashFlowShape
-                                 * overnightCost
-                                 * powerCapacity, 4)
+        constructionDuration = int(
+            agent_eco_prop["capital"]['constructionDuration']) + deviation
 
-            discountRate = eco_row['Finance_DiscountRate']
-            cashFlow *= ((1 + discountRate)
-                         ** math.ceil((beforePeak + afterPeak) / 12) -
-                         1) / (discountRate
-                               * math.ceil((beforePeak + afterPeak) / 12))
+        powerCapacity = power_row['Value']
+        overnightCost = float(agent_eco_prop["capital"]['overnight_cost'])
+        cashFlow = np.around(cashFlowShape
+                             * overnightCost
+                             * powerCapacity, 4)
 
-            entry_time = dfEntry[dfEntry['AgentId'] == id].EnterTime.values[0]
-            TimeSerie = list(range(beforePeak + afterPeak + 1))
-            TimeSerie += entry_time - constructionDuration
-
-            tmp = pd.DataFrame(data={'AgentId': id,
-                                     'Time': TimeSerie,
-                                     'Payment': cashFlow},
-                               columns=['AgentId', 'Time', 'Payment'])
-            rtn = pd.concat([rtn, tmp], ignore_index=False)
+        discountRate = agent_eco_prop["finance"]['discount_rate']
+        cashFlow *= ((1 + discountRate)
+                     ** math.ceil((beforePeak + afterPeak) / 12) -
+                     1) / (discountRate
+                           * math.ceil((beforePeak + afterPeak) / 12))
+        entry_time = dfEntry[
+                        dfEntry['AgentId'] == agent_id].iloc[0]["EnterTime"]
+        TimeSerie = list(range(beforePeak + afterPeak + 1))
+        TimeSerie += entry_time - constructionDuration
+        tmp = pd.DataFrame(data={'AgentId': agent_id,
+                                 'Time': TimeSerie,
+                                 'Payment': cashFlow},
+                           columns=['AgentId', 'Time', 'Payment'])
+        rtn = pd.concat([rtn, tmp], ignore_index=False)
 
     rtn['SimId'] = dfPower['SimId'].iloc[0]
     rtn = rtn[rtn['Time'].apply(lambda x: x >= 0 and x < simDuration)]
@@ -175,13 +178,11 @@ def decommissioning_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
     dfEntry = dfEntry[dfEntry['Lifetime'].apply(lambda x: x > 0)]
     reactorsId = dfEntry[dfEntry['Spec'].apply(
         lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-    print(reactorsId)
     rtn = pd.DataFrame()
     for id in reactorsId:
         tmp = dfEcoInfo[dfEntry['AgentId'] == id]
         if(len(tmp) == 1):
             duration = int(tmp.at[0, 'Decommissioning_Duration'])
-            print(duration)
             overnightCost = tmp.at[0, 'Decommissioning_OvernightCost']
             cashFlowShape = capital_shape(
                 duration - duration // 2, duration // 2)
