@@ -465,45 +465,6 @@ def monthly_electricity_generated_by_agent(elec):
 
 
 del _egdeps, _egschema
-
-# Quantity per GigaWattElectric in Inventory [kg/GWe]
-_invdeps = ['ExplicitInventory', 'TimeSeriesPower']
-
-_invschema = [
-    ('SimId', ts.UUID),
-    ('AgentId', ts.INT),
-    ('Time', ts.INT),
-    ('InventoryName', ts.STRING),
-    ('NucId', ts.INT),
-    ('Quantity', ts.DOUBLE)
-    ]
-
-
-@metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
-def inventory_quantity_per_gwe(expinv, power):
-    """Inventory Quantity per GWe metric returns the explicit inventory table
-    with quantity in units of kg/GWe, calculated by dividing the original
-    quantity by the electricity generated at the corresponding simulation and
-    the specific time in TimeSeriesPower metric.
-    """
-    power_index = ['SimId', 'Time']
-    power.drop(["AgentId"], axis=1, inplace=True)
-    power = power.groupby(power_index).sum()
-    power.reset_index(inplace=True)
-    inv = pd.DataFrame(data={'SimId': expinv.SimId,
-                             'AgentId': expinv.AgentId,
-                             'Time': expinv.Time,
-                             'InventoryName': expinv.InventoryName,
-                             'NucId': expinv.NucId,
-                             'Quantity': expinv.Quantity},
-                       columns=['SimId', 'AgentId', 'Time', 'InventoryName',
-                                'NucId', 'Quantity'])
-    inv = pd.merge(inv, power, on=['SimId', 'Time'], how='left')
-    inv.Quantity = inv.Quantity/inv.Value
-    inv.drop(['Value'], axis=1, inplace=True)
-    return inv
-
-
 #
 # Not a metric, not a root metric metrics
 #
@@ -513,7 +474,6 @@ def inventory_quantity_per_gwe(expinv, power):
 # elsewhere in the future if they become more common.
 
 # TimeList
-
 
 _tldeps = ['Info']
 
@@ -538,3 +498,44 @@ def timelist(info):
 
 
 del _tldeps, _tlschema
+
+# Quantity per GigaWattElectric in Inventory [kg/GWe]
+_invdeps = ['ExplicitInventory', 'TimeSeriesPower']
+
+_invschema = [
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Time', ts.INT),
+    ('InventoryName', ts.STRING),
+    ('NucId', ts.INT),
+    ('Quantity', ts.DOUBLE)
+]
+
+
+@metric(name='InventoryQuantityPerGWe', depends=_invdeps, schema=_invschema)
+def inventory_quantity_per_gwe(expinv, power):
+    """Inventory Quantity per GWe metric returns the explicit inventory table
+    with quantity in units of kg/GWe, calculated by dividing the original
+    quantity by the electricity generated at the corresponding simulation and
+    the specific time in TimeSeriesPower metric.
+    """
+    power = pd.DataFrame(data={'SimId': power.SimId,
+                               'AgentId': power.AgentId,
+                               'Time': power.Time,
+                               'Value': power.Value},
+                         columns=['SimId', 'AgentID', 'Time', 'Value'])
+    power_index = ['SimId', 'Time']
+    power = power.groupby(power_index).sum()
+    df1 = power.reset_index()
+    inv = pd.DataFrame(data={'SimId': expinv.SimId,
+                             'AgentId': expinv.AgentId,
+                             'Time': expinv.Time,
+                             'InventoryName': expinv.InventoryName,
+                             'NucId': expinv.NucId,
+                             'Quantity': expinv.Quantity},
+                       columns=['SimId', 'AgentId', 'Time', 'InventoryName',
+                                'NucId', 'Quantity'])
+    inv = pd.merge(inv, df1, on=['SimId', 'Time'], how='left')
+    inv.Quantity = inv.Quantity/inv.Value
+    inv = inv.drop(['Value'], axis=1)
+    return inv
