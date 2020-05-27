@@ -99,6 +99,7 @@ class eco_input_data():
 
         return proto_eco
 
+
 finance_col = ["discount_rate", "tax_rate", "return_on_debt",
                "return_on_equity"]
 capital_col = ["beforePeak", "afterPeak", "constructionDuration",
@@ -106,49 +107,49 @@ capital_col = ["beforePeak", "afterPeak", "constructionDuration",
 operation_col = ["fixed", "variable", "operation_dev"]
 fuel_col = ["name", "supply_cost", "waste_fee", "fuel_dev"]
 
+
 def build_eco_row(proto_dict):
     row_col = finance_col + capital_col + operation_col + fuel_col
     print(row_col)
     df = pd.DataFrame(columns=row_col)
-    
 
     for fuel_type in proto_dict["fuels"]:
         a_row = pd.DataFrame(np.array([(
-                    float(proto_dict["finance"]["discount_rate"]),
-                    float(proto_dict["finance"]["tax_rate"]),
-                    float(proto_dict["finance"]["return_on_debt"]),
-                    float(proto_dict["finance"]["return_on_equity"]),
-                    float(proto_dict["capital"]["beforePeak"]),
-                    float(proto_dict["capital"]["afterPeak"]),
-                    float(proto_dict["capital"]["constructionDuration"]),
-                    float(proto_dict["capital"]["overnight_cost"]),
-                    float(proto_dict["capital"]["deviation"]),
-                    float(proto_dict["operation_maintenance"]["fixed"]),
-                    float(proto_dict["operation_maintenance"]["variable"]),
-                    float(proto_dict["operation_maintenance"]["deviation"]),
-                    fuel_type["name"],
-                    float(fuel_type["supply_cost"]),
-                    float(fuel_type["waste_fee"]),
-                    float(fuel_type["deviation"]))
-                    ],
-                    dtype=ensure_dt_bytes([
-                         ('discount_rate', '<f8'),
-                         ('tax_rate', '<f8'),
-                         ('return_on_debt', '<f8'),
-                         ('return_on_equity', '<f8'),
-                         ('beforePeak', '<f8'),
-                         ('afterPeak', '<f8'),
-                         ('constructionDuration', '<f8'),
-                         ('overnight_cost', '<f8'),
-                         ('operation_dev', '<f8'),
-                         ('fixed', '<f8'),
-                         ('variable', '<f8'),
-                         ('capital_dev', '<f8'),
-                         ('name', 'O'),
-                         ('supply_cost', '<f8'),
-                         ('waste_fee', '<f8'),
-                         ('fuel_dev', '<f8')
-                         ])))
+            float(proto_dict["finance"]["discount_rate"]),
+            float(proto_dict["finance"]["tax_rate"]),
+            float(proto_dict["finance"]["return_on_debt"]),
+            float(proto_dict["finance"]["return_on_equity"]),
+            float(proto_dict["capital"]["beforePeak"]),
+            float(proto_dict["capital"]["afterPeak"]),
+            float(proto_dict["capital"]["constructionDuration"]),
+            float(proto_dict["capital"]["overnight_cost"]),
+            float(proto_dict["capital"]["deviation"]),
+            float(proto_dict["operation_maintenance"]["fixed"]),
+            float(proto_dict["operation_maintenance"]["variable"]),
+            float(proto_dict["operation_maintenance"]["deviation"]),
+            fuel_type["name"],
+            float(fuel_type["supply_cost"]),
+            float(fuel_type["waste_fee"]),
+            float(fuel_type["deviation"]))
+        ],
+            dtype=ensure_dt_bytes([
+                ('discount_rate', '<f8'),
+                ('tax_rate', '<f8'),
+                ('return_on_debt', '<f8'),
+                ('return_on_equity', '<f8'),
+                ('beforePeak', '<f8'),
+                ('afterPeak', '<f8'),
+                ('constructionDuration', '<f8'),
+                ('overnight_cost', '<f8'),
+                ('operation_dev', '<f8'),
+                ('fixed', '<f8'),
+                ('variable', '<f8'),
+                ('capital_dev', '<f8'),
+                ('name', 'O'),
+                ('supply_cost', '<f8'),
+                ('waste_fee', '<f8'),
+                ('fuel_dev', '<f8')
+            ])))
         print(a_row)
         df = pd.concat([a_row, df], ignore_index=True)
     return df
