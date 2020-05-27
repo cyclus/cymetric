@@ -40,19 +40,9 @@ class eco_input_data():
         data = yaml.load(stream, Loader=yaml.FullLoader)
         self.dict = data
 
-    def update_prop(self, proto, traveling_dict, key, properties, prop_list):
-        updated = False
-        if key in traveling_dict:
-            for agent in traveling_dict[key]:
-                if agent["prototype"] == proto:
-                    traveling_dict = agent
-                    updated = True
-                    for prop in prop_list:
-                        if prop in traveling_dict:
-                            properties[prop] = traveling_dict[prop]
-        return updated, traveling_dict
-
     def get_prototype_eco(self, filiation):
+        """ Return a dict with all the colapsed properties of a prototype
+        """
         proto_eco = {}
         traveling_dict = self.dict["eco_model"]
         for prop in eco_properties:
@@ -61,25 +51,27 @@ class eco_input_data():
 
         for proto in filiation:
             updated = False
-            updated, traveling_dict = self.update_prop(proto, traveling_dict,
-                                                       "region", proto_eco,
-                                                       eco_props_region)
+            updated, traveling_dict = update_prop(proto, traveling_dict,
+                                                  "region", proto_eco,
+                                                  eco_props_region)
             if not updated:
-                updated, traveling_dict = self.update_prop(proto,
-                                                           traveling_dict,
-                                                           "institution",
-                                                           proto_eco,
-                                                           eco_props_agents)
+                updated, traveling_dict = update_prop(proto,
+                                                      traveling_dict,
+                                                      "institution",
+                                                      proto_eco,
+                                                      eco_props_agents)
             if not updated:
-                updated, traveling_dict = self.update_prop(proto,
-                                                           traveling_dict,
-                                                           "facility",
-                                                           proto_eco,
-                                                           eco_props_agents)
+                updated, traveling_dict = update_prop(proto,
+                                                      traveling_dict,
+                                                      "facility",
+                                                      proto_eco,
+                                                      eco_props_agents)
 
         return proto_eco
 
     def get_prototypes_eco(self):
+        """ Return a dict with all the colapsed properties of a prototype
+        """
         proto_eco = {}
         model_dict = self.dict["eco_model"]
 
@@ -100,12 +92,20 @@ class eco_input_data():
         return proto_eco
 
 
-finance_col = ["discount_rate", "tax_rate", "return_on_debt",
-               "return_on_equity"]
-capital_col = ["beforePeak", "afterPeak", "constructionDuration",
-               "overnight_cost", "capital_dev"]
-operation_col = ["fixed", "variable", "operation_dev"]
-fuel_col = ["name", "supply_cost", "waste_fee", "fuel_dev"]
+def update_prop(proto, traveling_dict, key, properties, prop_list):
+    """ load/update the economical property of the prototype from the passed
+     dict.
+    """
+    updated = False
+    if key in traveling_dict:
+        for agent in traveling_dict[key]:
+            if agent["prototype"] == proto:
+                traveling_dict = agent
+                updated = True
+                for prop in prop_list:
+                    if prop in traveling_dict:
+                        properties[prop] = traveling_dict[prop]
+    return updated, traveling_dict
 
 
 def build_eco_row(proto_dict):
@@ -130,8 +130,7 @@ def build_eco_row(proto_dict):
             fuel_type["name"],
             float(fuel_type["supply_cost"]),
             float(fuel_type["waste_fee"]),
-            float(fuel_type["deviation"]))
-        ],
+            float(fuel_type["deviation"]))],
             dtype=ensure_dt_bytes([
                 ('discount_rate', '<f8'),
                 ('tax_rate', '<f8'),
@@ -148,10 +147,8 @@ def build_eco_row(proto_dict):
                 ('name', 'O'),
                 ('supply_cost', '<f8'),
                 ('waste_fee', '<f8'),
-                ('fuel_dev', '<f8')
-            ])))
-        print(a_row)
-        df = pd.concat([a_row, df], ignore_index=True)
+                ('fuel_dev', '<f8')])))
+        df = pd.concat([a_row, df], ignore_index=True, sort=False)
     return df
 
 
