@@ -5,10 +5,10 @@ power economics. Second, some functions give several modeling options in the
 metrics calculations. All prices are 2015 $
 """
 
+import math
+import yaml
 import pandas as pd
 import numpy as np
-import yaml
-import math
 from cymetric.tools import ensure_dt_bytes
 
 eco_props_agents = ["capital",
@@ -61,21 +61,21 @@ class eco_input_data():
 
         for proto in filiation:
             updated = False
-            status, traveling_dict = self.update_prop(proto, traveling_dict,
-                                                      "region", proto_eco,
-                                                      eco_props_region)
+            updated, traveling_dict = self.update_prop(proto, traveling_dict,
+                                                       "region", proto_eco,
+                                                       eco_props_region)
             if not updated:
-                status, traveling_dict = self.update_prop(proto,
-                                                          traveling_dict,
-                                                          "institution",
-                                                          proto_eco,
-                                                          eco_props_agents)
+                updated, traveling_dict = self.update_prop(proto,
+                                                           traveling_dict,
+                                                           "institution",
+                                                           proto_eco,
+                                                           eco_props_agents)
             if not updated:
-                status, traveling_dict = self.update_prop(proto,
-                                                          traveling_dict,
-                                                          "facility",
-                                                          proto_eco,
-                                                          eco_props_agents)
+                updated, traveling_dict = self.update_prop(proto,
+                                                           traveling_dict,
+                                                           "facility",
+                                                           proto_eco,
+                                                           eco_props_agents)
 
         return proto_eco
 
@@ -212,6 +212,7 @@ def swu(feedMass, feedAssay, productMass, productAssay, wasteMass, wasteAssay):
     """
     rtn_value = wasteMass * V(wasteAssay) + productMass * V(productAssay) \
         - feedMass * V(feedAssay)
+    return rtn_value
 
 
 def waste_mass(feedMass, productMass):
