@@ -23,7 +23,7 @@ finance_col = ["discount_rate", "tax_rate", "return_on_debt",
 capital_col = ["beforePeak", "afterPeak", "constructionDuration",
                "overnight_cost", "capital_dev"]
 operation_col = ["fixed", "variable", "operation_dev"]
-fuel_col = ["name", "supply_cost", "waste_fee", "fuel_dev"]
+fuel_col = ["Commodity", "supply_cost", "waste_fee", "fuel_dev"]
 
 
 class eco_input_data():
@@ -72,24 +72,58 @@ class eco_input_data():
     def get_prototypes_eco(self):
         """ Return a dict with all the colapsed properties of a prototype
         """
+        row_col = ["Prototype"] + finance_col + \
+            capital_col + operation_col + fuel_col
+        df_eco = pd.DataFrame(columns=row_col)
+
         proto_eco = {}
         model_dict = self.dict["eco_model"]
 
+        # Set default eco data
         for prop in eco_properties:
             if prop in model_dict:
                 proto_eco[prop] = model_dict[prop]
 
+        # Retrieve Regions eco data
         for region_dict in model_dict["region"]:
             region_eco = proto_eco
             region_eco["prototype"] = region_dict["prototype"]
+            # get region Properties
             for prop in eco_properties:
                 if prop in region_dict:
                     proto_eco[prop] = region_dict[prop]
-            print(region_eco)
-            region_raw = build_eco_row(region_eco)
-            print(region_raw)
+            # build pdf with facility properties
+            region_pdf = build_eco_prot(region_eco)
+            df_eco = pd.concat([region_pdf, df_eco],
+                               ignore_index=True, sort=False)
 
-        return proto_eco
+            # Retrieve Institutions eco data
+            for institution_dict in region_dict["institution"]:
+                institution_eco = region_eco
+                institution_eco["prototype"] = institution_dict["prototype"]
+                # get institution Properties
+                for prop in eco_properties:
+                    if prop in institution_dict:
+                        proto_eco[prop] = institution_dict[prop]
+                # build pdf with facility properties
+                inst_pdf = build_eco_prot(institution_eco)
+                df_eco = pd.concat([inst_pdf, df_eco],
+                                   ignore_index=True, sort=False)
+
+                # Retrieve Facilities eco data
+                for facility_dict in institution_dict["facility"]:
+                    facility_eco = institution_eco
+                    facility_eco["prototype"] = facility_dict["prototype"]
+                    # get facility Properties
+                    for prop in eco_properties:
+                        if prop in facility_dict:
+                            proto_eco[prop] = facility_dict[prop]
+                    # build pdf with facility properties
+                    inst_pdf = build_eco_prot(facility_eco)
+                    df_eco = pd.concat([inst_pdf, df_eco],
+                                       ignore_index=True, sort=False)
+
+        return df_eco
 
 
 def update_prop(proto, traveling_dict, key, properties, prop_list):
@@ -108,13 +142,14 @@ def update_prop(proto, traveling_dict, key, properties, prop_list):
     return updated, traveling_dict
 
 
-def build_eco_row(proto_dict):
-    row_col = finance_col + capital_col + operation_col + fuel_col
-    print(row_col)
+def build_eco_prot(proto_dict):
+    row_col = ["prototype"] + finance_col + \
+        capital_col + operation_col + fuel_col
     df = pd.DataFrame(columns=row_col)
-
+    print(proto_dict)
     for fuel_type in proto_dict["fuels"]:
         a_row = pd.DataFrame(np.array([(
+            proto_dict["prototype"],
             float(proto_dict["finance"]["discount_rate"]),
             float(proto_dict["finance"]["tax_rate"]),
             float(proto_dict["finance"]["return_on_debt"]),
@@ -132,6 +167,7 @@ def build_eco_row(proto_dict):
             float(fuel_type["waste_fee"]),
             float(fuel_type["deviation"]))],
             dtype=ensure_dt_bytes([
+                ('Prototype', 'O'),
                 ('discount_rate', '<f8'),
                 ('tax_rate', '<f8'),
                 ('return_on_debt', '<f8'),
@@ -144,7 +180,7 @@ def build_eco_row(proto_dict):
                 ('fixed', '<f8'),
                 ('variable', '<f8'),
                 ('capital_dev', '<f8'),
-                ('name', 'O'),
+                ('Commodity', 'O'),
                 ('supply_cost', '<f8'),
                 ('waste_fee', '<f8'),
                 ('fuel_dev', '<f8')])))
