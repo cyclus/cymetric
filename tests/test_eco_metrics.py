@@ -327,25 +327,32 @@ def test_annual_costs():
     """
     """
     # Reactor / Institution level
-    assert_equal(eco_metrics.annual_costs('tests/test.sqlite', 15).sum().sum(),
-                 eco_metrics.institution_annual_costs('tests/test.sqlite', 16).sum().sum())
-    assert_equal(eco_metrics.annual_costs_present_value('tests/test.sqlite', 13).sum().sum(),
-                 eco_metrics.institution_annual_costs_present_value(
-        'tests/test.sqlite', 9).sum().sum())
+    assert_equal(
+        eco_metrics.annual_costs('tests/test.sqlite', 15).sum(),
+        eco_metrics.institution_annual_costs('tests/test.sqlite', 16).sum())
+    assert_equal(
+        eco_metrics.annual_costs_present_value('tests/test.sqlite', 13).sum(),
+        eco_metrics.institution_annual_costs_present_value('tests/test.sqlite',
+                                                           9).sum().sum())
     # Region / Institution level
-    assert_equal(eco_metrics.region_annual_costs('tests/test.sqlite', 8).sum().sum(),
-                 eco_metrics.institution_annual_costs('tests/test.sqlite', 9).sum().sum())
-    assert_equal(eco_metrics.region_annual_costs_present_value(
-        'tests/test.sqlite', 8).sum().sum(),
+    assert_equal(
+        eco_metrics.region_annual_costs('tests/test.sqlite', 8).sum().sum(),
+        eco_metrics.institution_annual_costs('tests/test.sqlite',
+                                             9).sum().sum())
+    assert_equal(
+        eco_metrics.region_annual_costs_present_value(
+            'tests/test.sqlite', 8).sum().sum(),
         eco_metrics.institution_annual_costs_present_value(
-        'tests/test.sqlite', 9).sum().sum())
+            'tests/test.sqlite', 9).sum().sum())
     # Simulation / Reactor level
-    assert_equal(eco_metrics.region_annual_costs('tests/test.sqlite', 8).sum().sum(),
-                 eco_metrics.simulation_annual_costs('tests/test.sqlite').sum().sum())
-    assert_equal(eco_metrics.region_annual_costs_present_value(
-        'tests/test.sqlite', 8).sum().sum(),
+    assert_equal(
+        eco_metrics.region_annual_costs('tests/test.sqlite', 8).sum(),
+        eco_metrics.simulation_annual_costs('tests/test.sqlite').sum().sum())
+    assert_equal(
+        eco_metrics.region_annual_costs_present_value(
+            'tests/test.sqlite', 8).sum().sum(),
         eco_metrics.simulation_annual_costs_present_value(
-        'tests/test.sqlite').sum().sum())
+            'tests/test.sqlite').sum().sum())
 
 
 def test_lcoe():
@@ -395,10 +402,12 @@ def test_power_generated():
     """
     # Reactor / Institution level
     assert_equal(eco_metrics.power_generated('tests/test.sqlite', 13),
-                 eco_metrics.institution_power_generated('tests/test.sqlite', 9))
+                 eco_metrics.institution_power_generated('tests/test.sqlite',
+                                                         9))
     # Region / Institution level
     assert_equal(eco_metrics.region_power_generated('tests/test.sqlite', 8),
-                 eco_metrics.institution_power_generated('tests/test.sqlite', 9))
+                 eco_metrics.institution_power_generated('tests/test.sqlite',
+                                                         9))
     # Simulation / Reactor level
     assert_equal(eco_metrics.region_power_generated('tests/test.sqlite', 8),
                  eco_metrics.simulation_power_generated('tests/test.sqlite'))
@@ -408,17 +417,20 @@ def test_period_costs():
     """
     """
     # Reactor level
-    assert_equal(eco_metrics.period_costs('tests/test.sqlite', 13, 30).sum().sum(),
-                 eco_metrics.period_costs2('tests/test.sqlite', 13, 30).sum().sum())
+    assert_equal(eco_metrics.period_costs('tests/test.sqlite', 13, 30).sum(),
+                 eco_metrics.period_costs2('tests/test.sqlite', 13, 30).sum())
     # Reactor / Institution level
-    assert_equal(eco_metrics.period_costs('tests/test.sqlite', 13).sum().sum(),
-                 eco_metrics.institution_period_costs('tests/test.sqlite', 9).sum().sum())
+    assert_equal(eco_metrics.period_costs('tests/test.sqlite', 13).sum(),
+                 eco_metrics.institution_period_costs('tests/test.sqlite',
+                                                      9).sum())
     # Region / Institution level
-    assert_equal(eco_metrics.region_period_costs('tests/test.sqlite', 8).sum().sum(),
-                 eco_metrics.institution_period_costs('tests/test.sqlite', 9).sum().sum())
+    assert_equal(eco_metrics.region_period_costs('tests/test.sqlite', 8).sum(),
+                 eco_metrics.institution_period_costs('tests/test.sqlite',
+                                                      9).sum())
     # Region / Simulation level
-    assert_equal(eco_metrics.region_period_costs('tests/test.sqlite', 8).sum().sum(),
-                 eco_metrics.simulation_period_costs('tests/test.sqlite').sum().sum())
+    assert_equal(eco_metrics.region_period_costs('tests/test.sqlite', 8).sum(),
+                 eco_metrics.simulation_period_costs(
+                     'tests/test.sqlite').sum())
 
 
 if __name__ == "__main__":
