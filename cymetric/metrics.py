@@ -106,7 +106,7 @@ _matschema = [
     ('NucId', ts.INT),
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
@@ -138,7 +138,7 @@ _actschema = [
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
     ('Activity', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
@@ -177,7 +177,7 @@ _dhschema = [
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
     ('DecayHeat', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
@@ -210,7 +210,7 @@ _bsdeps = ['AgentEntry']
 _bsschema = [
     ('SimId', ts.UUID), ('EnterTime', ts.INT), ('Prototype', ts.STRING),
     ('Count', ts.INT)
-    ]
+]
 
 
 @metric(name='BuildSeries', depends=_bsdeps, schema=_bsschema)
@@ -235,7 +235,7 @@ _dsschema = [
     ('ExitTime', ts.INT),
     ('Prototype', ts.STRING),
     ('Count', ts.INT)
-    ]
+]
 
 
 @metric(name='DecommissionSeries', depends=_dsdeps, schema=_dsschema)
@@ -270,7 +270,7 @@ _agentsschema = schemas.schema([
     ('Lifetime', ts.INT),
     ('EnterTime', ts.INT),
     ('ExitTime', ts.INT),
-    ])
+])
 
 
 @metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
@@ -287,7 +287,7 @@ def agents(entry, exit, decom, info):
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
     if exit is None:
-        agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx))
+        agent_exit = pd.Series(index=idx, data=[np.nan] * len(idx))
         agent_exit.name = 'ExitTime'
     else:
         agent_exit = agent_exit.reindex(index=idx)
@@ -318,7 +318,7 @@ _transschema = [
     ('Commodity', ts.STRING),
     ('Units', ts.STRING),
     ('Quantity', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
@@ -350,7 +350,7 @@ _invschema = [
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
@@ -381,7 +381,7 @@ _invschema = [
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='ExplicitInventoryByNuc', depends=_invdeps, schema=_invschema)
@@ -411,7 +411,7 @@ _egschema = [
     ('AgentId', ts.INT),
     ('Year', ts.INT),
     ('Energy', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='AnnualElectricityGeneratedByAgent', depends=_egdeps,
@@ -423,8 +423,8 @@ def annual_electricity_generated_by_agent(elec):
     """
     elec = pd.DataFrame(data={'SimId': elec.SimId,
                               'AgentId': elec.AgentId,
-                              'Year': elec.Time.apply(lambda x: x//12),
-                              'Energy': elec.Value.apply(lambda x: x/12)},
+                              'Year': elec.Time.apply(lambda x: x // 12),
+                              'Energy': elec.Value.apply(lambda x: x / 12)},
                         columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
@@ -443,7 +443,7 @@ _egschema = [
     ('AgentId', ts.INT),
     ('Month', ts.INT),
     ('Energy', ts.DOUBLE)
-    ]
+]
 
 
 @metric(name='MonthlyElectricityGeneratedByAgent', depends=_egdeps,
@@ -498,7 +498,7 @@ def inventory_quantity_per_gwe(inv, power):
 
     # normalisation of the inv per power
     inv = pd.merge(inv, power, on=base_index, how='left')
-    inv.Quantity = inv.Quantity/inv.Value
+    inv.Quantity = inv.Quantity / inv.Value
     inv = inv.drop(['Value'], axis=1)
 
     return inv
@@ -519,7 +519,7 @@ _tldeps = ['Info']
 _tlschema = [
     ('SimId', ts.UUID),
     ('TimeStep', ts.INT)
-    ]
+]
 
 
 @metric(name='TimeList', depends=_tldeps, schema=_tlschema)

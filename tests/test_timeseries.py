@@ -157,7 +157,7 @@ def test_timeseries_inventories(db, fname, backend):
     if not HAVE_PYNE:
         raise SkipTest
     cal = ts.inventories(evaler, facilities=['Reactor1'],
-                                      nucs=['94239'])
+                         nucs=['94239'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
         (1, 0.0444814879803),
@@ -171,7 +171,7 @@ def test_timeseries_inventories(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     cal = ts.inventories(evaler, facilities=['Reactor1'],
-                                      nucs=['94239', '92235'])
+                         nucs=['94239', '92235'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
         (1, 0.0460607124057),
@@ -195,7 +195,7 @@ def test_timeseries_inventories_activity(db, fname, backend):
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
-                                               nucs=['94239'])
+                                  nucs=['94239'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
         (1, 2.44036364223e+13),
@@ -209,7 +209,7 @@ def test_timeseries_inventories_activity(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
-                                               nucs=['94239', '92235'])
+                                  nucs=['94239', '92235'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
         (1, 2.4403666094e+13),
@@ -233,7 +233,7 @@ def test_timeseries_inventories_decayheat(db, fname, backend):
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
-                                                nucs=['94239'])
+                                   nucs=['94239'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
         (1, 7.98590335085e+32),
@@ -247,7 +247,7 @@ def test_timeseries_inventories_decayheat(db, fname, backend):
     assert_frame_equal(cal, refs)
 
     cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
-                                                nucs=['94239', '92235'])
+                                   nucs=['94239', '92235'])
     refs = pd.DataFrame(np.array([
         (0, 0.0),
         (1, 7.98591200694e+32),

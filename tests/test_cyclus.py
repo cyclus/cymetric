@@ -8,6 +8,7 @@ from nose.tools import assert_equal, assert_less
 
 from tools import setup, dbtest
 
+
 @dbtest
 def test_name(db, fname, backend):
     obs = db.name

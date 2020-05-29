@@ -8,13 +8,14 @@ from cymetric.tools import dbopen
 from cymetric.evaluator import Evaluator
 from cymetric.execution import exec_code
 
+
 def parse_args():
     """Parses the command line arguments."""
-    parser =  ArgumentParser(description='Cyclus metric analysis tool.')
+    parser = ArgumentParser(description='Cyclus metric analysis tool.')
     parser.add_argument('db', help='path to the database')
     parser.add_argument('-e', dest='exec_code', help='execution string',
                         default=None)
-    parser.add_argument('-l', dest='listing', action='store_true', 
+    parser.add_argument('-l', dest='listing', action='store_true',
                         help='lists the tables in the database', default=False)
     parser.add_argument('--write', dest='write', action='store_true',
                         help='writes the computed metrics to the db',
@@ -35,5 +36,6 @@ def main():
     if ns.exec_code is not None:
         exec_code(ns.exec_code, db, write=ns.write)
 
-if __name__ == '__main__': 
+
+if __name__ == '__main__':
     main()
