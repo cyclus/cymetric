@@ -77,7 +77,7 @@ eco_model:
             - prototype: Reactor1
               fuels:
                 - name: uox
-                  supply_cost: 10.5
+                  supply_cost: 1
                   waste_fee: 0
                   deviation: 0
 

@@ -128,23 +128,21 @@ def fuel_cost(dfResources, dfTransactions, dfEntry):
 # in agreement, taking receiver (using implementation as ref)
     rtn = dfTransactions.rename(columns={'ReceiverId': 'AgentId'})
 
+    # Get eco data
     agents_eco_prop = eco_data.get_prototypes_eco()
 
-    print("agents_eco", agents_eco_prop)
-    # add quantity to Transaction
+    # Add quantity to Transaction
     base_col = ['SimId', 'ResourceId']
     added_col = base_col + ['Quantity']
     rtn = merge(rtn, base_col, dfResources, added_col)
+
+    # Adding prototype info
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
-    print(rtn)
-    print(dfEntry)
     rtn = merge(rtn, base_col, dfEntry, added_col)
-    print(rtn)
 
     # Merge Eco with Transaction per ReceiverId and commodity
     base_col = ['Prototype', 'Commodity']
-    # , 'Finance_DiscountRate']
     added_col = base_col + ['supply_cost',
                             'waste_fee', 'fuel_dev']
     rtn = merge(rtn, base_col, agents_eco_prop, added_col)

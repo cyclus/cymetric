@@ -60,13 +60,13 @@ def test_fuel_cost():
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 5, 12, 'uox', 1, 6),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 6, 12, 'uox', 1, 7),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 7, 12, 'uox', 1, 8),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 12, 'uox', 1, 9)
-    ], dtype=ensure_dt_bytes([('SimId', 'O'),
-                              ('TransactionId', '<i8'),
-                              ('AgentId', '<i8'),
-                              ('Commodity', 'O'),
-                              ('Payment', '<f8'),
-                              ('Time', '<i8')])))
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 12, 'uox', 1, 9)],
+        dtype=ensure_dt_bytes([('SimId', 'O'),
+                               ('TransactionId', '<i8'),
+                               ('AgentId', '<i8'),
+                               ('Commodity', 'O'),
+                               ('Payment', '<f8'),
+                               ('Time', '<i8')])))
     resources = pd.DataFrame(np.array([
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 5, 1),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 6, 1),
@@ -85,10 +85,10 @@ def test_fuel_cost():
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 47, 1),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 48, 1),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 53, 1),
-        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 54, 1)
-    ], dtype=ensure_dt_bytes([('SimId', 'O'),
-                              ('ResourceId', '<i8'),
-                              ('Quantity', '<f8')])))
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 54, 1)],
+        dtype=ensure_dt_bytes([('SimId', 'O'),
+                               ('ResourceId', '<i8'),
+                               ('Quantity', '<f8')])))
     transactions = pd.DataFrame(np.array([
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 0, 12, 13, 5,
          'uox', 1),
@@ -107,31 +107,24 @@ def test_fuel_cost():
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 7, 12, 13, 47,
          'uox', 8),
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 12, 13, 53,
-         'uox', 9)
-    ], dtype=ensure_dt_bytes([('SimId', 'O'),
-                              ('TransactionId', '<i8'),
-                              ('ReceiverId', '<i8'),
-                              ('SenderId', '<i8'),
-                              ('ResourceId', '<i8'),
-                              ('Commodity', 'O'),
-                              ('Time', '<i8')])))
+         'uox', 9)],
+        dtype=ensure_dt_bytes([('SimId', 'O'),
+                               ('TransactionId', '<i8'),
+                               ('ReceiverId', '<i8'),
+                               ('SenderId', '<i8'),
+                               ('ResourceId', '<i8'),
+                               ('Commodity', 'O'),
+                               ('Time', '<i8')])))
     entry = pd.DataFrame(np.array([
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
-         13, -1, ':cycamore:Reactor', 1, 'Reactor1')
-    ], dtype=ensure_dt_bytes([('SimId', 'O'),
-                              ('AgentId', '<i8'),
-                              ('ParentId', '<i8'),
-                              ('Spec', 'O'),
-                              ('EnterTime', '<i8'),
-                              ('Prototype', 'O')])))
-    ecoInfo = pd.DataFrame(np.array([
-        ('Reactor1', 12, 'uox', 1, 0, 0, 0.1)
-    ], dtype=ensure_dt_bytes([
-        ('Prototype', 'O'), ('AgentId', '<i8'),
-        ('Commodity', 'O'), ('Fuel_SupplyCost', '<f8'),
-        ('Fuel_WasteFee', '<f8'), ('Fuel_Deviation', '<f8'),
-        ('Finance_DiscountRate', '<f8')]))
-    )
+         12, -1, ':cycamore:Reactor', 1, 'Reactor1')],
+        dtype=ensure_dt_bytes([('SimId', 'O'),
+                               ('AgentId', '<i8'),
+                               ('ParentId', '<i8'),
+                               ('Spec', 'O'),
+                               ('EnterTime', '<i8'),
+                               ('Prototype', 'O')])))
+
     eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
     obs = eco_metrics.fuel_cost.func(resources, transactions, entry)
     assert_frame_equal(exp, obs)
