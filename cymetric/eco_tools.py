@@ -18,12 +18,14 @@ eco_props_agents = ["capital",
 eco_props_region = ["finance"] + eco_props_agents
 eco_properties = ["periode"] + eco_props_region
 
-finance_col = ["discount_rate", "tax_rate", "return_on_debt",
-               "return_on_equity"]
-capital_col = ["beforePeak", "afterPeak", "constructionDuration",
-               "overnight_cost", "capital_dev"]
-operation_col = ["fixed", "variable", "operation_dev"]
-fuel_col = ["Commodity", "supply_cost", "waste_fee", "fuel_dev"]
+
+key_option_dict = {"finance": ["discount_rate", "tax_rate", "return_on_debt",
+                               "return_on_equity"],
+                   "capital": ["beforePeak", "afterPeak", "constructionDuration",
+                               "capital_overnight_cost", "capital_dev"],
+                   "operation": ["fixed", "variable", "operation_dev"],
+                   "decommission": ["decom_duration", "decom_overnight_cost"],
+                   "fuel": ["Commodity", "supply_cost", "waste_fee", "fuel_dev"]}
 
 
 class eco_input_data():
@@ -72,8 +74,9 @@ class eco_input_data():
     def get_prototypes_eco(self):
         """ Return a dict with all the colapsed properties of a prototype
         """
-        row_col = ["Prototype"] + finance_col + \
-            capital_col + operation_col + fuel_col
+        row_col = ["Prototype"]
+        for key in key_option_dict:
+            row_col += key_option_dict[key]
         df_eco = pd.DataFrame(columns=row_col)
 
         proto_eco = {}
@@ -143,10 +146,11 @@ def update_prop(proto, traveling_dict, key, properties, prop_list):
 
 
 def build_eco_prot(proto_dict):
-    row_col = ["prototype"] + finance_col + \
-        capital_col + operation_col + fuel_col
+    row_col = ["Prototype"]
+    for key in key_option_dict:
+        row_col += key_option_dict[key]
+
     df = pd.DataFrame(columns=row_col)
-    print(proto_dict)
     for fuel_type in proto_dict["fuels"]:
         a_row = pd.DataFrame(np.array([(
             proto_dict["prototype"],
@@ -162,6 +166,8 @@ def build_eco_prot(proto_dict):
             float(proto_dict["operation_maintenance"]["fixed"]),
             float(proto_dict["operation_maintenance"]["variable"]),
             float(proto_dict["operation_maintenance"]["deviation"]),
+            float(proto_dict["decommission"]["duration"]),
+            float(proto_dict["decommission"]["overnight_cost"]),
             fuel_type["name"],
             float(fuel_type["supply_cost"]),
             float(fuel_type["waste_fee"]),
@@ -175,11 +181,13 @@ def build_eco_prot(proto_dict):
                 ('beforePeak', '<f8'),
                 ('afterPeak', '<f8'),
                 ('constructionDuration', '<f8'),
-                ('overnight_cost', '<f8'),
+                ('capital_overnight_cost', '<f8'),
                 ('operation_dev', '<f8'),
                 ('fixed', '<f8'),
                 ('variable', '<f8'),
                 ('capital_dev', '<f8'),
+                ('decom_duration', '<f8'),
+                ('decom_overnight_cost', '<f8'),
                 ('Commodity', 'O'),
                 ('supply_cost', '<f8'),
                 ('waste_fee', '<f8'),

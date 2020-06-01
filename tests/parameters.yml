@@ -80,6 +80,9 @@ eco_model:
                   supply_cost: 1
                   waste_fee: 0
                   deviation: 0
+              decommission:
+                overnight_cost: 1
+                duration: 5
 
             - prototype: Reactor2
               fuels:

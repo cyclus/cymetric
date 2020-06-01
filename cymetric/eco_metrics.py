@@ -163,7 +163,7 @@ def fuel_cost(dfResources, dfTransactions, dfEntry):
 del _fcdeps, _fcschema
 
 
-_dcdeps = ['TimeSeriesPower', 'AgentEntry', 'Info', 'EconomicInfo']
+_dcdeps = ['TimeSeriesPower', 'AgentEntry', 'Info']
 
 _dcschema = [
     ('SimId', ts.UUID),
@@ -173,27 +173,27 @@ _dcschema = [
 
 
 @metric(name='DecommissioningCost', depends=_dcdeps, schema=_dcschema)
-def decommissioning_cost(dfPower, dfEntry, dfInfo, dfEcoInfo):
+def decommissioning_cost(dfPower, dfEntry, dfInfo):
     """The Decommissioning cost metric gives the cash flows at each time step
     corresponding to the reactors decommissioning.
     """
+    # Get eco data
+    dfEcoInfo = eco_data.get_prototypes_eco()
 
-    base_col = ['AgentId']
-    added_col = base_col + ['Value']
-    dfEcoInfo = pd.merge(dfPower[added_col], dfEcoInfo, on=base_col)
-    dfEcoInfo.rename(columns={'Value': 'PowerCapacity'}, inplace=True)
     dfEntry = dfEntry[dfEntry['Lifetime'].apply(lambda x: x > 0)]
     reactorsId = dfEntry[dfEntry['Spec'].apply(
         lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
     rtn = pd.DataFrame()
     for id in reactorsId:
-        tmp = dfEcoInfo[dfEntry['AgentId'] == id]
-        if(len(tmp) == 1):
-            duration = int(tmp.at[0, 'Decommissioning_Duration'])
-            overnightCost = tmp.at[0, 'Decommissioning_OvernightCost']
+        proto = dfEntry[dfEntry['AgentId'] == id].at[0, 'Prototype']
+        tmp = dfEcoInfo[dfEcoInfo['Prototype'] == proto].reset_index()
+        if (len(tmp) == 1):
+            duration = int(tmp.at[0, 'decom_duration'])
+            overnightCost = tmp.at[0, 'decom_overnight_cost']
             cashFlowShape = capital_shape(
                 duration - duration // 2, duration // 2)
-            powerCapacity = tmp.at[0, 'PowerCapacity']
+            powerCapacity = dfPower[dfPower['AgentId']
+                                    == id].reset_index().at[0, 'Value']
             cashFlow = cashFlowShape * powerCapacity * overnightCost
             entryTime = dfEntry[dfEntry.AgentId == id]['EnterTime'][0]
             lifetime = dfEntry[dfEntry.AgentId == id]['Lifetime'][0]
@@ -218,7 +218,7 @@ _omschema = [('SimId', ts.UUID),
              ('Payment', ts.DOUBLE)]
 
 
-@metric(name='OperationMaintenance', depends=_omdeps, schema=_omschema)
+@ metric(name='OperationMaintenance', depends=_omdeps, schema=_omschema)
 def operation_maintenance(dfPower, dfEcoInfo):
     """The OperationMaintenance metric gives the cash flows at each time step
     corresponding to the reactor operations and maintenance costs.

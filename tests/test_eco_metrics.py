@@ -117,12 +117,13 @@ def test_fuel_cost():
                                ('Time', '<i8')])))
     entry = pd.DataFrame(np.array([
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
-         12, -1, ':cycamore:Reactor', 1, 'Reactor1')],
+         12, -1, ':cycamore:Reactor', 1, 10, 'Reactor1')],
         dtype=ensure_dt_bytes([('SimId', 'O'),
                                ('AgentId', '<i8'),
                                ('ParentId', '<i8'),
                                ('Spec', 'O'),
                                ('EnterTime', '<i8'),
+                               ('Lifetime', '<i8'),
                                ('Prototype', 'O')])))
 
     eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
@@ -151,14 +152,24 @@ def test_decommissioning_cost():
         ('AgentId', '<i8'),
         ('Value', '<f8')]))
     )
+    # entry = pd.DataFrame(np.array([
+    #     (1, 10, 13, ':cycamore:Reactor')
+    # ], dtype=ensure_dt_bytes([
+    #     ('EnterTime', '<i8'),
+    #     ('Lifetime', '<i8'),
+    #     ('AgentId', '<i8'),
+    #     ('Spec', 'O')]))
+    # )
     entry = pd.DataFrame(np.array([
-        (1, 10, 13, ':cycamore:Reactor')
-    ], dtype=ensure_dt_bytes([
-        ('EnterTime', '<i8'),
-        ('Lifetime', '<i8'),
-        ('AgentId', '<i8'),
-        ('Spec', 'O')]))
-    )
+        (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+         13, -1, ':cycamore:Reactor', 1, 10, 'Reactor1')],
+        dtype=ensure_dt_bytes([('SimId', 'O'),
+                               ('AgentId', '<i8'),
+                               ('ParentId', '<i8'),
+                               ('Spec', 'O'),
+                               ('EnterTime', '<i8'),
+                               ('Lifetime', '<i8'),
+                               ('Prototype', 'O')])))
     info = pd.DataFrame(np.array([
         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 2000, 1, 20)
     ], dtype=ensure_dt_bytes([
@@ -167,14 +178,8 @@ def test_decommissioning_cost():
         ('InitialMonth', '<i8'),
         ('Duration', '<i8')]))
     )
-    ecoInfo = pd.DataFrame(np.array([
-        (13, 5, 1)
-    ], dtype=ensure_dt_bytes([
-        ('AgentId', '<i8'),
-        ('Decommissioning_Duration', '<f8'),
-        ('Decommissioning_OvernightCost', '<f8')]))
-    )
-    obs = eco_metrics.decommissioning_cost.func(power, entry, info, ecoInfo)
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+    obs = eco_metrics.decommissioning_cost.func(power, entry, info)
     assert_frame_equal(exp, obs)
 
 
