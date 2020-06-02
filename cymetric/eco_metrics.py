@@ -233,7 +233,6 @@ def operation_maintenance(dfPower, dfEntry):
     base_col = ['Prototype']
     added_col = base_col + ecoInfo
     rtn = pd.merge(dfEntry, dfEcoInfo[added_col], on=base_col)
-    print(rtn)
 
     for index, row in rtn.iterrows():
         rtn.at[index, 'operation_dev'] *= np.random.randn(1)
@@ -246,8 +245,6 @@ def operation_maintenance(dfPower, dfEntry):
     rtn['Value'] *= 8760 / 12
     rtn['Payment'] = (rtn['Value'] * rtn['variable'] +
                       max(rtn['Value']) * rtn['fixed'])
-
-    print(rtn)
     return rtn[['SimId', 'AgentId', 'Time', 'Payment']]
 
 

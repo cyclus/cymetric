@@ -232,69 +232,69 @@ def test_operation_maintenance():
 
 # something is missing to be able to match the exp DataFrame....
 # def test_economic_info():
-#    exp = pd.DataFrame(np.array([
-#        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
-#        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 25436.85),
-#        (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 43800.0)
-#    ], dtype=ensure_dt_bytes([
-#        ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
-#        ('Payment', '<f8')]))
-#    )
-#    entry = pd.DataFrame(np.array([
-#        ('Region1', 8, -1, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 0, 0,
-#         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
-#        ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10,
-#         5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
-#        ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5,
-#         10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
-#        ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 0,
-#         0, 0, 'uox', 1, 0, 0, 0, 20)
-#    ], dtype=ensure_dt_bytes([('Prototype', 'O'),
-#                              ('AgentId', '<i8'),
-#                              ('ParentId', '<i8'),
-#                              ('Finance_ReturnOnDebt', '<f8'),
-#                              ('Finance_ReturnOnEquity', '<f8'),
-#                              ('Finance_TaxRate', '<f8'),
-#                              ('Finance_DiscountRate', '<f8'),
-#                              ('Captial_beforePeak', '<i8'),
-#                              ('Captial_afterPeak', '<i8'),
-#                              ('Captial_constructionDuration', '<i8'),
-#                              ('Captial_Deviation', '<f8'),
-#                              ('Captial_OvernightCost', '<f8'),
-#                              ('Decommissioning_Duration', '<i8'),
-#                              ('Decommissioning_OvernightCost', '<f8'),
-#                              ('FixedCost', '<f8'),
-#                              ('VariableCost', '<f8'),
-#                              ('Operation_Deviation', '<f8'),
-#                              ('Fuel_Commodity', 'O'),
-#                              ('Fuel_SupplyCost', '<f8'),
-#                              ('Fuel_WasteFee', '<f8'),
-#                              ('Fuel_Deviation', '<f8'),
-#                              ('Truncation_Begin', '<i8'),
-#                              ('Truncation_End', '<i8')]))
-#    )
-#    print(entry)
-#
-# this has been added but we are missing the info about the archetype "5".
-#    power = pd.DataFrame(np.array([
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 1),
-#              (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 1)
-#              ], dtype=ensure_dt_bytes([('SimId', 'O'),
-#                                        ('AgentId', '<i8'),
-#                                        ('Time', '<i8'),
-#                                        ('Value', '<f8')]))
-#              )
-#    obs = eco_metrics.operation_maintenance.func(power, entry)
-#    print(obs)
-#    print(exp)
-#    assert_frame_equal(exp, obs)
+#     exp = pd.DataFrame(np.array([
+#         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
+#         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 25436.85),
+#         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 43800.0)
+#     ], dtype=ensure_dt_bytes([
+#         ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
+#         ('Payment', '<f8')]))
+#     )
+#     entry = pd.DataFrame(np.array([
+#         ('Region1', 8, -1, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 0, 0,
+#          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
+#         ('Institution1', 9, 8, 0.1, 0.1, 0.1, 0.1, 10,
+#          5, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
+#         ('Source', 12, 9, 0.1, 0.1, 0.1, 0.1, 10, 5,
+#          10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20),
+#         ('Reactor1', 13, 9, 0.1, 0.1, 0.1, 0.1, 10, 5, 10, 1, 1, 1, 0, 0,
+#          0, 0, 'uox', 1, 0, 0, 0, 20)
+#     ], dtype=ensure_dt_bytes([('Prototype', 'O'),
+#                               ('AgentId', '<i8'),
+#                               ('ParentId', '<i8'),
+#                               ('Finance_ReturnOnDebt', '<f8'),
+#                               ('Finance_ReturnOnEquity', '<f8'),
+#                               ('Finance_TaxRate', '<f8'),
+#                               ('Finance_DiscountRate', '<f8'),
+#                               ('Captial_beforePeak', '<i8'),
+#                               ('Captial_afterPeak', '<i8'),
+#                               ('Captial_constructionDuration', '<i8'),
+#                               ('Captial_Deviation', '<f8'),
+#                               ('Captial_OvernightCost', '<f8'),
+#                               ('Decommissioning_Duration', '<i8'),
+#                               ('Decommissioning_OvernightCost', '<f8'),
+#                               ('FixedCost', '<f8'),
+#                               ('VariableCost', '<f8'),
+#                               ('Operation_Deviation', '<f8'),
+#                               ('Fuel_Commodity', 'O'),
+#                               ('Fuel_SupplyCost', '<f8'),
+#                               ('Fuel_WasteFee', '<f8'),
+#                               ('Fuel_Deviation', '<f8'),
+#                               ('Truncation_Begin', '<i8'),
+#                               ('Truncation_End', '<i8')]))
+#     )
+#     print(entry)
+
+#     # this has been added but we are missing the info about the archetype "5".
+#     power = pd.DataFrame(np.array([
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 7, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 1),
+#         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 1)
+#     ], dtype=ensure_dt_bytes([('SimId', 'O'),
+#                               ('AgentId', '<i8'),
+#                               ('Time', '<i8'),
+#                               ('Value', '<f8')]))
+#     )
+#     obs = eco_metrics.operation_maintenance.func(power, entry)
+#     print(obs)
+#     print(exp)
+#     assert_frame_equal(exp, obs)
 
 
 # Tests of the functions derived from the 5 basic economic metrics #####
@@ -304,8 +304,80 @@ way (calculating one obs and comparing to an exp)
 """
 
 
-def test_xml_parsing():
+def test_yaml_parsing():
     eco_info = eco_tools.eco_input_data("parameters.yml")
+
+    exp = {'eco_model':
+           {'periode': {'start': 0,
+                        'end': 20},
+            'finance': {'discount_rate': 0.1,
+                        'tax_rate': 0.1,
+                        'return_on_debt': 0.1,
+                        'return_on_equity': 0.1},
+            'capital': {'deviation': 0,
+                        'beforePeak': 10,
+                        'afterPeak': 5,
+                        'constructionDuration': 10,
+                        'overnight_cost': 1},
+            'operation_maintenance': {'fixed': 1,
+                                      'variable': 1,
+                                      'deviation': 0},
+            'decommission': {'duration': 5,
+                             'overnight_cost': 1},
+            'fuels': [{'name': 'uox',
+                       'supply_cost': 1,
+                       'waste_fee': 0,
+                       'deviation': 0},
+                      {'name': 'mox',
+                       'supply_cost': 2,
+                       'supply_fee': 0,
+                       'deviation': 0}],
+            'region': [{'prototype': 'MyReg',
+                        'finance': {'discount_rate': 0.1,
+                                    'tax_rate': 0.2,
+                                    'return_on_debt': 0.1,
+                                    'return_on_equity': 0.1},
+                        'capital': {'deviation': 0,
+                                    'beforePeak': 10,
+                                    'afterPeak': 5,
+                                    'constructionDuration': 10,
+                                    'overnight_cost': 1},
+                        'operation_maintenance': {'fixed': 0.5,
+                                                  'variable': 1,
+                                                  'deviation': 0},
+                        'fuels': [{'name': 'uox',
+                                   'supply_cost': 1.5,
+                                   'waste_fee': 0,
+                                   'deviation': 0}],
+                        'institution': [{'prototype': 'MyInst',
+                                         'capital': {'beforePeak': 10,
+                                                     'afterPeak': 5,
+                                                     'constructionDuration': 10,
+                                                     'deviation': 0,
+                                                     'overnight_cost': 1},
+                                         'fuels': [{'name': 'uox',
+                                                    'supply_cost': 2.5,
+                                                    'waste_fee': 0,
+                                                    'deviation': 0}],
+                                         'facility': [{'prototype': 'Reactor1',
+                                                       'fuels': [{'name': 'uox',
+                                                                  'supply_cost': 1,
+                                                                  'waste_fee': 0,
+                                                                  'deviation': 0}],
+                                                       'decommission': {'overnight_cost': 1,
+                                                                        'duration': 5}},
+                                                      {'prototype': 'Reactor2',
+                                                       'fuels': [{'name': 'mox',
+                                                                  'supply_cost': 5.5,
+                                                                  'waste_fee': 0,
+                                                                  'deviation': 0}]
+                                                       }]
+                                         }]
+                        }
+                       ]
+            }
+           }
+    assert_equal(exp, eco_info.dict)
     entry = pd.DataFrame(np.array([
         (1, 10,  2, 13, ':cycamore:Reactor', 'Reactor1'),
         (1, 10,  1,  2, 'SingleInstitution', 'MyInst'),
@@ -317,42 +389,66 @@ def test_xml_parsing():
         ('AgentId', '<i8'),
         ('Spec', 'O'),
         ('Prototype', 'O')])))
-    filiation = eco_info.get_filiation("Reactor1", entry)
+    filiation = eco_tools.get_filiation_per_name("Reactor1", entry)
+    exp = ['MyReg', 'MyInst', 'Reactor1']
+    assert_equal(filiation, exp)
 
-    print(filiation)
-    print(eco_info.get_prototype_eco("Reactor1", filiation))
+    exp = {'periode': {'start': 0,
+                       'end': 20},
+           'finance': {'discount_rate': 0.1,
+                       'tax_rate': 0.2,
+                       'return_on_debt': 0.1,
+                       'return_on_equity': 0.1},
+           'capital': {'beforePeak': 10,
+                       'afterPeak': 5,
+                       'constructionDuration': 10,
+                       'deviation': 0,
+                       'overnight_cost': 1},
+           'operation_maintenance': {'fixed': 0.5,
+                                     'variable': 1,
+                                     'deviation': 0},
+           'decommission': {'overnight_cost': 1,
+                            'duration': 5},
+           'fuels': [{'name': 'uox',
+                      'supply_cost': 1,
+                      'waste_fee': 0,
+                      'deviation': 0}]}
+    obs = eco_info.get_prototype_eco(filiation)
+    assert_equal(obs, exp)
 
 
 def test_annual_costs():
     """
     """
     # Reactor / Institution level
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+    print(eco_metrics.annual_costs('test.sqlite', 15))
     assert_equal(
-        eco_metrics.annual_costs('tests/test.sqlite', 15).sum(),
-        eco_metrics.institution_annual_costs('tests/test.sqlite', 16).sum())
+        eco_metrics.annual_costs('test.sqlite', 15).sum(),
+        eco_metrics.institution_annual_costs('test.sqlite', 16).sum())
     assert_equal(
-        eco_metrics.annual_costs_present_value('tests/test.sqlite', 13).sum(),
-        eco_metrics.institution_annual_costs_present_value('tests/test.sqlite',
+        eco_metrics.annual_costs_present_value('test.sqlite', 13).sum(),
+        eco_metrics.institution_annual_costs_present_value('test.sqlite',
                                                            9).sum().sum())
     # Region / Institution level
     assert_equal(
-        eco_metrics.region_annual_costs('tests/test.sqlite', 8).sum().sum(),
-        eco_metrics.institution_annual_costs('tests/test.sqlite',
+        eco_metrics.region_annual_costs('test.sqlite', 8).sum().sum(),
+        eco_metrics.institution_annual_costs('test.sqlite',
                                              9).sum().sum())
     assert_equal(
         eco_metrics.region_annual_costs_present_value(
-            'tests/test.sqlite', 8).sum().sum(),
+            'test.sqlite', 8).sum().sum(),
         eco_metrics.institution_annual_costs_present_value(
-            'tests/test.sqlite', 9).sum().sum())
+            'test.sqlite', 9).sum().sum())
     # Simulation / Reactor level
     assert_equal(
-        eco_metrics.region_annual_costs('tests/test.sqlite', 8).sum(),
-        eco_metrics.simulation_annual_costs('tests/test.sqlite').sum().sum())
+        eco_metrics.region_annual_costs('test.sqlite', 8).sum(),
+        eco_metrics.simulation_annual_costs('test.sqlite').sum().sum())
     assert_equal(
-        eco_metrics.region_annual_costs_present_value(
-            'tests/test.sqlite', 8).sum().sum(),
+        eco_metrics.region_annual_costs_present_value('test.sqlite',
+                                                      8).sum().sum(),
         eco_metrics.simulation_annual_costs_present_value(
-            'tests/test.sqlite').sum().sum())
+            'test.sqlite').sum().sum())
 
 
 def test_lcoe():
