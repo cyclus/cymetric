@@ -210,7 +210,7 @@ def decommissioning_cost(dfPower, dfEntry, dfInfo):
 del _dcdeps, _dcschema
 
 
-_omdeps = ['TimeSeriesPower', 'EconomicInfo']
+_omdeps = ['TimeSeriesPower', 'AgentEntry']
 
 _omschema = [('SimId', ts.UUID),
              ('AgentId', ts.INT),
@@ -218,27 +218,36 @@ _omschema = [('SimId', ts.UUID),
              ('Payment', ts.DOUBLE)]
 
 
-@ metric(name='OperationMaintenance', depends=_omdeps, schema=_omschema)
-def operation_maintenance(dfPower, dfEcoInfo):
+@metric(name='OperationMaintenance', depends=_omdeps, schema=_omschema)
+def operation_maintenance(dfPower, dfEntry):
     """The OperationMaintenance metric gives the cash flows at each time step
     corresponding to the reactor operations and maintenance costs.
     """
     exp = ['SimId', 'AgentId', 'Time', 'Payment']
     power = ['SimId', 'AgentId', 'Time', 'Value']
-    ecoInfo = ['AgentId', 'FixedCost', 'VariableCost', 'Operation_Deviation']
-    rtn = dfEcoInfo
+    ecoInfo = ['fixed', 'variable', 'operation_dev']
+    # Get eco data
+    dfEcoInfo = eco_data.get_prototypes_eco()
+
+    # Adding prototype info
+    base_col = ['Prototype']
+    added_col = base_col + ecoInfo
+    rtn = pd.merge(dfEntry, dfEcoInfo[added_col], on=base_col)
+    print(rtn)
+
     for index, row in rtn.iterrows():
-        rtn.at[index, 'Operation_Deviation'] *= np.random.randn(1)
-    rtn['FixedCost'] += rtn['Operation_Deviation']
-    rtn['VariableCost'] += rtn['Operation_Deviation']
+        rtn.at[index, 'operation_dev'] *= np.random.randn(1)
+    rtn['fixed'] += rtn['operation_dev']
+    rtn['variable'] += rtn['operation_dev']
 
     base_col = ['AgentId']
-    added_col = base_col + ['SimId', 'Time', 'Value']
+    added_col = base_col + ['Time', 'Value']
     rtn = pd.merge(dfPower[added_col], rtn, on=base_col)
     rtn['Value'] *= 8760 / 12
-    rtn['Payment'] = (rtn['Value'] * rtn['VariableCost'] +
-                      max(rtn['Value']) * rtn['FixedCost'])
+    rtn['Payment'] = (rtn['Value'] * rtn['variable'] +
+                      max(rtn['Value']) * rtn['fixed'])
 
+    print(rtn)
     return rtn[['SimId', 'AgentId', 'Time', 'Payment']]
 
 

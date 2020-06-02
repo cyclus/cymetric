@@ -50,8 +50,8 @@ eco_model:
         constructionDuration: 10
         overnight_cost: 1
       operation_maintenance:
-        fixed: 3
-        variable: 2
+        fixed: 0.5
+        variable: 1
         deviation: 0
       fuels:
         - name: uox
