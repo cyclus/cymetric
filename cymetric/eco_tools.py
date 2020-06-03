@@ -199,7 +199,8 @@ def build_eco_prot(proto_dict):
 def get_filiation_per_name(name, dfEntry):
     filiation = []
     filiation.append(name)
-    parent_id = dfEntry[dfEntry["Prototype"] == name]["ParentId"][0]
+    parent_id = dfEntry[dfEntry["Prototype"] == name].reset_index()[
+        "ParentId"][0]
 
     while parent_id != -1:
         # get the parent
@@ -212,7 +213,7 @@ def get_filiation_per_name(name, dfEntry):
 
 
 def get_filiation_per_id(id, dfEntry):
-    name = dfEntry[dfEntry["AgentId"] == id]["Prototype"][0]
+    name = dfEntry[dfEntry["AgentId"] == id].reset_index()["Prototype"][0]
     return get_filiation_per_name(name, dfEntry)
 
 

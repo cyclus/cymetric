@@ -177,10 +177,16 @@ def decommissioning_cost(dfPower, dfEntry, dfInfo):
     """The Decommissioning cost metric gives the cash flows at each time step
     corresponding to the reactors decommissioning.
     """
+    out_col = ['SimId', 'AgentId', 'Payment', 'Time']
     # Get eco data
     dfEcoInfo = eco_data.get_prototypes_eco()
 
     dfEntry = dfEntry[dfEntry['Lifetime'].apply(lambda x: x > 0)]
+
+    # if empty do nothing
+    if len(dfEntry) == 0:
+        return pd.DataFrame(columns=out_col)
+
     reactorsId = dfEntry[dfEntry['Spec'].apply(
         lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
     rtn = pd.DataFrame()
@@ -204,7 +210,7 @@ def decommissioning_cost(dfPower, dfEntry, dfInfo):
                                      'Payment': cashFlow})
             rtn = pd.concat([rtn, time_pdf], ignore_index=True)
     rtn['SimId'] = dfPower['SimId'][0]
-    return rtn[['SimId', 'AgentId', 'Payment', 'Time']]
+    return rtn[out_col]
 
 
 del _dcdeps, _dcschema
@@ -288,9 +294,17 @@ simulation level.
 #######################################
 
 
-# Reactor level
+_omdeps = ['AgentEntry', 'CapitalCost',
+           'DecommissioningCost', 'OperationMaintenance', 'FuelCost']
 
-def annual_costs(outputDb, reactorId, capital=True):
+_omschema = [('SimId', ts.UUID),
+             ('AgentId', ts.INT),
+             ('Time', ts.INT),
+             ('Payment', ts.DOUBLE)]
+
+
+@metric(name='MonthlyCosts', depends=_omdeps, schema=_omschema)
+def facility_annual_costs(dfCapitalCost, dfDecom, dfOM, dfFuelCost):
     """Input : sqlite output database and reactor's AgentId. It is possible not
     to take into account the construction costs (capital=False) if the reactor
     is supposed to have been built before the beginning of the simulation.
@@ -299,38 +313,31 @@ def annual_costs(outputDb, reactorId, capital=True):
     db = dbopen(outputDb)
     evaler = Evaluator(db, write=False)
 
-    dfInfo = evaler.eval('Info')
-    duration = dfInfo['Duration'].iloc[0]
-    initialYear = dfInfo['InitialYear'].iloc[0]
-    initialMonth = dfInfo['InitialMonth'].iloc[0]
+    base_col = ['SimId', 'AgentId', 'Time']
+    costs = pd.DataFrame(columns=base_col)
 
-    dfEntry = evaler.eval('AgentEntry')
-    print(dfEntry)
-    commissioning = dfEntry[dfEntry.AgentId == reactorId]['EnterTime'].iloc[0]
-    dfCapitalCosts = evaler.eval('CapitalCost')
-    print(dfCapitalCosts)
-    dfCapitalCosts = dfCapitalCosts[dfCapitalCosts.AgentId == reactorId].copy()
-    dfCapitalCosts = dfCapitalCosts.groupby('Time').sum()
-    costs = pd.DataFrame(
-        {'Capital': dfCapitalCosts['Payment']}, index=list(range(duration)))
-    dfDecommissioningCosts = evaler.eval('DecommissioningCost').reset_index()
-    dfDecommissioningCosts = dfDecommissioningCosts[
-        dfDecommissioningCosts.AgentId == reactorId].copy()
-    dfDecommissioningCosts = dfDecommissioningCosts.groupby('Time').sum()
-    costs['Decommissioning'] = dfDecommissioningCosts['Payment']
-    dfOMCosts = evaler.eval('OperationMaintenance')
-    dfOMCosts = dfOMCosts[dfOMCosts.AgentId == reactorId].copy()
-    dfOMCosts = dfOMCosts.groupby('Time').sum()
-    costs['OandM'] = dfOMCosts['Payment']
-    dfFuelCosts = evaler.eval('FuelCost')
-    dfFuelCosts = dfFuelCosts[dfFuelCosts.AgentId == reactorId].copy()
-    dfFuelCosts = dfFuelCosts.groupby('Time').sum()
-    costs['Fuel'] = dfFuelCosts['Payment']
+    costs_pairs = [(dfCapitalCost, "Capital"),
+                   (dfDecom, "Decommision"),
+                   (dfOM, "OperationMaintenance"),
+                   (dfFuelCost, "Fuel")]
+    for pair in costs_pairs:
+        df_tmp = pair[0]
+        df_tmp = df_tmp.groupby(base_col).sum().reset_index()
+        df_tmp = df_tmp.rename(columns={'Payment': pair[1]})
+        if (len(df_tmp) != 0):
+            costs = pd.merge(df_tmp, costs,
+                             how='outer', on=base_col)
+        else:
+            costs[pair[1]] = 0
+
     costs = costs.fillna(0)
-    costs['Year'] = (costs.index + initialMonth - 1) // 12 + initialYear
-    if not capital:
-        del costs['Capital']
-    costs = costs.groupby('Year').sum()
+    # costs['Year'] = (costs['Time'] + initialMonth - 1) // 12 + initialYear
+    # if not capital:
+    #     del costs['Capital']
+    # costs = costs.groupby(['Year', "AgentId"]).sum().reset_index()
+    # costs.drop(['Time'], axis=1, inplace=True)
+
+    print(costs.drop(['SimId'], axis=1))
     return costs
 
 
@@ -387,7 +394,7 @@ def lcoe(outputDb, reactorId, capital=True):
     powerGenerated = power_generated(outputDb, reactorId)
     actualization = actualization_vector(powerGenerated.size, discountRate)
     actualization.index = powerGenerated.index.copy()
-    return (annualCosts.sum(axis=1) * actualization).fillna(0).sum() / \
+    return (annualCosts.sum(axis=1) * actualization).fillna(0).sum() /\
         ((powerGenerated * actualization).fillna(0).sum())
 
 
@@ -519,7 +526,7 @@ def institution_annual_costs(
     the simulation. It is also possible to truncate the simulation results and
     only have access to cash flows occurring between the two dates (begin and
     end) specified in 'parameters.xml'. The truncation allows to let reactors
-    decommission after the end of the simulation and thus to take into account
+    decommission after the end of the simulation and thus print take into account
     cash flows that occur after the end of the simulation for example to
     calculate the LCOE.
     Output : total reactor costs per year over its lifetime at the institution
@@ -527,51 +534,59 @@ def institution_annual_costs(
     """
     db = dbopen(outputDb)
     evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
+    dfInfo = evaler.eval('Info')
     duration = dfInfo['Duration'].iloc[0]
     initialYear = dfInfo['InitialYear'].iloc[0]
     initialMonth = dfInfo['InitialMonth'].iloc[0]
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry').reset_index()
+    dfEcoInfo = eco_data.get_prototypes_eco()
+    simulationBegin = eco_data.dict["eco_model"]["periode"]["start"]
+    simulationEnd = eco_data.dict["eco_model"]["periode"]["end"]
+    dfEntry = evaler.eval('AgentEntry')
     dfEntry = dfEntry[dfEntry.ParentId == institutionId]
     dfEntry = dfEntry[dfEntry['EnterTime'].apply(
         lambda x: x > simulationBegin and x < simulationEnd)]
+    print(dfEntry)
     dfPower = evaler.eval('TimeSeriesPower')
     reactorIds = dfEntry[dfEntry['AgentId'].apply(
         lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
-    dfCapitalCosts = evaler.eval('CapitalCost').reset_index()
+    dfCapitalCosts = evaler.eval('CapitalCost')
     dfCapitalCosts = dfCapitalCosts[dfCapitalCosts['AgentId'].apply(
         lambda x: x in reactorIds)]
-    dfCapitalCosts = dfCapitalCosts.groupby('Time').sum()
+    print(dfCapitalCosts)
+    dfCapitalCosts = dfCapitalCosts.groupby(
+        ['AgentId', 'Time']).sum().reset_index()
+    print(dfCapitalCosts)
+
     costs = pd.DataFrame(
         {'Capital': dfCapitalCosts['Payment']}, index=list(range(0, duration)))
-    dfDecommissioningCosts = evaler.eval('DecommissioningCost').reset_index()
+    print(costs)
+    dfDecommissioningCosts = evaler.eval('DecommissioningCost')
     if not dfDecommissioningCosts.empty:
         dfDecommissioningCosts = dfDecommissioningCosts[
             dfDecommissioningCosts['AgentId'].apply(lambda x: x in reactorIds)]
-        dfDecommissioningCosts = dfDecommissioningCosts.groupby('Time').sum()
+        dfDecommissioningCosts = dfDecommissioningCosts.groupby(
+            'AgentId').sum()
         costs['Decommissioning'] = dfDecommissioningCosts['Payment']
-    dfOMCosts = evaler.eval('OperationMaintenance').reset_index()
+    dfOMCosts = evaler.eval('OperationMaintenance')
     dfOMCosts = dfOMCosts[dfOMCosts['AgentId'].apply(
         lambda x: x in reactorIds)]
-    dfOMCosts = dfOMCosts.groupby('Time').sum()
-    costs['OandM'] = dfOMCosts.loc[:, 'Payment']
-    dfFuelCosts = evaler.eval('FuelCost').reset_index()
+    dfOMCosts = dfOMCosts.groupby('AgentId').sum()
+    costs['OperationAndMaintenance'] = dfOMCosts.loc[:, 'Payment']
+    dfFuelCosts = evaler.eval('FuelCost')
     dfFuelCosts = dfFuelCosts[dfFuelCosts['AgentId'].apply(
         lambda x: x in reactorIds)]
-    dfFuelCosts = dfFuelCosts.groupby('Time').sum()
+    dfFuelCosts = dfFuelCosts.groupby('AgentId').sum()
     costs['Fuel'] = dfFuelCosts.loc[:, 'Payment']
     costs = costs.fillna(0)
     costs['Year'] = (costs.index + initialMonth - 1) // 12 + initialYear
     if truncate:
         endYear = (simulationEnd + initialMonth - 1) // 12 + initialYear
         costs = costs[costs['Year'].apply(lambda x: x <= endYear)]
-        beginYear = (simulationBegin + initialMonth - 1) // 12 + initialYear
+        beginYear = (simulationBegin + initialMon/th - 1) // 12 + initialYear
         costs = costs[costs['Year'].apply(lambda x: x >= beginYear)]
     if not capital:
         del costs['Capital']
+    print(costs)
     costs = costs.groupby('Year').sum()
     return costs
 
@@ -834,14 +849,14 @@ def region_annual_costs(outputDb, regionId, capital=True, truncate=True):
     """
     db = dbopen(outputDb)
     evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
+    dfInfo = evaler.eval('Info')
     duration = dfInfo.loc[0, 'Duration']
     initialYear = dfInfo.loc[0, 'InitialYear']
     initialMonth = dfInfo.loc[0, 'InitialMonth']
     dfEcoInfo = evaler.eval('EconomicInfo')
     simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
     simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry').reset_index()
+    dfEntry = evaler.eval('AgentEntry')
     tmp = dfEntry[dfEntry.ParentId == regionId]
     dfEntry = dfEntry[dfEntry['EnterTime'].apply(
         lambda x: x > simulationBegin and x < simulationEnd)]
@@ -867,7 +882,7 @@ def region_annual_costs(outputDb, regionId, capital=True, truncate=True):
     dfOMCosts = dfOMCosts[dfOMCosts['AgentId'].apply(
         lambda x: x in reactorIds)]
     dfOMCosts = dfOMCosts.groupby('Time').sum()
-    costs['OandM'] = dfOMCosts['Payment']
+    costs['OperationAndMaintenance'] = dfOMCosts['Payment']
     dfFuelCosts = evaler.eval('FuelCost').reset_index()
     dfFuelCosts = dfFuelCosts[dfFuelCosts['AgentId'].apply(
         lambda x: x in reactorIds)]
@@ -1173,7 +1188,7 @@ def simulation_annual_costs(outputDb, capital=True, truncate=True):
     dfOMCosts = dfOMCosts[dfOMCosts['AgentId'].apply(
         lambda x: x in reactorIds)]
     dfOMCosts = dfOMCosts.groupby('Time').sum()
-    costs['OandM'] = dfOMCosts['Payment']
+    costs['OperationAndMaintenance'] = dfOMCosts['Payment']
     dfFuelCosts = evaler.eval('FuelCost').reset_index()
     dfFuelCosts = dfFuelCosts[dfFuelCosts['AgentId'].apply(
         lambda x: x in reactorIds)]
@@ -1427,6 +1442,5 @@ def simulation_average_lcoe(outputDb):
                     decommissioning +
                     1)))
         rtn['Power'] += rtn['Temp2'].fillna(0)
-        print(id)  # test
     rtn['Average LCOE'] = rtn['Weighted sum'] / rtn['Power']
     return rtn.fillna(0)
