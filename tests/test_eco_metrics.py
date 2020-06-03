@@ -20,10 +20,10 @@ def test_capital_cost():
         [(UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 0, 0.126000),
          (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 1, 0.139965),
          (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 2, 0.112035),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 3, 0.084000),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 4, 0.055965),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 0.028035),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 0.0)],
+         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 3, 0.84000),
+         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 4, 0.55965),
+         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 0.28035),
+         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 0.)],
         dtype=ensure_dt_bytes(
             [('SimId', 'O'),
              ('AgentId', '<i8'),
@@ -140,12 +140,12 @@ def test_fuel_cost():
 
 def test_decommissioning_cost():
     exp = pd.DataFrame(np.array(
-        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.0, 11),
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0., 11),
          (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.133333, 12),
          (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.266667, 13),
          (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.4, 14),
          (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.2, 15),
-         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.0, 16)],
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0., 16)],
         dtype=ensure_dt_bytes(
             [('SimId', 'O'),
              ('AgentId', '<i8'),
@@ -234,7 +234,7 @@ def test_operation_maintenance():
 #     exp = pd.DataFrame(np.array([
 #         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 25436.85),
 #         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 25436.85),
-#         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 43800.0)
+#         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 8, 43800.)
 #     ], dtype=ensure_dt_bytes([
 #         ('SimId', 'O'), ('AgentId', '<i8'), ('Time', '<i8'),
 #         ('Payment', '<f8')]))
@@ -414,6 +414,88 @@ def test_yaml_parsing():
                       'deviation': 0}]}
     obs = eco_info.get_prototype_eco(filiation)
     assert_equal(obs, exp)
+
+
+def test_facilities_annual_costs():
+
+    decom_cost = pd.DataFrame(np.array(
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0., 11),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.133333, 12),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0.266667, 13),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0., 16)],
+        dtype=ensure_dt_bytes(
+            [('SimId', 'O'),
+             ('AgentId', '<i8'),
+             ('Payment', '<f8'),
+             ('Time', '<i8')])))
+    om_cost = pd.DataFrame(np.array(
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 1095),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 1095),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 1095),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 1095),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 1095)],
+        dtype=ensure_dt_bytes(
+            [('SimId', 'O'),
+             ('AgentId', '<i8'),
+             ('Time', '<i8'),
+             ('Payment', '<f8')]))
+    )
+    fuel_cost = pd.DataFrame(np.array(
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 0, 12, 'uox', 1, 1),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 1, 12, 'uox', 1, 2),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 7, 12, 'uox', 1, 8),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 8, 12, 'uox', 1, 9)],
+        dtype=ensure_dt_bytes(
+            [('SimId', 'O'),
+             ('TransactionId', '<i8'),
+             ('AgentId', '<i8'),
+             ('Commodity', 'O'),
+             ('Payment', '<f8'),
+             ('Time', '<i8')])))
+    cap_cost = pd.DataFrame(np.array(
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0, 0.126000),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 0.84000),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 0.55965),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 0.28035),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 0.)],
+        dtype=ensure_dt_bytes(
+            [('SimId', 'O'),
+             ('AgentId', '<i8'),
+             ('Time', '<i8'),
+             ('Payment', '<f8')])))
+
+    obs = eco_metrics.new_annual_costs.func(
+        cap_cost, decom_cost, om_cost, fuel_cost)
+
+    exp = pd.DataFrame(np.array(
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 1, 1.0, 0., 0., 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 2, 1.0, 0., 0., 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 8, 1.0, 0., 0., 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 9, 1.0, 0., 0., 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 0., 1095.0, 0., 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 0., 1095.0, 0., 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 0., 1095.0, 0., 0.84),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 0., 1095.0, 0., 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 0., 1095.0, 0., 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 11, 0., 0., 0., 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 12, 0., 0., 0.133333, 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 13, 0., 0., 0.266667, 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 16, 0., 0., 0., 0.),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0., 0., 0., 0., 0.126),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 0., 0., 0., 0.55965),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 0., 0., 0., 0.28035),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 0., 0., 0., 0.)],
+        dtype=ensure_dt_bytes(
+            [('SimId', 'O'),
+             ('AgentId', '<i8'),
+             ('Time', '<i8'),
+             ('Fuel', '<f8'),
+             ('OperationMaintenance', '<f8'),
+             ('Decommission', '<f8'),
+             ('Capital', '<f8')
+             ])))
+
+    assert_frame_equal(obs, exp)
 
 
 def test_annual_costs():

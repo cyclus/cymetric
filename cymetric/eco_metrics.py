@@ -304,20 +304,18 @@ _omschema = [('SimId', ts.UUID),
 
 
 @metric(name='MonthlyCosts', depends=_omdeps, schema=_omschema)
-def facility_annual_costs(dfCapitalCost, dfDecom, dfOM, dfFuelCost):
+def new_annual_costs(dfCapitalCost, dfDecom, dfOM, dfFuelCost):
     """Input : sqlite output database and reactor's AgentId. It is possible not
     to take into account the construction costs (capital=False) if the reactor
     is supposed to have been built before the beginning of the simulation.
     Output : total reactor costs per year over its lifetime.
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
 
     base_col = ['SimId', 'AgentId', 'Time']
     costs = pd.DataFrame(columns=base_col)
 
     costs_pairs = [(dfCapitalCost, "Capital"),
-                   (dfDecom, "Decommision"),
+                   (dfDecom, "Decommission"),
                    (dfOM, "OperationMaintenance"),
                    (dfFuelCost, "Fuel")]
     for pair in costs_pairs:
@@ -336,9 +334,15 @@ def facility_annual_costs(dfCapitalCost, dfDecom, dfOM, dfFuelCost):
     #     del costs['Capital']
     # costs = costs.groupby(['Year', "AgentId"]).sum().reset_index()
     # costs.drop(['Time'], axis=1, inplace=True)
+    return costs.drop(['TransactionId'], axis=1)
 
-    print(costs.drop(['SimId'], axis=1))
-    return costs
+
+del _omdeps, _omschema
+
+
+def annual_costs(outputDb, reactorId, capital=True):
+    cost = pd.DataFrame()
+    return cost
 
 
 def annual_costs_present_value(outputDb, reactorId, capital=True):
