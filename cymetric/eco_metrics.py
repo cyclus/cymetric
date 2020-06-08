@@ -294,22 +294,21 @@ simulation level.
 #######################################
 
 
-_omdeps = ['AgentEntry', 'CapitalCost',
-           'DecommissioningCost', 'OperationMaintenance', 'FuelCost']
+_omdeps = ['CapitalCost',
+           'DecommissioningCost',
+           'OperationMaintenance',
+           'FuelCost']
 
 _omschema = [('SimId', ts.UUID),
              ('AgentId', ts.INT),
-             ('Time', ts.INT),
-             ('Payment', ts.DOUBLE)]
+             ('Fuel', ts.DOUBLE),
+             ('OperationMaintenance', ts.DOUBLE),
+             ('Decommission', ts.DOUBLE),
+             ('Capital', ts.DOUBLE)]
 
 
 @metric(name='MonthlyCosts', depends=_omdeps, schema=_omschema)
-def new_annual_costs(dfCapitalCost, dfDecom, dfOM, dfFuelCost):
-    """Input : sqlite output database and reactor's AgentId. It is possible not
-    to take into account the construction costs (capital=False) if the reactor
-    is supposed to have been built before the beginning of the simulation.
-    Output : total reactor costs per year over its lifetime.
-    """
+def montly_costs(dfCapitalCost, dfDecom, dfOM, dfFuelCost):
 
     base_col = ['SimId', 'AgentId', 'Time']
     costs = pd.DataFrame(columns=base_col)
@@ -329,23 +328,119 @@ def new_annual_costs(dfCapitalCost, dfDecom, dfOM, dfFuelCost):
             costs[pair[1]] = 0
 
     costs = costs.fillna(0)
-    # costs['Year'] = (costs['Time'] + initialMonth - 1) // 12 + initialYear
-    # if not capital:
-    #     del costs['Capital']
-    # costs = costs.groupby(['Year', "AgentId"]).sum().reset_index()
-    # costs.drop(['Time'], axis=1, inplace=True)
     return costs.drop(['TransactionId'], axis=1)
 
 
 del _omdeps, _omschema
 
 
-def annual_costs(outputDb, reactorId, capital=True):
-    cost = pd.DataFrame()
-    return cost
+def direct_annual_costs(evaler, agents=(), agentsId=(), capital=True):
+    """Input : sqlite output database and reactor's AgentId. It is possible not
+    to take into account the construction costs (capital=False) if the reactor
+    is supposed to have been built before the beginning of the simulation.
+    Output : total reactor costs per year over its lifetime.
+    """
+
+    costs = evaler.eval('MonthlyCosts')
+
+    if len(agents) != 0:
+        dfAgents = evaler.eval('AgentEntry')
+        agentsId += dfAgents[dfAgents['Prototype'].isin(
+            agents)]["AgentId"].tolist()
+
+    if len(agentsId) != 0:
+        costs = costs[costs['AgentId'].isin(agentsId)]
+
+    dfInfo = evaler.eval('Info')
+    duration = dfInfo.loc[0, 'Duration']
+    initialYear = dfInfo.loc[0, 'InitialYear']
+    initialMonth = dfInfo.loc[0, 'InitialMonth']
+
+    costs['Year'] = (costs['Time'] + initialMonth - 1) // 12 + initialYear
+    costs = costs.groupby(['Year', "AgentId"]).sum().reset_index()
+    costs.drop(['Time'], axis=1, inplace=True)
+
+    if not capital:
+        del costs['Capital']
+
+    return costs
 
 
-def annual_costs_present_value(outputDb, reactorId, capital=True):
+def child_annual_costs(evaler, agents=(), agentsId=(), capital=True):
+    """Input : evaler database and institution's AgentId. It is
+    possible not to take into account the construction costs (capital=False)
+    if the reactors are supposed to have been built before the beginning of
+    the simulation. It is also possible to truncate the simulation results and
+    only have access to cash flows occurring between the two dates (begin and
+    end) specified in 'parameters.xml'. The truncation allows to let reactors
+    decommission after the end of the simulation and thus print take into account
+    cash flows that occur after the end of the simulation for example to
+    calculate the LCOE.
+    Output : total reactor costs per year over its lifetime at the institution
+    level.
+    """
+
+    dfEntry = evaler.eval('AgentEntry')
+
+    if len(agents) != 0:
+        agentsId += dfEntry[dfEntry['Prototype'].isin(
+            agents)]["AgentId"].tolist()
+
+    childId = []
+    while (childId != list(set(dfEntry[dfEntry['ParentId'].isin(
+            agentsId)]['AgentId'].to_list()))):
+        if len(agentsId) != 0:
+            childId += dfEntry[dfEntry['ParentId'].isin(
+                agentsId)]['AgentId'].to_list()
+        childId = (list(set(childId)))
+        agentsId += childId
+
+    costs = direct_annual_costs(evaler, agentsId=childId)
+
+    if not capital:
+        del costs['Capital']
+    costs = costs.groupby('Year').sum().reset_index()
+    return costs
+
+
+def all_annual_costs(evaler, agents=(), agentsId=(), capital=True):
+    """Input : evaler database and region's AgentId. It is possible not
+    to take into account the construction costs (capital=False) if the reactors
+    are supposed to have been built before the beginning of the simulation. It
+    is also possible to truncate the simulation results and only have access
+    to cash flows occurring between the two dates (begin and end) specified in
+    'parameters.xml'. The truncation allows to let reactors decommission after
+    the end of the simulation and thus to take into account cash flows that
+    occur after the end of the simulation for example to calculate the LCOE.
+
+    Output : total reactor costs per year over its lifetime at the region
+    level.
+    """
+
+    dfEntry = evaler.eval('AgentEntry')
+
+    if len(agents) != 0:
+        agentsId += dfEntry[dfEntry['Prototype'].isin(
+            agents)]["AgentId"].tolist()
+
+    facilitiesId = agentsId
+    while (facilitiesId != list(set(dfEntry[dfEntry['ParentId'].isin(
+            agentsId)]['AgentId'].to_list() + agentsId))):
+        if len(agentsId) != 0:
+            facilitiesId += dfEntry[dfEntry['ParentId'].isin(
+                agentsId)]['AgentId'].to_list()
+        facilitiesId = list(set(facilitiesId))
+        agentsId += facilitiesId
+
+    costs = direct_annual_costs(evaler, agentsId=facilitiesId)
+
+    if not capital:
+        del costs['Capital']
+    costs = costs.groupby('Year').sum().reset_index()
+    return costs
+
+
+def annual_costs_present_value(outputDb, reactorId=(), capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
     """
@@ -398,7 +493,7 @@ def lcoe(outputDb, reactorId, capital=True):
     powerGenerated = power_generated(outputDb, reactorId)
     actualization = actualization_vector(powerGenerated.size, discountRate)
     actualization.index = powerGenerated.index.copy()
-    return (annualCosts.sum(axis=1) * actualization).fillna(0).sum() /\
+    return (annualCosts.sum(axis=1) * actualization).fillna(0).sum() / \
         ((powerGenerated * actualization).fillna(0).sum())
 
 
@@ -522,79 +617,6 @@ def power_generated(outputDb, reactorId):
 # Institution level
 
 
-def institution_annual_costs(
-        outputDb, institutionId, capital=True, truncate=True):
-    """Input : sqlite output database and institution's AgentId. It is
-    possible not to take into account the construction costs (capital=False)
-    if the reactors are supposed to have been built before the beginning of
-    the simulation. It is also possible to truncate the simulation results and
-    only have access to cash flows occurring between the two dates (begin and
-    end) specified in 'parameters.xml'. The truncation allows to let reactors
-    decommission after the end of the simulation and thus print take into account
-    cash flows that occur after the end of the simulation for example to
-    calculate the LCOE.
-    Output : total reactor costs per year over its lifetime at the institution
-    level.
-    """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info')
-    duration = dfInfo['Duration'].iloc[0]
-    initialYear = dfInfo['InitialYear'].iloc[0]
-    initialMonth = dfInfo['InitialMonth'].iloc[0]
-    dfEcoInfo = eco_data.get_prototypes_eco()
-    simulationBegin = eco_data.dict["eco_model"]["periode"]["start"]
-    simulationEnd = eco_data.dict["eco_model"]["periode"]["end"]
-    dfEntry = evaler.eval('AgentEntry')
-    dfEntry = dfEntry[dfEntry.ParentId == institutionId]
-    dfEntry = dfEntry[dfEntry['EnterTime'].apply(
-        lambda x: x > simulationBegin and x < simulationEnd)]
-    print(dfEntry)
-    dfPower = evaler.eval('TimeSeriesPower')
-    reactorIds = dfEntry[dfEntry['AgentId'].apply(
-        lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
-    dfCapitalCosts = evaler.eval('CapitalCost')
-    dfCapitalCosts = dfCapitalCosts[dfCapitalCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    print(dfCapitalCosts)
-    dfCapitalCosts = dfCapitalCosts.groupby(
-        ['AgentId', 'Time']).sum().reset_index()
-    print(dfCapitalCosts)
-
-    costs = pd.DataFrame(
-        {'Capital': dfCapitalCosts['Payment']}, index=list(range(0, duration)))
-    print(costs)
-    dfDecommissioningCosts = evaler.eval('DecommissioningCost')
-    if not dfDecommissioningCosts.empty:
-        dfDecommissioningCosts = dfDecommissioningCosts[
-            dfDecommissioningCosts['AgentId'].apply(lambda x: x in reactorIds)]
-        dfDecommissioningCosts = dfDecommissioningCosts.groupby(
-            'AgentId').sum()
-        costs['Decommissioning'] = dfDecommissioningCosts['Payment']
-    dfOMCosts = evaler.eval('OperationMaintenance')
-    dfOMCosts = dfOMCosts[dfOMCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    dfOMCosts = dfOMCosts.groupby('AgentId').sum()
-    costs['OperationAndMaintenance'] = dfOMCosts.loc[:, 'Payment']
-    dfFuelCosts = evaler.eval('FuelCost')
-    dfFuelCosts = dfFuelCosts[dfFuelCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    dfFuelCosts = dfFuelCosts.groupby('AgentId').sum()
-    costs['Fuel'] = dfFuelCosts.loc[:, 'Payment']
-    costs = costs.fillna(0)
-    costs['Year'] = (costs.index + initialMonth - 1) // 12 + initialYear
-    if truncate:
-        endYear = (simulationEnd + initialMonth - 1) // 12 + initialYear
-        costs = costs[costs['Year'].apply(lambda x: x <= endYear)]
-        beginYear = (simulationBegin + initialMon/th - 1) // 12 + initialYear
-        costs = costs[costs['Year'].apply(lambda x: x >= beginYear)]
-    if not capital:
-        del costs['Capital']
-    print(costs)
-    costs = costs.groupby('Year').sum()
-    return costs
-
-
 def institution_annual_costs_present_value(outputDb, reactorId, capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
@@ -646,10 +668,7 @@ def institution_period_costs(
         index=list(
             range(
                 initialYear,
-                initialYear +
-                duration //
-                12 +
-                1)))
+                initialYear + duration // 12 + 1)))
     df['Power'] = power
     df['Costs'] = costs
     df = df.fillna(0)
@@ -827,82 +846,13 @@ def institution_average_lcoe(outputDb, institutionId):
         rtn['Temp2'] = pd.Series(
             power,
             index=list(
-                range(
-                    commissioning,
-                    decommissioning +
-                    1))).fillna(0)
+                range(commissioning,
+                      decommissioning + 1))).fillna(0)
         rtn['Power'] += rtn['Temp2'].fillna(0)
     rtn['Average LCOE'] = rtn['Weighted sum'] / rtn['Power']
     return rtn.fillna(0)
 
 # Region level
-
-
-def region_annual_costs(outputDb, regionId, capital=True, truncate=True):
-    """Input : sqlite output database and region's AgentId. It is possible not
-    to take into account the construction costs (capital=False) if the reactors
-    are supposed to have been built before the beginning of the simulation. It
-    is also possible to truncate the simulation results and only have access
-    to cash flows occurring between the two dates (begin and end) specified in
-    'parameters.xml'. The truncation allows to let reactors decommission after
-    the end of the simulation and thus to take into account cash flows that
-    occur after the end of the simulation for example to calculate the LCOE.
-
-    Output : total reactor costs per year over its lifetime at the region
-    level.
-    """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info')
-    duration = dfInfo.loc[0, 'Duration']
-    initialYear = dfInfo.loc[0, 'InitialYear']
-    initialMonth = dfInfo.loc[0, 'InitialMonth']
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry')
-    tmp = dfEntry[dfEntry.ParentId == regionId]
-    dfEntry = dfEntry[dfEntry['EnterTime'].apply(
-        lambda x: x > simulationBegin and x < simulationEnd)]
-    institutionIds = tmp[tmp.Kind == 'Inst']['AgentId'].tolist()
-    reactorIds = []
-    for id in institutionIds:
-        dfEntry2 = dfEntry[dfEntry.ParentId == id]
-        reactorIds += dfEntry2[dfEntry2['Spec'].apply(
-            lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-    dfCapitalCosts = evaler.eval('CapitalCost').reset_index()
-    dfCapitalCosts = dfCapitalCosts[dfCapitalCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    dfCapitalCosts = dfCapitalCosts.groupby('Time').sum()
-    costs = pd.DataFrame(
-        {'Capital': dfCapitalCosts['Payment']}, index=list(range(duration)))
-    dfDecommissioningCosts = evaler.eval('DecommissioningCost').reset_index()
-    if not dfDecommissioningCosts.empty:
-        dfDecommissioningCosts = dfDecommissioningCosts[
-            dfDecommissioningCosts['AgentId'].apply(lambda x: x in reactorIds)]
-        dfDecommissioningCosts = dfDecommissioningCosts.groupby('Time').sum()
-        costs['Decommissioning'] = dfDecommissioningCosts['Payment']
-    dfOMCosts = evaler.eval('OperationMaintenance').reset_index()
-    dfOMCosts = dfOMCosts[dfOMCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    dfOMCosts = dfOMCosts.groupby('Time').sum()
-    costs['OperationAndMaintenance'] = dfOMCosts['Payment']
-    dfFuelCosts = evaler.eval('FuelCost').reset_index()
-    dfFuelCosts = dfFuelCosts[dfFuelCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    dfFuelCosts = dfFuelCosts.groupby('Time').sum()
-    costs['Fuel'] = dfFuelCosts['Payment']
-    costs = costs.fillna(0)
-    costs['Year'] = (costs.index + initialMonth - 1) // 12 + initialYear
-    if truncate:
-        endYear = (simulationEnd + initialMonth - 1) // 12 + initialYear
-        costs = costs[costs['Year'].apply(lambda x: x <= endYear)]
-        beginYear = (simulationBegin + initialMonth - 1) // 12 + initialYear
-        costs = costs[costs['Year'].apply(lambda x: x >= beginYear)]
-    if not capital:
-        del costs['Capital']
-    costs = costs.groupby('Year').sum()
-    return costs
 
 
 def region_annual_costs_present_value(

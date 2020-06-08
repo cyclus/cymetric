@@ -9,8 +9,10 @@ from nose.plugins.skip import SkipTest
 
 import numpy as np
 import pandas as pd
-from pandas.util.testing import assert_frame_equal
+from pandas.util.testing import assert_frame_equal, assert_series_equal
 
+from tools import setup, dbtest
+import cymetric as cym
 from cymetric import eco_metrics, eco_tools
 from cymetric.tools import raw_to_series, ensure_dt_bytes
 
@@ -416,7 +418,7 @@ def test_yaml_parsing():
     assert_equal(obs, exp)
 
 
-def test_facilities_annual_costs():
+def test_monthly_costs():
 
     decom_cost = pd.DataFrame(np.array(
         [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0., 11),
@@ -464,7 +466,7 @@ def test_facilities_annual_costs():
              ('Time', '<i8'),
              ('Payment', '<f8')])))
 
-    obs = eco_metrics.new_annual_costs.func(
+    obs = eco_metrics.montly_costs.func(
         cap_cost, decom_cost, om_cost, fuel_cost)
 
     exp = pd.DataFrame(np.array(
@@ -498,41 +500,41 @@ def test_facilities_annual_costs():
     assert_frame_equal(obs, exp)
 
 
-def test_annual_costs():
-    """
-    """
+@dbtest
+def test_annual_costs(db, fname, backend):
+    evaler = cym.Evaluator(db)
+
     # Reactor / Institution level
     eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
-    obs = eco_metrics.operation_maintenance.func(power, entry)
+    obs_1 = eco_metrics.direct_annual_costs(evaler,
+                                            agentsId=[17, 18, 19, 20, 21])
+    obs_1.drop(['AgentId', 'Year'], axis=1, inplace=True)
 
-    print("all", eco_metrics.annual_costs('test.sqlite', 19))
-    # print("institution", eco_metrics.institution_annual_costs('test.sqlite', 16))
-    # assert_equal(
-    #     eco_metrics.annual_costs('test.sqlite', 15).sum(),
-    #     eco_metrics.institution_annual_costs('test.sqlite', 16).sum())
-    # assert_equal(
-    #     eco_metrics.annual_costs_present_value('test.sqlite', 13).sum(),
-    #     eco_metrics.institution_annual_costs_present_value('test.sqlite',
-    #                                                        9).sum().sum())
-    # # Region / Institution level
-    # assert_equal(
-    #     eco_metrics.region_annual_costs('test.sqlite', 8).sum().sum(),
-    #     eco_metrics.institution_annual_costs('test.sqlite',
-    #                                          9).sum().sum())
-    # assert_equal(
-    #     eco_metrics.region_annual_costs_present_value(
-    #         'test.sqlite', 8).sum().sum(),
-    #     eco_metrics.institution_annual_costs_present_value(
-    #         'test.sqlite', 9).sum().sum())
-    # # Simulation / Reactor level
-    # assert_equal(
-    #     eco_metrics.region_annual_costs('test.sqlite', 8).sum(),
-    #     eco_metrics.simulation_annual_costs('test.sqlite').sum().sum())
-    # assert_equal(
-    #     eco_metrics.region_annual_costs_present_value('test.sqlite',
-    #                                                   8).sum().sum(),
-    #     eco_metrics.simulation_annual_costs_present_value(
-    #         'test.sqlite').sum().sum())
+    obs_2 = eco_metrics.child_annual_costs(evaler,
+                                           agentsId=[16])
+    obs_2.drop(['AgentId', 'Year'], axis=1, inplace=True)
+    assert_series_equal(obs_1.sum(), obs_2.sum())
+
+
+# # Region / Institution level
+    obs_3 = eco_metrics.all_annual_costs(evaler,
+                                         agentsId=[15])
+    obs_3.drop(['AgentId', 'Year'], axis=1, inplace=True)
+    assert_series_equal(obs_1.sum(), obs_3.sum())
+# assert_equal(
+#     eco_metrics.region_annual_costs_present_value(
+#         'test.sqlite', 8).sum().sum(),
+#     eco_metrics.institution_annual_costs_present_value(
+#         'test.sqlite', 9).sum().sum())
+# # Simulation / Reactor level
+# assert_equal(
+#     eco_metrics.region_annual_costs('test.sqlite', 8).sum(),
+#     eco_metrics.simulation_annual_costs('test.sqlite').sum().sum())
+# assert_equal(
+#     eco_metrics.region_annual_costs_present_value('test.sqlite',
+#                                                   8).sum().sum(),
+#     eco_metrics.simulation_annual_costs_present_value(
+#         'test.sqlite').sum().sum())
 
 
 def test_lcoe():
