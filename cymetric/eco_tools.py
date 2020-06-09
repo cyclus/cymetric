@@ -40,13 +40,13 @@ class eco_input_data():
     def load_economic_info(self, eco_input):
         stream = open(eco_input)
         data = yaml.load(stream, Loader=yaml.FullLoader)
-        self.dict = data
+        self.dict = data["eco_model"]
 
     def get_prototype_eco(self, filiation):
         """ Return a dict with all the colapsed properties of a prototype
         """
         proto_eco = {}
-        traveling_dict = self.dict["eco_model"]
+        traveling_dict = self.dict
         for prop in eco_properties:
             if prop in traveling_dict:
                 proto_eco[prop] = traveling_dict[prop]
@@ -80,7 +80,7 @@ class eco_input_data():
         df_eco = pd.DataFrame(columns=row_col)
 
         proto_eco = {}
-        model_dict = self.dict["eco_model"]
+        model_dict = self.dict
 
         # Set default eco data
         for prop in eco_properties:
@@ -399,7 +399,7 @@ def actualization_vector(size, discountRate):
     return rtn * (1 + discountRate)
 
 
-def actualize(price, delta_t, discount_rate):
+def actualize(delta_t, discount_rate, price=1.):
     """Given a price at date t + delta_t, give the actualized price at t.
     """
     return price / (1 + discount_rate) ** delta_t

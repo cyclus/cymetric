@@ -18,14 +18,14 @@ try:
     from cymetric.metrics import metric
     from cymetric.tools import dbopen, merge
     from cymetric.evaluator import Evaluator
-    from cymetric.eco_tools import actualization_vector, isreactor, \
+    from cymetric.eco_tools import actualize, actualization_vector, isreactor, \
         capital_shape, get_filiation_per_id, eco_input_data
     from cymetric.evaluator import register_metric
 except ImportError:
     # some wacky CI paths prevent absolute importing, try relative
     from .metrics import metric
     from .evaluator import register_metric
-    from .eco_tools import capital_shape, isreactor, actualization_vector, \
+    from .eco_tools import actualize, capital_shape, isreactor, actualization_vector, \
         isreactor, get_filiation_per_id, eco_input_data
     from .tools import dbopen, merge
     from .evaluator import Evaluator
@@ -300,6 +300,7 @@ _omdeps = ['CapitalCost',
            'FuelCost']
 
 _omschema = [('SimId', ts.UUID),
+             ('Time', ts.INT),
              ('AgentId', ts.INT),
              ('Fuel', ts.DOUBLE),
              ('OperationMaintenance', ts.DOUBLE),
@@ -347,7 +348,6 @@ def direct_annual_costs(evaler, agents=(), agentsId=(), capital=True):
         dfAgents = evaler.eval('AgentEntry')
         agentsId += dfAgents[dfAgents['Prototype'].isin(
             agents)]["AgentId"].tolist()
-
     if len(agentsId) != 0:
         costs = costs[costs['AgentId'].isin(agentsId)]
 
@@ -440,14 +440,138 @@ def all_annual_costs(evaler, agents=(), agentsId=(), capital=True):
     return costs
 
 
-def annual_costs_present_value(outputDb, reactorId=(), capital=True):
+def actualize_costs(df, columns, time_col='Time', time_factor=12.):
+    discount_rate = eco_data.dict['finance']['discount_rate']
+    df_actualised = df.copy(deep=True)
+
+    for index, row in df_actualised.iterrows():
+        t = row[time_col] / time_factor
+        actualization = actualize(t, discount_rate)
+
+        for col in columns:
+            df_actualised.at[index, col] *= actualization
+    return df_actualised
+
+
+_omdeps = ['MonthlyCosts', ]
+
+_omschema = [('SimId', ts.UUID),
+             ('AgentId', ts.INT),
+             ('Fuel', ts.DOUBLE),
+             ('OperationMaintenance', ts.DOUBLE),
+             ('Decommission', ts.DOUBLE),
+             ('Capital', ts.DOUBLE)]
+
+
+@metric(name='ActualizedMonthlyCosts', depends=_omdeps, schema=_omschema)
+def actualised_montly_costs(dfMontlyCost):
+
+    df_actualised = dfMontlyCost.copy(deep=True)
+
+    col_to_actualize = ['Fuel',
+                        'OperationMaintenance',
+                        'Decommission',
+                        'Capital']
+    return actualize_costs(df_actualised, col_to_actualize, time_col='Time', time_factor=12.)
+
+
+del _omdeps, _omschema
+
+
+def direct_actualized_annual_costs(evaler, agents=(), agentsId=(), capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
     """
-    costs = annual_costs(outputDb, reactorId, capital)
-    actualization = actualization_vector(len(costs))
-    actualization.index = costs.index
-    return costs.apply(lambda x: x * actualization)
+
+    costs = evaler.eval('ActualizedMonthlyCosts')
+
+    if len(agents) != 0:
+        dfAgents = evaler.eval('AgentEntry')
+        agentsId += dfAgents[dfAgents['Prototype'].isin(
+            agents)]["AgentId"].tolist()
+    if len(agentsId) != 0:
+        costs = costs[costs['AgentId'].isin(agentsId)]
+
+    dfInfo = evaler.eval('Info')
+    duration = dfInfo.loc[0, 'Duration']
+    initialYear = dfInfo.loc[0, 'InitialYear']
+    initialMonth = dfInfo.loc[0, 'InitialMonth']
+
+    costs['Year'] = (costs['Time'] + initialMonth - 1) // 12 + initialYear
+    costs = costs.groupby(['Year', "AgentId"]).sum().reset_index()
+    costs.drop(['Time'], axis=1, inplace=True)
+
+    if not capital:
+        del costs['Capital']
+
+    return costs
+
+
+def child_actualized_annual_costs(evaler, agents=(), agentsId=(), capital=True):
+    """Same as annual_cost except all values are actualized to the begin date
+    of the SIMULATION
+    """
+
+    dfEntry = evaler.eval('AgentEntry')
+
+    if len(agents) != 0:
+        agentsId += dfEntry[dfEntry['Prototype'].isin(
+            agents)]["AgentId"].tolist()
+
+    childId = []
+    while (childId != list(set(dfEntry[dfEntry['ParentId'].isin(
+            agentsId)]['AgentId'].to_list()))):
+        if len(agentsId) != 0:
+            childId += dfEntry[dfEntry['ParentId'].isin(
+                agentsId)]['AgentId'].to_list()
+        childId = (list(set(childId)))
+        agentsId += childId
+
+    costs = direct_actualized_annual_costs(evaler, agentsId=childId)
+
+    if not capital:
+        del costs['Capital']
+    costs = costs.groupby('Year').sum().reset_index()
+    costs['AgentId'] = -1
+    return costs
+
+
+def all_actualized_annual_costs(evaler, agents=(), agentsId=(), capital=True):
+    """Same as annual_cost except all values are actualized to the begin date
+    of the SIMULATION
+    """
+
+    dfEntry = evaler.eval('AgentEntry')
+
+    if len(agents) != 0:
+        agentsId += dfEntry[dfEntry['Prototype'].isin(
+            agents)]["AgentId"].tolist()
+
+    facilitiesId = agentsId
+    if len(agentsId) != 0:
+        while (facilitiesId != list(set(dfEntry[dfEntry['ParentId'].isin(
+                agentsId)]['AgentId'].to_list() + agentsId))):
+            if len(agentsId) != 0:
+                facilitiesId += dfEntry[dfEntry['ParentId'].isin(
+                    agentsId)]['AgentId'].to_list()
+            facilitiesId = list(set(facilitiesId))
+            agentsId += facilitiesId
+
+    costs = direct_actualized_annual_costs(evaler, agentsId=facilitiesId)
+
+    if not capital:
+        del costs['Capital']
+    costs = costs.groupby('Year').sum().reset_index()
+    costs['AgentId'] = -1
+
+    return costs
+
+
+def simulation_actualized_annual_costs(outputDb, capital=True):
+    """Same as annual_cost except all values are actualized to the begin date
+    of the SIMULATION
+    """
+    return all_actualized_annual_costs(outputDb, capital=capital)
 
 
 def average_cost(outputDb, reactorId, capital=True):
@@ -615,16 +739,6 @@ def power_generated(outputDb, reactorId):
     return rtn.fillna(0)
 
 # Institution level
-
-
-def institution_annual_costs_present_value(outputDb, reactorId, capital=True):
-    """Same as annual_cost except all values are actualized to the begin date
-    of the SIMULATION
-    """
-    costs = institution_annual_costs(outputDb, institutionId, capital)
-    actualization = actualization_vector(len(costs))
-    actualization.index = costs.index
-    return costs.apply(lambda x: x * actualization)
 
 
 def institution_benefit(outputDb, institutionId):
@@ -853,17 +967,6 @@ def institution_average_lcoe(outputDb, institutionId):
     return rtn.fillna(0)
 
 # Region level
-
-
-def region_annual_costs_present_value(
-        outputDb, regionId, capital=True, truncate=True):
-    """Same as annual_cost except all values are actualized to the begin date
-    of the SIMULATION
-    """
-    costs = region_annual_costs(outputDb, regionId, capital)
-    actualization = actualization_vector(len(costs))
-    actualization.index = costs.index
-    return costs.apply(lambda x: x * actualization)
 
 
 def region_benefit(outputDb, regionId):
@@ -1159,18 +1262,6 @@ def simulation_annual_costs(outputDb, capital=True, truncate=True):
         del costs['Capital']
     costs = costs.groupby('Year').sum()
     return costs
-
-
-def simulation_annual_costs_present_value(
-        outputDb, capital=True, truncate=True):
-    """Same as annual_cost except all values are actualized to the begin date
-    of the SIMULATION
-    """
-    df = simulation_annual_costs(outputDb, capital, truncate)
-    for year in df.index:
-        df.loc[year, :] = df.loc[year, :] / \
-            (1 + default_discount_rate) ** (year - df.index[0])
-    return df
 
 
 def simulation_benefit(outputDb):

@@ -500,6 +500,81 @@ def test_monthly_costs():
     assert_frame_equal(obs, exp)
 
 
+def test_actualized_monthly_costs():
+
+    monthly_cost = pd.DataFrame(np.array(
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 1, 1.0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 2, 1.0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 8, 1.0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 9, 1.0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 1, 0, 1095.0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 2, 0, 1095.0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 3, 0, 1095.0, 0, 0.84),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 8, 0, 1095.0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 9, 0, 1095.0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 11, 0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 12, 0, 0, 0.133333, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 13, 0, 0, 0.266667, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 16, 0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0, 0, 0, 0, 0.126),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 4, 0, 0, 0, 0.55965),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 5, 0, 0, 0, 0.28035),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 0, 0, 0, 0)],
+        dtype=ensure_dt_bytes(
+            [('SimId', 'O'),
+             ('AgentId', '<i8'),
+             ('Time', '<i8'),
+             ('Fuel', '<f8'),
+             ('OperationMaintenance', '<f8'),
+             ('Decommission', '<f8'),
+             ('Capital', '<f8')
+             ])))
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+
+    obs = eco_metrics.actualised_montly_costs.func(monthly_cost)
+    exp = pd.DataFrame(np.array(
+        [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 1, 0.992090, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          12, 2, 0.9842404717097668, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          12, 8, 0.9384364685966974, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          12, 9, 0.9310124446222229, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 1, 0, 1086.3373930744551, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 2, 0, 1077.7433165221946, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 3, 0, 1069.21722819556, 0, 0.8202214353281008),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 8, 0, 1027.5879331133, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 9, 0, 1019.4586268613341, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 11, 0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 12, 0, 0, 0.12121181818181818, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 13, 0, 0, 0.240506711165617, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 16, 0, 0, 0, 0),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 0, 0, 0, 0, 0.126),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 4, 0, 0, 0, 0.5421493561876669),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
+          13, 5, 0, 0, 0, 0.26943475044310305),
+         (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 13, 6, 0, 0, 0, 0)],
+        dtype=ensure_dt_bytes(
+            [('SimId', 'O'),
+             ('AgentId', '<i8'),
+             ('Time', '<i8'),
+             ('Fuel', '<f8'),
+             ('OperationMaintenance', '<f8'),
+             ('Decommission', '<f8'),
+             ('Capital', '<f8')
+             ])))
+
+    assert_frame_equal(left=obs, right=exp, check_less_precise=4)
+
+
 @dbtest
 def test_annual_costs(db, fname, backend):
     evaler = cym.Evaluator(db)
@@ -515,12 +590,16 @@ def test_annual_costs(db, fname, backend):
     obs_2.drop(['AgentId', 'Year'], axis=1, inplace=True)
     assert_series_equal(obs_1.sum(), obs_2.sum())
 
-
-# # Region / Institution level
+    # Region / Institution level
     obs_3 = eco_metrics.all_annual_costs(evaler,
                                          agentsId=[15])
     obs_3.drop(['AgentId', 'Year'], axis=1, inplace=True)
     assert_series_equal(obs_1.sum(), obs_3.sum())
+
+    print(eco_metrics.direct_actualized_annual_costs(evaler,
+                                                     agentsId=[17, 18, 19, 20, 21]))
+    print(eco_metrics.simulation_actualized_annual_costs(evaler))
+
 # assert_equal(
 #     eco_metrics.region_annual_costs_present_value(
 #         'test.sqlite', 8).sum().sum(),
