@@ -574,18 +574,19 @@ def simulation_actualized_annual_costs(outputDb, capital=True):
     return all_actualized_annual_costs(outputDb, capital=capital)
 
 
-def average_cost(outputDb, reactorId, capital=True):
-    """Input : sqlite output database, reactor's AgentId
+def average_cost(evaler, reactorId, capital=True):
+    """Input : evaler, reactor's AgentId
     Output : value (in $/MWh) corresponding to the total costs (sum of annual
     costs) divided by the total power generated.
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
+
     dfPower = evaler.eval('TimeSeriesPower').reset_index()
-    powerGenerated = sum(
-        dfPower[dfPower.AgentId == reactorId].loc[:, 'Value']) * 8760 / 12
-    return annual_costs(outputDb, reactorId,
-                        capital).sum().sum() / powerGenerated
+    powerGenerated = dfPower[dfPower.AgentId ==
+                             reactorId].loc[:, 'Value'].sum() / 12. * 365.25 * 24
+    print(powerGenerated)
+    return direct_actualized_annual_costs(
+        evaler, agentsId=[reactorId], capital=capital).drop(['Year',
+                                                             'AgentId'], axis=1).sum().sum() / powerGenerated
 
 
 def benefit(outputDb, reactorId):

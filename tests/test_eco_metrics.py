@@ -599,6 +599,7 @@ def test_annual_costs(db, fname, backend):
     print(eco_metrics.direct_actualized_annual_costs(evaler,
                                                      agentsId=[17, 18, 19, 20, 21]))
     print(eco_metrics.simulation_actualized_annual_costs(evaler))
+    print(eco_metrics.average_cost(evaler, 19))
 
 # assert_equal(
 #     eco_metrics.region_annual_costs_present_value(
