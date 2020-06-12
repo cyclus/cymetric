@@ -9,19 +9,18 @@ jobs:
         steps:
             # Ensure your image has git (required by git to clone via SSH) so that CircleCI can clone your repo
             - run: apt-get -qq update; apt-get -y install git openssh-client
-            - run: pip install pyyaml
             - checkout
             - run:
-                  name: Build Cymetric
-                  command: |
-                      python ./setup.py install --user
+                name: Build Cymetric
+                command: |
+                    python ./setup.py install --user
             - run:
-                  name: save SHA to a file
-                  command: echo $CIRCLE_SHA1 > .circle-sha
+                name: save SHA to a file
+                command: echo $CIRCLE_SHA1 > .circle-sha
             - save_cache:
-                  key: v1-repo-{{ checksum ".circle-sha" }}
-                  paths:
-                      - /root
+                key: v1-repo-{{ checksum ".circle-sha" }}
+                paths:
+                  - /root
 
     # Test
     nosetest:
@@ -30,17 +29,19 @@ jobs:
         working_directory: ~/root
         steps:
             - run:
-                  name: save SHA to a file
-                  command: echo $CIRCLE_SHA1 > .circle-sha
+                name: save SHA to a file
+                command: echo $CIRCLE_SHA1 > .circle-sha
+            - run: pip install pyyaml
             - restore_cache:
-                  keys:
-                      - v1-repo-{{ checksum ".circle-sha" }}
+                keys:
+                  - v1-repo-{{ checksum ".circle-sha" }}
             - run:
-                  name: Install nosetest
-                  command: pip install nose
+                name: Install nosetest
+                command: pip install nose
             - run:
-                  name: Nosetests
-                  command: nosetests -w ~/cymetric/tests; exit $?
+                name: Nosetests
+                command: nosetests -w ~/cymetric/tests; exit $?
+
 
     # Update docker container
     deploy: # Cymetric -> Cymetric:latest
@@ -50,19 +51,19 @@ jobs:
         steps:
             - checkout
             - run:
-                  name: Place the proper Dockerfile
-                  command: cp docker/master-ci/Dockerfile .
+                name: Place the proper Dockerfile
+                command: cp docker/master-ci/Dockerfile .
             - setup_remote_docker
             - run:
-                  name: log into Docker
-                  command: |
-                      docker login -u $DOCKER_USER -p $DOCKER_PASS
+                name: log into Docker
+                command: |
+                    docker login -u $DOCKER_USER -p $DOCKER_PASS
             - run:
-                  name: Build Docker container
-                  command: docker build --rm=false -t cyclus/cymetric:latest .
+                name: Build Docker container
+                command: docker build --rm=false -t cyclus/cymetric:latest .
             - run:
-                  name: Push on DockerHub
-                  command: docker push cyclus/cymetric:latest # push to docker depot
+                name: Push on DockerHub
+                command: docker push cyclus/cymetric:latest # push to docker depot
 
     deploy_stable: # Cymetric:stable
         docker:
@@ -71,43 +72,47 @@ jobs:
         steps:
             - checkout
             - run:
-                  name: Place the proper Dockerfile
-                  command: cp docker/release-ci/Dockerfile .
+                name: Place the proper Dockerfile
+                command: cp docker/release-ci/Dockerfile .
             - setup_remote_docker
             - run:
-                  name: Log on DockerHub
-                  command: |
-                      docker login -u $DOCKER_USER -p $DOCKER_PASS
+                name: Log on DockerHub
+                command: |
+                  docker login -u $DOCKER_USER -p $DOCKER_PASS
             - run:
-                  name: Build Docker container
-                  command: docker build -t cyclus/cymetric:stable .
+                name: Build Docker container
+                command: docker build -t cyclus/cymetric:stable .
             - run:
-                  name: Push on DockerHub
-                  command: docker push cyclus/cymetric:stable # push to docker depot
+                name: Push on DockerHub
+                command: docker push cyclus/cymetric:stable # push to docker depot
+
 
 workflows:
     version: 2
     build_and_test:
         jobs:
+
             # on a pr // all branch
             - build
             - nosetest:
-                  requires:
-                      - build
+                requires:
+                    - build
 
             # Merge on Master
             - deploy:
-                  filters:
-                      branches:
-                          only: master
-                  requires:
-                      - nosetest
-              # The following should now be done on version tag.
+                filters:
+                    branches:
+                        only: master
+                requires:
+                    - nosetest
+
+
+             # The following should now be done on version tag.
             - deploy_stable:
-                  filters:
-                      branches:
-                          ignore: /.*/
-                      tags:
-                          only: /.*/
-                  requires:
-                      - nosetest
+                filters:
+                    branches:
+                        ignore: /.*/
+                    tags:
+                        only: /.*/
+                requires:
+                    - nosetest
