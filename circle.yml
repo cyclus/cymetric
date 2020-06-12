@@ -31,13 +31,12 @@ jobs:
             - run:
                 name: save SHA to a file
                 command: echo $CIRCLE_SHA1 > .circle-sha
-            - run: pip install pyyaml
             - restore_cache:
                 keys:
                   - v1-repo-{{ checksum ".circle-sha" }}
             - run:
                 name: Install nosetest
-                command: pip install nose
+                command: pip install nose pyyaml
             - run:
                 name: Nosetests
                 command: nosetests -w ~/cymetric/tests; exit $?
