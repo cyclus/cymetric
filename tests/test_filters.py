@@ -36,12 +36,11 @@ def test_transactions(db, fname, backend):
     assert_equal(list(cal), exp_head)  # Check we have the correct headers
 
     # SimId et al. change at each test need to drop it
-    drop_cols = [
-        'SimId',
-        'TransactionId',
-        'ResourceId',
-        'ReceiverId',
-        'SenderId']
+    drop_cols = ['SimId',
+                 'TransactionId',
+                 'ResourceId',
+                 'ReceiverId',
+                 'SenderId']
     cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
@@ -461,17 +460,12 @@ def test_inventories_activity(db, fname, backend):
                                        nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        (15, 'Reactor1', 1, 'core', 942390000,
-         0.0444814879803, 2.44036364223e+13),
-        (15, 'Reactor1', 2, 'core', 942390000,
-         0.0444814879803, 2.44036364223e+13),
-        (15, 'Reactor1', 2, 'spent', 942390000,
-         0.0176991150442, 9.71016906463e+12),
-        (15, 'Reactor1', 3, 'core', 942390000,
-         0.0444814879803, 2.44036364223e+13),
-        (15, 'Reactor1', 3, 'spent', 942390000,
-         0.0353982300885, 1.94203381293e+13),
-        (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327, 2.91305071939e+13)
+        (15, 'Reactor1', 1, 'core', 942390000, 0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 2, 'core', 942390000, 0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.017699115044, 9.7101690646e+12),
+        (15, 'Reactor1', 3, 'core', 942390000, 0.044481487980, 2.4403636422e+13),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.035398230080, 1.9420338129e+13),
+        (15, 'Reactor1', 4, 'spent', 942390000, 0.053097345133, 2.9130507194e+13)
     ], dtype=ensure_dt_bytes([
         ('AgentId', '<i8'), ('Prototype', 'O'), ('Time', '<i8'),
         ('InventoryName', 'O'), ('NucId', '<i8'), ('Quantity', '<f8'),
@@ -485,20 +479,15 @@ def test_inventories_activity(db, fname, backend):
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core', 922350000, 0.00157922442534, 29671782.9213),
-        (15, 'Reactor1', 1, 'core', 942390000,
-         0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 1, 'core', 942390000, 0.04448148798, 2.44036364223e+13),
         (15, 'Reactor1', 2, 'core', 922350000, 0.00157922442534, 29671782.9213),
-        (15, 'Reactor1', 2, 'core', 942390000,
-         0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 2, 'core', 942390000, 0.04448148798, 2.44036364223e+13),
         (15, 'Reactor1', 2, 'spent', 922350000, 0.00884955752212, 166272852.378),
-        (15, 'Reactor1', 2, 'spent', 942390000,
-         0.0176991150442, 9.71016906463e+12),
+        (15, 'Reactor1', 2, 'spent', 942390000, 0.01769911504, 9.71016906463e+12),
         (15, 'Reactor1', 3, 'core', 922350000, 0.00157922442534, 29671782.9213),
-        (15, 'Reactor1', 3, 'core', 942390000,
-         0.0444814879803, 2.44036364223e+13),
+        (15, 'Reactor1', 3, 'core', 942390000, 0.04448148798, 2.44036364223e+13),
         (15, 'Reactor1', 3, 'spent', 922350000, 0.0176991150442, 332545704.756),
-        (15, 'Reactor1', 3, 'spent', 942390000,
-         0.0353982300885, 1.94203381293e+13),
+        (15, 'Reactor1', 3, 'spent', 942390000, 0.035398230089, 1.94203381293e+13),
         (15, 'Reactor1', 4, 'core', 922350000, 0.04, 751553292.748),
         (15, 'Reactor1', 4, 'spent', 922350000, 0.0265486725664, 498818557.134),
         (15, 'Reactor1', 4, 'spent', 942390000, 0.0530973451327, 2.91305071939e+13)

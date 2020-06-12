@@ -1,7 +1,6 @@
 import warnings
 import pandas as pd
 import numpy as np
-from functools import reduce
 
 try:
     from graphviz import Digraph
