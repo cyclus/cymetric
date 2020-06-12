@@ -213,13 +213,28 @@ def get_filiation_per_name(name, dfEntry):
 
 
 def get_filiation_per_id(id, dfEntry):
+    """
+    Input : Agents entry table and agents id
+    Output : list of childs AgentId 
+    """
     name = dfEntry[dfEntry["AgentId"] == id].reset_index()["Prototype"][0]
     return get_filiation_per_name(name, dfEntry)
 
 
-####################
-# Mining & Milling #
-####################
+def get_child_id(agentsId, dfEntry):
+    childId = []
+    while (childId != list(set(dfEntry[dfEntry['ParentId'].isin(
+            agentsId)]['AgentId'].to_list()))):
+        if len(agentsId) != 0:
+            childId += dfEntry[dfEntry['ParentId'].isin(
+                agentsId)]['AgentId'].to_list()
+            childId = (list(set(childId)))
+            agentsId += childId
+    return childId
+
+    ####################
+    # Mining & Milling #
+    ####################
 
 
 def isuraniumsource(dfEntry, id):

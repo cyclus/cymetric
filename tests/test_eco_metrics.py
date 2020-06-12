@@ -581,8 +581,8 @@ def test_annual_costs(db, fname, backend):
 
     # Reactor / Institution level
     eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
-    obs_1 = eco_metrics.direct_annual_costs(evaler,
-                                            agentsId=[17, 18, 19, 20, 21])
+    obs_1 = eco_metrics.annual_costs(evaler,
+                                     agentsId=[17, 18, 19, 20, 21])
     obs_1.drop(['AgentId', 'Year'], axis=1, inplace=True)
 
     obs_2 = eco_metrics.child_annual_costs(evaler,
@@ -590,45 +590,38 @@ def test_annual_costs(db, fname, backend):
     obs_2.drop(['AgentId', 'Year'], axis=1, inplace=True)
     assert_series_equal(obs_1.sum(), obs_2.sum())
 
-    # Region / Institution level
     obs_3 = eco_metrics.all_annual_costs(evaler,
                                          agentsId=[15])
     obs_3.drop(['AgentId', 'Year'], axis=1, inplace=True)
     assert_series_equal(obs_1.sum(), obs_3.sum())
 
-    print(eco_metrics.direct_actualized_annual_costs(evaler,
-                                                     agentsId=[17, 18, 19, 20, 21]))
     print(eco_metrics.simulation_actualized_annual_costs(evaler))
     print(eco_metrics.average_cost(evaler, 19))
-
-# assert_equal(
-#     eco_metrics.region_annual_costs_present_value(
-#         'test.sqlite', 8).sum().sum(),
-#     eco_metrics.institution_annual_costs_present_value(
-#         'test.sqlite', 9).sum().sum())
-# # Simulation / Reactor level
-# assert_equal(
-#     eco_metrics.region_annual_costs('test.sqlite', 8).sum(),
-#     eco_metrics.simulation_annual_costs('test.sqlite').sum().sum())
-# assert_equal(
-#     eco_metrics.region_annual_costs_present_value('test.sqlite',
-#                                                   8).sum().sum(),
-#     eco_metrics.simulation_annual_costs_present_value(
-#         'test.sqlite').sum().sum())
+    print(eco_metrics.benefit(evaler, 19))
 
 
-def test_lcoe():
+@dbtest
+def test_lcoe(db, fname, backend):
     """
     """
+    evaler = cym.Evaluator(db)
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+
     # Reactor / Institution level
-    assert_equal(eco_metrics.lcoe('tests/test.sqlite', 13),
-                 eco_metrics.institution_lcoe('tests/test.sqlite', 9))
-    # Region / Institution level
-    assert_equal(eco_metrics.region_lcoe('tests/test.sqlite', 8),
-                 eco_metrics.institution_lcoe('tests/test.sqlite', 9))
-    # Simulation / Reactor level
-    assert_equal(eco_metrics.region_lcoe('tests/test.sqlite', 8),
-                 eco_metrics.simulation_lcoe('tests/test.sqlite'))
+    obs_1 = eco_metrics.lcoe(evaler,
+                             agentsId=[17, 18, 19, 20, 21])
+    print(obs_1)
+    obs_2 = eco_metrics.child_lcoe(evaler,
+                                   agentsId=[16])
+    print(obs_2)
+
+    assert_equal(obs_1, obs_2)
+    # # Region / Institution level
+    # assert_equal(eco_metrics.region_lcoe(evaler, 8),
+    #              eco_metrics.institution_lcoe(evaler, 9))
+    # # Simulation / Reactor level
+    # assert_equal(eco_metrics.region_lcoe(evaler, 8),
+    #              eco_metrics.simulation_lcoe(evaler))
 
 
 def test_average_lcoe():
