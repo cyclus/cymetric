@@ -194,7 +194,7 @@ def decommissioning_cost(dfPower, dfEntry, dfInfo):
         if (len(tmp) == 1):
             duration = int(tmp.at[0, 'decom_duration'])
             overnightCost = tmp.at[0, 'decom_overnight_cost']
-            cashFlowShape = capital_shape(
+            cashFlowShape = eco_tools.capital_shape(
                 duration - duration // 2, duration // 2)
             powerCapacity = dfPower[dfPower['AgentId']
                                     == id].reset_index().at[0, 'Value']
@@ -350,21 +350,10 @@ def child_annual_costs(evaler, agents=(), agentsId=(), capital=True):
     Output : total reactor costs per year over its lifetime at the institution
     level.
     """
-
     dfEntry = evaler.eval('AgentEntry')
-
-    if len(agents) != 0:
-        agentsId += dfEntry[dfEntry['Prototype'].isin(
-            agents)]["AgentId"].tolist()
-
     childId = eco_tools.get_child_id(agentsId, dfEntry)
-
-    costs = annual_costs(evaler, agentsId=childId)
-
-    if not capital:
-        del costs['Capital']
-    costs = costs.groupby('Year').sum().reset_index()
-    return costs
+    agentsId += eco_tools.get_child_id(agentsId, dfEntry)
+    return annual_costs(evaler, agentsId=childId, capital=capital)
 
 
 def all_annual_costs(evaler, agents=(), agentsId=(), capital=True):
@@ -380,20 +369,9 @@ def all_annual_costs(evaler, agents=(), agentsId=(), capital=True):
     Output : total reactor costs per year over its lifetime at the region
     level.
     """
-
     dfEntry = evaler.eval('AgentEntry')
-
-    if len(agents) != 0:
-        agentsId += dfEntry[dfEntry['Prototype'].isin(
-            agents)]["AgentId"].tolist()
-
     agentsId += eco_tools.get_child_id(agentsId, dfEntry)
-    costs = annual_costs(evaler, agentsId=agentsId)
-
-    if not capital:
-        del costs['Capital']
-    costs = costs.groupby('Year').sum().reset_index()
-    return costs
+    return annual_costs(evaler, agentsId=agentsId, capital=capital)
 
 
 def actualize_costs(df, columns,  dfEntry, time_col='Time', time_factor=12., t_0=0):
@@ -451,7 +429,6 @@ def actualized_annual_costs(evaler, agents=(), agentsId=(), capital=True):
         costs = costs[costs['AgentId'].isin(agentsId)]
 
     dfInfo = evaler.eval('Info')
-    duration = dfInfo.loc[0, 'Duration']
     initialYear = dfInfo.loc[0, 'InitialYear']
     initialMonth = dfInfo.loc[0, 'InitialMonth']
 
@@ -469,59 +446,25 @@ def child_actualized_annual_costs(evaler, agents=(), agentsId=(), capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
     """
-
-    dfEntry = evaler.eval('AgentEntry').copy()
-
-    if len(agents) != 0:
-        agentsId += dfEntry[dfEntry['Prototype'].isin(
-            agents)]["AgentId"].tolist()
-
+    dfEntry = evaler.eval('AgentEntry')
     childId = eco_tools.get_child_id(agentsId, dfEntry)
-
-    costs = actualized_annual_costs(evaler, agentsId=childId)
-
-    if not capital:
-        del costs['Capital']
-    costs = costs.groupby('Year').sum().reset_index()
-    costs['AgentId'] = -1
-    return costs
+    return actualized_annual_costs(evaler, agentsId=childId, capital=capital)
 
 
 def all_actualized_annual_costs(evaler, agents=[], agentsId=[], capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
     """
-
-    dfEntry = evaler.eval('AgentEntry').copy()
-
-    if len(agents) != 0:
-        agentsId += dfEntry[dfEntry['Prototype'].isin(
-            agents)]["AgentId"].tolist()
-
+    dfEntry = evaler.eval('AgentEntry')
     agentsId += eco_tools.get_child_id(agentsId, dfEntry)
-
-    costs = actualized_annual_costs(evaler, agentsId=agentsId)
-
-    if not capital:
-        del costs['Capital']
-    costs = costs.groupby('Year').sum().reset_index()
-    costs['AgentId'] = -1
-
-    return costs
-
-
-def simulation_actualized_annual_costs(outputDb, capital=True):
-    """Same as annual_cost except all values are actualized to the begin date
-    of the SIMULATION
-    """
-    return all_actualized_annual_costs(outputDb, capital=capital)
+    return actualized_annual_costs(evaler, agentsId=agentsId, capital=capital)
 
 
 def actualized_annual_cost(evaler, agents=(), agentsId=(), capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
     """
-    cost = actualized_annual_cost(evaler, agents, agentsId, capital):
+    cost = actualized_annual_costs(evaler, agents, agentsId, capital)
     cost['Cost'] = cost['Fuel'] + cost['OperationMaintenance'] + \
         cost['Capital'] + cost['Decommission']
     return cost[['Year', 'AgentId', 'Cost']]
@@ -531,17 +474,17 @@ def child_actualized_annual_cost(evaler, agents=(), agentsId=(), capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
     """
-    cost = child_actualized_annual_cost(evaler, agents, agentsId, capital):
+    cost = child_actualized_annual_costs(evaler, agents, agentsId, capital)
     cost['Cost'] = cost['Fuel'] + cost['OperationMaintenance'] + \
         cost['Capital'] + cost['Decommission']
-    return cost[['Year', 'AgentId', 'Cost']]s
+    return cost[['Year', 'AgentId', 'Cost']]
 
 
 def all_actualized_annual_cost(evaler, agents=[], agentsId=[], capital=True):
     """Same as annual_cost except all values are actualized to the begin date
     of the SIMULATION
     """
-    cost = all_actualized_annual_cost(evaler, agents, agentsId, capital):
+    cost = all_actualized_annual_costs(evaler, agents, agentsId, capital)
     cost['Cost'] = cost['Fuel'] + cost['OperationMaintenance'] + \
         cost['Capital'] + cost['Decommission']
     return cost[['Year', 'AgentId', 'Cost']]
@@ -583,48 +526,30 @@ def child_power_generated(evaler, agentsId=[]):
     """Input : cymetric evaler and reactor agent id
     Output : Electricity generated in MWh every year
     """
-    dfPower = evaler.eval('AnnualElectricityGeneratedByAgent').copy()
-    initialYear = evaler.eval('Info').loc[0, 'InitialYear']
-
-    # Convert to absolute time
-    dfPower['Year'] = dfPower['Year'] + initialYear
-    # Convert Power to MWh
-    dfPower['Energy'] *= 365.25 * 24
-
+    dfEntry = evaler.eval('AgentEntry')
     childId = eco_tools.get_child_id(agentsId, dfEntry)
-
-    # Return table filtered by AgentsId
-    return dfPower[dfPower['AgentId'].isin(childId)]
+    return power_generated(evaler, agentsId=childId)
 
 
 def all_power_generated(evaler, agentsId=[]):
     """Input : cymetric evaler and reactor agent id
     Output : Electricity generated in MWh every year
     """
-    dfPower = evaler.eval('AnnualElectricityGeneratedByAgent').copy()
-    initialYear = evaler.eval('Info').loc[0, 'InitialYear']
-
-    # Convert to absolute time
-    dfPower['Year'] = dfPower['Year'] + initialYear
-    # Convert Power to MWh
-    dfPower['Energy'] *= 365.25 * 24
-
+    dfEntry = evaler.eval('AgentEntry')
     agentsId += eco_tools.get_child_id(agentsId, dfEntry)
-
-    # Return table filtered by AgentsId
-    return dfPower[dfPower['AgentId'].isin(agentsId)]
+    return power_generated(evaler, agentsId=agentsId)
 
 
-def benefit(evaler, reactorId):
+def benefit(evaler, agentsId=[]):
     """Input : evaler database and reactor agent id
     Output : cumulative sum of actualized income and expense
              (= - expenditures + income)
     """
     costs = actualized_annual_costs(evaler=evaler,
-                                    agentsId=[reactorId])
+                                    agentsId=agentsId)
     power_income = power_generated(evaler=evaler,
-                                   agentsId=[reactorId])
-    power_income["Energy"] *= lcoe(evaler=evaler, agentsId=[reactorId])
+                                   agentsId=agentsId)
+    power_income["Energy"] *= lcoe(evaler=evaler, agentsId=agentsId)
 
     base_col = ['AgentId', 'Year']
     added_col = base_col + ['Fuel',
@@ -642,12 +567,30 @@ def benefit(evaler, reactorId):
     return power_income[['SimId', 'AgentId', 'Year', 'Capital']]
 
 
+def child_benefit(evaler, agentsId=[]):
+    """Input : sqlite output database and institution agent id
+    Output : cumulative sum of income and expense (= - expenditures + income)
+    """
+    dfEntry = evaler.eval('AgentEntry').copy()
+    childsId = eco_tools.get_child_id(agentsId, dfEntry)
+    return benefit(evaler, childsId)
+
+
+def all_benefit(evaler, agentsId=[]):
+    """Input : sqlite output database and institution agent id
+    Output : cumulative sum of income and expense (= - expenditures + income)
+    """
+    dfEntry = evaler.eval('AgentEntry').copy()
+    agentsId += eco_tools.get_child_id(agentsId, dfEntry)
+    return benefit(evaler, agentsId)
+
+
 def lcoe(evaler, agentsId=[]):
     """Input : evaler database and agents id
     Output : Value corresponding to Levelized Cost of Electricity ($/MWh)
     """
-    costs = actualized_annual_costs(evaler=evaler,
-                                    agentsId=agentsId).drop(['AgentId', 'Year'], axis=1)
+    costs = actualized_annual_cost(evaler=evaler,
+                                   agentsId=agentsId).drop(['AgentId', 'Year'], axis=1)
     power = power_generated(evaler=evaler, agentsId=agentsId)
 
     initialYear = evaler.eval('Info').loc[0, 'InitialYear']
@@ -664,48 +607,20 @@ def lcoe(evaler, agentsId=[]):
 
 def child_lcoe(evaler, agentsId=[]):
     """Input : evaler database and Instutions/Region id
-    Output : Value corresponding to Levelized Cost of Electricity ($/MWh)
+    Output : Value corresponding to Levelized Cost of Electricity ($/MWh) of the child agents
     """
     dfEntry = evaler.eval('AgentEntry').copy()
-    childId = eco_tools.get_child_id(agentsId, dfEntry)
-
-    costs = child_actualized_annual_costs(evaler=evaler,
-                                          agentsId=childId).drop(['AgentId', 'Year'], axis=1)
-    power = power_generated(evaler=evaler, agentsId=childId)
-
-    initialYear = evaler.eval('Info').loc[0, 'InitialYear']
-    dfEntry = evaler.eval('AgentEntry')
-    actualized_power = actualize_costs(df=power,
-                                       columns=["Energy"],
-                                       dfEntry=dfEntry,
-                                       time_col="Year",
-                                       time_factor=1.,
-                                       t_0=initialYear).drop(['SimId', 'AgentId', 'Year'], axis=1)
-
-    return (costs.sum(axis=1)).sum() / actualized_power.sum().sum()
+    childsId = eco_tools.get_child_id(agentsId, dfEntry)
+    return lcoe(evaler, agentsId=childsId)
 
 
 def all_lcoe(evaler, agentsId=[]):
-    """Input : sqlite output database and Instutions/Region agent id
+    """Input : evaler database and Instutions/Region id
     Output : Value corresponding to Levelized Cost of Electricity ($/MWh)
     """
     dfEntry = evaler.eval('AgentEntry').copy()
     agentsId += eco_tools.get_child_id(agentsId, dfEntry)
-
-    costs = actualized_annual_costs(evaler=evaler,
-                                    agentsId=agentsId).drop(['AgentId', 'Year'], axis=1)
-    power = power_generated(evaler=evaler, agentsId=agentsId)
-
-    initialYear = evaler.eval('Info').loc[0, 'InitialYear']
-    dfEntry = evaler.eval('AgentEntry')
-    actualized_power = actualize_costs(df=power,
-                                       columns=["Energy"],
-                                       dfEntry=dfEntry,
-                                       time_col="Year",
-                                       time_factor=1.,
-                                       t_0=initialYear).drop(['SimId', 'AgentId', 'Year'], axis=1)
-
-    return (costs.sum(axis=1)).sum() / actualized_power.sum().sum()
+    return lcoe(evaler, agentsId=agentsId)
 
 
 def period_costs(evaler, agentsId=[], t0=0, period=0, capital=True):
@@ -719,7 +634,6 @@ def period_costs(evaler, agentsId=[], t0=0, period=0, capital=True):
     power = power_generated(evaler, agentsId)
     if t0 > 0 or period > 0:
         initialYear = evaler.eval('Info').loc[0, 'InitialYear']
-
         if (t0 > 0):
             costs = costs[costs['Year'] >= t0+initialYear]
             power = power[power['Year'] >= t0+initialYear]
@@ -728,10 +642,10 @@ def period_costs(evaler, agentsId=[], t0=0, period=0, capital=True):
             power = power[power['Year'] <= t0+initialYear+period]
     base_col = ['AgentId', 'Year']
     added_col = base_col + ['Cost']
-    costs = merge(power_income, base_col, costs, added_col)
+    costs = merge(power, base_col, costs, added_col)
     costs['Cost'] *= 1 / costs['Energy']
 
-    return costs[[['Year', 'AgentId', 'Cost']]]
+    return costs[['Year', 'AgentId', 'Cost']]
 
 
 def child_period_costs(evaler, agentsId=[], t0=0, period=0, capital=True):
@@ -740,25 +654,9 @@ def child_period_costs(evaler, agentsId=[], t0=0, period=0, capital=True):
     expense in [t+t0, t+t0+period] divided by actualized power generated
     in [t+t0, t+t0+period]
     """
-
-    costs = child_actualized_annual_cost(
-        evaler, agentsId=agentsId, capital=capital)
-    power = power_generated(evaler, agentsId)
-    if t0 > 0 or period > 0:
-        initialYear = evaler.eval('Info').loc[0, 'InitialYear']
-
-        if (t0 > 0):
-            costs = costs[costs['Year'] >= t0+initialYear]
-            power = power[power['Year'] >= t0+initialYear]
-        if period > 0:
-            costs = costs[costs['Year'] <= t0+initialYear+period]
-            power = power[power['Year'] <= t0+initialYear+period]
-    base_col = ['AgentId', 'Year']
-    added_col = base_col + ['Cost']
-    costs = merge(power_income, base_col, costs, added_col)
-    costs['Cost'] *= 1 / costs['Energy']
-
-    return costs[[['Year', 'AgentId', 'Cost']]]
+    dfEntry = evaler.eval('AgentEntry').copy()
+    childsId = eco_tools.get_child_id(agentsId, dfEntry)
+    return period_costs(evaler, agentsId=childsId, t0=t0, period=period, capital=capital)
 
 
 def all_period_costs(evaler, agentsId=[], t0=0, period=0, capital=True):
@@ -767,186 +665,85 @@ def all_period_costs(evaler, agentsId=[], t0=0, period=0, capital=True):
     expense in [t+t0, t+t0+period] divided by actualized power generated
     in [t+t0, t+t0+period]
     """
-
-    costs = all_actualized_annual_cost(
-        evaler, agentsId=agentsId, capital=capital)
-    power = power_generated(evaler, agentsId)
-    if t0 > 0 or period > 0:
-        initialYear = evaler.eval('Info').loc[0, 'InitialYear']
-
-        if (t0 > 0):
-            costs = costs[costs['Year'] >= t0+initialYear]
-            power = power[power['Year'] >= t0+initialYear]
-        if period > 0:
-            costs = costs[costs['Year'] <= t0+initialYear+period]
-            power = power[power['Year'] <= t0+initialYear+period]
-    base_col = ['AgentId', 'Year']
-    added_col = base_col + ['Cost']
-    costs = merge(power_income, base_col, costs, added_col)
-    costs['Cost'] *= 1 / costs['Energy']
-
-    return costs[[['Year', 'AgentId', 'Cost']]]
+    dfEntry = evaler.eval('AgentEntry').copy()
+    agentsId += eco_tools.get_child_id(agentsId, dfEntry)
+    return period_costs(evaler, agentsId=agentsId, t0=t0, period=period, capital=capital)
 
 
 # Institution level
 
 
-def institution_benefit(outputDb, institutionId):
-    """Input : sqlite output database and institution agent id
-    Output : cumulative sum of income and expense (= - expenditures + income)
-    """
-    costs = - institution_annual_costs(outputDb, institutionId).sum(axis=1)
-    power_gen = institution_power_generated(
-        outputDb, institutionId) * institution_average_lcoe(
-        outputDb, institutionId)['Average LCOE']
-    rtn = pd.concat([costs, power_gen], axis=1).fillna(0)
-    rtn['Capital'] = (rtn[0] + rtn[1]).cumsum()
-    actualization = actualization_vector(len(rtn))
-    actualization.index = rtn.index
-    rtn['Actualized'] = ((rtn[0] + rtn[1]) * actualization).cumsum()
-    return rtn
-
-
-def institution_average_lcoe(outputDb, institutionId):
-    """Input : sqlite output database and institution agent id
+def average_lcoe(evaler, agentsId=[]):
+    """Input : evaler database and a list of agents id
     Output : Variable cost corresponding at each time step (i.e. every year)
     to the weighted average of the reactors Levelized Cost of Electricity
     ($/MWh). A reactor is taken into account at a time step t only if it is
     active (i.e. already commissioned and not yet decommissioned) at this
     time step.
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
-    duration = dfInfo.loc[0, 'Duration']
-    initialYear = dfInfo.loc[0, 'InitialYear']
-    initialMonth = dfInfo.loc[0, 'InitialMonth']
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry').reset_index()
-    dfEntry = dfEntry[dfEntry.ParentId == institutionId]
-    dfEntry = dfEntry[dfEntry['EnterTime'].apply(
-        lambda x: x > simulationBegin and x < simulationEnd)]
-    dfPower = evaler.eval('TimeSeriesPower')
-    reactorIds = dfEntry[dfEntry['AgentId'].apply(
-        lambda x: isreactor(dfPower, x))]['AgentId'].tolist()
-    simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear
-    simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
-    dfPower = evaler.eval('TimeSeriesPower')
-    rtn = pd.DataFrame(index=list(range(simulationBegin, simulationEnd + 1)))
-    rtn['Weighted sum'] = 0
-    rtn['Power'] = 0
-    rtn['Temp'] = pd.Series()
-    rtn['Temp2'] = pd.Series()
-    for id in reactorIds:
-        tmp = lcoe(outputDb, id)
-        commissioning = dfEntry[dfEntry.AgentId == id]['EnterTime'].iloc[0]
-        lifetime = dfEntry[dfEntry.AgentId == id]['Lifetime'].iloc[0]
-        decommissioning = (commissioning + lifetime +
-                           initialMonth - 1) // 12 + initialYear
-        commissioning = (commissioning + initialMonth - 1) // 12 + initialYear
-        power = dfPower[dfPower.AgentId == id]['Value'].iloc[0]
-        rtn['Temp'] = pd.Series(
-            tmp,
-            index=list(
-                range(
-                    commissioning,
-                    decommissioning + 1))) * power
-        rtn['Weighted sum'] += rtn['Temp'].fillna(0)
-        rtn['Temp2'] = pd.Series(
-            power,
-            index=list(
-                range(commissioning,
-                      decommissioning + 1))).fillna(0)
-        rtn['Power'] += rtn['Temp2'].fillna(0)
-    rtn['Average LCOE'] = rtn['Weighted sum'] / rtn['Power']
-    return rtn.fillna(0)
+    costs = actualized_annual_cost(evaler=evaler,
+                                   agentsId=agentsId)
+    power = power_generated(evaler=evaler, agentsId=agentsId)
+
+    initialYear = evaler.eval('Info').loc[0, 'InitialYear']
+    dfEntry = evaler.eval('AgentEntry')
+    actualized_power = actualize_costs(df=power,
+                                       columns=["Energy"],
+                                       dfEntry=dfEntry,
+                                       time_col="Year",
+                                       time_factor=1.,
+                                       t_0=initialYear)
+    base_col = ['AgentId', 'Year']
+    added_col = base_col + ['Cost']
+    costs = merge(actualized_power, base_col, costs, added_col)
+    costs["Cost"] *= 1 / costs["Energy"]
+    costs.drop(["AgentId"], axis=1, inplace=True)
+    costs = costs.groupby(['SimId', 'Year']).sum().reset_index()
+
+    return costs[['SimId', 'Year', 'Cost']]
+
 
 # Region level
 
 
-def region_benefit(outputDb, regionId):
-    """Input : sqlite output database and region agent id
-    Output : cumulative sum of actualized income and expense
-            (= - expenditures + income)
-    """
-    costs = - region_annual_costs(outputDb, regionId).sum(axis=1)
-    power_gen = region_power_generated(outputDb, regionId) * \
-        region_average_lcoe(outputDb, regionId)['Average LCOE']
-    rtn = pd.concat([costs, power_gen], axis=1).fillna(0)
-    rtn['Capital'] = (rtn[0] + rtn[1]).cumsum()
-    actualization = actualization_vector(len(rtn))
-    actualization.index = rtn.index
-    rtn['Actualized'] = ((rtn[0] + rtn[1]) * actualization).cumsum()
-    return rtn
-
-
-def region_average_lcoe(outputDb, regionId):
-    """Input : sqlite output database and region agent id
+def child_average_lcoe(evaler, agentsId=[]):
+    """Input : evaler database and list of regions/Institution/Agent agent id
     Output : Variable cost corresponding at each time step (i.e. every year)
     to the weighted average of the reactors Levelized Cost of Electricity
     ($/MWh). A reactor is taken into account at a time step t if and only if
     it is active (i.e. already commissioned and not yet decommissioned) at
     this time step.
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
-    duration = dfInfo.loc[0, 'Duration']
-    initialYear = dfInfo.loc[0, 'InitialYear']
-    initialMonth = dfInfo.loc[0, 'InitialMonth']
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry').reset_index()
-    tmp = dfEntry[dfEntry.ParentId == regionId]
-    dfEntry = dfEntry[dfEntry['EnterTime'].apply(
-        lambda x: x > simulationBegin and x < simulationEnd)]
-    institutionsId = tmp[tmp.Kind == 'Inst']['AgentId'].tolist()
-    reactorIds = []
-    dfPower = evaler.eval('TimeSeriesPower')
-    for id in institutionsId:
-        dfEntry2 = dfEntry[dfEntry.ParentId == id]
-        reactorIds += dfEntry2[dfEntry2['Spec'].apply(
-            lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-    simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear
-    simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
-    rtn = pd.DataFrame(index=list(range(simulationBegin, simulationEnd + 1)))
-    rtn['Weighted sum'] = 0
-    rtn['Power'] = 0
-    rtn['Temp'] = pd.Series()
-    rtn['Temp2'] = pd.Series()
-    for id in reactorIds:
-        tmp = lcoe(outputDb, id)
-        commissioning = dfEntry[dfEntry.AgentId == id]['EnterTime'].iloc[0]
-        lifetime = dfEntry[dfEntry.AgentId == id]['Lifetime'].iloc[0]
-        decommissioning = (commissioning + lifetime +
-                           initialMonth - 1) // 12 + initialYear
-        commissioning = (commissioning + initialMonth - 1) // 12 + initialYear
-        power = dfPower[dfPower.AgentId == id]['Value'].iloc[0]
-        rtn['Temp'] = pd.Series(
-            tmp,
-            index=list(
-                range(
-                    commissioning,
-                    decommissioning + 1))) * power
-        rtn['Weighted sum'] += rtn['Temp'].fillna(0)
-        rtn['Temp2'] = pd.Series(
-            power,
-            index=list(
-                range(
-                    commissioning,
-                    decommissioning +
-                    1))).fillna(0)
-        rtn['Power'] += rtn['Temp2']
-    rtn['Average LCOE'] = rtn['Weighted sum'] / rtn['Power']
-    return rtn.fillna(0)
+    dfEntry = evaler.eval('AgentEntry')
+    childId = eco_tools.get_child_id(agentsId, dfEntry)
+    return average_lcoe(evaler, childId)
+
+
+def all_average_lcoe(evaler, agentsId=[]):
+    """Input : evaler database and list of regions/Institution/Agent agent id
+    Output : Variable cost corresponding at each time step (i.e. every year)
+    to the weighted average of the reactors Levelized Cost of Electricity
+    ($/MWh). A reactor is taken into account at a time step t if and only if
+    it is active (i.e. already commissioned and not yet decommissioned) at
+    this time step.
+    """
+    dfEntry = evaler.eval('AgentEntry')
+    agentsId += eco_tools.get_child_id(agentsId, dfEntry)
+    return average_lcoe(evaler, agentsId)
+
 
 # Simulation level
 
 
-def simulation_annual_costs(outputDb, capital=True, truncate=True):
+def simulation_actualized_annual_costs(evaler, capital=True):
+    """Same as annual_cost except all values are actualized to the begin date
+    of the SIMULATION
+    """
+    all_ids = evaler.eval('AgentEntry')['AgentId'].to_list()
+    return all_actualized_annual_costs(evaler, agentsId=all_ids, capital=capital)
+
+
+def simulation_annual_costs(evaler, capital=True, truncate=True):
     """Input : sqlite output database. It is possible not to take into account
     the construction costs (capital=False) if the reactors are supposed to
     have been built before the beginning of the simulation. It is also
@@ -958,233 +755,56 @@ def simulation_annual_costs(outputDb, capital=True, truncate=True):
     Output : total reactor costs per year over its lifetime at the simulation
     level.
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
-    duration = dfInfo.loc[0, 'Duration']
-    initialYear = dfInfo.loc[0, 'InitialYear']
-    initialMonth = dfInfo.loc[0, 'InitialMonth']
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry').reset_index()
-    dfEntry = dfEntry[dfEntry['EnterTime'].apply(
-        lambda x: x > simulationBegin and x < simulationEnd)]
-    reactorIds = dfEntry[dfEntry['Spec'].apply(
-        lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-    dfCapitalCosts = evaler.eval('CapitalCost').reset_index()
-    dfCapitalCosts = dfCapitalCosts[dfCapitalCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    mini = min(dfCapitalCosts['Time'])
-    dfCapitalCosts = dfCapitalCosts.groupby('Time').sum()
-    costs = pd.DataFrame(
-        {'Capital': dfCapitalCosts['Payment']}, index=list(range(0, duration)))
-    dfDecommissioningCosts = evaler.eval('DecommissioningCost').reset_index()
-    if not dfDecommissioningCosts.empty:
-        dfDecommissioningCosts = dfDecommissioningCosts[
-            dfDecommissioningCosts['AgentId'].apply(lambda x: x in reactorIds)]
-        dfDecommissioningCosts = dfDecommissioningCosts.groupby('Time').sum()
-        costs['Decommissioning'] = dfDecommissioningCosts['Payment']
-    dfOMCosts = evaler.eval('OperationMaintenance').reset_index()
-    dfOMCosts = dfOMCosts[dfOMCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    dfOMCosts = dfOMCosts.groupby('Time').sum()
-    costs['OperationAndMaintenance'] = dfOMCosts['Payment']
-    dfFuelCosts = evaler.eval('FuelCost').reset_index()
-    dfFuelCosts = dfFuelCosts[dfFuelCosts['AgentId'].apply(
-        lambda x: x in reactorIds)]
-    dfFuelCosts = dfFuelCosts.groupby('Time').sum()
-    costs['Fuel'] = dfFuelCosts['Payment']
-    costs = costs.fillna(0)
-    costs['Year'] = (costs.index + initialMonth - 1) // 12 + initialYear
-    if truncate:
-        endYear = (simulationEnd + initialMonth - 1) // 12 + initialYear
-        costs = costs[costs['Year'].apply(lambda x: x <= endYear)]
-        beginYear = (simulationBegin + initialMonth - 1) // 12 + initialYear
-        costs = costs[costs['Year'].apply(lambda x: x >= beginYear)]
-    if not capital:
-        del costs['Capital']
-    costs = costs.groupby('Year').sum()
-    return costs
+    all_ids = evaler.eval('AgentEntry')['AgentId'].to_list()
+    return all_annual_costs(evaler, capital=capital)
 
 
-def simulation_benefit(outputDb):
-    """Input : sqlite output database
+def simulation_benefit(evaler):
+    """Input : evaler database
     Output : cumulative sum of total income and total expense
             (= - expenditures + income) when all reactors of the simulation
             are taken into account
     """
-    costs = - simulation_annual_costs(outputDb).sum(axis=1)
-    power_gen = simulation_power_generated(
-        outputDb) * simulation_average_lcoe(outputDb)['Average LCOE']
-    rtn = pd.concat([costs, power_gen], axis=1).fillna(0)
-    rtn['Capital'] = (rtn[0] + rtn[1]).cumsum()
-    actualization = actualization_vector(len(rtn))
-    actualization.index = rtn.index
-    rtn['Actualized'] = ((rtn[0] + rtn[1]) * actualization).cumsum()
-    return rtn
+    all_ids = evaler.eval('AgentEntry')['AgentId'].to_list()
+    return all_benefit(evaler, agentsId=all_ids)
 
 
-def simulation_period_costs(outputDb, t0=0, period=20, capital=True):
-    """Input : sqlite output database, time window (t0, period)
+def simulation_period_costs(evaler, t0=0, period=20, capital=True):
+    """Input : evaler database, time window (t0, period)
     Output : cost at each time step t corresponding to actualized sum of total
     expense in [t+t0, t+t0+period] divided by total actualized power generated
     in [t+t0, t+t0+period] when all reactors of the simulation are taken into
     account
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
-    duration = dfInfo.loc[0, 'Duration']
-    initialYear = dfInfo.loc[0, 'InitialYear']
-    initialMonth = dfInfo.loc[0, 'InitialMonth']
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    costs = simulation_annual_costs(
-        outputDb,
-        capital,
-        truncate=False).sum(
-        axis=1)
-    power = simulation_power_generated(outputDb, truncate=False)
-    df = pd.DataFrame(
-        index=list(
-            range(
-                initialYear,
-                initialYear +
-                duration //
-                12 +
-                1)))
-    df['Power'] = power
-    df['Costs'] = costs
-    df = df.fillna(0)
-    simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear
-    simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
-    rtn = pd.DataFrame(index=list(range(simulationBegin, simulationEnd)))
-    rtn['Power'] = pd.Series()
-    rtn['Payment'] = pd.Series()
-    rtn = rtn.fillna(0)
-    for i in range(simulationBegin + t0, simulationBegin + t0 + period):
-        rtn.loc[simulationBegin, 'Power'] += df.loc[i, 'Power'] / \
-            (1 + default_discount_rate) ** (i - simulationBegin)
-        rtn.loc[simulationBegin, 'Payment'] += df.loc[i, 'Costs'] / \
-            (1 + default_discount_rate) ** (i - simulationBegin)
-    for j in range(simulationBegin + 1, simulationEnd):
-        rtn.loc[j, 'Power'] = rtn.loc[j - 1, 'Power'] * \
-            (1 + default_discount_rate) - df.loc[j - 1 + t0, 'Power'] * \
-            (1 + default_discount_rate) ** (1 - t0) + \
-            df.loc[j - 1 + period + t0, 'Power'] / \
-            (1 + default_discount_rate) ** (period + t0 - 1)
-        rtn.loc[j, 'Payment'] = rtn.loc[j - 1, 'Payment'] * \
-            (1 + default_discount_rate) - df.loc[j - 1 + t0, 'Costs'] * \
-            (1 + default_discount_rate) ** (1 - t0) + \
-            df.loc[j - 1 + period + t0, 'Costs'] / \
-            (1 + default_discount_rate) ** (period + t0 - 1)
-    rtn['Ratio'] = rtn['Payment'] / rtn['Power'] * (rtn['Power'] > 1)
-    return rtn
+    all_ids = evaler.eval('AgentEntry')['AgentId'].to_list()
+    return all_period_costs(evaler, agentsId=all_ids, t0=t0, period=period, capital=capital)
 
 
-def simulation_power_generated(outputDb, truncate=True):
-    """Input : sqlite output database
+def simulation_power_generated(evaler):
+    """Input : evaler database
     Output : Electricity generated in MWh every years by all the reactors of
     the simulation
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
-    duration = dfInfo.loc[0, 'Duration']
-    initialYear = dfInfo.loc[0, 'InitialYear']
-    initialMonth = dfInfo.loc[0, 'InitialMonth']
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry').reset_index()
-    dfEntry = dfEntry[dfEntry['EnterTime'].apply(
-        lambda x: x > simulationBegin and x < simulationEnd)]
-    reactorIds = dfEntry[dfEntry['Spec'].apply(
-        lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-    dfPower = evaler.eval('TimeSeriesPower').reset_index()
-    dfPower = dfPower[dfPower['AgentId'].apply(lambda x: x in reactorIds)]
-    dfPower['Year'] = (dfPower['Time'] + initialMonth - 1) // 12 + initialYear
-    dfPower = dfPower.groupby('Year').sum()
-    rtn = pd.Series(dfPower['Value'] * 8760 / 12,
-                    index=list(range(initialYear,
-                                     initialYear + (initialMonth + duration) //
-                                     12 + 1)))
-    rtn.name = 'Power in MWh'
-    return rtn.fillna(0)
+    all_ids = evaler.eval('AgentEntry')['AgentId'].to_list()
+    return all_power_generated(evaler, agentsId=all_ids)
 
 
-def simulation_lcoe(outputDb):
+def simulation_lcoe(evaler):
     """Input : sqlite output database
     Output : Value corresponding to Levelized Cost of Electricity ($/MWh) when
     taking into account all reactors commissioned in the simulation
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    dfEcoInfo = dfEcoInfo.set_index(('Agent', 'AgentId'))
-    discountRate = dfEcoInfo.iloc[0, ('Finance', 'DiscountRate')]
-    annualCosts = simulation_annual_costs(outputDb)
-    powerGenerated = simulation_power_generated(outputDb)
-    actualization = actualization_vector(powerGenerated.size, discountRate)
-    actualization.index = powerGenerated.index.copy()
-    return (annualCosts.sum(axis=1) * actualization).fillna(0).sum() / \
-        ((powerGenerated * actualization).fillna(0).sum())
+    all_ids = evaler.eval('AgentEntry')['AgentId'].to_list()
+    return all_lcoe(evaler)
 
 
-def simulation_average_lcoe(outputDb):
-    """Input : sqlite output database and region agent id
+def simulation_average_lcoe(evaler):
+    """Input : evaler database and region agent id
     Output : Variable cost corresponding at each time step (i.e. every year)
     to the weighted average of the reactors Levelized Cost of Electricity
     ($/MWh). A reactor is taken into account at a time step t if and only if
     it is in activity (i.e. already commissioned and not yet decommissioned)
     at this time step.
     """
-    db = dbopen(outputDb)
-    evaler = Evaluator(db, write=False)
-    dfInfo = evaler.eval('Info').reset_index()
-    duration = dfInfo.loc[0, 'Duration']
-    initialYear = dfInfo.loc[0, 'InitialYear']
-    initialMonth = dfInfo.loc[0, 'InitialMonth']
-    dfEcoInfo = evaler.eval('EconomicInfo')
-    simulationBegin = dfEcoInfo[('Truncation', 'Begin')].iloc[0]
-    simulationEnd = dfEcoInfo[('Truncation', 'End')].iloc[0]
-    dfEntry = evaler.eval('AgentEntry').reset_index()
-    dfEntry = dfEntry[dfEntry['EnterTime'].apply(
-        lambda x: x > simulationBegin and x < simulationEnd)]
-    reactorIds = dfEntry[dfEntry['Spec'].apply(
-        lambda x: 'REACTOR' in x.upper())]['AgentId'].tolist()
-    simulationBegin = (simulationBegin + initialMonth - 1) // 12 + initialYear
-    simulationEnd = (simulationEnd + initialMonth - 1) // 12 + initialYear
-    dfPower = evaler.eval('TimeSeriesPower')
-    rtn = pd.DataFrame(index=list(range(simulationBegin, simulationEnd + 1)))
-    rtn['Weighted sum'] = 0
-    rtn['Power'] = 0
-    rtn['Temp'] = pd.Series()
-    rtn['Temp2'] = pd.Series()
-    for id in reactorIds:
-        tmp = lcoe(outputDb, id)
-        commissioning = dfEntry[dfEntry.AgentId == id]['EnterTime'].iloc[0]
-        lifetime = dfEntry[dfEntry.AgentId == id]['Lifetime'].iloc[0]
-        decommissioning = (commissioning + lifetime +
-                           initialMonth - 1) // 12 + initialYear
-        commissioning = (commissioning + initialMonth - 1) // 12 + initialYear
-        power = dfPower[dfPower.AgentId == id]['Value'].iloc[0]
-        rtn['Temp'] = pd.Series(
-            tmp,
-            index=list(
-                range(
-                    commissioning,
-                    decommissioning + 1))) * power
-        rtn['Weighted sum'] += rtn['Temp'].fillna(0)
-        rtn['Temp2'] = pd.Series(
-            power,
-            index=list(
-                range(
-                    commissioning,
-                    decommissioning +
-                    1)))
-        rtn['Power'] += rtn['Temp2'].fillna(0)
-    rtn['Average LCOE'] = rtn['Weighted sum'] / rtn['Power']
-    return rtn.fillna(0)
+    all_ids = evaler.eval('AgentEntry')['AgentId'].to_list()
+    return all_average_lcoe(evaler, agentsId=all_ids)

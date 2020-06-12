@@ -19,13 +19,13 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 def test_capital_cost():
     exp = pd.DataFrame(np.array(
-        [(UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 0, 0.126000),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 1, 0.139965),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 2, 0.112035),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 3, 0.84000),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 4, 0.55965),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 5, 0.28035),
-         (UUID('4375a413-dafb-4da1-bfcc-f16e59b5a3e0'), 13, 6, 0.)],
+        [(UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 0, 0.126000),
+         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 1, 0.139965),
+         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 2, 0.112035),
+         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 3, 0.084000),
+         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 4, 0.055965),
+         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 5, 0.028035),
+         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 13, 6, 0.)],
         dtype=ensure_dt_bytes(
             [('SimId', 'O'),
              ('AgentId', '<i8'),
@@ -51,8 +51,7 @@ def test_capital_cost():
                                ('Duration', '<i8')])))
     eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
     obs = eco_metrics.capital_cost.func(power, entry, info)
-    assert_frame_equal(exp.drop(['SimId'], axis=1),
-                       obs.drop(['SimId'], axis=1))
+    assert_frame_equal(exp,                       obs)
 
 
 def test_fuel_cost():
@@ -308,76 +307,75 @@ way (calculating one obs and comparing to an exp)
 def test_yaml_parsing():
     eco_info = eco_tools.eco_input_data("parameters.yml")
 
-    exp = {'eco_model':
-           {'periode': {'start': 0,
-                        'end': 20},
-            'finance': {'discount_rate': 0.1,
-                        'tax_rate': 0.1,
-                        'return_on_debt': 0.1,
-                        'return_on_equity': 0.1},
-            'capital': {'deviation': 0,
-                        'beforePeak': 10,
-                        'afterPeak': 5,
-                        'constructionDuration': 10,
-                        'overnight_cost': 1},
-            'operation_maintenance': {'fixed': 1,
-                                      'variable': 1,
-                                      'deviation': 0},
-            'decommission': {'duration': 5,
-                             'overnight_cost': 1},
-            'fuels': [{'name': 'uox',
-                       'supply_cost': 1,
-                       'waste_fee': 0,
-                       'deviation': 0},
-                      {'name': 'mox',
-                       'supply_cost': 2,
-                       'supply_fee': 0,
-                       'deviation': 0}],
-            'region': [{'prototype': 'MyReg',
-                        'finance': {'discount_rate': 0.1,
-                                    'tax_rate': 0.2,
-                                    'return_on_debt': 0.1,
-                                    'return_on_equity': 0.1},
-                        'capital': {'deviation': 0,
-                                    'beforePeak': 10,
-                                    'afterPeak': 5,
-                                    'constructionDuration': 10,
-                                    'overnight_cost': 1},
-                        'operation_maintenance': {'fixed': 0.5,
-                                                  'variable': 1,
-                                                  'deviation': 0},
-                        'fuels': [{'name': 'uox',
-                                   'supply_cost': 1.5,
-                                   'waste_fee': 0,
-                                   'deviation': 0}],
-                        'institution': [{'prototype': 'MyInst',
-                                         'capital': {'beforePeak': 10,
-                                                     'afterPeak': 5,
-                                                     'constructionDuration': 10,
-                                                     'deviation': 0,
-                                                     'overnight_cost': 1},
-                                         'fuels': [{'name': 'uox',
-                                                    'supply_cost': 2.5,
-                                                    'waste_fee': 0,
-                                                    'deviation': 0}],
-                                         'facility': [{'prototype': 'Reactor1',
-                                                       'fuels': [{'name': 'uox',
-                                                                  'supply_cost': 1,
-                                                                  'waste_fee': 0,
-                                                                  'deviation': 0}],
-                                                       'decommission': {'overnight_cost': 1,
-                                                                        'duration': 5}},
-                                                      {'prototype': 'Reactor2',
-                                                       'fuels': [{'name': 'mox',
-                                                                  'supply_cost': 5.5,
-                                                                  'waste_fee': 0,
-                                                                  'deviation': 0}]
-                                                       }]
-                                         }]
-                        }
-                       ]
-            }
+    exp = {'periode': {'start': 0,
+                       'end': 20},
+           'finance': {'discount_rate': 0.1,
+                       'tax_rate': 0.1,
+                       'return_on_debt': 0.1,
+                       'return_on_equity': 0.1},
+           'capital': {'deviation': 0,
+                       'beforePeak': 10,
+                       'afterPeak': 5,
+                       'constructionDuration': 10,
+                       'overnight_cost': 1},
+           'operation_maintenance': {'fixed': 1,
+                                     'variable': 1,
+                                     'deviation': 0},
+           'decommission': {'duration': 5,
+                            'overnight_cost': 1},
+           'fuels': [{'name': 'uox',
+                      'supply_cost': 1,
+                      'waste_fee': 0,
+                      'deviation': 0},
+                     {'name': 'mox',
+                      'supply_cost': 2,
+                      'supply_fee': 0,
+                      'deviation': 0}],
+           'region': [{'prototype': 'MyReg',
+                       'finance': {'discount_rate': 0.1,
+                                   'tax_rate': 0.2,
+                                   'return_on_debt': 0.1,
+                                   'return_on_equity': 0.1},
+                       'capital': {'deviation': 0,
+                                   'beforePeak': 10,
+                                   'afterPeak': 5,
+                                   'constructionDuration': 10,
+                                   'overnight_cost': 1},
+                       'operation_maintenance': {'fixed': 0.5,
+                                                 'variable': 1,
+                                                 'deviation': 0},
+                       'fuels': [{'name': 'uox',
+                                  'supply_cost': 1.5,
+                                  'waste_fee': 0,
+                                  'deviation': 0}],
+                       'institution': [{'prototype': 'MyInst',
+                                        'capital': {'beforePeak': 10,
+                                                    'afterPeak': 5,
+                                                    'constructionDuration': 10,
+                                                    'deviation': 0,
+                                                    'overnight_cost': 1},
+                                        'fuels': [{'name': 'uox',
+                                                   'supply_cost': 2.5,
+                                                   'waste_fee': 0,
+                                                   'deviation': 0}],
+                                        'facility': [{'prototype': 'Reactor1',
+                                                      'fuels': [{'name': 'uox',
+                                                                 'supply_cost': 1,
+                                                                 'waste_fee': 0,
+                                                                 'deviation': 0}],
+                                                      'decommission': {'overnight_cost': 1,
+                                                                       'duration': 5}},
+                                                     {'prototype': 'Reactor2',
+                                                      'fuels': [{'name': 'mox',
+                                                                 'supply_cost': 5.5,
+                                                                 'waste_fee': 0,
+                                                                 'deviation': 0}]
+                                                      }]
+                                        }]
+                       }
+                      ]
            }
+
     assert_equal(exp, eco_info.dict)
     entry = pd.DataFrame(np.array([
         (1, 10,  2, 13, ':cycamore:Reactor', 'Reactor1'),
@@ -531,7 +529,20 @@ def test_actualized_monthly_costs():
              ])))
     eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
 
-    obs = eco_metrics.actualised_montly_costs.func(monthly_cost)
+    entry = pd.DataFrame(np.array([
+        (1, 10,  2, 12, ':cycamore:Reactor', 'Reactor1'),
+        (1, 10,  2, 13, ':cycamore:Reactor', 'Reactor1'),
+        (1, 10,  1,  2, 'SingleInstitution', 'MyInst'),
+        (1, 10, -1,  1, 'SingleRegion',      'MyReg')
+    ], dtype=ensure_dt_bytes([
+        ('EnterTime', '<i8'),
+        ('Lifetime', '<i8'),
+        ('ParentId', '<i8'),
+        ('AgentId', '<i8'),
+        ('Spec', 'O'),
+        ('Prototype', 'O')])))
+    obs = eco_metrics.actualised_montly_costs.func(monthly_cost, entry)
+
     exp = pd.DataFrame(np.array(
         [(UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'), 12, 1, 0.992090, 0, 0, 0),
          (UUID('0ac0f445-3e1c-43ec-826c-8702d4fc2f40'),
@@ -572,10 +583,10 @@ def test_actualized_monthly_costs():
              ('Capital', '<f8')
              ])))
 
-    assert_frame_equal(left=obs, right=exp, check_less_precise=4)
+    assert_frame_equal(obs, exp, check_less_precise=4)
 
 
-@dbtest
+@ dbtest
 def test_annual_costs(db, fname, backend):
     evaler = cym.Evaluator(db)
 
@@ -594,10 +605,6 @@ def test_annual_costs(db, fname, backend):
                                          agentsId=[15])
     obs_3.drop(['AgentId', 'Year'], axis=1, inplace=True)
     assert_series_equal(obs_1.sum(), obs_3.sum())
-
-    # print(eco_metrics.simulation_actualized_annual_costs(evaler))
-    # print(eco_metrics.average_cost(evaler, 19))
-    # print(eco_metrics.benefit(evaler, 19))
 
 
 @dbtest
@@ -618,75 +625,94 @@ def test_lcoe(db, fname, backend):
     obs_3 = eco_metrics.all_lcoe(evaler,
                                  agentsId=[15])
     assert_equal(obs_1, obs_3)
-    # assert_equal(eco_metrics.region_lcoe(evaler, 8),
-    #              eco_metrics.institution_lcoe(evaler, 9))
-    # # Simulation / Reactor level
-    # assert_equal(eco_metrics.region_lcoe(evaler, 8),
-    #              eco_metrics.simulation_lcoe(evaler))
 
 
-def test_average_lcoe():
+@dbtest
+def test_average_lcoe(db, fname, backend):
     """
     """
+    evaler = cym.Evaluator(db)
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+
     # Reactor / Institution level
-    assert_equal(eco_metrics.lcoe('tests/test.sqlite', 13),
-                 eco_metrics.institution_average_lcoe('tests/test.sqlite', 9))
-    # Region / Institution level
-    assert_equal(eco_metrics.region_average_lcoe('tests/test.sqlite', 8),
-                 eco_metrics.institution_average_lcoe('tests/test.sqlite', 9))
-    # Simulation / Reactor level
-    assert_equal(eco_metrics.region_average_lcoe('tests/test.sqlite', 8),
-                 eco_metrics.simulation_average_lcoe('tests/test.sqlite'))
+    obs_1 = eco_metrics.average_lcoe(evaler,
+                                     agentsId=[17, 18, 19, 20, 21])
+    obs_2 = eco_metrics.child_average_lcoe(evaler,
+                                           agentsId=[16])
+
+    assert_frame_equal(obs_1, obs_2)
+    obs_3 = eco_metrics.all_average_lcoe(evaler,
+                                         agentsId=[15])
+    assert_frame_equal(obs_1, obs_3)
+
+    obs_4 = eco_metrics.simulation_average_lcoe(evaler)
+    assert_frame_equal(obs_1, obs_4)
 
 
-def test_benefit():
+@dbtest
+def test_benefit(db, fname, backend):
     """
     """
+    evaler = cym.Evaluator(db)
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+
     # Reactor / Institution level
-    assert_equal(eco_metrics.benefit('tests/test.sqlite', 13),
-                 eco_metrics.institution_benefit('tests/test.sqlite', 9))
-    # Region / Institution level
-    assert_equal(eco_metrics.region_benefit('tests/test.sqlite', 8),
-                 eco_metrics.institution_benefit('tests/test.sqlite', 9))
-    # Simulation / Reactor level
-    assert_equal(eco_metrics.region_benefit('tests/test.sqlite', 8),
-                 eco_metrics.simulation_benefit('tests/test.sqlite'))
+    obs_1 = eco_metrics.benefit(evaler,
+                                agentsId=[17, 18, 19, 20, 21])
+    obs_2 = eco_metrics.child_benefit(evaler,
+                                      agentsId=[16])
+
+    assert_frame_equal(obs_1, obs_2)
+    obs_3 = eco_metrics.all_benefit(evaler,
+                                    agentsId=[15])
+    assert_frame_equal(obs_1, obs_3)
+
+    obs_4 = eco_metrics.simulation_benefit(evaler)
+    assert_frame_equal(obs_1, obs_4)
 
 
-def test_power_generated():
+@dbtest
+def test_power_generated(db, fname, backend):
     """
     """
+    evaler = cym.Evaluator(db)
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+
     # Reactor / Institution level
-    assert_equal(eco_metrics.power_generated('tests/test.sqlite', 13),
-                 eco_metrics.institution_power_generated('tests/test.sqlite',
-                                                         9))
-    # Region / Institution level
-    assert_equal(eco_metrics.region_power_generated('tests/test.sqlite', 8),
-                 eco_metrics.institution_power_generated('tests/test.sqlite',
-                                                         9))
-    # Simulation / Reactor level
-    assert_equal(eco_metrics.region_power_generated('tests/test.sqlite', 8),
-                 eco_metrics.simulation_power_generated('tests/test.sqlite'))
+    obs_1 = eco_metrics.power_generated(evaler,
+                                        agentsId=[17, 18, 19, 20, 21])
+    obs_2 = eco_metrics.child_power_generated(evaler,
+                                              agentsId=[16])
+
+    assert_frame_equal(obs_1, obs_2)
+    obs_3 = eco_metrics.all_power_generated(evaler,
+                                            agentsId=[15])
+    assert_frame_equal(obs_1, obs_3)
+
+    obs_4 = eco_metrics.simulation_power_generated(evaler)
+    assert_frame_equal(obs_1, obs_4)
 
 
-def test_period_costs():
+@dbtest
+def test_period_costs(db, fname, backend):
     """
     """
-    # Reactor level
-    assert_equal(eco_metrics.period_costs('tests/test.sqlite', 13, 30).sum(),
-                 eco_metrics.period_costs2('tests/test.sqlite', 13, 30).sum())
+    evaler = cym.Evaluator(db)
+    eco_metrics.eco_data = eco_tools.eco_input_data("parameters.yml")
+
     # Reactor / Institution level
-    assert_equal(eco_metrics.period_costs('tests/test.sqlite', 13).sum(),
-                 eco_metrics.institution_period_costs('tests/test.sqlite',
-                                                      9).sum())
-    # Region / Institution level
-    assert_equal(eco_metrics.region_period_costs('tests/test.sqlite', 8).sum(),
-                 eco_metrics.institution_period_costs('tests/test.sqlite',
-                                                      9).sum())
-    # Region / Simulation level
-    assert_equal(eco_metrics.region_period_costs('tests/test.sqlite', 8).sum(),
-                 eco_metrics.simulation_period_costs(
-                     'tests/test.sqlite').sum())
+    obs_1 = eco_metrics.period_costs(evaler,
+                                     agentsId=[17, 18, 19, 20, 21], period=30)
+    obs_2 = eco_metrics.child_period_costs(evaler,
+                                           agentsId=[16], period=30)
+
+    assert_frame_equal(obs_1, obs_2)
+    obs_3 = eco_metrics.all_period_costs(evaler,
+                                         agentsId=[15], period=30)
+    assert_frame_equal(obs_1, obs_3)
+
+    obs_4 = eco_metrics.simulation_period_costs(evaler, period=30)
+    assert_frame_equal(obs_1, obs_4)
 
 
 if __name__ == "__main__":
