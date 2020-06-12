@@ -576,13 +576,12 @@ def benefit(evaler, reactorId):
     return power_income[['SimId', 'AgentId', 'Year', 'Capital']]
 
 
-def lcoe(evaler, agentsId=[], capital=True):
-    """Input : evaler database and reactor agent id
+def lcoe(evaler, agentsId=[]):
+    """Input : evaler database and agents id
     Output : Value corresponding to Levelized Cost of Electricity ($/MWh)
     """
     costs = actualized_annual_costs(evaler=evaler,
-                                    agentsId=agentsId,
-                                    capital=capital).drop(['AgentId', 'Year'], axis=1)
+                                    agentsId=agentsId).drop(['AgentId', 'Year'], axis=1)
     power = power_generated(evaler=evaler, agentsId=agentsId)
 
     initialYear = evaler.eval('Info').loc[0, 'InitialYear']
@@ -597,19 +596,39 @@ def lcoe(evaler, agentsId=[], capital=True):
     return (costs.sum(axis=1)).sum() / actualized_power.sum().sum()
 
 
-def child_lcoe(evaler, agentsId=[], capital=True):
-    """Input : sqlite output database and institution agent id
+def child_lcoe(evaler, agentsId=[]):
+    """Input : evaler database and Instutions/Region id
     Output : Value corresponding to Levelized Cost of Electricity ($/MWh)
     """
-    costs = child_actualized_annual_costs(evaler=evaler,
-                                          agentsId=agentsId,
-                                          capital=capital).drop(['AgentId', 'Year'], axis=1)
-
     dfEntry = evaler.eval('AgentEntry').copy()
-
     childId = eco_tools.get_child_id(agentsId, dfEntry)
 
+    costs = child_actualized_annual_costs(evaler=evaler,
+                                          agentsId=childId).drop(['AgentId', 'Year'], axis=1)
     power = power_generated(evaler=evaler, agentsId=childId)
+
+    initialYear = evaler.eval('Info').loc[0, 'InitialYear']
+    dfEntry = evaler.eval('AgentEntry')
+    actualized_power = actualize_costs(df=power,
+                                       columns=["Energy"],
+                                       dfEntry=dfEntry,
+                                       time_col="Year",
+                                       time_factor=1.,
+                                       t_0=initialYear).drop(['SimId', 'AgentId', 'Year'], axis=1)
+
+    return (costs.sum(axis=1)).sum() / actualized_power.sum().sum()
+
+
+def all_lcoe(evaler, agentsId=[]):
+    """Input : sqlite output database and Instutions/Region agent id
+    Output : Value corresponding to Levelized Cost of Electricity ($/MWh)
+    """
+    dfEntry = evaler.eval('AgentEntry').copy()
+    agentsId += eco_tools.get_child_id(agentsId, dfEntry)
+
+    costs = actualized_annual_costs(evaler=evaler,
+                                    agentsId=agentsId).drop(['AgentId', 'Year'], axis=1)
+    power = power_generated(evaler=evaler, agentsId=agentsId)
 
     initialYear = evaler.eval('Info').loc[0, 'InitialYear']
     dfEntry = evaler.eval('AgentEntry')

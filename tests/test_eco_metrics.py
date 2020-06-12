@@ -595,9 +595,9 @@ def test_annual_costs(db, fname, backend):
     obs_3.drop(['AgentId', 'Year'], axis=1, inplace=True)
     assert_series_equal(obs_1.sum(), obs_3.sum())
 
-    print(eco_metrics.simulation_actualized_annual_costs(evaler))
-    print(eco_metrics.average_cost(evaler, 19))
-    print(eco_metrics.benefit(evaler, 19))
+    # print(eco_metrics.simulation_actualized_annual_costs(evaler))
+    # print(eco_metrics.average_cost(evaler, 19))
+    # print(eco_metrics.benefit(evaler, 19))
 
 
 @dbtest
@@ -610,13 +610,14 @@ def test_lcoe(db, fname, backend):
     # Reactor / Institution level
     obs_1 = eco_metrics.lcoe(evaler,
                              agentsId=[17, 18, 19, 20, 21])
-    print(obs_1)
     obs_2 = eco_metrics.child_lcoe(evaler,
                                    agentsId=[16])
-    print(obs_2)
-
     assert_equal(obs_1, obs_2)
-    # # Region / Institution level
+
+    # Region / Institution level
+    obs_3 = eco_metrics.all_lcoe(evaler,
+                                 agentsId=[15])
+    assert_equal(obs_1, obs_3)
     # assert_equal(eco_metrics.region_lcoe(evaler, 8),
     #              eco_metrics.institution_lcoe(evaler, 9))
     # # Simulation / Reactor level
