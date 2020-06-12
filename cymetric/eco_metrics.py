@@ -227,8 +227,7 @@ def operation_maintenance(dfPower, dfEntry):
     """The OperationMaintenance metric gives the cash flows at each time step
     corresponding to the reactor operations and maintenance costs.
     """
-    exp = ['SimId', 'AgentId', 'Time', 'Payment']
-    power = ['SimId', 'AgentId', 'Time', 'Value']
+
     ecoInfo = ['fixed', 'variable', 'operation_dev']
     # Get eco data
     dfEcoInfo = eco_data.get_prototypes_eco()
@@ -323,7 +322,6 @@ def annual_costs(evaler, agents=(), agentsId=(), capital=True):
         costs = costs[costs['AgentId'].isin(agentsId)]
 
     dfInfo = evaler.eval('Info')
-    duration = dfInfo.loc[0, 'Duration']
     initialYear = dfInfo.loc[0, 'InitialYear']
     initialMonth = dfInfo.loc[0, 'InitialMonth']
 
