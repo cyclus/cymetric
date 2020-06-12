@@ -106,7 +106,7 @@ _matschema = [
     ('NucId', ts.INT),
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
@@ -138,7 +138,7 @@ _actschema = [
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
     ('Activity', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
@@ -177,7 +177,7 @@ _dhschema = [
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
     ('DecayHeat', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
@@ -210,7 +210,7 @@ _bsdeps = ['AgentEntry']
 _bsschema = [
     ('SimId', ts.UUID), ('EnterTime', ts.INT), ('Prototype', ts.STRING),
     ('Count', ts.INT)
-]
+    ]
 
 
 @metric(name='BuildSeries', depends=_bsdeps, schema=_bsschema)
@@ -235,7 +235,7 @@ _dsschema = [
     ('ExitTime', ts.INT),
     ('Prototype', ts.STRING),
     ('Count', ts.INT)
-]
+    ]
 
 
 @metric(name='DecommissionSeries', depends=_dsdeps, schema=_dsschema)
@@ -270,7 +270,7 @@ _agentsschema = schemas.schema([
     ('Lifetime', ts.INT),
     ('EnterTime', ts.INT),
     ('ExitTime', ts.INT),
-])
+    ])
 
 
 @metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
@@ -318,7 +318,7 @@ _transschema = [
     ('Commodity', ts.STRING),
     ('Units', ts.STRING),
     ('Quantity', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
@@ -350,7 +350,7 @@ _invschema = [
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
@@ -381,7 +381,7 @@ _invschema = [
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='ExplicitInventoryByNuc', depends=_invdeps, schema=_invschema)
@@ -411,7 +411,7 @@ _egschema = [
     ('AgentId', ts.INT),
     ('Year', ts.INT),
     ('Energy', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='AnnualElectricityGeneratedByAgent', depends=_egdeps,
@@ -443,7 +443,7 @@ _egschema = [
     ('AgentId', ts.INT),
     ('Month', ts.INT),
     ('Energy', ts.DOUBLE)
-]
+    ]
 
 
 @metric(name='MonthlyElectricityGeneratedByAgent', depends=_egdeps,
@@ -519,7 +519,7 @@ _tldeps = ['Info']
 _tlschema = [
     ('SimId', ts.UUID),
     ('TimeStep', ts.INT)
-]
+    ]
 
 
 @metric(name='TimeList', depends=_tldeps, schema=_tlschema)
