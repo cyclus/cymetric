@@ -11,7 +11,6 @@ try:
 except ImportError:
     HAVE_PYNE = False
 
-
 from cymetric import tools
 from cymetric import filters
 
@@ -60,7 +59,7 @@ def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs
         nucs = tools.format_nucs(nucs)
 
     df = filters.transactions_activity(evaler, senders, receivers, commodities,
-                                     nucs)
+                                       nucs)
 
     df = df[['Time', 'Activity']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
@@ -70,7 +69,8 @@ def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs
     return df
 
 
-def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_decayheat(
+        evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -87,7 +87,7 @@ def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nuc
         nucs = tools.format_nucs(nucs)
 
     df = filters.transactions_decayheat(evaler, senders, receivers, commodities,
-                                      nucs)
+                                        nucs)
 
     df = df[['Time', 'DecayHeat']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
@@ -95,8 +95,6 @@ def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nuc
     time = evaler.eval('TimeList')
     df = tools.add_missing_time_step(df, time)
     return df
-
-
 
 
 def inventories(evaler, facilities=(), nucs=()):
@@ -276,7 +274,7 @@ def get_retirement(evaler, facilities=()):
     # time step i
 
     df = df.assign(Value=lambda x: 1)
-    df = df[['DecomTime','Value']].groupby(['Time']).sum()
+    df = df[['DecomTime', 'Value']].groupby(['Time']).sum()
     df.reset_index(inplace=True)
 
     df.rename(index=str, columns={'DecomTime': 'Time'}, inplace=True)

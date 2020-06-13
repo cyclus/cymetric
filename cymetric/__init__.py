@@ -3,7 +3,7 @@ from __future__ import unicode_literals, print_function
 
 from cyclus.typesystem import *  # only grabs code generated defintiions
 from cyclus.lib import Datum, FullBackend, SqliteBack, Hdf5Back, \
-        Recorder
+    Recorder
 
 try:
     from cymetric.tools import dbopen
@@ -26,4 +26,3 @@ except ImportError:
     from .execution import ExecutionContext, exec_code
 
 __version__ = '1.5.3'
-

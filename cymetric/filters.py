@@ -71,7 +71,8 @@ def transactions(evaler, senders=(), receivers=(), commodities=()):
     return trans
 
 
-def transactions_nuc(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_nuc(evaler, senders=(), receivers=(),
+                     commodities=(), nucs=()):
     """
     Filter the Transaction Data Frame, which include nuclide composition, on
     specific sending facility and receving facility. Applying nuclides
@@ -101,7 +102,8 @@ def transactions_nuc(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     return df
 
 
-def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_activity(
+        evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Return the transation df, with the activities. Applying nuclides selection
     when required.
@@ -130,7 +132,8 @@ def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs
     return df
 
 
-def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_decayheat(
+        evaler, senders=(), receivers=(), commodities=(), nucs=()):
     """
     Return the transation df, with the decayheat. Applying nuclides selection
     when required.

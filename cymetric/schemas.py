@@ -111,7 +111,8 @@ class SchemaProperty(MutableSequence):
         obj.descr[:] = newdescr
         if self.idx == 0:
             obj.byte_names.clear()
-            obj.byte_names.update({name: name.encode() for name, _, _ in newdescr})
+            obj.byte_names.update({name: name.encode()
+                                   for name, _, _ in newdescr})
 
     def __getitem__(self, i):
         return self.obj.descr[i][self.idx]

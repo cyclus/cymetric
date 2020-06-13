@@ -11,6 +11,7 @@ HAS_BEEN_RUN = False
 DBS = [('test.h5', 'orig.h5', lib.Hdf5Back),
        ('test.sqlite', 'orig.sqlite', lib.SqliteBack)]
 
+
 def safe_call(cmd, shell=False, *args, **kwargs):
     """Checks that a command successfully runs with/without shell=True.
     Returns the process return code.
@@ -48,4 +49,3 @@ def dbtest(f):
             db = backend(fname)
             yield f, db, fname, backend
     return wrapper
-

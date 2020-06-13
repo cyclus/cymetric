@@ -32,11 +32,15 @@ class ColumnProxy(object):
 
     def __call__(self, *args, **kwargs):
         """Stub function that prevents ColumnProxies from being called."""
-        raise TypeError('ColumnProxy object {0!r} is not callable'.format(self.name))
+        raise TypeError(
+            'ColumnProxy object {0!r} is not callable'.format(
+                self.name))
 
     def __getitem__(self, *args, **kwargs):
         """Stub function that prevents ColumnProxies from being indexed."""
-        raise TypeError('ColumnProxy object {0!r} cannot be indexed'.format(self.name))
+        raise TypeError(
+            'ColumnProxy object {0!r} cannot be indexed'.format(
+                self.name))
 
     def __lt__(self, other):
         """Less than operator for column filtering."""
@@ -70,9 +74,11 @@ class ColumnProxy(object):
         return self
 
 
-stripper = lambda s: s.strip()
+def stripper(s): return s.strip()
 
-COND_RE = re.compile('\s*(\w+)\s*(<|>|<=|>=|==|!=)\s*(.*)')
+
+COND_RE = re.compile(r'\s*(\w+)\s*(<|>|<=|>=|==|!=)\s*(.*)')
+
 
 def parse_cond(cond):
     """Parses a condition and returns the canonical 3-tuple."""
@@ -90,12 +96,13 @@ def parse_cond(cond):
 
 EMPTY_SLICE = slice(None)
 
+
 def has_no_conds(key):
     """Determines if a key means that there are no conditions given."""
     if isinstance(key, ColumnProxy):
         return False
     return ((key is Ellipsis) or (key is None) or (key == EMPTY_SLICE) or
-        (isinstance(key, Sized) and len(key) == 0))
+            (isinstance(key, Sized) and len(key) == 0))
 
 
 class MetricProxy(object):
