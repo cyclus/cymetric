@@ -66,7 +66,8 @@ def _genmetricclass(f, name, depends, scheme):
             """Constructor for metric object in database."""
             super(Cls, self).__init__(db)
 
-        def __call__(self, frames, conds=None, known_tables=None, *args, **kwargs):
+        def __call__(self, frames, conds=None, known_tables=None,
+                     *args, **kwargs):
             """Computes metric for given input data and conditions."""
             # FIXME test if I already exist in the db, read in if I do
             if known_tables is None:
@@ -84,12 +85,13 @@ def metric(name=None, depends=NotImplemented, schema=NotImplemented):
     """Decorator that creates metric class from a function or class."""
     def dec(f):
         clsname = name or f.__name__
-        return _genmetricclass(f=f, name=clsname, scheme=schema, depends=depends)
+        return _genmetricclass(f=f, name=clsname, scheme=schema,
+                               depends=depends)
     return dec
 
 
 #####################
-## General Metrics ##
+#  General Metrics  #
 #####################
 
 # Material Mass (quantity * massfrac)
@@ -104,7 +106,8 @@ _matschema = [
     ('NucId', ts.INT),
     ('Units', ts.STRING),
     ('Mass', ts.DOUBLE)
-    ]
+]
+
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(rsrcs, comps):
@@ -113,7 +116,7 @@ def materials(rsrcs, comps):
     ResourceId, ObjId, TimeCreated, and NucId.
     """
     x = pd.merge(rsrcs, comps, on=['SimId', 'QualId'], how='inner')
-    x = x.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId','TimeCreated',
+    x = x.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated',
                      'NucId', 'Units'])
     y = x['Quantity'] * x['MassFrac']
     y.name = 'Mass'
@@ -135,7 +138,8 @@ _actschema = [
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
     ('Activity', ts.DOUBLE)
-    ]
+]
+
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(mats):
@@ -145,17 +149,19 @@ def activity(mats):
     """
     tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
     mass = tools.raw_to_series(mats,
-                               ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+                               ('SimId', 'QualId', 'ResourceId', 'ObjId',
+                                'TimeCreated', 'NucId'),
                                'Mass')
     act = []
     for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
-        val = (1000 * data.N_A * m * data.decay_const(nuc) \
-              / data.atomic_mass(nuc))
+        val = (1000 * data.N_A * m * data.decay_const(nuc)
+               / data.atomic_mass(nuc))
         act.append(val)
     act = pd.Series(act, index=mass.index)
     act.name = 'Activity'
     rtn = act.reset_index()
     return rtn
+
 
 del _actdeps, _actschema
 
@@ -171,7 +177,8 @@ _dhschema = [
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
     ('DecayHeat', ts.DOUBLE)
-    ]
+]
+
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
 def decay_heat(acts):
@@ -181,7 +188,8 @@ def decay_heat(acts):
     """
     tools.raise_no_pyne('DecayHeat could not be computed', HAVE_PYNE)
     act = tools.raw_to_series(acts,
-                              ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+                              ('SimId', 'QualId', 'ResourceId', 'ObjId',
+                               'TimeCreated', 'NucId'),
                               'Activity')
     dh = []
     for (simid, qual, res, obj, time, nuc), a in act.iteritems():
@@ -192,6 +200,7 @@ def decay_heat(acts):
     rtn = dh.reset_index()
     return rtn
 
+
 del _dhdeps, _dhschema
 
 
@@ -201,7 +210,8 @@ _bsdeps = ['AgentEntry']
 _bsschema = [
     ('SimId', ts.UUID), ('EnterTime', ts.INT), ('Prototype', ts.STRING),
     ('Count', ts.INT)
-    ]
+]
+
 
 @metric(name='BuildSeries', depends=_bsdeps, schema=_bsschema)
 def build_series(entry):
@@ -225,7 +235,8 @@ _dsschema = [
     ('ExitTime', ts.INT),
     ('Prototype', ts.STRING),
     ('Count', ts.INT)
-    ]
+]
+
 
 @metric(name='DecommissionSeries', depends=_dsdeps, schema=_dsschema)
 def decommission_series(entry, exit):
@@ -241,6 +252,7 @@ def decommission_series(entry, exit):
     count.name = 'Count'
     rtn = count.reset_index()
     return rtn
+
 
 del _dsdeps, _dsschema
 
@@ -258,7 +270,8 @@ _agentsschema = schemas.schema([
     ('Lifetime', ts.INT),
     ('EnterTime', ts.INT),
     ('ExitTime', ts.INT),
-    ])
+])
+
 
 @metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
 def agents(entry, exit, decom, info):
@@ -274,17 +287,19 @@ def agents(entry, exit, decom, info):
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
     if exit is None:
-        agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx))
+        agent_exit = pd.Series(index=idx, data=[np.nan] * len(idx))
         agent_exit.name = 'ExitTime'
     else:
         agent_exit = agent_exit.reindex(index=idx)
     df = pd.merge(df, agent_exit.reset_index(), on=mergeon)
     if decom is not None:
-        df = tools.merge_and_fillna_col(df, decom[['SimId', 'AgentId', 'DecomTime']],
+        df = tools.merge_and_fillna_col(df, decom[['SimId', 'AgentId',
+                                                   'DecomTime']],
                                         'ExitTime', 'DecomTime', on=mergeon)
     df = tools.merge_and_fillna_col(df, info[['SimId', 'Duration']],
                                     'ExitTime', 'Duration', on=['SimId'])
     return df
+
 
 del _agentsdeps, _agentsschema
 
@@ -303,21 +318,24 @@ _transschema = [
     ('Commodity', ts.STRING),
     ('Units', ts.STRING),
     ('Quantity', ts.DOUBLE)
-    ]
+]
+
 
 @metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
 def transaction_quantity(mats, tranacts):
-    """Transaction Quantity metric returns the quantity of each transaction throughout
-    the simulation.
+    """Transaction Quantity metric returns the quantity of each transaction
+    throughout the simulation.
     """
     trans_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId',
-            'TimeCreated', 'SenderId', 'ReceiverId', 'Commodity', 'Units']
+                   'TimeCreated', 'SenderId', 'ReceiverId', 'Commodity',
+                   'Units']
     trans = pd.merge(mats, tranacts, on=['SimId', 'ResourceId'], how='inner')
     trans = trans.set_index(trans_index)
     trans = trans.groupby(level=trans_index)['Mass'].sum()
     trans.name = 'Quantity'
     rtn = trans.reset_index()
     return rtn
+
 
 del _transdeps, _transschema
 
@@ -332,7 +350,8 @@ _invschema = [
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
-    ]
+]
+
 
 @metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
 def explicit_inventory_by_agent(expinv):
@@ -341,12 +360,14 @@ def explicit_inventory_by_agent(expinv):
     """
     inv_index = ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId']
     inv = tools.raw_to_series(expinv,
-                              ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId'],
+                              ['SimId', 'AgentId', 'Time', 'InventoryName',
+                               'NucId'],
                               'Quantity')
     inv = inv.groupby(level=inv_index).sum()
     inv.name = 'Quantity'
     rtn = inv.reset_index()
     return rtn
+
 
 del _invdeps, _invschema
 
@@ -360,7 +381,8 @@ _invschema = [
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
     ('Quantity', ts.DOUBLE)
-    ]
+]
+
 
 @metric(name='ExplicitInventoryByNuc', depends=_invdeps, schema=_invschema)
 def explicit_inventory_by_nuc(expinv):
@@ -377,6 +399,7 @@ def explicit_inventory_by_nuc(expinv):
     rtn = inv.reset_index()
     return rtn
 
+
 del _invdeps, _invschema
 
 
@@ -388,9 +411,11 @@ _egschema = [
     ('AgentId', ts.INT),
     ('Year', ts.INT),
     ('Energy', ts.DOUBLE)
-    ]
+]
 
-@metric(name='AnnualElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
+
+@metric(name='AnnualElectricityGeneratedByAgent', depends=_egdeps,
+        schema=_egschema)
 def annual_electricity_generated_by_agent(elec):
     """Annual Electricity Generated metric returns the total electricity
     generated in MWe-y for each agent, calculated from the average monthly
@@ -398,13 +423,14 @@ def annual_electricity_generated_by_agent(elec):
     """
     elec = pd.DataFrame(data={'SimId': elec.SimId,
                               'AgentId': elec.AgentId,
-                              'Year': elec.Time.apply(lambda x: x//12),
-                              'Energy': elec.Value.apply(lambda x: x/12)},
-			columns=['SimId', 'AgentId', 'Year', 'Energy'])
+                              'Year': elec.Time.apply(lambda x: x // 12),
+                              'Energy': elec.Value.apply(lambda x: x / 12)},
+                        columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
     return rtn
+
 
 del _egdeps, _egschema
 
@@ -417,8 +443,11 @@ _egschema = [
     ('AgentId', ts.INT),
     ('Month', ts.INT),
     ('Energy', ts.DOUBLE)
-    ]
-@metric(name='MonthlyElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
+]
+
+
+@metric(name='MonthlyElectricityGeneratedByAgent', depends=_egdeps,
+        schema=_egschema)
 def monthly_electricity_generated_by_agent(elec):
     """Monthly Electricity Generated metric returns the total electricity
     generated in MWe-month for each agent, calculated from the average monthly
@@ -428,11 +457,52 @@ def monthly_electricity_generated_by_agent(elec):
                               'AgentId': elec.AgentId,
                               'Month': elec.Time,
                               'Energy': elec.Value},
-			columns=['SimId', 'AgentId', 'Month', 'Energy'])
+                        columns=['SimId', 'AgentId', 'Month', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Month']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
     return rtn
+
+
+del _egdeps, _egschema
+
+
+# Quantity per GigaWattElectric in Inventory [kg/GWe]
+_invdeps = ['ExplicitInventory', 'TimeSeriesPower']
+
+_invschema = [
+    ('SimId', ts.UUID),
+    ('AgentId', ts.INT),
+    ('Time', ts.INT),
+    ('InventoryName', ts.STRING),
+    ('NucId', ts.INT),
+    ('Quantity', ts.DOUBLE)
+]
+
+
+@metric(name='InventoryQuantityPerElectricPower', depends=_invdeps,
+        schema=_invschema)
+def inventory_quantity_per_gwe(inv, power):
+    """Inventory Quantity per GWe metric returns the explicit inventory table
+    with quantity in units of kg/GWe, calculated by dividing the original
+    quantity by the electricity generated at the corresponding simulation and
+    the specific time in TimeSeriesPower metric.
+    """
+    # reference columns used for inventatory normalisation
+    base_index = ['SimId', 'Time']
+
+    # preping the power table to get 1 power per time
+    power = power.drop(["AgentId"], axis=1)
+    power = power.groupby(base_index).sum()
+    power = power.reset_index()
+
+    # normalisation of the inv per power
+    inv = pd.merge(inv, power, on=base_index, how='left')
+    inv.Quantity = inv.Quantity / inv.Value
+    inv = inv.drop(['Value'], axis=1)
+
+    return inv
+
 
 #
 # Not a metric, not a root metric metrics
@@ -449,7 +519,8 @@ _tldeps = ['Info']
 _tlschema = [
     ('SimId', ts.UUID),
     ('TimeStep', ts.INT)
-    ]
+]
+
 
 @metric(name='TimeList', depends=_tldeps, schema=_tlschema)
 def timelist(info):
@@ -542,4 +613,4 @@ def transaction_quantity_per_gwe(tranacts, power):
     tranacts=pd.merge(tranacts,df1, on=['SimId', 'Time'],how='left')
     tranacts.Quantity = tranacts.Quantity/tranacts.Value
     return tranacts[tranacts_index]
-    
+

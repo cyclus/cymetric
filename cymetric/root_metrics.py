@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 
 from cymetric.evaluator import register_metric
 
+
 def _genrootclass(name):
     """Creates a new root metric class."""
     class Cls(object):
@@ -47,7 +48,7 @@ def root_metric(obj=None, name=None, schema=None, *args, **kwargs):
     return _genrootclass(name=name)
 
 
-#core tables
+# core tables
 resources = root_metric(name='Resources')
 compositions = root_metric(name='Compositions')
 recipes = root_metric(name='Recipes')
@@ -66,7 +67,7 @@ debug_bids = root_metric(name='DebugBids')
 explicit_inventory = root_metric(name='ExplicitInventory')
 explicit_inventory_compact = root_metric(name='ExplicitInventoryCompact')
 
-#where do these tables come from?
+# where do these tables come from?
 commod_priority = root_metric(name='CommodPriority')
 decay_mode = root_metric(name='DecayMode')
 field_types = root_metric(name='FieldTypes')
@@ -75,20 +76,20 @@ next_ids = root_metric(name='NextIds')
 prototypes = root_metric(name='Prototypes')
 xmlpp_info = root_metric(name='XMLPPInfo')
 
-#general agent state tables
+# general agent state tables
 agent_entry = root_metric(name='AgentEntry')
 agent_exit = root_metric(name='AgentExit')
 agent_versions = root_metric(name='AgentVersions')
 agentstate_agent = root_metric(name='AgentStateAgent')
 agentstate_inventories = root_metric(name='AgentStateInventories')
 
-#tables about solvers
+# tables about solvers
 greedy_solver_info = root_metric(name='GreedySolverInfo')
 exchange_solver_info = root_metric(name='ExchangeSolverInfo')
 prog_solver_info = root_metric(name='ProgSolverInfo')
 solver_info = root_metric(name='SolverInfo')
 
-#cyclus archetype tables
+# cyclus archetype tables
 agentstate_agents_nullinstinfo = root_metric(
     name='AgentState_agents_NullInstInfo')
 agentstate_agents_nullregioninfo = root_metric(
@@ -98,7 +99,7 @@ agentstate_agent_sinkinfo = root_metric(
 agentstate_agent_sourceinfo = root_metric(
     name='AgentState_agents_SourceInfo')
 
-#toolkit-enabled tables
+# toolkit-enabled tables
 time_series_power = root_metric(name='TimeSeriesPower')
 time_series_enrichmentfeed = root_metric(name='TimeSeriesEnrichmentFeed')
 time_series_enrichmentswu = root_metric(name='TimeSeriesEnrichmentSWU')

@@ -24,7 +24,7 @@ from cymetric.filters import transactions_nuc
 
 
 def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
-        label='', start=None, stop=None):
+               label='', start=None, stop=None):
     """
     Generate the dot graph of the transation between facilitiese. Applying times
     nuclides selection when required.
@@ -46,9 +46,9 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
     df = transactions_nuc(
         evaler, senders, receivers, commodities, nucs)
 
-    if start != None:
+    if start is not None:
         df = df.loc[(df['Time'] >= start)]
-    if stop != None:
+    if stop is not None:
         df = df.loc[(df['Time'] <= stop)]
 
     group_end = ['ReceiverPrototype', 'SenderPrototype', 'Commodity']
@@ -70,6 +70,6 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
         if 'mass' in label:
             lbl += str('{:.2e}'.format(row['Mass'])) + ' '
         dot.edge(row['SenderPrototype'], row['ReceiverPrototype'],
-                 label= lbl)
+                 label=lbl)
 
     return dot

@@ -16,3 +16,4 @@ cymetric/typesystem.pyx
 # Rever
 rever/
 
+.vscode

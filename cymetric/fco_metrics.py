@@ -21,17 +21,19 @@ _egdeps = ['AnnualElectricityGeneratedByAgent']
 
 _egschema = [('Year', ts.INT), ('Energy', ts.DOUBLE)]
 
+
 @metric(name='FcoElectricityGenerated', depends=_egdeps, schema=_egschema)
 def fco_electricity_generated(elec):
     """FcoElectricityGenerated metric returns the electricity generated in GWe-y
     for all agents in simulation.
     """
     elec = pd.DataFrame(data={'Year': elec.Year,
-                              'Energy': elec.Energy.apply(lambda x: x/1000)},
+                              'Energy': elec.Energy.apply(lambda x: x / 1000)},
                         columns=['Year', 'Energy'])
     elec = elec.groupby('Year').sum()
     rtn = elec.reset_index()
     return rtn
+
 
 del _egdeps, _egschema
 
@@ -41,25 +43,29 @@ _egdeps = ['MonthlyElectricityGeneratedByAgent']
 
 _egschema = [('Month', ts.INT), ('Energy', ts.DOUBLE)]
 
-@metric(name='FcoMonthlyElectricityGenerated', depends=_egdeps, schema=_egschema)
+
+@metric(name='FcoMonthlyElectricityGenerated',
+        depends=_egdeps, schema=_egschema)
 def fco_monthly_electricity_generated(elec):
     """FcoElectricityGenerated metric returns the electricity generated in GWe-month
     for all agents in simulation.
     """
     elec = pd.DataFrame(data={'Month': elec.Month,
-                              'Energy': elec.Energy.apply(lambda x: x/1000)},
+                              'Energy': elec.Energy.apply(lambda x: x / 1000)},
                         columns=['Month', 'Energy'])
     elec = elec.groupby('Month').sum()
     rtn = elec.reset_index()
     return rtn
 
+
 del _egdeps, _egschema
 
 
 # U Resources Mined [t]
-_udeps= ['Materials', 'Transactions']
+_udeps = ['Materials', 'Transactions']
 
 _uschema = [('Year', ts.INT), ('UMined', ts.DOUBLE)]
+
 
 @metric(name='FcoUMined', depends=_udeps, schema=_uschema)
 def fco_u_mined(mats, trans):
@@ -78,7 +84,7 @@ def fco_u_mined(mats, trans):
     for (obj, _, nuc), value in m.iterrows():
         if 922320000 <= nuc <= 922390000:
             prods[obj] = prods.get(obj, 0.0) + value['Mass']
-        if nuc==922350000:
+        if nuc == 922350000:
             mass235[obj] = value['Mass']
     x_feed = 0.0072
     x_tails = 0.0025
@@ -89,11 +95,12 @@ def fco_u_mined(mats, trans):
     m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
     m = m.reset_index()
     # sum by years (12 time steps)
-    u = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x//12),
+    u = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x // 12),
                            'UMined': u}, columns=['Year', 'UMined'])
     u = u.groupby('Year').sum()
     rtn = u.reset_index()
     return rtn
+
 
 del _udeps, _uschema
 
@@ -102,6 +109,7 @@ del _udeps, _uschema
 _swudeps = ['Materials', 'Transactions']
 
 _swuschema = [('Year', ts.INT), ('SWU', ts.DOUBLE)]
+
 
 @metric(name='FcoSwu', depends=_swudeps, schema=_swuschema)
 def fco_swu(mats, trans):
@@ -131,11 +139,12 @@ def fco_swu(mats, trans):
     m = m.groupby(level=['ObjId', 'TimeCreated'])['Mass'].sum()
     m = m.reset_index()
     # sum by years (12 time steps)
-    swu = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x//12),
+    swu = pd.DataFrame(data={'Year': m.TimeCreated.apply(lambda x: x // 12),
                              'SWU': swu}, columns=['Year', 'SWU'])
     swu = swu.groupby('Year').sum()
     rtn = swu.reset_index()
     return rtn
+
 
 del _swudeps, _swuschema
 
@@ -144,6 +153,7 @@ del _swudeps, _swuschema
 _fldeps = ['Materials', 'Transactions']
 
 _flschema = [('Year', ts.INT), ('FuelLoading', ts.DOUBLE)]
+
 
 @metric(name='FcoFuelLoading', depends=_fldeps, schema=_flschema)
 def fco_fuel_loading(mats, trans):
@@ -157,13 +167,12 @@ def fco_fuel_loading(mats, trans):
     mass = mass.groupby(mass.index)['Mass'].sum()
     mass = mass.reset_index()
     # sum by years (12 time steps)
-    mass = pd.DataFrame(data={'Year': mass.TimeCreated.apply(lambda x: x//12),
-                              'FuelLoading': mass.Mass.apply(lambda x: x/1000)},
+    mass = pd.DataFrame(data={'Year': mass.TimeCreated.apply(lambda x: x // 12),
+                              'FuelLoading': mass.Mass.apply(lambda x: x / 1000)},
                         columns=['Year', 'FuelLoading'])
     mass = mass.groupby('Year').sum()
     rtn = mass.reset_index()
     return rtn
 
+
 del _fldeps, _flschema
-
-

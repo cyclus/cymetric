@@ -62,7 +62,7 @@ def main():
         "packages": packages,
         "package_dir": pack_dir,
         "scripts": scripts,
-        }
+    }
     rtn = core.setup(**setup_kwargs)
     return rtn
 
