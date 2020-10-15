@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 db = cym.dbopen('recycle.sqlite')
 evaler = cym.Evaluator(db)
-comm = evaler.eval('CommissioningSeries')
-decomm = evaler.eval('DecommissioningSeries')
+comm = evaler.eval('BuildSeries')
+decomm = evaler.eval('DecommissionSeries')
 
 # make exit counts negative for plotting purposes
 neg = -decomm['Count']
