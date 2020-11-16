@@ -282,7 +282,7 @@ def agents(entry, agent_exit, decom, info):
     significant amounts of missing data.
     """
     mergeon = ['SimId', 'AgentId']
-    ent = tools.raw_to_series(entry, ['SimId', 'AgentId'], 'Kind')
+    ent = tools.raw_to_series(entry, ['SimId', 'AgentId','ExitTime'])
     idx = ent.index
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
