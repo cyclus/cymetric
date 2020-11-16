@@ -274,7 +274,7 @@ _agentsschema = schemas.schema([
 
 
 @metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
-def agents(entry, exit, decom, info):
+def agents(entry, agent_exit, decom, info):
     """Computes the Agents table. This is tricky because both the AgentExit
     table and the DecomSchedule table may not be present in the database.
     Furthermore, the Info table does not contain the AgentId column. This
@@ -286,7 +286,7 @@ def agents(entry, exit, decom, info):
     idx = ent.index
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
-    if exit is None:
+    if agent_exit is None:
         agent_exit = pd.Series(index=idx, data=[np.nan] * len(idx))
         agent_exit.name = 'ExitTime'
     else:
