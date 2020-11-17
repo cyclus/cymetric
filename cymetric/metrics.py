@@ -282,15 +282,12 @@ def agents(entry, agent_exit, decom, info):
     significant amounts of missing data.
     """
     mergeon = ['SimId', 'AgentId']
-    #ent = tools.raw_to_series(entry, ['SimId', 'AgentId'],'Kind')
-    #idx = ent.index
-    #idx = mergeon.size
     idx = ['SimId','AgentId','ExitTime']
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
-    #idx = len(df)
     if agent_exit is None:
-        agent_exit = pd.Series(index=idx, data=[np.nan] * len(idx))
+        agent_exit = entry[['SimId','AgentId']]
+        agent_exit['ExitTime'] = [np.nan]*len(agent_exit)
         agent_exit.name = 'ExitTime'
     else:
         agent_exit = agent_exit.reindex(index=idx)
