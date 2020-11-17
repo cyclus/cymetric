@@ -285,9 +285,10 @@ def agents(entry, agent_exit, decom, info):
     #ent = tools.raw_to_series(entry, ['SimId', 'AgentId'],'Kind')
     #idx = ent.index
     #idx = mergeon.size
+    idx = ['SimId','AgentId','ExitTime']
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
-    #idx = df.size
+    #idx = len(df)
     if agent_exit is None:
         agent_exit = pd.Series(index=idx, data=[np.nan] * len(idx))
         agent_exit.name = 'ExitTime'
