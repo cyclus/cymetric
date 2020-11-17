@@ -286,12 +286,10 @@ def agents(entry, agent_exit, decom, info):
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
     if agent_exit is None:
-        agent_exit = entry[['SimId','AgentId']]
+        agent_exit = entry[['SimId','AgentId']].copy()
         agent_exit['ExitTime'] = [np.nan]*len(agent_exit)
         agent_exit.name = 'ExitTime'
-    else:
-        agent_exit = agent_exit#.reindex(index=idx)
-    df = pd.merge(df, agent_exit, on=mergeon)
+    df = tools.merge_and_fillna_col(df, agent_exit, on=mergeon)
     if decom is not None:
         df = tools.merge_and_fillna_col(df, decom[['SimId', 'AgentId',
                                                    'DecomTime']],
