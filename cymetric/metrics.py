@@ -282,7 +282,6 @@ def agents(entry, exit, decom, info):
     significant amounts of missing data.
     """
     mergeon = ['SimId', 'AgentId']
-    idx = ['SimId','AgentId','ExitTime']
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
     df['ExitTime'] = [np.nan]*len(entry)
@@ -290,7 +289,6 @@ def agents(entry, exit, decom, info):
         exit.columns = ['SimId','AgentId','Exits']
         df = tools.merge_and_fillna_col(df, exit[['SimId','AgentId','Exits']], 
                                         'ExitTime','Exits',on=mergeon)
-    #df.rename({'Exits':'ExitTime'},axis='columns')
     if decom is not None:
         df = tools.merge_and_fillna_col(df, decom[['SimId', 'AgentId',
                                                    'DecomTime']],
