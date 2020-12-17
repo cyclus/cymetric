@@ -8,5 +8,5 @@ your convenience.
 
 The files ``agent_entryexit.py`` and ``agent_entryexit.ipynb`` walk through the same example, just with different 
 user interfaces. The example looks at the commissioning and decommissioning of reactor prototypes in the simulation. 
-The other example, ``materials_transactions.ipynb``, looks at the transfer of LWR fuel and the accumulation of waste in 
+The other example, ``materials_transactions.ipynb``, plots the transfer of LWR fuel and the accumulation of waste in 
 the repository. 
