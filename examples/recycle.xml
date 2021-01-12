@@ -67,7 +67,7 @@
                   <info>
                       <buf_size>1e100</buf_size>
                       <efficiencies>
-                         <item><comp>Pu</comp> <eff>.99</eff></item>
+                        <item><comp>Pu</comp> <eff>.99</eff></item>
                       </efficiencies>
                   </info>
               </item>
