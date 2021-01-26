@@ -115,13 +115,13 @@ def materials(rsrcs, comps):
     Resources times the massfrac in Compositions) indexed by the SimId, QualId,
     ResourceId, ObjId, TimeCreated, and NucId.
     """
-    rsrcs = rsrcs[['SimId', 'QualId','ResourceId', 'ObjId', 'TimeCreated', 'Quantity',
-                   'Units']]
+    rsrcs = rsrcs[['SimId', 'QualId','ResourceId', 'ObjId', 'TimeCreated',
+                   'Quantity', 'Units']]
     x = pd.merge(rsrcs, comps, on=['SimId', 'QualId'], how='inner')
     x['Mass'] = x['Quantity'] * x['MassFrac']
     x = x.drop(['Quantity', 'MassFrac'], axis=1)
-    x = x.reindex(columns=['SimId', 'QualId','ResourceId', 'ObjId', 'TimeCreated', 'NucId',
-                   'Units', 'Mass'])
+    x = x.reindex(columns=['SimId', 'QualId', 'ResourceId', 'ObjId',
+                           'TimeCreated', 'NucId', 'Units', 'Mass'])
     return x
 
 
