@@ -240,7 +240,7 @@ def test_agents_agentexit():
     assert_frame_equal(exp, obs)
 
 
-def test_agents_decoms():
+def test_agents_decom():
     exp = pd.DataFrame(np.array([
         (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
          ':agents:NullRegion', 'SingleRegion', -1, -1, 0, 10.0),
@@ -304,6 +304,85 @@ def test_agents_decoms():
         'SimId': {0: UUID('93726022-57f7-4ec4-b99c-e9538e65d45e')},
     })
     obs = metrics.agents.func(agent_entry, None, decom_schedule, info)
+    assert_frame_equal(exp, obs)
+
+
+def test_agents_agentexit_decom():
+    exp = pd.DataFrame(np.array([
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
+         ':agents:NullRegion', 'SingleRegion', -1, -1, 0, 10.0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
+         'SingleInstitution', 8, -1, 0, 10.0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 10, 'Facility',
+         ':cycamore:Source', 'Source', 9, 5, 0, 4.0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 11, 'Facility',
+         ':cycamore:Source', 'Source', 9, 5, 0, 4.0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 12, 'Facility',
+         ':cycamore:Source', 'Source', 9, 5, 0, 4.0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 13, 'Facility',
+         ':cycamore:Reactor', 'Reactor', 9, 6, 0, 5.0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 14, 'Facility',
+         ':cycamore:Sink', 'Sink', 9, -1, 0, 10.0),
+    ], dtype=ensure_dt_bytes([
+        ('SimId', 'O'),
+        ('AgentId', '<i8'),
+        ('Kind', 'O'),
+        ('Spec', 'O'),
+        ('Prototype', 'O'),
+        ('ParentId', '<i8'),
+        ('Lifetime', '<i8'),
+        ('EnterTime', '<i8'),
+        ('ExitTime', '<f8')]))
+    )
+    agent_entry = pd.DataFrame(np.array([
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region', 
+         ':agents:NullRegion', 'SingleRegion', -1, -1, 0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
+         'SingleInstitution', 8, -1, 0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 10, 'Facility',
+         ':cycamore:Source', 'Source', 9, 5, 0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 11, 'Facility',
+         ':cycamore:Source', 'Source', 9, 5, 0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 12, 'Facility',
+         ':cycamore:Source', 'Source', 9, 5, 0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 13, 'Facility',
+         ':cycamore:Reactor', 'Reactor', 9, 6, 0),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 14, 'Facility',
+         ':cycamore:Sink', 'Sink', 9, -1, 0),
+    ], dtype=ensure_dt_bytes([
+        ('SimId', 'O'),
+        ('AgentId', '<i8'),
+        ('Kind', 'O'),
+        ('Spec', 'O'),
+        ('Prototype', 'O'),
+        ('ParentId', '<i8'),
+        ('Lifetime', '<i8'),
+        ('EnterTime', '<i8')
+    ]))
+    )
+    agent_exit = pd.DataFrame(np.array([
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 11, 4),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 10, 4),
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 12, 4),
+    ], dtype=ensure_dt_bytes([
+        ('SimId', 'O'),
+        ('AgentId', '<i8'),
+        ('ExitTime', '<f8')
+    ]))
+    )
+    decom_schedule = pd.DataFrame(np.array([
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 13, 5),
+    ], dtype=ensure_dt_bytes([
+        ('SimId', 'O'),
+        ('AgentId', '<i8'),
+        ('DecomTime', '<f8')
+    ]))
+    )
+    info = pd.DataFrame({
+        'Duration': {0: 10},
+        'SimId': {0: UUID('93726022-57f7-4ec4-b99c-e9538e65d45e')},
+    })
+    obs = metrics.agents.func(agent_entry, agent_exit, decom_schedule, info)
     assert_frame_equal(exp, obs)
 
 
