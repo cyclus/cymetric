@@ -15,7 +15,6 @@ from pandas.util.testing import assert_frame_equal
 
 try:
     from pyne import data
-    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
@@ -199,7 +198,7 @@ def test_agents_agentexit():
         ('ExitTime', '<f8')]))
     )
     agent_entry = pd.DataFrame(np.array([
-        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region', 
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
          ':agents:NullRegion', 'SingleRegion', -1, -1, 0),
         (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
          'SingleInstitution', 8, -1, 0),
@@ -266,7 +265,7 @@ def test_agents_decom():
         ('ExitTime', '<f8')]))
     )
     agent_entry = pd.DataFrame(np.array([
-        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region', 
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
          ':agents:NullRegion', 'SingleRegion', -1, -1, 0),
         (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
          'SingleInstitution', 8, -1, 0),
@@ -335,7 +334,7 @@ def test_agents_agentexit_decom():
         ('ExitTime', '<f8')]))
     )
     agent_entry = pd.DataFrame(np.array([
-        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region', 
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
          ':agents:NullRegion', 'SingleRegion', -1, -1, 0),
         (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
          'SingleInstitution', 8, -1, 0),
