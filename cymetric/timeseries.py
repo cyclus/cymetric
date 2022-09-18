@@ -1,15 +1,5 @@
 import warnings
 
-import pandas as pd
-import numpy as np
-
-try:
-    from pyne import data
-    from pyne import nucname
-    HAVE_PYNE = True
-except ImportError:
-    HAVE_PYNE = False
-
 from cymetric import tools
 from cymetric import filters
 
@@ -41,7 +31,12 @@ def transactions(evaler, senders=(), receivers=(), commodities=(), nucs=()):
     return df
 
 
-def transactions_activity(evaler, senders=(), receivers=(), commodities=(), nucs=()):
+def transactions_activity(
+        evaler,
+        senders=(),
+        receivers=(),
+        commodities=(),
+        nucs=()):
     """
     Shape the reduced transation Data Frame into a simple time serie. Applying nuclides selection when required.
 
@@ -85,8 +80,8 @@ def transactions_decayheat(
     if len(nucs) != 0:
         nucs = tools.format_nucs(nucs)
 
-    df = filters.transactions_decayheat(evaler, senders, receivers, commodities,
-                                        nucs)
+    df = filters.transactions_decayheat(
+        evaler, senders, receivers, commodities, nucs)
 
     df = df[['Time', 'DecayHeat']].groupby(['Time']).sum()
     df.reset_index(inplace=True)

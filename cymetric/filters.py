@@ -1,6 +1,4 @@
 import warnings
-import pandas as pd
-import numpy as np
 
 try:
     from graphviz import Digraph
@@ -10,7 +8,6 @@ except ImportError:
 
 try:
     from pyne import data
-    from pyne import nucname
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False

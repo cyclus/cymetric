@@ -8,7 +8,6 @@ if sys.version_info[0] > 2:
 else:
     str_types = (str, unicode)
 
-from cyclus import typesystem as ts
 from cyclus.typesystem import NAMES, RANKS, IDS
 
 
@@ -40,8 +39,9 @@ def canon_shape(shape, dbtype):
             s.append(i)
         rank = RANKS[dbtype]
         if len(s) != rank:
-            msg = ('the shape rank for the {0} type must be {1}, got {2} for a '
-                   'shape of {3}.')
+            msg = (
+                'the shape rank for the {0} type must be {1}, got {2} for a '
+                'shape of {3}.')
             raise ValueError(msg.format(NAMES[dbtype], rank, len(s), s))
         rtn = tuple(s)
     elif isinstance(shape, int):
