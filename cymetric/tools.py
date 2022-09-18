@@ -10,7 +10,6 @@ import pandas as pd
 
 try:
     from pyne import data
-    import pyne.enrichment as enr
     from pyne import nucname
     HAVE_PYNE = True
 except ImportError:

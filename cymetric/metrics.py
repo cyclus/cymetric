@@ -8,7 +8,6 @@ import pandas as pd
 
 try:
     from pyne import data
-    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
