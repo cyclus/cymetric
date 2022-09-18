@@ -9,6 +9,7 @@ from cymetric.tools import raw_to_series
 
 
 METRIC_REGISTRY = {}
+pd.options.display.precision = 16
 
 
 def register_metric(cls):

@@ -4,6 +4,7 @@ import warnings
 
 import pandas as pd
 import numpy as np
+pd.options.display.precision = 16
 
 try:
     from graphviz import Digraph

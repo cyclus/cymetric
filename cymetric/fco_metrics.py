@@ -1,5 +1,8 @@
 """FCO metrics"""
 import pandas as pd
+pd.options.display.precision = 16
+
+
 try:
     from pyne import data
     import pyne.enrichment as enr
