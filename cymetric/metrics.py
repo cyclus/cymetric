@@ -5,7 +5,6 @@ import inspect
 
 import numpy as np
 import pandas as pd
-#pd.options.display.precision = 16
 
 
 try:
@@ -285,7 +284,7 @@ def agents(entry, exit, decom, info):
     mergeon = ['SimId', 'AgentId']
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
-    df['ExitTime'] = [np.nan]*len(entry)
+    df['ExitTime'] = [np.nan] * len(entry)
     if exit is not None:
         exit.columns = ['SimId', 'AgentId', 'Exits']
         df = tools.merge_and_fillna_col(df, exit[['SimId', 'AgentId',

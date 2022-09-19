@@ -6,7 +6,6 @@ import sys
 import warnings
 
 import pandas as pd
-#pd.options.display.precision = 16
 
 
 try:

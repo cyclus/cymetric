@@ -1,7 +1,5 @@
 """FCO metrics"""
 import pandas as pd
-#pd.options.display.precision = 16
-
 
 
 try:
@@ -171,9 +169,15 @@ def fco_fuel_loading(mats, trans):
     mass = mass.groupby(mass.index)['Mass'].sum()
     mass = mass.reset_index()
     # sum by years (12 time steps)
-    mass = pd.DataFrame(data={'Year': mass.TimeCreated.apply(lambda x: x // 12),
-                              'FuelLoading': mass.Mass.apply(lambda x: x / 1000)},
-                        columns=['Year', 'FuelLoading'])
+    mass = pd.DataFrame(
+        data={
+            'Year': mass.TimeCreated.apply(
+                lambda x: x // 12),
+            'FuelLoading': mass.Mass.apply(
+                lambda x: x / 1000)},
+        columns=[
+            'Year',
+            'FuelLoading'])
     mass = mass.groupby('Year').sum()
     rtn = mass.reset_index()
     return rtn
