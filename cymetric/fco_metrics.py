@@ -1,6 +1,7 @@
 """FCO metrics"""
 import pandas as pd
-pd.options.display.precision = 16
+#pd.options.display.precision = 16
+
 
 
 try:

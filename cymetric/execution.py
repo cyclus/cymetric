@@ -12,7 +12,8 @@ else:
 
 import numpy as np
 import pandas as pd
-pd.options.display.precision = 16
+#pd.options.display.precision = 16
+
 
 from cymetric.evaluator import Evaluator, METRIC_REGISTRY
 
