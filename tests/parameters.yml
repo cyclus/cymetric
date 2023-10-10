@@ -1,0 +1,92 @@
+eco_model:
+  periode:
+    start: 0
+    end: 20
+
+  finance:
+    discount_rate: 0.1
+    tax_rate: 0.1
+    return_on_debt: 0.1
+    return_on_equity: 0.1
+
+  capital:
+    deviation: 0
+    beforePeak: 10
+    afterPeak: 5
+    constructionDuration: 10
+    overnight_cost: 1
+
+  operation_maintenance:
+    fixed: 1
+    variable: 1
+    deviation: 0
+
+  decommission:
+    duration: 5
+    overnight_cost: 1
+
+  fuels:
+    - name: uox
+      supply_cost: 1
+      waste_fee: 0
+      deviation: 0
+
+    - name: mox
+      supply_cost: 2
+      supply_fee: 0
+      deviation: 0
+
+  region:
+    - prototype: MyReg
+      finance:
+        discount_rate: 0.1
+        tax_rate: 0.2
+        return_on_debt: 0.1
+        return_on_equity: 0.1
+      capital:
+        deviation: 0
+        beforePeak: 10
+        afterPeak: 5
+        constructionDuration: 10
+        overnight_cost: 1
+      operation_maintenance:
+        fixed: 0.5
+        variable: 1
+        deviation: 0
+      fuels:
+        - name: uox
+          supply_cost: 1.5
+          waste_fee: 0
+          deviation: 0
+
+      institution:
+        - prototype: MyInst
+          capital:
+            beforePeak: 10
+            afterPeak: 5
+            constructionDuration: 10
+            deviation: 0
+            overnight_cost: 1
+          fuels:
+            - name: uox
+              supply_cost: 2.5
+              waste_fee: 0
+              deviation: 0
+
+          facility:
+            - prototype: Reactor1
+              fuels:
+                - name: uox
+                  supply_cost: 1
+                  waste_fee: 0
+                  deviation: 0
+              decommission:
+                overnight_cost: 1
+                duration: 5
+
+            - prototype: Reactor2
+              fuels:
+                - name: mox
+                  supply_cost: 5.5
+                  waste_fee: 0
+                  deviation: 0

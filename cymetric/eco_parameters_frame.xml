@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Template for 'parameters.xml' files needed to give economic input data to calculate economic metrics.
+The 'capital', 'operation_maintenance', 'fuel' and 'decommissioning' parameters can be defined either at a simulation, region, institution, prototype or facility level.
+The 'finance' parameters have to be defined either at the simulation or region level.
+The 'truncation' parameters have to be defined at the simulation level. -->
+<model>
+
+	<region>
+		<id></id>
+		<institution>
+			<id></id>
+			<prototype>
+				<name></name>
+				<facility>
+					<id></id>
+				</facility>
+			</prototype>
+		</institution>
+	</region>
+
+	<region>
+		<id></id>
+	</region>
+
+
+	<finance>
+		<discount_rate></discount_rate> <!-- % -->
+		<tax_rate></tax_rate> <!-- % -->
+		<return_on_debt></return_on_debt> <!-- % -->
+		<return_on_equity></return_on_equity> <!-- % -->
+	</finance>
+	
+	<capital>
+		<deviation></deviation>  <!-- deviation in the Poisson distribution to have random construction begin and construcion duration-->
+		<beforePeak></beforePeak>  <!-- number of months the construction begins before peak -->
+		<afterPeak></afterPeak>
+		<constructionDuration></constructionDuration>  <!-- duration of construction in months -->
+		<overnight_cost></overnight_cost>  <!-- $/MW -->
+	</capital>
+
+	<decommissioning>
+		<duration></duration> <!-- duration of decommissioning in months -->
+		<overnight_cost></overnight_cost> <!-- $/MW -->
+	</decommissioning>
+
+	<operation_maintenance>
+		<fixed></fixed>  <!-- $/MW -->
+		<variable></variable>  <!-- $/MWh -->
+		<deviation></deviation>
+	</operation_maintenance>
+
+	<fuel>
+		<type> <!-- fuel 1 -->
+			<name></name> <!-- name of the commodity -->
+			<supply_cost></supply_cost> <!-- $/kg -->
+			<waste_fee></waste_fee> <!-- $/kg -->
+			<deviation></deviation>
+		</type> 
+		<type> <!-- fuel 2 -->
+			<name></name> <!-- name of the commodity -->
+			<supply_cost></supply_cost> <!-- $/kg -->
+			<waste_fee></waste_fee> <!-- $/kg -->
+			<deviation></deviation>
+		</type> 
+	</fuel>
+	
+	<truncation>
+		<simulation_begin></simulation_begin> <!-- number of months -->
+		<simulation_end></simulation_end> <!-- number of months -->
+		<!--all reactors commissionned after the date 'simulation_begin' and before the date 'simulation_end' will be included in the costs calculations-->
+	</truncation>
+</model>

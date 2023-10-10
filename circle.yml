@@ -36,7 +36,7 @@ jobs:
                   - v1-repo-{{ checksum ".circle-sha" }}
             - run:
                 name: Install nosetest
-                command: pip install nose
+                command: pip install nose pyyaml
             - run:
                 name: Nosetests
                 command: nosetests -w ~/cymetric/tests; exit $?
