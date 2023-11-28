@@ -108,7 +108,7 @@ def add_missing_time_step(df, ref_time):
     ref_time.rename(index=str, columns={'TimeStep': 'Time'}, inplace=True)
 
     if 'SimId' in ref_time.columns.values:
-        ref_time.drop('SimId', 1, inplace=True)
+        ref_time.drop('SimId', axis=1, inplace=True)
     df = pd.merge(ref_time, df, how="outer")
     df.fillna(0, inplace=True)
     return df
@@ -128,7 +128,7 @@ def merge(df, base_col, add_df, add_col):
     add_col: columns to be added
     """
     df = pd.merge(add_df[add_col], df, on=base_col)
-    df.drop(base_col[1], 1)
+    df.drop(base_col[1], axis=1)
     return df
 
 
