@@ -2,7 +2,7 @@
 """
 from __future__ import print_function, unicode_literals
 import sys
-from collections import MutableSequence, Iterable
+from collections.abc import MutableSequence, Iterable
 if sys.version_info[0] > 2:
     str_types = (str, bytes)
 else:

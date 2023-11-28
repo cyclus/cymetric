@@ -4,7 +4,7 @@ from __future__ import unicode_literals, print_function
 import re
 import sys
 import uuid
-from collections import MutableMapping, Sized
+from collections.abc import MutableMapping, Sized
 if sys.version_info[0] > 2:
     str_types = (str, bytes)
 else:
