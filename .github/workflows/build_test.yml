@@ -29,7 +29,7 @@ jobs:
           22.04,
         ]
         pkg_mgr : [
-          # apt,
+          apt,
           conda,
         ]
         cycamore_tag: [
