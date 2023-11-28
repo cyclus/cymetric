@@ -47,7 +47,7 @@ jobs:
         run: |
           python setup.py install --prefix $(cyclus --install-path)
 
-      - name: Cymetric Nosetests
+      - name: Cymetric Tests
         run: |
           export PYTHONPATH=$(find /root/.local/lib -type d -name 'cyclus-*-*.egg' -print -quit)
           apt install -y python3-pytest
