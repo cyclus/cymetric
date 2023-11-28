@@ -1,0 +1,54 @@
+name: Build/Test for PR and collaborator push
+
+on:
+  # allows us to run workflows manually
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - '.github/workflows/build_test_publish.yml'
+      - 'docker/**'
+      - 'doc/**'
+      - 'CHANGELOG.rst'
+  push:
+    paths-ignore:
+      - '.github/workflows/build_test_publish.yml'
+      - 'docker/**'
+      - 'doc/**'
+      - 'CHANGELOG.rst'
+
+jobs:
+  build-and-test:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu_versions : [
+          # 20.04,
+          22.04,
+        ]
+        pkg_mgr : [
+          apt,
+          # conda,
+        ]
+        cyclus_tag: [
+          latest,
+        ]
+    
+    container:
+      image: ghcr.io/cyclus/cyclus_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cyclus:${{matrix.cyclus_tag}}
+
+    steps:
+      - name: Checkout Cymetric
+        uses: actions/checkout@v3
+
+      - name: Build Cymetric
+        run: |
+          python setup.py install --prefix $(cyclus --install-path)
+
+      - name: Cymetric Nosetests
+        run: |
+          export PYTHONPATH=$(find /root/.local/lib -type d -name 'cyclus-*-*.egg' -print -quit)
+          apt install -y python3-nose
+          nosetests3 -w tests/ -v
