@@ -6,8 +6,8 @@ from cymetric import evaluator
 from tools import dbtest
 
 
-@dbtest
-def test_eval(db, fname, backend):
+def test_eval(dbtest):
+    db, fname, backend = dbtest
     df = evaluator.eval('Materials', db, write=False)
     assert 0 < len(df)
 

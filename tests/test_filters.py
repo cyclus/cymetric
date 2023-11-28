@@ -21,8 +21,8 @@ except ImportError:
     HAVE_PYNE = False
 
 
-@dbtest
-def test_transactions(db, fname, backend):
+def test_transactions(dbtest):
+    db, fname, backend = dbtest
     evaler = cym.Evaluator(db)
     cal = filters.transactions(evaler)
     exp_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
@@ -181,8 +181,8 @@ def test_transactions(db, fname, backend):
     assert_frame_equal(cal, refs)
 
 
-@dbtest
-def test_transactions_nuc(db, fname, backend):
+def test_transactions_nuc(dbtest):
+    db, fname, backend = dbtest
     evaler = cym.Evaluator(db)
     cal = filters.transactions_nuc(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
@@ -250,8 +250,8 @@ def test_transactions_nuc(db, fname, backend):
     assert_frame_equal(cal, refs)
 
 
-@dbtest
-def test_transactions_activity(db, fname, backend):
+def test_transactions_activity(dbtest):
+    db, fname, backend = dbtest
     if not HAVE_PYNE:
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
@@ -318,8 +318,8 @@ def test_transactions_activity(db, fname, backend):
     assert_frame_equal(cal, refs)
 
 
-@dbtest
-def test_transactions_decayheat(db, fname, backend):
+def test_transactions_decayheat(dbtest):
+    db, fname, backend = dbtest
     if not HAVE_PYNE:
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
@@ -385,8 +385,8 @@ def test_transactions_decayheat(db, fname, backend):
     assert_frame_equal(cal, refs)
 
 
-@dbtest
-def test_inventories(db, fname, backend):
+def test_inventories(dbtest):
+    db, fname, backend = dbtest
     evaler = cym.Evaluator(db)
     cal = filters.inventories(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype',
@@ -440,8 +440,8 @@ def test_inventories(db, fname, backend):
     assert_frame_equal(cal, refs)
 
 
-@dbtest
-def test_inventories_activity(db, fname, backend):
+def test_inventories_activity(dbtest):
+    db, fname, backend = dbtest
     if not HAVE_PYNE:
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
@@ -494,8 +494,8 @@ def test_inventories_activity(db, fname, backend):
     assert_frame_equal(cal, refs)
 
 
-@dbtest
-def test_inventories_decayheat(db, fname, backend):
+def test_inventories_decayheat(dbtest):
+    db, fname, backend = dbtest
     if not HAVE_PYNE:
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
