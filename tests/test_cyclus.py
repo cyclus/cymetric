@@ -3,14 +3,16 @@
 from tools import dbtest
 
 
-@dbtest
-def test_name(db, fname, backend):
+
+def test_name(dbtest):
+    db, fname, backend = dbtest
     obs = db.name
     assert fname == obs
 
 
-@dbtest
-def test_simid(db, fname, backend):
+
+def test_simid(dbtest):
+    db, fname, backend = dbtest
     df = db.query("AgentEntry")
     simid = df['SimId']
     exp = simid[0]
@@ -18,16 +20,16 @@ def test_simid(db, fname, backend):
         assert exp == obs
 
 
-@dbtest
-def test_conds_ae(db, fname, backend):
+def test_conds_ae(dbtest):
+    db, fname, backend = dbtest
     obs = db.query("AgentEntry", [('Kind', '==', 'Region')])
     assert 1 == len(obs)
     assert 'Region' == obs['Kind'][0]
     assert ':agents:NullRegion' == obs['Spec'][0]
 
 
-@dbtest
-def test_conds_comp(db, fname, backend):
+def test_conds_comp(dbtest):
+    db, fname, backend = dbtest
     conds = [('NucId', '==', 922350000), ('MassFrac', '>', 0.0072)]
     df = db.query("Compositions", conds)
     assert 0 < len(df)

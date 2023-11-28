@@ -2,7 +2,7 @@
 import os
 import shutil
 import subprocess
-from functools import wraps
+import pytest
 
 from cyclus import lib
 
@@ -38,14 +38,17 @@ def setup():
             continue
         safe_call(['cyclus', '-o' + oname, 'test-input.xml'])
 
+setup()
 
-def dbtest(f):
-    @wraps(f)
-    def wrapper():
-        for fname, oname, backend in DBS:
-            if os.path.exists(fname):
-                os.remove(fname)
-            shutil.copy(oname, fname)
-            db = backend(fname)
-            yield f, db, fname, backend
-    return wrapper
+
+def get_dbs():
+    for fname, oname, backend in DBS:
+        if os.path.exists(fname):
+            os.remove(fname)
+        shutil.copy(oname, fname)
+        db = backend(fname)
+        yield db, fname, backend
+
+@pytest.fixture(params=get_dbs())
+def dbtest(request):
+    return request.param
