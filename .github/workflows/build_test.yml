@@ -25,19 +25,19 @@ jobs:
       fail-fast: false
       matrix:
         ubuntu_versions : [
-          # 20.04,
+          20.04,
           22.04,
         ]
         pkg_mgr : [
           apt,
-          # conda,
+          conda,
         ]
-        cyclus_tag: [
+        cycamore_tag: [
           latest,
         ]
     
     container:
-      image: ghcr.io/cyclus/cyclus_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cyclus:${{matrix.cyclus_tag}}
+      image: ghcr.io/cyclus/cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{matrix.cycamore_tag}}
 
     steps:
       - name: Checkout Cymetric
@@ -50,5 +50,5 @@ jobs:
       - name: Cymetric Nosetests
         run: |
           export PYTHONPATH=$(find /root/.local/lib -type d -name 'cyclus-*-*.egg' -print -quit)
-          apt install -y python3-nose
-          nosetests3 -w tests/ -v
+          apt install -y python3-pytest
+          cd tests && python -m pytest
