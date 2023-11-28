@@ -29,7 +29,7 @@ jobs:
           22.04,
         ]
         pkg_mgr : [
-          apt,
+          # apt,
           conda,
         ]
         cycamore_tag: [
@@ -45,10 +45,11 @@ jobs:
 
       - name: Build Cymetric
         run: |
-          python setup.py install --prefix $(cyclus --install-path)
+          apt update && apt install -y python3-pip
+          python -m pip install --target $(python -m site --user-site) .
 
       - name: Cymetric Tests
         run: |
           export PYTHONPATH=$(find /root/.local/lib -type d -name 'cyclus-*-*.egg' -print -quit)
-          apt install -y python3-pytest
+          apt update && apt install -y python3-pytest
           cd tests && python -m pytest
