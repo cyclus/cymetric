@@ -4,8 +4,8 @@ from functools import wraps
 
 import numpy as np
 import pandas as pd
-from pandas.util.testing import assert_frame_equal
-from nose.plugins.skip import SkipTest
+from pandas.testing import assert_frame_equal
+from pytest import skip
 
 from tools import dbtest
 
@@ -190,7 +190,7 @@ def test_transactions_nuc(db, fname, backend):
     assert list(cal) == exp_head  # Check we have the correct headers
 
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     # test single nuclide selection
     cal = filters.transactions_nuc(evaler, nucs=['942390000'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
@@ -253,7 +253,7 @@ def test_transactions_nuc(db, fname, backend):
 @dbtest
 def test_transactions_activity(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.transactions_activity(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverPrototype',
@@ -321,7 +321,7 @@ def test_transactions_activity(db, fname, backend):
 @dbtest
 def test_transactions_decayheat(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.transactions_decayheat(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'DecayHeat', 'ReceiverId', 'ReceiverPrototype',
@@ -394,7 +394,7 @@ def test_inventories(db, fname, backend):
     assert list(cal) == exp_head  # Check we have the correct headers
 
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     cal = filters.inventories(evaler, facilities=['Reactor1'],
                               nucs=['94239'])
     cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
@@ -443,7 +443,7 @@ def test_inventories(db, fname, backend):
 @dbtest
 def test_inventories_activity(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.inventories_activity(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
@@ -497,7 +497,7 @@ def test_inventories_activity(db, fname, backend):
 @dbtest
 def test_inventories_decayheat(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.inventories_decayheat(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',

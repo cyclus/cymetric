@@ -5,14 +5,13 @@ from pytest import skip
 
 import numpy as np
 import pandas as pd
-from pandas.util.testing import assert_frame_equal
-
+from pandas.testing import assert_frame_equal
 
 from tools import dbtest
 
 import cymetric as cym
 from cymetric import timeseries as ts
-from cymetric.tools import raw_to_series, ensure_dt_bytes
+from cymetric.tools import ensure_dt_bytes
 
 try:
     from pyne import data
