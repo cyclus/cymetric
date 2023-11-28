@@ -92,7 +92,7 @@ def test_transactions(dbtest):
 
     # test single receiver
     cal = filters.transactions(evaler, receivers=['Reactor1'])
-    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
+    cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
         ('Reactor1', 'MOX_Source', 'mox', 1),
@@ -109,7 +109,7 @@ def test_transactions(dbtest):
     # test multiple sender
     cal = filters.transactions(
         evaler, receivers=['Reactor1', 'Reactor3'])
-    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
+    cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
         ('Reactor1', 'MOX_Source', 'mox', 1),
@@ -128,7 +128,7 @@ def test_transactions(dbtest):
     # test multiple sender and multiple receiver
     cal = filters.transactions(evaler, senders=['UOX_Source', 'MOX_Source'],
                                receivers=['Reactor1', 'Reactor2'])
-    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
+    cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
         ('Reactor1', 'MOX_Source', 'mox', 1),
@@ -147,7 +147,7 @@ def test_transactions(dbtest):
 
     # test single filters.odity
     cal = filters.transactions(evaler, commodities=['uox'])
-    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
+    cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
         ('Reactor3', 'UOX_Source', 'uox', 3),
@@ -161,7 +161,7 @@ def test_transactions(dbtest):
 
     # test multiple sender
     cal = filters.transactions(evaler, commodities=['uox', 'mox'])
-    cal = cal.drop(drop_cols, 1)  # SimId change at each test need to drop it
+    cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
         ('Reactor1', 'MOX_Source', 'mox', 1),
@@ -193,11 +193,11 @@ def test_transactions_nuc(dbtest):
         raise skip("Doesn't have Pyne")
     # test single nuclide selection
     cal = filters.transactions_nuc(evaler, nucs=['942390000'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
+    cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop('ResourceId', axis=1)
     refs = pd.DataFrame(np.array([
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
@@ -218,11 +218,11 @@ def test_transactions_nuc(dbtest):
     # test multiple nuclide selection
     cal = filters.transactions_nuc(
         evaler, nucs=['942390000', '922380000'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
+    cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop('ResourceId', axis=1)
     refs = pd.DataFrame(np.array([
         (922380000, 0.7872433760310, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
@@ -262,11 +262,11 @@ def test_transactions_activity(dbtest):
 
     # test single nuclide selection
     cal = filters.transactions_activity(evaler, nucs=['942390000'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
+    cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop('ResourceId', axis=1)
     refs = pd.DataFrame(np.array([
         (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 102084984531.0, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
@@ -286,11 +286,11 @@ def test_transactions_activity(dbtest):
     # test multiple nuclide selection
     cal = filters.transactions_activity(
         evaler, nucs=['942390000', '922380000'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
+    cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop('ResourceId', axis=1)
 
     refs = pd.DataFrame(np.array([
         (922380000, 9790360.331530, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
@@ -330,11 +330,11 @@ def test_transactions_decayheat(dbtest):
 
     # test single nuclide selection
     cal = filters.transactions_decayheat(evaler, nucs=['942390000'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
+    cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop('ResourceId', axis=1)
     refs = pd.DataFrame(np.array([
         (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
@@ -354,11 +354,11 @@ def test_transactions_decayheat(dbtest):
     # test multiple nuclide selection
     cal = filters.transactions_decayheat(
         evaler, nucs=['942390000', '922380000'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     # SimId change at each test need to drop it
-    cal = cal.drop('TransactionId', 1)
+    cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
-    cal = cal.drop('ResourceId', 1)
+    cal = cal.drop('ResourceId', axis=1)
     refs = pd.DataFrame(np.array([
         (922380000, 2.609253035160e26, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 3.34065303191e+30, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
@@ -397,7 +397,7 @@ def test_inventories(dbtest):
         raise skip("Doesn't have Pyne")
     cal = filters.inventories(evaler, facilities=['Reactor1'],
                               nucs=['94239'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core', 942390000, 0.0444814879803),
         (15, 'Reactor1', 2, 'core', 942390000, 0.0444814879803),
@@ -415,7 +415,7 @@ def test_inventories(dbtest):
 
     cal = filters.inventories(evaler, facilities=['Reactor1'],
                               nucs=['94239', '92235'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core', 922350000, 0.00157922442534),
         (15, 'Reactor1', 1, 'core', 942390000, 0.0444814879803),
@@ -452,7 +452,7 @@ def test_inventories_activity(dbtest):
 
     cal = filters.inventories_activity(evaler, facilities=['Reactor1'],
                                        nucs=['94239'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core', 942390000, 0.0444814879803, 2.44036364223e+13),
         (15, 'Reactor1', 2, 'core', 942390000, 0.0444814879803, 2.44036364223e+13),
@@ -470,7 +470,7 @@ def test_inventories_activity(dbtest):
 
     cal = filters.inventories_activity(evaler, facilities=['Reactor1'],
                                        nucs=['94239', '92235'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core', 922350000, 0.00157922442534, 29671782.9213),
         (15, 'Reactor1', 1, 'core', 942390000, 0.04448148798, 2.44036364223e+13),
@@ -506,7 +506,7 @@ def test_inventories_decayheat(dbtest):
 
     cal = filters.inventories_decayheat(evaler, facilities=['Reactor1'],
                                         nucs=['94239'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core', 942390000,
          0.0444814879803, 2.44036364223e+13, 7.98590335085e+32),
@@ -530,7 +530,7 @@ def test_inventories_decayheat(dbtest):
 
     cal = filters.inventories_decayheat(evaler, facilities=['Reactor1'],
                                         nucs=['94239', '92235'])
-    cal = cal.drop('SimId', 1)  # SimId change at each test need to drop it
+    cal = cal.drop('SimId', axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
         (15, 'Reactor1', 1, 'core', 922350000,
          0.00157922442534, 29671782.9213, 8.65609466244e+26),
