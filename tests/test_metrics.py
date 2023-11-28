@@ -5,9 +5,7 @@ test like fashion.
 from __future__ import print_function, unicode_literals
 from uuid import UUID
 
-import nose
-from nose.tools import assert_equal, assert_less
-from nose.plugins.skip import SkipTest
+from pytest import skip
 
 import numpy as np
 import pandas as pd
@@ -15,6 +13,7 @@ from pandas.util.testing import assert_frame_equal
 
 try:
     from pyne import data
+    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
@@ -198,7 +197,7 @@ def test_agents_agentexit():
         ('ExitTime', '<f8')]))
     )
     agent_entry = pd.DataFrame(np.array([
-        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region', 
          ':agents:NullRegion', 'SingleRegion', -1, -1, 0),
         (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
          'SingleInstitution', 8, -1, 0),
@@ -265,7 +264,7 @@ def test_agents_decom():
         ('ExitTime', '<f8')]))
     )
     agent_entry = pd.DataFrame(np.array([
-        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region', 
          ':agents:NullRegion', 'SingleRegion', -1, -1, 0),
         (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
          'SingleInstitution', 8, -1, 0),
@@ -334,7 +333,7 @@ def test_agents_agentexit_decom():
         ('ExitTime', '<f8')]))
     )
     agent_entry = pd.DataFrame(np.array([
-        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region',
+        (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 8, 'Region', 
          ':agents:NullRegion', 'SingleRegion', -1, -1, 0),
         (UUID('93726022-57f7-4ec4-b99c-e9538e65d45e'), 9, 'Inst', ':agents:NullInst',
          'SingleInstitution', 8, -1, 0),
@@ -437,7 +436,7 @@ def test_materials():
 
 def test_activity():
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000,
          3197501.3876324706),
@@ -479,7 +478,7 @@ def test_activity():
 
 def test_decayheat():
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     exp = pd.DataFrame(np.array([
         (UUID('f22f2281-2464-420a-8325-37320fd418f8'), 5, 9, 7, 1, 922350000,
          9.3280119931e+25),
@@ -807,7 +806,3 @@ def test_inventory_quantity_per_gwe():
     )
     obs = metrics.inventory_quantity_per_gwe.func(inv, tsp)
     assert_frame_equal(exp, obs)
-
-
-if __name__ == "__main__":
-    nose.runmodule()

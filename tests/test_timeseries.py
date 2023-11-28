@@ -1,20 +1,14 @@
 """Tests for timseries method"""
 from __future__ import print_function, unicode_literals
-from uuid import UUID
-import os
-import subprocess
-from functools import wraps
 
-import nose
-from nose.tools import assert_equal, assert_less
-from nose.plugins.skip import SkipTest
+from pytest import skip
 
 import numpy as np
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
 
-from tools import setup, dbtest
+from tools import dbtest
 
 import cymetric as cym
 from cymetric import timeseries as ts
@@ -22,6 +16,7 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 try:
     from pyne import data
+    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
@@ -32,10 +27,10 @@ def test_timeseries_transactions(db, fname, backend):
     evaler = cym.Evaluator(db)
     cal = ts.transactions(evaler)
     exp_head = ['Time', 'Mass']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     # test single nuclide selection
     cal = ts.transactions(evaler, nucs=['942390000'])
     refs = pd.DataFrame(np.array([
@@ -69,11 +64,11 @@ def test_timeseries_transactions(db, fname, backend):
 @dbtest
 def test_timeseries_transactions_activity(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = ts.transactions_activity(evaler)
     exp_head = ['Time', 'Activity']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     # test single nuclide selection
     cal = ts.transactions_activity(
@@ -109,11 +104,11 @@ def test_timeseries_transactions_activity(db, fname, backend):
 @dbtest
 def test_timeseries_transactions_decayheat(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = ts.transactions_decayheat(evaler)
     exp_head = ['Time', 'DecayHeat']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     # test single nuclide selection
     cal = ts.transactions_decayheat(
@@ -151,10 +146,10 @@ def test_timeseries_inventories(db, fname, backend):
     evaler = cym.Evaluator(db)
     cal = ts.inventories(evaler)
     exp_head = ['Time', 'Quantity']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     cal = ts.inventories(evaler, facilities=['Reactor1'],
                          nucs=['94239'])
     refs = pd.DataFrame(np.array([
@@ -187,11 +182,11 @@ def test_timeseries_inventories(db, fname, backend):
 @dbtest
 def test_timeseries_inventories_activity(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = ts.inventories_activity(evaler)
     exp_head = ['Time', 'Activity']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     cal = ts.inventories_activity(evaler, facilities=['Reactor1'],
                                   nucs=['94239'])
@@ -225,11 +220,11 @@ def test_timeseries_inventories_activity(db, fname, backend):
 @dbtest
 def test_timeseries_inventories_decayheat(db, fname, backend):
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = ts.inventories_decayheat(evaler)
     exp_head = ['Time', 'DecayHeat']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     cal = ts.inventories_decayheat(evaler, facilities=['Reactor1'],
                                    nucs=['94239'])
@@ -258,7 +253,3 @@ def test_timeseries_inventories_decayheat(db, fname, backend):
     ]))
     )
     assert_frame_equal(cal, refs)
-
-
-if __name__ == "__main__":
-    nose.runmodule()

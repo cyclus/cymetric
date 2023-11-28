@@ -1,26 +1,21 @@
 """Tests for filters method"""
 from __future__ import print_function, unicode_literals
-from uuid import UUID
-import os
-import subprocess
 from functools import wraps
-
-import nose
-from nose.tools import assert_equal, assert_less
 
 import numpy as np
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 from nose.plugins.skip import SkipTest
 
-from tools import setup, dbtest
+from tools import dbtest
 
 import cymetric as cym
 from cymetric import filters
-from cymetric.tools import raw_to_series, ensure_dt_bytes
+from cymetric.tools import ensure_dt_bytes
 
 try:
     from pyne import data
+    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
@@ -32,7 +27,7 @@ def test_transactions(db, fname, backend):
     cal = filters.transactions(evaler)
     exp_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
                 'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     # SimId et al. change at each test need to drop it
     drop_cols = ['SimId',
@@ -192,7 +187,7 @@ def test_transactions_nuc(db, fname, backend):
     cal = filters.transactions_nuc(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     if not HAVE_PYNE:
         raise SkipTest
@@ -263,7 +258,7 @@ def test_transactions_activity(db, fname, backend):
     cal = filters.transactions_activity(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     # test single nuclide selection
     cal = filters.transactions_activity(evaler, nucs=['942390000'])
@@ -331,7 +326,7 @@ def test_transactions_decayheat(db, fname, backend):
     cal = filters.transactions_decayheat(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'DecayHeat', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     # test single nuclide selection
     cal = filters.transactions_decayheat(evaler, nucs=['942390000'])
@@ -396,7 +391,7 @@ def test_inventories(db, fname, backend):
     cal = filters.inventories(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype',
                 'Time', 'InventoryName', 'NucId', 'Quantity', 'Units']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     if not HAVE_PYNE:
         raise SkipTest
@@ -453,7 +448,7 @@ def test_inventories_activity(db, fname, backend):
     cal = filters.inventories_activity(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
                 'NucId', 'Quantity', 'Activity']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     cal = filters.inventories_activity(evaler, facilities=['Reactor1'],
                                        nucs=['94239'])
@@ -507,7 +502,7 @@ def test_inventories_decayheat(db, fname, backend):
     cal = filters.inventories_decayheat(evaler)
     exp_head = ['SimId', 'AgentId', 'Prototype', 'Time', 'InventoryName',
                 'NucId', 'Quantity', 'Activity', 'DecayHeat']
-    assert_equal(list(cal), exp_head)  # Check we have the correct headers
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     cal = filters.inventories_decayheat(evaler, facilities=['Reactor1'],
                                         nucs=['94239'])
@@ -570,7 +565,3 @@ def test_inventories_decayheat(db, fname, backend):
     ]))
     )
     assert_frame_equal(cal, refs)
-
-
-if __name__ == "__main__":
-    nose.runmodule()

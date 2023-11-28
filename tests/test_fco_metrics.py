@@ -2,9 +2,7 @@
 from __future__ import print_function, unicode_literals
 from uuid import UUID
 
-import nose
-from nose.tools import assert_equal, assert_less
-from nose.plugins.skip import SkipTest
+from pytest import skip
 
 import numpy as np
 import pandas as pd
@@ -12,12 +10,13 @@ from pandas.util.testing import assert_frame_equal
 
 try:
     from pyne import data
+    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
 
 from cymetric import fco_metrics
-from cymetric.tools import raw_to_series, ensure_dt_bytes
+from cymetric.tools import ensure_dt_bytes
 
 #################################
 ####### FCO METRICS TESTS #######
@@ -26,7 +25,7 @@ from cymetric.tools import raw_to_series, ensure_dt_bytes
 
 def test_fco_u_mined():
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     exp = pd.DataFrame(np.array([(0, 3.780034), (1, 2.185349)],
                                 dtype=ensure_dt_bytes([('Year', '<i8'), ('UMined', '<f8')]))
                        )
@@ -62,7 +61,7 @@ def test_fco_u_mined():
 
 def test_fco_swu():
     if not HAVE_PYNE:
-        raise SkipTest
+        raise skip("Doesn't have Pyne")
     exp = pd.DataFrame(np.array([(0, 0.002407), (1, 0.001473)],
                                 dtype=ensure_dt_bytes([('Year', '<i8'), ('SWU', '<f8')]))
                        )
@@ -164,7 +163,3 @@ def test_fco_monthly_electricity_generated():
     )
     obs = fco_metrics.fco_monthly_electricity_generated.func(eg)
     assert_frame_equal(exp, obs)
-
-
-if __name__ == "__main__":
-    nose.runmodule()
