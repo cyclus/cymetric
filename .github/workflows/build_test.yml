@@ -43,13 +43,21 @@ jobs:
       - name: Checkout Cymetric
         uses: actions/checkout@v3
 
+      - name: Install Cymetric Apt Dependencies
+        if: matrix.pkg_mgr == 'apt'
+        run: |
+          apt update --fix-missing && apt install -y python3-pip python3-pytest
+      
+      - name: Install Cymetric Conda Dependencies
+        if: matrix.pkg_mgr == 'conda'
+        run: |
+          mamba install -y pip pytest
+
       - name: Build Cymetric
         run: |
-          apt update && apt install -y python3-pip
           python -m pip install --target $(python -m site --user-site) .
 
       - name: Cymetric Tests
         run: |
           export PYTHONPATH=$(find /root/.local/lib -type d -name 'cyclus-*-*.egg' -print -quit)
-          apt update && apt install -y python3-pytest
           cd tests && python -m pytest
