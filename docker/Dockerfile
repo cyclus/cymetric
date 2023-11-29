@@ -11,5 +11,5 @@ RUN apt update && apt install -y python3-pip
 RUN python -m pip install --target $(python -m site --user-site) .
 
 FROM cymetric as cymetric-pytest
-RUN apt update && apt install python3-pytest
+RUN apt update && apt install -y python3-pytest
 RUN cd tests && python -m pytest
