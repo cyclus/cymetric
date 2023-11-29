@@ -12,18 +12,16 @@ maintainers = [
 ]
 description = "Cyclus Metric Calculator"
 readme = "README.rst"
-requires-python = "3"
+requires-python = ">=3.8"
 license = {text = "BSD-3-Clause"}
 classifiers = [
     'Operating System :: POSIX',
     'Programming Language :: Python :: 3',
 ]
 dependencies = [
-    'pytest',
     'pandas',
     'numpy',
-    'cyclus',
-    'jinja2',
+    'Jinja2',
     'matplotlib',
 ]
 
@@ -31,3 +29,4 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 pyne = ['pyne']
+test = ['pytest']
