@@ -1,158 +1,148 @@
 """Tests for root metrics"""
 from __future__ import print_function, unicode_literals
-import os
-import subprocess
-from functools import wraps
-
-import nose
-from nose.tools import assert_equal, assert_less
 
 from cymetric import root_metrics
 
-from tools import setup, dbtest
+from tools import dbtest
 
 
-@dbtest
-def test_resources(db, fname, backend):
+def test_resources(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.resources(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('Resources', r.name)
+    assert 0 < len(obs)
+    assert 'Resources' == r.name
 
 
-@dbtest
-def test_compositions(db, fname, backend):
+def test_compositions(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.compositions(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('Compositions', r.name)
+    assert 0 < len(obs)
+    assert 'Compositions' == r.name
 
 
-@dbtest
-def test_recipes(db, fname, backend):
+def test_recipes(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.recipes(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('Recipes', r.name)
+    assert 0 < len(obs)
+    assert 'Recipes' == r.name
 
 
-@dbtest
-def test_products(db, fname, backend):
+def test_products(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.products(db=db)
     obs = r()
     if obs is None:
         return
-    assert_less(0, len(obs))
-    assert_equal('Products', r.name)
+    assert 0 < len(obs)
+    assert 'Products' == r.name
 
 
-@dbtest
-def test_res_creators(db, fname, backend):
+def test_res_creators(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.res_creators(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('ResCreators', r.name)
+    assert 0 < len(obs)
+    assert 'ResCreators' == r.name
 
 
-@dbtest
-def test_agent_entry(db, fname, backend):
+def test_agent_entry(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.agent_entry(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('AgentEntry', r.name)
+    assert 0 < len(obs)
+    assert 'AgentEntry' == r.name
 
 
-@dbtest
-def test_agent_exit(db, fname, backend):
+def test_agent_exit(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.agent_exit(db=db)
     obs = r()
     if obs is None:
         return
-    assert_less(0, len(obs))
-    assert_equal('AgentExit', r.name)
+    assert 0 < len(obs)
+    assert 'AgentExit' == r.name
 
 
-@dbtest
-def test_transactions(db, fname, backend):
+def test_transactions(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.transactions(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('Transactions', r.name)
+    assert 0 < len(obs)
+    assert 'Transactions' == r.name
 
 
-@dbtest
-def test_info(db, fname, backend):
+def test_info(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.info(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('Info', r.name)
+    assert 0 < len(obs)
+    assert 'Info' == r.name
 
 
-@dbtest
-def test_finish(db, fname, backend):
+def test_finish(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.finish(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('Finish', r.name)
+    assert 0 < len(obs)
+    assert 'Finish' == r.name
 
 
-@dbtest
-def test_input_files(db, fname, backend):
+def test_input_files(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.input_files(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('InputFiles', r.name)
+    assert 0 < len(obs)
+    assert 'InputFiles' == r.name
 
 
-@dbtest
-def test_decom_schedule(db, fname, backend):
+def test_decom_schedule(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.decom_schedule(db=db)
     obs = r()
     if obs is None:
         return
-    assert_less(0, len(obs))
-    assert_equal('DecomSchedule', r.name)
+    assert 0 < len(obs)
+    assert 'DecomSchedule' == r.name
 
 
-@dbtest
-def test_build_schedule(db, fname, backend):
+def test_build_schedule(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.build_schedule(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('BuildSchedule', r.name)
+    assert 0 < len(obs)
+    assert 'BuildSchedule' == r.name
 
 
-@dbtest
-def test_snapshots(db, fname, backend):
+def test_snapshots(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.snapshots(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('Snapshots', r.name)
+    assert 0 < len(obs)
+    assert 'Snapshots' == r.name
 
 
-@dbtest
-def test_inventories(db, fname, backend):
+def test_inventories(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.explicit_inventory(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('ExplicitInventory', r.name)
+    assert 0 < len(obs)
+    assert 'ExplicitInventory' == r.name
 
 
-@dbtest
-def test_inventories_compact(db, fname, backend):
+def test_inventories_compact(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.explicit_inventory_compact(db=db)
     obs = r()
-    assert_less(0, len(obs))
-    assert_equal('ExplicitInventoryCompact', r.name)
+    assert 0 < len(obs)
+    assert 'ExplicitInventoryCompact' == r.name
 
 
-@dbtest
-def test_resources_non_existent_filter(db, fname, backend):
+def test_resources_non_existent_filter(dbtest):
+    db, fname, backend = dbtest
     r = root_metrics.resources(db=db)
     obs = r(conds=[('NotAColumn', '!=', 'not-a-value')])
-    assert_less(0, len(obs))
-    assert_equal('Resources', r.name)
-
-
-if __name__ == "__main__":
-    nose.runmodule()
+    assert 0 < len(obs)
+    assert 'Resources' == r.name

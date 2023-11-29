@@ -1,45 +1,38 @@
 """Tests for cyclus wrappers"""
-import os
-import subprocess
-from functools import wraps
 
-import nose
-from nose.tools import assert_equal, assert_less
-
-from tools import setup, dbtest
+from tools import dbtest
 
 
-@dbtest
-def test_name(db, fname, backend):
+
+def test_name(dbtest):
+    db, fname, backend = dbtest
     obs = db.name
-    assert_equal(fname, obs)
+    assert fname == obs
 
 
-@dbtest
-def test_simid(db, fname, backend):
+
+def test_simid(dbtest):
+    db, fname, backend = dbtest
     df = db.query("AgentEntry")
     simid = df['SimId']
     exp = simid[0]
     for obs in simid:
-        assert_equal(exp, obs)
+        assert exp == obs
 
 
-@dbtest
-def test_conds_ae(db, fname, backend):
+def test_conds_ae(dbtest):
+    db, fname, backend = dbtest
     obs = db.query("AgentEntry", [('Kind', '==', 'Region')])
-    assert_equal(1, len(obs))
-    assert_equal('Region', obs['Kind'][0])
-    assert_equal(':agents:NullRegion', obs['Spec'][0])
+    assert 1 == len(obs)
+    assert 'Region' == obs['Kind'][0]
+    assert ':agents:NullRegion' == obs['Spec'][0]
 
 
-@dbtest
-def test_conds_comp(db, fname, backend):
+def test_conds_comp(dbtest):
+    db, fname, backend = dbtest
     conds = [('NucId', '==', 922350000), ('MassFrac', '>', 0.0072)]
     df = db.query("Compositions", conds)
-    assert_less(0, len(df))
+    assert 0 < len(df)
     for row in df['MassFrac']:
-        assert_less(0.0072, row)
+        assert 0.0072 < row
 
-
-if __name__ == "__main__":
-    nose.runmodule()

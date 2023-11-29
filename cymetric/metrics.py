@@ -153,7 +153,7 @@ def activity(mats):
                                 'TimeCreated', 'NucId'),
                                'Mass')
     act = []
-    for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
+    for (simid, qual, res, obj, time, nuc), m in mass.items():
         val = (1000 * data.N_A * m * data.decay_const(nuc)
                / data.atomic_mass(nuc))
         act.append(val)
@@ -192,7 +192,7 @@ def decay_heat(acts):
                                'TimeCreated', 'NucId'),
                               'Activity')
     dh = []
-    for (simid, qual, res, obj, time, nuc), a in act.iteritems():
+    for (simid, qual, res, obj, time, nuc), a in act.items():
         val = (data.MeV_per_MJ * a * data.q_val(nuc))
         dh.append(val)
     dh = pd.Series(dh, index=act.index)
@@ -530,7 +530,7 @@ def timelist(info):
     """
     info = tools.raw_to_series(info, ('SimId',), 'Duration')
     tl = []
-    for sim, dur in info.iteritems():
+    for sim, dur in info.items():
         for i in range(dur):
             tl.append((sim, i))
     tl = pd.DataFrame(tl, columns=['SimId', 'TimeStep'])

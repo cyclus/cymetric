@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cymetric"
+authors = [
+    {name = "Cyclus Development Team", email = "cyclus-dev@googlegroups.com"},
+]
+maintainers = [
+    {name = "Cyclus Development Team", email = "cyclus-dev@googlegroups.com"},
+]
+description = "Cyclus Metric Calculator"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 3',
+]
+dependencies = [
+    'pandas',
+    'numpy',
+    'Jinja2',
+    'matplotlib',
+]
+
+dynamic = ["version"]
+
+[project.optional-dependencies]
+pyne = ['pyne']
+test = ['pytest']

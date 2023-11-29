@@ -31,14 +31,7 @@ functions.
 from __future__ import print_function
 
 import os
-import sys
-import imp
-import argparse
-import platform
-import warnings
-import subprocess
-from glob import glob
-from distutils import core, dir_util
+from setuptools import setup
 
 
 VERSION = '1.5.5'
@@ -63,7 +56,7 @@ def main():
         "package_dir": pack_dir,
         "scripts": scripts,
     }
-    rtn = core.setup(**setup_kwargs)
+    rtn = setup(**setup_kwargs)
     return rtn
 
 
