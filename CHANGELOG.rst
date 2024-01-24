@@ -8,6 +8,7 @@ cymetric Change Log
 
 **Changed**
 * Converted test suite from nose to pytest (#188)
+* Removed some unused imports, mainly pyne (#184)
 
 v1.5.5
 ====================
