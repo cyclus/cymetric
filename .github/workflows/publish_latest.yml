@@ -1,4 +1,4 @@
-name: Build and Publish Cymetric Images
+name: Publish Latest Cymetric
 
 on:
   # allows us to run workflows manually
