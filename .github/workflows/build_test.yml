@@ -22,7 +22,8 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+      pull-requests: write
+      
     strategy:
       fail-fast: false
       matrix:
