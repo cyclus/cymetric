@@ -18,7 +18,6 @@ on:
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -36,28 +35,20 @@ jobs:
           latest,
         ]
     
-    container:
-      image: ghcr.io/cyclus/cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{matrix.cycamore_tag}}
-
     steps:
       - name: Checkout Cymetric
         uses: actions/checkout@v3
 
-      - name: Install Cymetric Apt Dependencies
-        if: matrix.pkg_mgr == 'apt'
-        run: |
-          apt update --fix-missing && apt install -y python3-pip python3-pytest
-      
-      - name: Install Cymetric Conda Dependencies
-        if: matrix.pkg_mgr == 'conda'
-        run: |
-          mamba install -y pip pytest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build Cymetric
-        run: |
-          python -m pip install --target $(python -m site --user-site) .
-
-      - name: Cymetric Tests
-        run: |
-          export PYTHONPATH=$(find /root/.local/lib -type d -name 'cyclus-*-*.egg' -print -quit)
-          cd tests && python -m pytest
+      - name: Build and Test Cymetric
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=registry,ref=ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache
+          cache-to: type=registry,ref=ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache,mode=max
+          file: docker/Dockerfile
+          build-args: |
+            pkg_mgr=${{ matrix.pkg_mgr }}
+            ubuntu_version=${{ matrix.ubuntu_versions }}
+            cycamore_tag=${{ matrix.cycamore_tag }}
