@@ -26,7 +26,7 @@ jobs:
           conda
         ]
 
-    name: Building Cymetric and running tests
+    name: Building, Test, Publish
     steps:
       - name: Tag as ci-image-cache
         run: |
