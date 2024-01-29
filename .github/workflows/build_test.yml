@@ -53,6 +53,8 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and Test Cymetric
+        id: build-cymetric
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           cache-from: type=registry,ref=ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache
@@ -62,3 +64,14 @@ jobs:
             pkg_mgr=${{ matrix.pkg_mgr }}
             ubuntu_version=${{ matrix.ubuntu_versions }}
             cycamore_tag=${{ matrix.cycamore_tag }}
+
+      - name: PR Comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          comment_tag: ${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}
+          message: |
+            ## Build statuses using cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}:${{ matrix.cycamore_tag }}
+            - Cymetric: ${{steps.build-cymetric.outcome == 'success' && '*Success* :white_check_mark:' || 
+                steps.build-cymetric.outcome == 'failure' && '**Failure** :x:' || 
+                '**Skipped due to upstream failure** :warning:'}}
