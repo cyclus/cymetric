@@ -36,6 +36,7 @@ jobs:
         ]
         cycamore_tag: [
           latest,
+          stable,
         ]
     
     steps:
