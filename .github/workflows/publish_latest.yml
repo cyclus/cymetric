@@ -5,8 +5,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - '.github/workflows/build_test_publish.yml'
-      - 'docker/**'
+      - '.github/workflows/publish_latest.yml'
   push:
     branches:
       - main
