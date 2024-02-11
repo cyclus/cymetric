@@ -5,22 +5,25 @@ on:
   workflow_dispatch:
   pull_request:
     paths-ignore:
-      - '.github/workflows/build_test_publish.yml'
-      - 'docker/**'
+      - '.github/workflows/publish_latest.yml'
+      - '.github/workflows/publish_release.yml'
       - 'doc/**'
       - 'CHANGELOG.rst'
   push:
     paths-ignore:
-      - '.github/workflows/build_test_publish.yml'
-      - 'docker/**'
+      - '.github/workflows/publish_latest.yml'
+      - '.github/workflows/publish_release.yml'
       - 'doc/**'
       - 'CHANGELOG.rst'
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+      
     strategy:
       fail-fast: false
       matrix:
@@ -34,30 +37,43 @@ jobs:
         ]
         cycamore_tag: [
           latest,
+          stable,
         ]
     
-    container:
-      image: ghcr.io/cyclus/cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{matrix.cycamore_tag}}
-
     steps:
       - name: Checkout Cymetric
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install Cymetric Apt Dependencies
-        if: matrix.pkg_mgr == 'apt'
-        run: |
-          apt update --fix-missing && apt install -y python3-pip python3-pytest
-      
-      - name: Install Cymetric Conda Dependencies
-        if: matrix.pkg_mgr == 'conda'
-        run: |
-          mamba install -y pip pytest
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Cymetric
-        run: |
-          python -m pip install --target $(python -m site --user-site) .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Cymetric Tests
-        run: |
-          export PYTHONPATH=$(find /root/.local/lib -type d -name 'cyclus-*-*.egg' -print -quit)
-          cd tests && python -m pytest
+      - name: Build and Test Cymetric
+        id: build-cymetric
+        continue-on-error: true
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=registry,ref=ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache
+          cache-to: type=registry,ref=ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache,mode=max
+          file: docker/Dockerfile
+          build-args: |
+            pkg_mgr=${{ matrix.pkg_mgr }}
+            ubuntu_version=${{ matrix.ubuntu_versions }}
+            cycamore_tag=${{ matrix.cycamore_tag }}
+
+      - name: PR Comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          comment_tag: ${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}_${{ matrix.cycamore_tag }}
+          message: |
+            ## Build statuses using cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}:${{ matrix.cycamore_tag }}
+            - Cymetric: ${{steps.build-cymetric.outcome == 'success' && '*Success* :white_check_mark:' || 
+                steps.build-cymetric.outcome == 'failure' && '**Failure** :x:' || 
+                '**Skipped due to upstream failure** :warning:'}}
