@@ -26,7 +26,8 @@ jobs:
 
       - name: Merge artifacts and get PR number
         run: |
-          cat ./*.txt > artifacts_merged.txt
+          echo "### Build Status Report\n" > artifacts_merged.txt
+          cat ./*.txt >> artifacts_merged.txt
           echo "PR_NUMBER=$(cat pr_number)" >> "$GITHUB_ENV"
 
       - name: PR Comment
