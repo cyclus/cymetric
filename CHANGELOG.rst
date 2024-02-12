@@ -4,7 +4,7 @@ cymetric Change Log
 
 .. current developments
 **Added:**
-* GitHub workflows for CI (#188, #190, #191)
+* GitHub workflows for CI (#188, #190, #191, #192)
 
 **Changed**
 * Converted test suite from nose to pytest (#188)
