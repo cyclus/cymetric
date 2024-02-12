@@ -67,6 +67,11 @@ jobs:
             ubuntu_version=${{ matrix.ubuntu_versions }}
             cycamore_tag=${{ matrix.cycamore_tag }}
 
+      - name: debug
+        run: |
+          echo ${{ github.event_name }}
+          echo ${{ github.event }}
+
       - name: PR Comment
         if: ${{ github.event_name == 'pull_request_target' }}
         uses: thollander/actions-comment-pull-request@v2
