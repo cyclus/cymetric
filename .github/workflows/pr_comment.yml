@@ -35,4 +35,4 @@ jobs:
         with:
           pr_number: ${{ env.PR_NUMBER }}
           comment_tag: build_status_report
-          filePath: artifacts_merged.txt
+          filePath: artifacts_merged.md
