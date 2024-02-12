@@ -1,7 +1,5 @@
 name: Comment on PR
 
-# read-write repo token
-# access to secrets
 on:
   workflow_run:
     workflows: ["Build/Test for PR and collaborator push"]
