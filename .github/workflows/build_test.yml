@@ -76,7 +76,7 @@ jobs:
 
       - name: Construct Artifact
         run: |
-          echo "Build against `cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{ matrix.cycamore_tag }}` - ${{ env.BUILD_STATUS }}" 
+          echo "Build against \`cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{ matrix.cycamore_tag }}\` - ${{ env.BUILD_STATUS }}" 
             > ${{ env.ARTIFACT_NAME }}.txt
       
       - name: Upload Artifact
