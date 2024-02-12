@@ -24,13 +24,14 @@ jobs:
         run: |
           ls -R
 
-      - name: Merge artifacts
+      - name: Merge artifacts and get PR number
         run: |
           cat ./*.txt > artifacts_merged.txt
-          cat artifacts_merged.txt
+          echo "PR_NUMBER=$(cat pr_number)" >> "$GITHUB_ENV"
 
       - name: PR Comment
         uses: thollander/actions-comment-pull-request@v2
         with:
+          pr_number: ${{ env.PR_NUMBER }}
           comment_tag: build_status_report
           filePath: artifacts_merged.txt
