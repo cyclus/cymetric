@@ -78,7 +78,7 @@ jobs:
       - name: Construct Artifact
         if: github.event_name == 'pull_request'
         run: |
-          echo "Build FROM \`cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{ matrix.cycamore_tag }}\` - ${{ env.BUILD_STATUS }}" > ${{ env.ARTIFACT_NAME }}.txt
+          echo "Build \`FROM cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{ matrix.cycamore_tag }}\` - ${{ env.BUILD_STATUS }}" > ${{ env.ARTIFACT_NAME }}.txt
       
       - name: Upload Artifact
         if: github.event_name == 'pull_request'
