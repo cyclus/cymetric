@@ -3,7 +3,7 @@ name: Build/Test for PR and collaborator push
 on:
   # allows us to run workflows manually
   workflow_dispatch:
-  pull_request_target:
+  pull_request:
     paths-ignore:
       - '.github/workflows/publish_latest.yml'
       - '.github/workflows/publish_release.yml'
@@ -67,20 +67,36 @@ jobs:
             cycamore_tag=${{ matrix.cycamore_tag }}
 
       - name: Export Environment Variables
+        if: github.event_name == 'pull_request'
         run: |
-          echo "BUILD_STATUS=${{steps.build-cymetric.outcome == 'success' && '*Success* :white_check_mark:' || 
+          echo "BUILD_STATUS=${{steps.build-cymetric.outcome == 'success' && '**Success** :white_check_mark:' || 
           steps.build-cymetric.outcome == 'failure' && '**Failure** :x:' || 
           '**Skipped due to upstream failure** :warning:'}}" >> "$GITHUB_ENV"
 
           echo "ARTIFACT_NAME=${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}_${{ matrix.cycamore_tag }}" >> "$GITHUB_ENV"
 
       - name: Construct Artifact
+        if: github.event_name == 'pull_request'
         run: |
-          echo "Build against \`cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{ matrix.cycamore_tag }}\` - ${{ env.BUILD_STATUS }}" > ${{ env.ARTIFACT_NAME }}.txt
+          echo "Build FROM \`cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{ matrix.cycamore_tag }}\` - ${{ env.BUILD_STATUS }}" > ${{ env.ARTIFACT_NAME }}.txt
       
       - name: Upload Artifact
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_NAME }}.txt
           
+  upload-pr-number:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Save PR number to file
+        run: |
+          echo "${{ github.event.number }}" > pr_number
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr_number
+          path: pr_number
