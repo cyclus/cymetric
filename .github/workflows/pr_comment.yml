@@ -1,0 +1,34 @@
+name: Comment on PR
+
+# read-write repo token
+# access to secrets
+on:
+  workflow_run:
+    workflows: ["Build/Test for PR and collaborator push"]
+    types:
+      - completed
+
+jobs:
+  pr-comment:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          merge-multiple: true
+          
+      - name: debug
+        run: |
+          ls -l
+
+      - name: Merge artifacts
+        run: |
+          cat ./*.txt > artifacts_merged.txt
+
+      - name: PR Comment
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          comment_tag: build_status_report
+          filePath: artifacts_merged.txt
