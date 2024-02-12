@@ -66,7 +66,7 @@ jobs:
             ubuntu_version=${{ matrix.ubuntu_versions }}
             cycamore_tag=${{ matrix.cycamore_tag }}
 
-      - name: Construct Artifact
+      - name: Export Environment Variables
         run: |
           echo "BUILD_STATUS=${{steps.build-cymetric.outcome == 'success' && '*Success* :white_check_mark:' || 
           steps.build-cymetric.outcome == 'failure' && '**Failure** :x:' || 
@@ -74,6 +74,8 @@ jobs:
 
           echo "ARTIFACT_NAME=${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}_${{ matrix.cycamore_tag }}" >> "$GITHUB_ENV"
 
+      - name: Construct Artifact
+        run: |
           echo "Build against `cycamore_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cycamore:${{ matrix.cycamore_tag }}` - ${{ env.BUILD_STATUS }}" 
             > ${{ env.ARTIFACT_NAME }}.txt
       
