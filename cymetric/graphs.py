@@ -2,22 +2,12 @@
 """
 import warnings
 
-import pandas as pd
-import numpy as np
 
 try:
     from graphviz import Digraph
     HAVE_GRAPHVIZ = True
 except ImportError:
     HAVE_GRAPHVIZ = False
-
-try:
-    from pyne import data
-    import pyne.enrichment as enr
-    from pyne import nucname
-    HAVE_PYNE = True
-except ImportError:
-    HAVE_PYNE = False
 
 from cymetric import tools
 from cymetric.filters import transactions_nuc
