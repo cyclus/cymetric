@@ -52,13 +52,13 @@ jobs:
       - name: Build and Test Cymetric
         uses: docker/build-push-action@v5
         with:
-          cache-from: type=registry,ref=ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache
-          cache-to: type=registry,ref=ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:ci-layer-cache,mode=max
           file: docker/Dockerfile
           push: true
           tags: |
-            ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:${{ env.version_tag }}
-            ghcr.io/cyclus/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:${{ env.stable_tag }}
+            ghcr.io/${{ github.repository_owner }}/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:${{ env.version_tag }}
+            ghcr.io/${{ github.repository_owner }}/cymetric_${{ matrix.ubuntu_versions }}_${{ matrix.pkg_mgr }}/cymetric:${{ env.stable_tag }}
           build-args: |
             pkg_mgr=${{ matrix.pkg_mgr }}
             ubuntu_version=${{ matrix.ubuntu_versions }}
