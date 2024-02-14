@@ -1,6 +1,6 @@
 ARG pkg_mgr=apt
 ARG ubuntu_version=22.04
-ARG cycamore_tag=stable
+ARG cycamore_tag=latest
 
 FROM ghcr.io/cyclus/cycamore_${ubuntu_version}_${pkg_mgr}/cycamore:${cycamore_tag} as cymetric
 
