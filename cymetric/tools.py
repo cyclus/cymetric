@@ -5,12 +5,10 @@ import os
 import sys
 import warnings
 
-import numpy as np
 import pandas as pd
 
+
 try:
-    from pyne import data
-    import pyne.enrichment as enr
     from pyne import nucname
     HAVE_PYNE = True
 except ImportError:
@@ -26,8 +24,9 @@ def dbopen(fname):
     """Opens a Cyclus database."""
     _, ext = os.path.splitext(fname)
     if ext not in EXT_BACKENDS:
-        msg = ('The backend database type of {0!r} could not be determined from '
-               'extension {1!r}.')
+        msg = (
+            'The backend database type of {0!r} could not be determined from '
+            'extension {1!r}.')
         raise ValueError(msg.format(fname, ext))
     db = EXT_BACKENDS[ext](fname)
     return db

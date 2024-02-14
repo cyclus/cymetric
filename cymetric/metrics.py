@@ -6,9 +6,9 @@ import inspect
 import numpy as np
 import pandas as pd
 
+
 try:
     from pyne import data
-    import pyne.enrichment as enr
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
@@ -284,7 +284,7 @@ def agents(entry, exit, decom, info):
     mergeon = ['SimId', 'AgentId']
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
-    df['ExitTime'] = [np.nan]*len(entry)
+    df['ExitTime'] = [np.nan] * len(entry)
     if exit is not None:
         exit.columns = ['SimId', 'AgentId', 'Exits']
         df = tools.merge_and_fillna_col(df, exit[['SimId', 'AgentId',

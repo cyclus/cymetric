@@ -11,7 +11,7 @@ Dependencies
 First, please check to make sure you have all of the dependencies.
 
 Required dependencies:
-
+ 
 * Cyclus and its dependencies
 * `Jinja2 <http://jinja.pocoo.org/docs/dev/>`_
 * `pandas <http://pandas.pydata.org/>`_
