@@ -2,7 +2,20 @@
 cymetric Change Log
 ===================
 
-.. current developments
+Since last release
+======================
+
+**Added:**
+
+**Changed:**
+
+**Fixed:**
+
+**Removed:**
+
+v1.6.0
+====================
+
 **Added:**
 * GitHub workflows for CI (#188, #190, #191, #193, #195)
 
