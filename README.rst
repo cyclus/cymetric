@@ -40,13 +40,13 @@ Then build and install to the same location Cyclus is installed:
 .. code-block:: bash
 
     $ cd cymetric
-    $ python -m pip install --target $(python -m site --user-site)
+    $ python3 -m pip install --target $(python3 -m site --user-site)
 
 Next, run the tests to ensure everything is working properly:
 
 .. code-block:: bash
 
-    $ python -m pytest tests/
+    $ python3 -m pytest tests/
 
 Installation via Binary
 ~~~~~~~~~~~~~~~~~~~~~~~

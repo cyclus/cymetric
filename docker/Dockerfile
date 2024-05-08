@@ -6,7 +6,7 @@ FROM ghcr.io/cyclus/cycamore_${ubuntu_version}_${pkg_mgr}/cycamore:${cycamore_ta
 
 COPY . /cymetric
 WORKDIR /cymetric
-RUN python -m pip install --target $(python -m site --user-site) .
+RUN python3 -m pip install --target $(python3 -m site --user-site) .
 
 FROM cymetric as cymetric-pytest
-RUN cd tests && python -m pytest
+RUN cd tests && python3 -m pytest

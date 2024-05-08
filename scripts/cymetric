@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Cymetric entry point."""
 from cymetric.main import main
 main()

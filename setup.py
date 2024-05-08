@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Welcome to cymetric's setup.py script. This is a little non-standard because pyne
 is a multilanguage project.  Still, this script follows a predicatable ordering:
 
