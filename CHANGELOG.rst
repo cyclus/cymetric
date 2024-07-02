@@ -10,6 +10,7 @@ Since last release
 **Changed:**
 
 * Rely on `python3` in environment instead of `python` (#196)
+* Pinned ``numpy<2.0.0`` in ``pyproject.toml`` (#198)
 
 **Fixed:**
 

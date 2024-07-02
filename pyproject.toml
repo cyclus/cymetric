@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = [
     'pandas',
-    'numpy',
+    'numpy<2.0.0',
     'Jinja2',
     'matplotlib',
 ]
