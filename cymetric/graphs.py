@@ -1,10 +1,12 @@
 """A plot generator for Cymetric.
 """
+
 import warnings
 
 
 try:
     from graphviz import Digraph
+
     HAVE_GRAPHVIZ = True
 except ImportError:
     HAVE_GRAPHVIZ = False
@@ -13,8 +15,16 @@ from cymetric import tools
 from cymetric.filters import transactions_nuc
 
 
-def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
-               label='', start=None, stop=None):
+def flow_graph(
+    evaler,
+    senders=(),
+    receivers=(),
+    commodities=(),
+    nucs=(),
+    label="",
+    start=None,
+    stop=None,
+):
     """
     Generate the dot graph of the transation between facilitiese. Applying times
     nuclides selection when required.
@@ -31,18 +41,17 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
     start : first timestep to consider, start included
     stop : last timestep to consider, stop included
     """
-    tools.raise_no_graphviz('Unable to generate flow graph!', HAVE_GRAPHVIZ)
+    tools.raise_no_graphviz("Unable to generate flow graph!", HAVE_GRAPHVIZ)
 
-    df = transactions_nuc(
-        evaler, senders, receivers, commodities, nucs)
+    df = transactions_nuc(evaler, senders, receivers, commodities, nucs)
 
     if start is not None:
-        df = df.loc[(df['Time'] >= start)]
+        df = df.loc[(df["Time"] >= start)]
     if stop is not None:
-        df = df.loc[(df['Time'] <= stop)]
+        df = df.loc[(df["Time"] <= stop)]
 
-    group_end = ['ReceiverPrototype', 'SenderPrototype', 'Commodity']
-    group_start = group_end + ['Mass']
+    group_end = ["ReceiverPrototype", "SenderPrototype", "Commodity"]
+    group_start = group_end + ["Mass"]
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
@@ -55,7 +64,9 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
     for i, row in regions.iterrows():
         region_id = row["AgentId"]
         region_prototype = row["Prototype"]
-        institutions = agents_[agents_["ParentId"] == region_id]
+        institutions = agents_[
+            (agents_["ParentId"] == region_id) & (agents_["Kind"] == "Inst")
+        ]
         # graphviz requires subgraphs start with the prefix cluster_
         with dot.subgraph(name=f"cluster_{region_id}") as c:
             c.attr(
@@ -75,7 +86,10 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
                         color="lightgray",
                     )
                     # facilities are nodes in the (sub)graph(s)
-                    facilities = agents_[agents_["ParentId"] == institution_id]
+                    facilities = agents_[
+                        (agents_["ParentId"] == institution_id)
+                        & (agents_["Kind"] == "Facility")
+                    ]
                     for k, facility in facilities.iterrows():
                         facility_id = facility["AgentId"]
                         facility_prototype = facility["Prototype"]
@@ -98,4 +112,3 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
         )
 
     return dot
-
