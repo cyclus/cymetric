@@ -51,7 +51,7 @@ def flow_graph(evaler, senders=(), receivers=(), commodities=(), nucs=(),
     dot = Digraph("G", strict=True)
 
     # start by constructing region subgraphs
-    regions = agents_[agents_["ParentId"] == -1]
+    regions = agents_[agents_["Kind"] == "Region"]
     for i, row in regions.iterrows():
         region_id = row["AgentId"]
         region_prototype = row["Prototype"]
