@@ -20,11 +20,14 @@ v1.6.0
 ====================
 
 **Added:**
+
 * GitHub workflows for CI (#188, #190, #191, #193, #195)
 
 **Changed**
+
 * Converted test suite from nose to pytest (#188)
 * Removed some unused imports, mainly pyne (#184)
+* `flow_graph` now plots institutions and regions hierarchically as subgraphs (#197)
 
 v1.5.5
 ====================
