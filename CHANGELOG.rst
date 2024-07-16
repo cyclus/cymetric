@@ -27,7 +27,7 @@ v1.6.0
 
 * Converted test suite from nose to pytest (#188)
 * Removed some unused imports, mainly pyne (#184)
-* `flow_graph` now plots institutions and regions hierarchically as subgraphs (#197)
+* `flow_graph` now plots institutions and regions hierarchically as subgraphs (#197, #200)
 
 v1.5.5
 ====================
