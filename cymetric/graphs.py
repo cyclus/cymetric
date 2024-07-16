@@ -1,9 +1,6 @@
 """A plot generator for Cymetric.
 """
 
-import warnings
-
-
 try:
     from graphviz import Digraph
 
@@ -26,8 +23,8 @@ def flow_graph(
     stop=None,
 ):
     """
-    Generate the dot graph of the transation between facilitiese. Applying times
-    nuclides selection when required.
+    Generate the dot graph of the transation between facilitiese.
+    Applying times nuclides selection when required.
 
     Parameters
     ----------
@@ -36,8 +33,8 @@ def flow_graph(
     receivers : list of the receiving facility to consider
     commodities : list of the commodity exchanged to consider
     nucs : list of nuclide to consider
-    label : label key, used to add label on the arrow connecting facilities (for
-    commodity use 'com', for mass use 'mass', for both use com,mass)
+    label : label key, used to add label on the arrow connecting facilities
+    (for commodity use 'com', for mass use 'mass', for both use com,mass)
     start : first timestep to consider, start included
     stop : last timestep to consider, stop included
     """
@@ -50,7 +47,13 @@ def flow_graph(
     if stop is not None:
         df = df.loc[(df["Time"] <= stop)]
 
-    group_end = ["ReceiverPrototype", "SenderPrototype", "Commodity"]
+    group_end = [
+        "ReceiverPrototype",
+        "SenderPrototype",
+        "Commodity",
+        "SenderId",
+        "ReceiverId",
+    ]
     group_start = group_end + ["Mass"]
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
