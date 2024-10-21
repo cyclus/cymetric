@@ -7,6 +7,8 @@ Since last release
 
 **Added:**
 
+* Added Ubuntu 24.04 to CI workflows (#204)
+
 **Changed:**
 
 * Rely on `python3` in environment instead of `python` (#196)
