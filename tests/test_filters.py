@@ -20,14 +20,15 @@ try:
 except ImportError:
     HAVE_PYNE = False
 
+exp_transactions_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
+                'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 
+                'Time', 'Cost']
 
 def test_transactions(dbtest):
     db, fname, backend = dbtest
     evaler = cym.Evaluator(db)
     cal = filters.transactions(evaler)
-    exp_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
-                'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
-    assert list(cal) == exp_head  # Check we have the correct headers
+    assert list(cal) == exp_transactions_head  # Check we have the correct headers
 
     # SimId et al. change at each test need to drop it
     drop_cols = ['SimId',
@@ -185,9 +186,7 @@ def test_transactions_nuc(dbtest):
     db, fname, backend = dbtest
     evaler = cym.Evaluator(db)
     cal = filters.transactions_nuc(evaler)
-    exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
-                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert list(cal) == exp_head  # Check we have the correct headers
+    assert list(cal) == exp_transactions_head # Check we have the correct headers
 
     if not HAVE_PYNE:
         raise skip("Doesn't have Pyne")
@@ -256,9 +255,7 @@ def test_transactions_activity(dbtest):
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.transactions_activity(evaler)
-    exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverPrototype',
-                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert list(cal) == exp_head  # Check we have the correct headers
+    assert list(cal) == exp_transactions_head # Check we have the correct headers
 
     # test single nuclide selection
     cal = filters.transactions_activity(evaler, nucs=['942390000'])
@@ -324,9 +321,7 @@ def test_transactions_decayheat(dbtest):
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.transactions_decayheat(evaler)
-    exp_head = ['SimId', 'ResourceId', 'NucId', 'DecayHeat', 'ReceiverId', 'ReceiverPrototype',
-                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert list(cal) == exp_head  # Check we have the correct headers
+    assert list(cal) == exp_transactions_head  # Check we have the correct headers
 
     # test single nuclide selection
     cal = filters.transactions_decayheat(evaler, nucs=['942390000'])
