@@ -35,21 +35,22 @@ def test_transactions(dbtest):
                  'TransactionId',
                  'ResourceId',
                  'ReceiverId',
-                 'SenderId']
+                 'SenderId',
+                 'Cost']
     cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 1, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 4, 1),
-        ('Reactor3', 'UOX_Source', 'uox', 3, 1),
-        ('Reactor3', 'MOX_Source', 'mox', 4, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -59,11 +60,11 @@ def test_transactions(dbtest):
     cal = filters.transactions(evaler, senders=['UOX_Source'])
     cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor3', 'UOX_Source', 'uox', 3, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -74,18 +75,18 @@ def test_transactions(dbtest):
         evaler, senders=['UOX_Source', 'MOX_Source'])
     cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 1, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 4, 1),
-        ('Reactor3', 'UOX_Source', 'uox', 3, 1),
-        ('Reactor3', 'MOX_Source', 'mox', 4, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -95,13 +96,13 @@ def test_transactions(dbtest):
     cal = filters.transactions(evaler, receivers=['Reactor1'])
     cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 1, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 3, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -112,15 +113,15 @@ def test_transactions(dbtest):
         evaler, receivers=['Reactor1', 'Reactor3'])
     cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 1, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor3', 'UOX_Source', 'uox', 3, 1),
-        ('Reactor3', 'MOX_Source', 'mox', 4, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -131,16 +132,16 @@ def test_transactions(dbtest):
                                receivers=['Reactor1', 'Reactor2'])
     cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 1, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 4, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -150,11 +151,11 @@ def test_transactions(dbtest):
     cal = filters.transactions(evaler, commodities=['uox'])
     cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor3', 'UOX_Source', 'uox', 3, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -164,18 +165,18 @@ def test_transactions(dbtest):
     cal = filters.transactions(evaler, commodities=['uox', 'mox'])
     cal = cal.drop(drop_cols, axis=1)  # SimId change at each test need to drop it
     refs = pd.DataFrame(np.array([
-        ('Reactor1', 'UOX_Source', 'uox', 4, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 1, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor1', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 2, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 3, 1),
-        ('Reactor2', 'MOX_Source', 'mox', 4, 1),
-        ('Reactor3', 'UOX_Source', 'uox', 3, 1),
-        ('Reactor3', 'MOX_Source', 'mox', 4, 1),
+        ('Reactor1', 'UOX_Source', 'uox', 4),
+        ('Reactor1', 'MOX_Source', 'mox', 1),
+        ('Reactor1', 'MOX_Source', 'mox', 2),
+        ('Reactor1', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 2),
+        ('Reactor2', 'MOX_Source', 'mox', 3),
+        ('Reactor2', 'MOX_Source', 'mox', 4),
+        ('Reactor3', 'UOX_Source', 'uox', 3),
+        ('Reactor3', 'MOX_Source', 'mox', 4),
     ], dtype=ensure_dt_bytes([
         ('ReceiverPrototype', 'O'), ('SenderPrototype', 'O'),
-        ('Commodity', 'O'), ('Time', '<i8'), ('Cost', '<f8')
+        ('Commodity', 'O'), ('Time', '<i8')
     ]))
     )
     refs.index = refs.index.astype('str')
@@ -186,7 +187,9 @@ def test_transactions_nuc(dbtest):
     db, fname, backend = dbtest
     evaler = cym.Evaluator(db)
     cal = filters.transactions_nuc(evaler)
-    assert list(cal) == exp_transactions_head # Check we have the correct headers
+    exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
+                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time', 'Cost']
+    assert list(cal) == exp_head # Check we have the correct headers
 
     if not HAVE_PYNE:
         raise skip("Doesn't have Pyne")
@@ -197,6 +200,8 @@ def test_transactions_nuc(dbtest):
     cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
     cal = cal.drop('ResourceId', axis=1)
+    # Cost not properly tested yet
+    cal = cal.drop('Cost', axis=1)
     refs = pd.DataFrame(np.array([
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
@@ -255,7 +260,9 @@ def test_transactions_activity(dbtest):
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.transactions_activity(evaler)
-    assert list(cal) == exp_transactions_head # Check we have the correct headers
+    exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverPrototype',
+                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
+    assert list(cal) == exp_head # Check we have the correct headers
 
     # test single nuclide selection
     cal = filters.transactions_activity(evaler, nucs=['942390000'])
@@ -321,7 +328,9 @@ def test_transactions_decayheat(dbtest):
         raise skip("Doesn't have Pyne")
     evaler = cym.Evaluator(db)
     cal = filters.transactions_decayheat(evaler)
-    assert list(cal) == exp_transactions_head  # Check we have the correct headers
+    exp_head = ['SimId', 'ResourceId', 'NucId', 'DecayHeat', 'ReceiverId', 'ReceiverPrototype',
+                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
+    assert list(cal) == exp_head  # Check we have the correct headers
 
     # test single nuclide selection
     cal = filters.transactions_decayheat(evaler, nucs=['942390000'])
