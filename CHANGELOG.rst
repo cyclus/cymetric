@@ -8,7 +8,7 @@ Since last release
 **Added:**
 
 * Added Ubuntu 24.04 to CI workflows (#204)
-* Added expectation of Cost in transactions table (#)
+* Added expectation of Cost in transactions table (#206 )
 
 **Changed:**
 
