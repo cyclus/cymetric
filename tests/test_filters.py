@@ -20,21 +20,23 @@ try:
 except ImportError:
     HAVE_PYNE = False
 
+exp_transactions_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
+                'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 
+                'Time', 'Cost']
 
 def test_transactions(dbtest):
     db, fname, backend = dbtest
     evaler = cym.Evaluator(db)
     cal = filters.transactions(evaler)
-    exp_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
-                'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 'Time']
-    assert list(cal) == exp_head  # Check we have the correct headers
+    assert list(cal) == exp_transactions_head  # Check we have the correct headers
 
     # SimId et al. change at each test need to drop it
     drop_cols = ['SimId',
                  'TransactionId',
                  'ResourceId',
                  'ReceiverId',
-                 'SenderId']
+                 'SenderId',
+                 'Cost']
     cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
@@ -186,8 +188,8 @@ def test_transactions_nuc(dbtest):
     evaler = cym.Evaluator(db)
     cal = filters.transactions_nuc(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
-                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert list(cal) == exp_head  # Check we have the correct headers
+                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time', 'Cost']
+    assert list(cal) == exp_head # Check we have the correct headers
 
     if not HAVE_PYNE:
         raise skip("Doesn't have Pyne")
@@ -198,6 +200,8 @@ def test_transactions_nuc(dbtest):
     cal = cal.drop('TransactionId', axis=1)
     # SimId change at each test need to drop it
     cal = cal.drop('ResourceId', axis=1)
+    # Cost not properly tested yet
+    cal = cal.drop('Cost', axis=1)
     refs = pd.DataFrame(np.array([
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
@@ -258,7 +262,7 @@ def test_transactions_activity(dbtest):
     cal = filters.transactions_activity(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Activity', 'ReceiverId', 'ReceiverPrototype',
                 'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time']
-    assert list(cal) == exp_head  # Check we have the correct headers
+    assert list(cal) == exp_head # Check we have the correct headers
 
     # test single nuclide selection
     cal = filters.transactions_activity(evaler, nucs=['942390000'])
