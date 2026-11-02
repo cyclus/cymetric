@@ -42,7 +42,8 @@ def raw_to_series(df, idx, val):
 
 def merge_and_fillna_col(left, right, lcol, rcol, how='inner', on=None):
     """Merges two dataframes and fills the values of the left column
-    with the values from the right column. A copy of left is returned.
+    with the values from the right column. A copy of left is returned,
+    preserving its row order and index, including rows without a match.
 
     Parameters
     ----------
@@ -59,10 +60,18 @@ def merge_and_fillna_col(left, right, lcol, rcol, how='inner', on=None):
     on : list of str, optional
         Which columns to merge on, same as in pd.merge()
     """
-    m = pd.merge(left, right, how=how, on=on)
-    f = m[lcol].fillna(m[rcol])
-    left[lcol] = f
-    return left
+    # Column merges can reorder rows and discard their original index. Track
+    # left row positions separately, including when the index has duplicates.
+    row_number = object()
+    source = left.copy()
+    source[row_number] = range(len(left))
+    m = pd.merge(source, right, how=how, on=on)
+    m = m[m[row_number].notna()].set_index(row_number)
+    f = m[lcol].fillna(m[rcol]).reindex(range(len(left)))
+
+    result = left.copy()
+    result[lcol] = result[lcol].fillna(pd.Series(f.array, index=left.index))
+    return result
 
 
 def ensure_dt_bytes(dt):
