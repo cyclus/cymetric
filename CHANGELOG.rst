@@ -18,6 +18,9 @@ Since last release
 
 **Fixed:**
 
+* Preserve row identity when filling merged columns, preventing incorrect
+  ``Agents.ExitTime`` values for reordered records and non-default indices.
+
 **Removed:**
 
 v1.6.0

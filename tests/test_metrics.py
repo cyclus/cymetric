@@ -5,7 +5,7 @@ test like fashion.
 from __future__ import print_function, unicode_literals
 from uuid import UUID
 
-from pytest import skip
+from pytest import mark, skip
 
 import numpy as np
 import pandas as pd
@@ -382,6 +382,42 @@ def test_agents_agentexit_decom():
     })
     obs = metrics.agents.func(agent_entry, agent_exit, decom_schedule, info)
     assert_frame_equal(exp, obs)
+
+
+@mark.parametrize('index', [None, [50, 20, 70, 10, 30]])
+@mark.parametrize('records', ['exit', 'decom', 'both', 'neither'])
+def test_agents_exit_times_follow_simulation_and_agent(index, records):
+    sim1, sim2 = UUID(int=1), UUID(int=2)
+    entry = pd.DataFrame({
+        'SimId': [sim2, sim1, sim2, sim1, sim2],
+        'AgentId': [2, 1, 1, 2, 3],
+        'Kind': ['Facility'] * 5,
+        'Spec': [':cycamore:Source'] * 5,
+        'Prototype': ['source'] * 5,
+        'ParentId': [-1] * 5,
+        'Lifetime': [-1] * 5,
+        'EnterTime': [0] * 5,
+    }, index=index)
+    exits = pd.DataFrame({
+        'SimId': [sim1, sim2], 'AgentId': [1, 2], 'ExitTime': [10, 20],
+    }) if records in ('exit', 'both') else None
+    decom = pd.DataFrame({
+        'SimId': [sim1, sim2, sim1, sim2],
+        'AgentId': [2, 1, 1, 2],
+        'DecomTime': [30, 40, 50, 60],
+    }) if records in ('decom', 'both') else None
+    info = pd.DataFrame({'SimId': [sim1, sim2], 'Duration': [100, 200]})
+    expected = entry.copy()
+    expected['ExitTime'] = {
+        'exit': [20., 10., 200., 100., 200.],
+        'decom': [60., 50., 40., 30., 200.],
+        'both': [20., 10., 40., 30., 200.],
+        'neither': [200., 100., 200., 100., 200.],
+    }[records]
+
+    observed = metrics.agents.func(entry, exits, decom, info)
+
+    assert_frame_equal(expected, observed)
 
 
 def test_materials():
