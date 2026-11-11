@@ -18,6 +18,8 @@ Since last release
 
 **Fixed:**
 
+* Run the changelog check workflow on the runner instead of in an Alpine 3.14 container, which cannot run Node.js 24 actions (#217)
+
 **Removed:**
 
 v1.6.0
