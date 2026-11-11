@@ -22,6 +22,8 @@ Since last release
 
 **Removed:**
 
+* Removed unused ``setuptools-scm`` build requirement from ``pyproject.toml`` (#216)
+
 v1.6.0
 ====================
 
