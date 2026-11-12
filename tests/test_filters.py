@@ -22,7 +22,7 @@ except ImportError:
 
 exp_transactions_head = ['SimId', 'ReceiverId', 'ReceiverPrototype', 'SenderId',
                 'SenderPrototype', 'TransactionId', 'ResourceId', 'Commodity', 
-                'Time', 'Cost']
+                'Time', 'BidCost', 'AdjustedCost']
 
 def test_transactions(dbtest):
     db, fname, backend = dbtest
@@ -36,7 +36,8 @@ def test_transactions(dbtest):
                  'ResourceId',
                  'ReceiverId',
                  'SenderId',
-                 'Cost']
+                 'BidCost',
+                 'AdjustedCost']
     cal = cal.drop(drop_cols, axis=1)
     refs = pd.DataFrame(np.array([
         ('Reactor1', 'UOX_Source', 'uox', 4),
@@ -188,7 +189,7 @@ def test_transactions_nuc(dbtest):
     evaler = cym.Evaluator(db)
     cal = filters.transactions_nuc(evaler)
     exp_head = ['SimId', 'ResourceId', 'NucId', 'Mass', 'ReceiverId', 'ReceiverPrototype',
-                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time', 'Cost']
+                'SenderId', 'SenderPrototype', 'TransactionId', 'Commodity', 'Time', 'BidCost', 'AdjustedCost']
     assert list(cal) == exp_head # Check we have the correct headers
 
     if not HAVE_PYNE:
@@ -201,7 +202,8 @@ def test_transactions_nuc(dbtest):
     # SimId change at each test need to drop it
     cal = cal.drop('ResourceId', axis=1)
     # Cost not properly tested yet
-    cal = cal.drop('Cost', axis=1)
+    cal = cal.drop('BidCost', axis=1)
+    cal = cal.drop('AdjustedCost', axis=1)
     refs = pd.DataFrame(np.array([
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 1),
         (942390000, 0.0444814879803, 15, 'Reactor1', 14, 'MOX_Source', 'mox', 2),
