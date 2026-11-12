@@ -22,6 +22,7 @@ Since last release
 
 * Run the changelog check workflow on the runner instead of in an Alpine 3.14 container, which cannot run Node.js 24 actions (#217)
 * Fixed the publish workflows failing in pull requests from forks, which cannot push to the GitHub Container Registry of the organization. They now only push the images for events of the repository itself, and only build and test them in pull requests from forks (#219)
+* Expect the ``BidCost`` and ``AdjustedCost`` columns of the ``Transactions`` table, which replaced ``Cost`` in Cyclus, in the transaction tests (#218)
 
 **Removed:**
 
