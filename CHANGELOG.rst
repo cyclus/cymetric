@@ -9,16 +9,19 @@ Since last release
 
 * Added Ubuntu 24.04 to CI workflows (#204)
 * Added expectation of Cost in transactions table (#206 )
+* Added a Dependabot configuration (``.github/dependabot.yml``) that checks weekly for updates of the GitHub Actions used in the workflows and groups them into a single pull request (#219)
 
 **Changed:**
 * Install and Test instructions in README for correctness (#213)
 * Rely on `python3` in environment instead of `python` (#196)
 * Pinned ``numpy<2.0.0`` in ``pyproject.toml`` (#198)
 * Unpinned ``numpy`` in ``pyproject.toml`` (#203)
+* Updated the GitHub Actions of the workflows to their latest versions (#219)
 
 **Fixed:**
 
 * Run the changelog check workflow on the runner instead of in an Alpine 3.14 container, which cannot run Node.js 24 actions (#217)
+* Fixed the publish workflows failing in pull requests from forks, which cannot push to the GitHub Container Registry of the organization. They now only push the images for events of the repository itself, and only build and test them in pull requests from forks (#219)
 
 **Removed:**
 

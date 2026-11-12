@@ -15,7 +15,7 @@ jobs:
     name: Is Changelog up-to-date ?
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - run: |
           cd $GITHUB_WORKSPACE
