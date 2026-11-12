@@ -9,12 +9,14 @@ Since last release
 
 * Added Ubuntu 24.04 to CI workflows (#204)
 * Added expectation of Cost in transactions table (#206 )
+* Added a Dependabot configuration (``.github/dependabot.yml``) that checks weekly for updates of the GitHub Actions used in the workflows and groups them into a single pull request (#219)
 
 **Changed:**
 * Install and Test instructions in README for correctness (#213)
 * Rely on `python3` in environment instead of `python` (#196)
 * Pinned ``numpy<2.0.0`` in ``pyproject.toml`` (#198)
 * Unpinned ``numpy`` in ``pyproject.toml`` (#203)
+* Updated the GitHub Actions of the workflows to their latest versions (#219)
 
 **Fixed:**
 
